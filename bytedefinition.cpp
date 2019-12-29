@@ -99,10 +99,10 @@ void byteDefinition::requestMaskDataRX(int _devNum, int _byteNum, int _id)
     emit requestMaskDataTX(_devNum, _byteNum, _id);
 }
 
-void byteDefinition::maskData2FormRX(int _devNum, int _byteNum, int _id, QString _paramName, int _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag)
+void byteDefinition::maskData2FormRX(int _devNum, int _byteNum, int _id, QString _paramName, int _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag, int _wordType)
 {//ответный сигнал со всеми данными маски bitmaskobj в masksettingsdialog
     if (devNum == _devNum && th_byteNum == _byteNum)
-    emit maskData2FormTX(_devNum, _byteNum, _id, _paramName, _paramMask, _paramType, _valueShift, _valueKoef, _viewInLogFlag);
+    emit maskData2FormTX(_devNum, _byteNum, _id, _paramName, _paramMask, _paramType, _valueShift, _valueKoef, _viewInLogFlag, _wordType);
 }
 
 void byteDefinition::sendDataToProfileRX(int _devNum, int _byteNum, int _id, QString _paramName, int _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag)

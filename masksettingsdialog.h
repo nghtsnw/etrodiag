@@ -23,6 +23,7 @@ public:
     QList<bitSetForm*> bitSetList;
     //QListIterator<bitSetForm*> bitSetListIt;
     void initBitButtonsAndCheckBoxes(int _wordBit);
+    void killChildren();
 
 public slots:
     void requestDataOnId(int _devNum, int _byteNum, int _id);

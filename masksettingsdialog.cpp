@@ -2,6 +2,7 @@
 #include "ui_masksettingsdialog.h"
 #include <QList>
 #include "bitsetform.h"
+#include <QDebug>
 
 maskSettingsDialog::maskSettingsDialog(QWidget *parent) :
     QWidget(parent),
@@ -38,6 +39,7 @@ void maskSettingsDialog::getDataOnId(int _devNum, int _byteNum, int _id, QString
         ui->koeffTxt->text() = QString::number(_valueKoef);
         ui->checkBox->setTristate(_viewInLogFlag);
         emit getWordBit(_devNum, _byteNum);
+        initBitButtonsAndCheckBoxes(_wordType);
     }
 }
 
@@ -49,20 +51,22 @@ void maskSettingsDialog::initBitButtonsAndCheckBoxes(int _wordBit)
     else if (_wordBit == 2) wordBit = 32;
 
     int x = 0, y = 0;
-    for (int var = 0; var < wordBit; ++var, y++) {
-        bitSetForm *bs = new bitSetForm(this);
-        bitSetList.append(bs);
-        this->ui->dynMaskForm->addWidget(bs, x, y);
-        if (y > 7)
+    for (int var = 0; var < wordBit; ++var, ++y) {
+        if (y > 7) //по 8 бит в одной строке
         {
             y = 0;
             x++;
         }
+        bitSetForm *bs = new bitSetForm(this);
+        bitSetList.append(bs);
+        this->ui->dynMaskForm->addWidget(bs, x, y);
+
         bs->setNumLabel(var);
+        bs->show();
 
     }
     int mask = ui->binNum->text().toInt(nullptr,10);
-    int one = 0x01;
+    uint32_t one = 1;
     QListIterator<bitSetForm*> bitSetListIt(bitSetList);
     while (bitSetListIt.hasNext())
     {
@@ -90,4 +94,15 @@ void maskSettingsDialog::sendDataOnId(int _devNum, int _byteNum, int _id)
         bool _viewInLogFlag = ui->checkBox->isTristate();
         emit sendMaskData(_devNum, _byteNum, _id, _paramName, _paramMask, _paramType, _valueShift, _valueKoef, _viewInLogFlag);
     }
+}
+
+void maskSettingsDialog::killChildren() //очистка формы от объектов кнопок
+{
+    QList<bitSetForm*> devChildList = this->findChildren<bitSetForm*>(); //времянка для поиска бага
+    qDebug() << "Bitsetforms living = " << devChildList.size();
+    QListIterator<bitSetForm*> devChildListIt(devChildList);
+    while (devChildListIt.hasNext())
+        devChildListIt.next()->~bitSetForm();
+    devChildList = this->findChildren<bitSetForm*>(); //времянка для поиска бага
+    qDebug() << "Bitsetforms after holokost = " << devChildList.size();
 }

@@ -157,6 +157,7 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
     if (masksd.isVisible())
     {
             masksd.hide();
+            masksd.killChildren();
             btsf.show();
     }
     else {

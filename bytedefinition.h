@@ -22,7 +22,7 @@ public:
 signals:
     void returnWordType(int _devNum, int _byteNum, int wordType);
     void mask2FormTX(int _devNum, int _byteNum, int _id);
-    void maskData2FormTX(int _devNum, int _byteNum, int _id, QString _paramName, int _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag);
+    void maskData2FormTX(int _devNum, int _byteNum, int _id, QString _paramName, int _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag, int _wordType);
     void requestMaskDataTX(int _devNum, int _byteNum, int _id);
     void sendDataToProfileTX(int _devNum, int _byteNum, int _id, QString _paramName, int _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag);
     void wordData2Mask(int wordData);
@@ -31,7 +31,7 @@ public slots:
     void getWordType(int _devNum, int _byteNum);
     void createNewMask(int _devNum, int _byteNum);
     void mask2FormRX(int _devNum, int _byteNum, int _id);
-    void maskData2FormRX(int _devNum, int _byteNum, int _id, QString _paramName, int _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag);
+    void maskData2FormRX(int _devNum, int _byteNum, int _id, QString _paramName, int _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag, int _wordType);
     void requestMaskDataRX(int _devNum, int _byteNum, int _id);
     void sendDataToProfileRX(int _devNum, int _byteNum, int _id, QString _paramName, int _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag);
 };

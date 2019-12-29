@@ -67,7 +67,8 @@ void Device::byteObjectsInit(QVector<int> data) //инициализируем �
         connect (bytedef, &byteDefinition::returnWordType, this, &Device::returnWordTypeRX);
         connect (this, &Device::createNewMaskTX, bytedef, &byteDefinition::createNewMask);
         connect (bytedef, &byteDefinition::mask2FormTX, this, &Device::mask2FormRX);
-
+        connect (bytedef, &byteDefinition::maskData2FormTX, this, &Device::maskData2FormRX);
+        connect (this, &Device::requestMaskDataTX, bytedef, &byteDefinition::requestMaskDataRX);
         byteObjArr->append(bytedef);
         n++;
     }

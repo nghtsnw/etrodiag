@@ -10,10 +10,22 @@
     <height>613</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>ETRO diagnostic tool</string>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="maximumSize">
+    <size>
+     <width>887</width>
+     <height>553</height>
+    </size>
+   </property>
    <widget class="QTabWidget" name="tabWidget">
     <property name="geometry">
      <rect>
@@ -22,6 +34,12 @@
       <width>881</width>
       <height>541</height>
      </rect>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>881</width>
+      <height>541</height>
+     </size>
     </property>
     <property name="currentIndex">
      <number>1</number>
@@ -80,7 +98,7 @@
      <x>0</x>
      <y>0</y>
      <width>887</width>
-     <height>21</height>
+     <height>30</height>
     </rect>
    </property>
   </widget>
