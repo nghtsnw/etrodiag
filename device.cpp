@@ -69,6 +69,7 @@ void Device::byteObjectsInit(QVector<int> data) //инициализируем �
         connect (bytedef, &byteDefinition::mask2FormTX, this, &Device::mask2FormRX);
         connect (bytedef, &byteDefinition::maskData2FormTX, this, &Device::maskData2FormRX);
         connect (this, &Device::requestMaskDataTX, bytedef, &byteDefinition::requestMaskDataRX);
+        connect (bytedef, &byteDefinition::allMasksToListTX, this, &Device::allMasksToListRX);
         byteObjArr->append(bytedef);
         n++;
     }
@@ -175,3 +176,7 @@ void Device::sendDataToProfileRX(int _devNum, int _byteNum, int _id, QString _pa
     emit sendDataToProfileTX(_devNum, _byteNum, _id, _paramName, _paramMask, _paramType, _valueShift, _valueKoef, _viewInLogFlag);
 }
 
+void Device::allMasksToListRX(int devNum, int byteNum, int id, QString paramName, int paramMask, int paramType, int valueShift, float valueKoef, bool viewInLogFlag, int wordType)
+{//сигнал от bitmaskobj предназначенный для bytesettingsform, для наполнения листа масок всеми имеющимися у этого байта
+    emit allMasksToListTX(devNum, byteNum, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType);
+}

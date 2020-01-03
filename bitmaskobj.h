@@ -10,7 +10,7 @@ public:
     bitMaskObj();
     void newMaskObj(int _devNum, int _byteNum, int _id);
     //void sendMaskToProfile(QString _paramName, int _paramMask, int _paramType, int _valueShift, float _valueKoef, int _wordData);
-    QString paramName;
+    QString paramName = "Parameter";
     int devNum;
     int byteNum;
     int id;
@@ -32,9 +32,11 @@ public:
 signals:
     void maskToFormSIG(int devNum, int byteNum, int id, QString paramName, int paramMask, int paramType, int valueShift, float valueKoef, bool viewInLogFlag, int wordType);
     void mask2byteSettingsForm(int devNum, int byteNum, int id);
+    void maskToListSIG(int devNum, int byteNum, int id, QString paramName, int paramMask, int paramType, int valueShift, float valueKoef, bool viewInLogFlag, int wordType);
 public slots:
     void maskToForm(int _devNum, int _byteNum, int _id);
     void sendMaskToProfile(int _devNum, int _byteNum, int _id, QString _paramName, int _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag);
+    void allMasksToList(int _devNum, int _byteNum);
 };
 
 #endif // BITMASKOBJ_H

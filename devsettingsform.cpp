@@ -90,7 +90,3 @@ void devSettingsForm::retranslateByteButtonSetStatus(int byteNum, bool status)
     emit setByteButtonStatus(byteNum, status);
 }
 
-//void devSettingsForm::initWordLeight(int _devNum, int _byteNum, int _wordBit)
-//{
-//    //доделать
-//}

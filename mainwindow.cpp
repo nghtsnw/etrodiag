@@ -76,6 +76,7 @@ MainWindow::MainWindow(QWidget *parent) :
     statuslbl->setText("Make ETRO great again!");
     connect (connection, SIGNAL(sendStatusStr(QString)), SLOT(showStatusMessage(QString)));
     connect (connection, &newconnect::transmitData, this, &MainWindow::addDeviceToList);
+    connect (&btsf, &ByteSettingsForm::editMask, &masksd, &maskSettingsDialog::requestDataOnId);
 }
 
 
@@ -135,7 +136,10 @@ void MainWindow::addDeviceToList(QVector<int> ddata)
         connect (&btsf, &ByteSettingsForm::createMask, dev, &Device::createNewMaskRX);
         connect (dev, &Device::mask2FormTX, &masksd, &maskSettingsDialog::requestDataOnId);
         connect (&masksd, &maskSettingsDialog::requestMaskData, dev, &Device::requestMaskDataRX);
+        connect (&btsf, &ByteSettingsForm::requestAllMaskToList, dev, &Device::requestMaskDataRX);
         connect (dev, &Device::maskData2FormTX, &masksd, &maskSettingsDialog::getDataOnId);
+        connect (dev, &Device::allMasksToListTX, &btsf, &ByteSettingsForm::addMaskItem);
+        connect (&masksd, &maskSettingsDialog::sendMaskData, &btsf, &ByteSettingsForm::addMaskItem);
         connect (&masksd, &maskSettingsDialog::requestMaskData, this, &MainWindow::openMaskSettingsDialog);
     }
 
@@ -155,7 +159,8 @@ void MainWindow::txtToGuiFunc(QString txtToGui)
 void MainWindow::openDevSett(int devNum, QVector<int> data)
 {//все реакции на нажатие кнопки устройства в зависимости от состояния окна
     if (masksd.isVisible())
-    {
+    {            
+            masksd.sendMask2Profile();
             masksd.hide();
             masksd.killChildren();
             btsf.show();
@@ -164,6 +169,7 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
     if (btsf.isVisible())
     {
         btsf.hide();
+        btsf.cleanMaskList();
         dvsf.show();
     }
     else

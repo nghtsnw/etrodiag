@@ -83,6 +83,7 @@ void byteDefinition::createNewMask(int _devNum, int _byteNum)
         connect (mask, &bitMaskObj::maskToFormSIG, this, &byteDefinition::maskData2FormRX);//ответ форме
         connect (this, &byteDefinition::sendDataToProfileTX, mask, &bitMaskObj::sendMaskToProfile);
         connect (this, &byteDefinition::wordData2Mask, mask, &bitMaskObj::calculateValue);
+        connect (mask, &bitMaskObj::maskToListSIG, this, &byteDefinition::allMasksToListRX);
         mask->newMaskObj(devNum, th_byteNum, id);
     }
 }
@@ -109,6 +110,11 @@ void byteDefinition::sendDataToProfileRX(int _devNum, int _byteNum, int _id, QSt
 {//забор данных из формы masksettingsdialog и отправка в профиль bitmaskobj
     if (devNum == _devNum && th_byteNum == _byteNum)
     emit sendDataToProfileTX(_devNum, _byteNum, _id, _paramName, _paramMask, _paramType, _valueShift, _valueKoef, _viewInLogFlag);
+}
+
+void byteDefinition::allMasksToListRX(int devNum, int byteNum, int id, QString paramName, int paramMask, int paramType, int valueShift, float valueKoef, bool viewInLogFlag, int wordType)
+{//сигнал от bitmaskobj предназначенный для bytesettingsform, для наполнения листа масок всеми имеющимися у этого байта
+    emit allMasksToListTX(devNum, byteNum, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType);
 }
 
 void byteDefinition::calcWordData(int _devNum, QVector<int> data)

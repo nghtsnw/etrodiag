@@ -26,6 +26,7 @@ signals:
     void requestMaskDataTX(int _devNum, int _byteNum, int _id);
     void sendDataToProfileTX(int _devNum, int _byteNum, int _id, QString _paramName, int _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag);
     void wordData2Mask(int wordData);
+    void allMasksToListTX(int devNum, int byteNum, int id, QString paramName, int paramMask, int paramType, int valueShift, float valueKoef, bool viewInLogFlag, int wordType);
 public slots:
     void setWordBitRX(int _devNum, int _byteNum, int _argBit);
     void getWordType(int _devNum, int _byteNum);
@@ -34,6 +35,7 @@ public slots:
     void maskData2FormRX(int _devNum, int _byteNum, int _id, QString _paramName, int _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag, int _wordType);
     void requestMaskDataRX(int _devNum, int _byteNum, int _id);
     void sendDataToProfileRX(int _devNum, int _byteNum, int _id, QString _paramName, int _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag);
+    void allMasksToListRX(int devNum, int byteNum, int id, QString paramName, int paramMask, int paramType, int valueShift, float valueKoef, bool viewInLogFlag, int wordType);
 };
 
 #endif // BYTEDEFINITION_H

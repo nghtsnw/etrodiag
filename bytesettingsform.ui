@@ -18,7 +18,7 @@
     <rect>
      <x>20</x>
      <y>12</y>
-     <width>47</width>
+     <width>81</width>
      <height>21</height>
     </rect>
    </property>
@@ -29,7 +29,7 @@
   <widget class="QSpinBox" name="bitBox">
    <property name="geometry">
     <rect>
-     <x>70</x>
+     <x>90</x>
      <y>10</y>
      <width>42</width>
      <height>22</height>
@@ -51,25 +51,12 @@
     <number>10</number>
    </property>
   </widget>
-  <widget class="QLabel" name="label_2">
-   <property name="geometry">
-    <rect>
-     <x>130</x>
-     <y>10</y>
-     <width>151</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>0 = 8bit, 1 = 16bit, 2 = 32bit</string>
-   </property>
-  </widget>
   <widget class="QLCDNumber" name="hexNumber">
    <property name="geometry">
     <rect>
-     <x>283</x>
+     <x>280</x>
      <y>10</y>
-     <width>101</width>
+     <width>301</width>
      <height>23</height>
     </rect>
    </property>
@@ -123,7 +110,7 @@
     <string>Add mask</string>
    </property>
   </widget>
-  <widget class="QListWidget" name="masksWidget">
+  <widget class="QTableWidget" name="masksWidget">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -132,6 +119,18 @@
      <height>291</height>
     </rect>
    </property>
+   <property name="maximumSize">
+    <size>
+     <width>581</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="columnCount">
+    <number>3</number>
+   </property>
+   <column/>
+   <column/>
+   <column/>
   </widget>
  </widget>
  <resources/>

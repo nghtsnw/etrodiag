@@ -32,23 +32,24 @@ void maskSettingsDialog::getDataOnId(int _devNum, int _byteNum, int _id, QString
     if (id == _id)
     {
         wordType = _wordType;
-        ui->maskName->text() = _paramName;
-        ui->binNum->text() = QString::number(_paramMask);
+        ui->maskName->setText(_paramName);
+        ui->binNum->setText(QString::number(_paramMask));
         //int _paramType = 0;
-        ui->shiftTxt->text() = QString::number(_valueShift);
-        ui->koeffTxt->text() = QString::number(_valueKoef);
+        ui->shiftTxt->setText(QString::number(_valueShift));
+        ui->koeffTxt->setText(QString::number(_valueKoef));
         ui->checkBox->setTristate(_viewInLogFlag);
         emit getWordBit(_devNum, _byteNum);
-        initBitButtonsAndCheckBoxes(_wordType);
+        initBitButtonsAndCheckBoxes(wordType);
     }
 }
 
-void maskSettingsDialog::initBitButtonsAndCheckBoxes(int _wordBit)
+void maskSettingsDialog::initBitButtonsAndCheckBoxes(int _wordType)
 {//создаём чекбоксы, пронумеровываем, расставляем согласно имеющейся маске
     int wordBit = 8;
-    if (_wordBit == 0) wordBit = 8;
-    else if (_wordBit == 1) wordBit = 16;
-    else if (_wordBit == 2) wordBit = 32;
+    if (_wordType == 0) wordBit = 8;
+    else if (_wordType == 1) wordBit = 16;
+    else if (_wordType == 2) wordBit = 32;
+    else wordBit = 8;
 
     int x = 0, y = 0;
     for (int var = 0; var < wordBit; ++var, ++y) {
@@ -82,9 +83,9 @@ void maskSettingsDialog::updateBitButtonsAndCheckBoxes()
 
 }
 
-void maskSettingsDialog::sendDataOnId(int _devNum, int _byteNum, int _id)
+void maskSettingsDialog::sendMask2Profile()//int _devNum, int _byteNum, int _id)
 {//забор данных из формы masksettingsdialog и отправка в профиль bitmaskobj
-    if (id == _id)
+    //if (id == _id)
     {
         QString _paramName = this->ui->maskName->text();
         int _paramMask =  this->ui->binNum->text().toInt(nullptr,10);
@@ -92,17 +93,17 @@ void maskSettingsDialog::sendDataOnId(int _devNum, int _byteNum, int _id)
         int _valueShift = ui->shiftTxt->text().toInt(nullptr,10);
         float _valueKoef = ui->koeffTxt->text().toFloat(nullptr);
         bool _viewInLogFlag = ui->checkBox->isTristate();
-        emit sendMaskData(_devNum, _byteNum, _id, _paramName, _paramMask, _paramType, _valueShift, _valueKoef, _viewInLogFlag);
+        emit sendMaskData(devNum, byteNum, id, _paramName, _paramMask, _paramType, _valueShift, _valueKoef, _viewInLogFlag, wordType);
     }
 }
 
 void maskSettingsDialog::killChildren() //очистка формы от объектов кнопок
 {
-    QList<bitSetForm*> devChildList = this->findChildren<bitSetForm*>(); //времянка для поиска бага
+    QList<bitSetForm*> devChildList = this->findChildren<bitSetForm*>();
     qDebug() << "Bitsetforms living = " << devChildList.size();
     QListIterator<bitSetForm*> devChildListIt(devChildList);
     while (devChildListIt.hasNext())
         devChildListIt.next()->~bitSetForm();
-    devChildList = this->findChildren<bitSetForm*>(); //времянка для поиска бага
+    devChildList = this->findChildren<bitSetForm*>();
     qDebug() << "Bitsetforms after holokost = " << devChildList.size();
 }

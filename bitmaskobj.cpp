@@ -33,7 +33,17 @@ void bitMaskObj::maskToForm(int _devNum, int _byteNum, int _id)
 {
     if (_devNum == devNum && _byteNum == byteNum && _id == id)
     emit maskToFormSIG(devNum, byteNum, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType);
+    else if (_devNum == devNum && _byteNum == byteNum && _id == 999)
+        allMasksToList(_devNum, _byteNum); //если пришёл id 999, то вызывается функция на отправку сигнала от всех масок данного байта устройства в лист масок в bytesettingsform
 }
+
+void bitMaskObj::allMasksToList(int _devNum, int _byteNum)
+//сигнал от bytesettingsform с запросом всех масок байта в список (id = 999)
+{
+    if (_devNum == devNum && _byteNum == byteNum)
+    emit maskToListSIG(devNum, byteNum, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType);
+}
+
 
 int bitMaskObj::calculateParamShift()
 {

@@ -25,7 +25,7 @@ bool bitSetForm::checkboxStatus()
 
 void bitSetForm::setCheckbox(bool bit)
 {
-    ui->bitCheckBox->setTristate(bit);
+    //ui->bitCheckBox->setTristate(bit); //починить
 }
 
 //void bitSetForm::setCheckboxText(QChar ch);
