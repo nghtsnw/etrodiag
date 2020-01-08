@@ -31,6 +31,7 @@ signals:
     void wordType2ByteBtn(int _devNum, int _byteNum, int wordType);
     void setByteButtonStatus(int byteNum, bool status);
     void initByteButtonsWordLeight(int id,int count);
+    void wordDataFullHex(int devNum, int byteNum, QString);
 public slots:
     //void onByteBtnClicked();
     void openByteSettingsFormRX(int devNum, int byteNum);

@@ -1,5 +1,6 @@
 #include "bitsetform.h"
 #include "ui_bitsetform.h"
+#include <QDebug>
 
 bitSetForm::bitSetForm(QWidget *parent) :
     QWidget(parent),
@@ -20,12 +21,22 @@ void bitSetForm::setNumLabel(int num)
 
 bool bitSetForm::checkboxStatus()
 {
+    //qDebug() << "checkbox status " << ui->bitNumLabel->text() << " = " << ui->bitCheckBox->isChecked();
     return ui->bitCheckBox->isChecked();
 }
 
-void bitSetForm::setCheckbox(bool bit)
+void bitSetForm::setCheckBox(bool bit, int id)
 {
-    //ui->bitCheckBox->setTristate(bit); //починить
+    if (id == ui->bitNumLabel->text().toInt(0,10))
+    ui->bitCheckBox->setChecked(bit);
 }
 
-//void bitSetForm::setCheckboxText(QChar ch);
+void bitSetForm::setCheckboxText(QString data)
+{
+    ui->bitCheckBox->setText(data);
+}
+
+void bitSetForm::on_bitCheckBox_clicked()
+{
+    emit scanCheckboxesToMask();
+}

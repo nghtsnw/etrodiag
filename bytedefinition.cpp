@@ -53,7 +53,7 @@ void byteDefinition::createNewMask(int _devNum, int _byteNum)
         bool notFoundFlag = 0;
         QList<bitMaskObj*> bytedefChildList = this->findChildren<bitMaskObj*>();
         QListIterator<bitMaskObj*> bytedefChildListIt(bytedefChildList);
-        //qDebug() << "Children of bytedef = " << bytedefChildList.size();
+        qDebug() << "Children of bytedef (dev " << devNum<< ", byte " << th_byteNum << ")= " << bytedefChildList.size();
 
         if (bytedefChildList.size() != 0)
         {
@@ -84,6 +84,8 @@ void byteDefinition::createNewMask(int _devNum, int _byteNum)
         connect (this, &byteDefinition::sendDataToProfileTX, mask, &bitMaskObj::sendMaskToProfile);
         connect (this, &byteDefinition::wordData2Mask, mask, &bitMaskObj::calculateValue);
         connect (mask, &bitMaskObj::maskToListSIG, this, &byteDefinition::allMasksToListRX);
+        connect (this, &byteDefinition::sendDataToProfileRX, mask, &bitMaskObj::sendMaskToProfile);
+        connect (this, &byteDefinition::deleteMaskObjTX, mask, &bitMaskObj::deleteMaskObjectTX);
         mask->newMaskObj(devNum, th_byteNum, id);
     }
 }
@@ -100,19 +102,19 @@ void byteDefinition::requestMaskDataRX(int _devNum, int _byteNum, int _id)
     emit requestMaskDataTX(_devNum, _byteNum, _id);
 }
 
-void byteDefinition::maskData2FormRX(int _devNum, int _byteNum, int _id, QString _paramName, int _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag, int _wordType)
+void byteDefinition::maskData2FormRX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag, int _wordType)
 {//ответный сигнал со всеми данными маски bitmaskobj в masksettingsdialog
     if (devNum == _devNum && th_byteNum == _byteNum)
     emit maskData2FormTX(_devNum, _byteNum, _id, _paramName, _paramMask, _paramType, _valueShift, _valueKoef, _viewInLogFlag, _wordType);
 }
 
-void byteDefinition::sendDataToProfileRX(int _devNum, int _byteNum, int _id, QString _paramName, int _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag)
+void byteDefinition::sendDataToProfileRX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag)
 {//забор данных из формы masksettingsdialog и отправка в профиль bitmaskobj
     if (devNum == _devNum && th_byteNum == _byteNum)
     emit sendDataToProfileTX(_devNum, _byteNum, _id, _paramName, _paramMask, _paramType, _valueShift, _valueKoef, _viewInLogFlag);
 }
 
-void byteDefinition::allMasksToListRX(int devNum, int byteNum, int id, QString paramName, int paramMask, int paramType, int valueShift, float valueKoef, bool viewInLogFlag, int wordType)
+void byteDefinition::allMasksToListRX(int devNum, int byteNum, int id, QString paramName, QString paramMask, int paramType, int valueShift, float valueKoef, bool viewInLogFlag, int wordType)
 {//сигнал от bitmaskobj предназначенный для bytesettingsform, для наполнения листа масок всеми имеющимися у этого байта
     emit allMasksToListTX(devNum, byteNum, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType);
 }

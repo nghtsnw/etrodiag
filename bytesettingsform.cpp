@@ -10,6 +10,8 @@ ByteSettingsForm::ByteSettingsForm(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->masksWidget->setEditTriggers(0);
+    QStringList lst = {"Parameter", "Value", "ID", "Delete"};
+    ui->masksWidget->setVerticalHeaderLabels(lst);
 }
 
 
@@ -26,7 +28,7 @@ void ByteSettingsForm::open(int _devNum, int _byteNum)
     requestAllMasks();
 }
 
-void ByteSettingsForm::addMaskItem(int _devNum, int _byteNum, int _id, QString _paramName, int _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag, int _wordType)
+void ByteSettingsForm::addMaskItem(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag, int _wordType)
 {
     if (devNum == _devNum && byteNum == _byteNum)
     {
@@ -43,26 +45,39 @@ void ByteSettingsForm::addMaskItem(int _devNum, int _byteNum, int _id, QString _
         }
         if (!findRow)
         {
-            ui->masksWidget->setRowCount(ui->masksWidget->rowCount()+1);
+            ui->masksWidget->setRowCount(ui->masksWidget->rowCount()+1); //добавляем новую строку
+            int row = ui->masksWidget->rowCount()-1;//определяем индекс строки
             QTableWidgetItem *nameItem = new QTableWidgetItem;
             nameItem->setText(_paramName);
-            ui->masksWidget->setItem(_id, 0, nameItem);
-            connect (ui->masksWidget, &QTableWidget::cellClicked, this, &ByteSettingsForm::openMaskSettingsForm);
+            ui->masksWidget->setItem(row, 0, nameItem);
             QTableWidgetItem *valueItem = new QTableWidgetItem;
-            valueItem->setText("zero");
-            ui->masksWidget->setItem(_id, 1, valueItem);
+            valueItem->setText("null");
+            ui->masksWidget->setItem(row, 1, valueItem);
             QTableWidgetItem *idItem = new QTableWidgetItem;
             idItem->setText(QString::number(_id, 10));
-            ui->masksWidget->setItem(_id, 2, idItem);
+            ui->masksWidget->setItem(row, 2, idItem);
+            QTableWidgetItem *deleteItem = new QTableWidgetItem;
+            deleteItem->setText("Delete");
+            ui->masksWidget->setItem(row, 3, deleteItem);
         }
+        if (ui->masksWidget->rowCount() > 0)
+            ui->bitBox->setDisabled(true);
     }
-    qDebug() << "row count = " << ui->masksWidget->rowCount();
 }
 
-void ByteSettingsForm::openMaskSettingsForm(int row, int column)
+void ByteSettingsForm::deleteMaskItem(int row)
 {
-    emit editMask(devNum, byteNum, ui->masksWidget->item(row,2)->text().toInt(0,10));
+    emit deleteMaskObj(devNum,byteNum, ui->masksWidget->item(row,2)->text().toInt(0,10));
+    ui->masksWidget->removeRow(row);
+    if (ui->masksWidget->rowCount() == 0)
+        ui->bitBox->setDisabled(false);
 }
+void ByteSettingsForm::on_masksWidget_cellClicked(int row, int column)
+{    
+    qDebug() << QObject::sender() << ", row " << row << ", column " << column;
+    if (column == 3) deleteMaskItem(row);
+    else emit editMask(devNum, byteNum, ui->masksWidget->item(row,2)->text().toInt(0,10));
+}//найти откуда вызывается второй раз
 
 void ByteSettingsForm::on_bitBox_valueChanged(int arg1)
 {//по изменению битбокса в форме, отправляем значение в byteButton
@@ -95,4 +110,11 @@ void ByteSettingsForm::cleanMaskList()
 void ByteSettingsForm::requestAllMasks()
 {
     emit requestAllMaskToList(devNum,byteNum,999);
+}
+
+void ByteSettingsForm::updateHexWordData(int _devNum, int _byteNum, QString _txt)
+{
+    if (devNum == _devNum && byteNum == _byteNum) {
+        ui->hexNumber->setText("Dev " + QString("%1").arg(devNum,0,16).toUpper() + ", Byte " + QString::number(byteNum) + ", Word data " + _txt);
+    }
 }

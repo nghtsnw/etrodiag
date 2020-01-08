@@ -51,9 +51,10 @@ void devSettingsForm::initByteButtons(int id, QVector<int> data)
         byteButton *byteBtn = new byteButton;
         connect(byteBtn, &byteButton::setButton, this, &devSettingsForm::retranslateByteButtonSetStatus);
         connect(this, &devSettingsForm::setByteButtonStatus, byteBtn, &byteButton::setButtonStatus);
-        connect(byteBtn, &byteButton::openByteSettingsForm, this, &devSettingsForm::openByteSettingsFormTX); //ретрансляция для дальнейшей передачи в майнвиндов
+        connect(byteBtn, &byteButton::openByteSettingsForm, this, &devSettingsForm::openByteSettingsFormRX); //ретрансляция для дальнейшей передачи в майнвиндов
         connect(this, &devSettingsForm::updateBtnDataSIG, byteBtn, &byteButton::updateBtnData);
         connect (this, &devSettingsForm::wordType2ByteBtn, byteBtn, &byteButton::setWordType);
+        connect (byteBtn, &byteButton::wordDataFullHex, this, &devSettingsForm::wordDataFullHex);
         QString hexBtnTxt = QString("%1").arg(data.at(count),0,16).toUpper();
         byteBtn->setText(hexBtnTxt);//QString::number(data.at(count)));
         byteBtn->setByteNum(id, count);

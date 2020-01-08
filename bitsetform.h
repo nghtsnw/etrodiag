@@ -16,9 +16,13 @@ public:
     ~bitSetForm();
     void setNumLabel(int num);
     bool checkboxStatus();
-    void setCheckbox(bool bit);
-    void setCheckboxText(QChar ch);
+    void setCheckBox(bool bit, int id);
+    void setCheckboxText(QString data);
 
+signals:
+    void scanCheckboxesToMask();
+private slots:
+    void on_bitCheckBox_clicked();
 
 private:
     Ui::bitSetForm *ui;

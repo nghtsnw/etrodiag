@@ -141,6 +141,9 @@ void MainWindow::addDeviceToList(QVector<int> ddata)
         connect (dev, &Device::allMasksToListTX, &btsf, &ByteSettingsForm::addMaskItem);
         connect (&masksd, &maskSettingsDialog::sendMaskData, &btsf, &ByteSettingsForm::addMaskItem);
         connect (&masksd, &maskSettingsDialog::requestMaskData, this, &MainWindow::openMaskSettingsDialog);
+        connect (&masksd, &maskSettingsDialog::sendMaskData, dev, &Device::sendDataToProfileRX);
+        connect (&btsf, &ByteSettingsForm::deleteMaskObj, dev, &Device::deleteMaskObjTX);
+        connect (&dvsf, &devSettingsForm::wordDataFullHex, &btsf, &ByteSettingsForm::updateHexWordData);
     }
 
     vlayChildListIt.toFront();
@@ -206,3 +209,4 @@ void MainWindow::openMaskSettingsDialog()
     masksd.setParent(m_ui->rightFrame);
     masksd.show();
 }
+

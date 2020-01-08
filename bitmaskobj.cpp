@@ -6,6 +6,11 @@ bitMaskObj::bitMaskObj()
 
 }
 
+bitMaskObj::~bitMaskObj()
+{
+
+}
+
 void bitMaskObj::newMaskObj(int _devNum, int _byteNum, int _id)
 {
     id = _id;
@@ -15,8 +20,10 @@ void bitMaskObj::newMaskObj(int _devNum, int _byteNum, int _id)
     //после создания новой маски сразу посылаем сигнал на открытие формы masksettingsdialog, сообщая ей параметры маски которую нужно редактировать
 }
 
-void bitMaskObj::sendMaskToProfile(int _devNum, int _byteNum, int _id, QString _paramName, int _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogflag)
+void bitMaskObj::sendMaskToProfile(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogflag)
 {//забор данных из формы masksettingsdialog и отправка в профиль bitmaskobj
+    if (_devNum == devNum && _byteNum == byteNum && _id == id)
+    {
         paramName = _paramName;
         paramMask = _paramMask;
         paramShift = calculateParamShift();
@@ -25,6 +32,7 @@ void bitMaskObj::sendMaskToProfile(int _devNum, int _byteNum, int _id, QString _
         valueShift = _valueShift;
         valueKoef = _valueKoef;
         //wordData = _wordData;
+    }
 }
 
 void bitMaskObj::maskToForm(int _devNum, int _byteNum, int _id)
@@ -49,7 +57,7 @@ int bitMaskObj::calculateParamShift()
 {
     int n = 0;
     int i = 0;
-    paramMask4calcShift = paramMask;
+    paramMask4calcShift = paramMask.toInt(0,10);
     while (i!=1)
     {
         if (!(paramMask4calcShift & 0x01))
@@ -103,4 +111,13 @@ void bitMaskObj::calculateValue(int wordData)
     int binRawValue = value;
     qDebug() << "Value is " << (value+valueShift)*valueKoef;
     float endValue = (value+valueShift)*valueKoef;
+}
+
+void bitMaskObj::deleteMaskObjectTX(int _devNum, int _byteNum, int _id)
+{
+    if (devNum == _devNum && byteNum == _byteNum && id == _id)
+    {
+        qDebug() << "dev " << devNum << ", byte " << byteNum << ", id " << id << " bye bye";
+        this->~bitMaskObj();
+    }
 }

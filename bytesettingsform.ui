@@ -51,50 +51,17 @@
     <number>10</number>
    </property>
   </widget>
-  <widget class="QLCDNumber" name="hexNumber">
-   <property name="geometry">
-    <rect>
-     <x>280</x>
-     <y>10</y>
-     <width>301</width>
-     <height>23</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QLCDNumber" name="binNumber_2">
+  <widget class="QLineEdit" name="wordNameEdit">
    <property name="geometry">
     <rect>
      <x>10</x>
      <y>40</y>
-     <width>381</width>
-     <height>23</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="lineEdit">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>70</y>
      <width>381</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
     <string>Word name</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_3">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>90</y>
-     <width>47</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Masks:</string>
    </property>
   </widget>
   <widget class="QPushButton" name="pushButton">
@@ -114,9 +81,9 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>110</y>
+     <y>70</y>
      <width>581</width>
-     <height>291</height>
+     <height>331</height>
     </rect>
    </property>
    <property name="maximumSize">
@@ -125,12 +92,32 @@
      <height>16777215</height>
     </size>
    </property>
+   <property name="alternatingRowColors">
+    <bool>false</bool>
+   </property>
+   <property name="showGrid">
+    <bool>true</bool>
+   </property>
    <property name="columnCount">
-    <number>3</number>
+    <number>4</number>
    </property>
    <column/>
    <column/>
    <column/>
+   <column/>
+  </widget>
+  <widget class="QLabel" name="hexNumber">
+   <property name="geometry">
+    <rect>
+     <x>150</x>
+     <y>10</y>
+     <width>431</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
   </widget>
  </widget>
  <resources/>

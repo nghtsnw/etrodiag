@@ -20,6 +20,7 @@ public:
 signals:
     void openByteSettingsForm(int devNum, int byteNum);
     void setButton(int byteNum, bool status);
+    void wordDataFullHex(int devNum, int byteNum, QString);
 
 public slots:
     //void onByteButtonClicked();

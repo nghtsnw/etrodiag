@@ -4,7 +4,6 @@
 byteButton::byteButton()
 {
     connect(this, &byteButton::clicked, this, &byteButton::onByteButtonClicked);
-
 }
 
 void byteButton::setByteNum(int _devNum, int _byteNum)
@@ -37,6 +36,7 @@ void byteButton::updateBtnData(int _devNum, QVector<int> fulldata)
     }
     }
     else this->setText("<---");
+    emit wordDataFullHex(devNum, byteNum, this->text());
 }
 
 void byteButton::onByteButtonClicked()
