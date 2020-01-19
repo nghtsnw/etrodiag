@@ -11,11 +11,9 @@ getStream::getStream(QWidget *parent) : QObject(parent)
 
 }
 
-
 void getStream::getRawData(QByteArray r_data) //пишем все данные в буфер
 {
     QByteArray toQue;
-    //qDebug() << "r_data.size() = " << r_data.size();
     int intToQue;
     QString tmpstr;
     n=0;
@@ -26,14 +24,10 @@ void getStream::getRawData(QByteArray r_data) //пишем все данные �
         intToQue = toQue.toHex().toInt(&ok, 16);
         tmpstr = QString("%1").arg(intToQue,0,16).toUpper(); //проверка преобразования int в hex
         generalBuffer.enqueue(intToQue);
-        //qDebug() << "intToQue = " <<intToQue<<", tmpstr = "<< tmpstr << ", toQue = "<< toQue.toHex().toUpper() <<", n = "<<n<< ", generalBuffer.size() = "<< generalBuffer.size();
         toQue.clear();
-       // qDebug() << "pre generalBuffer.size() = " << generalBuffer.size();
-            emit giveMyByte(generalBuffer.dequeue());
-       // qDebug() << "post generalBuffer.size() = " << generalBuffer.size();
+        emit giveMyByte(generalBuffer.dequeue());
         n++;
     }
-
 }
 
 void getStream::profilerReadyToReceive(bool getByteFlag) //читаем из буфера побайтово

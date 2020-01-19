@@ -39,8 +39,7 @@ public slots:
     //void retranslateByteButtonSetStatus(int byteNum, bool status);
 
 private slots:
-    void on_devNameInputForm_editingFinished();
-
+    void on_devNameEdit_editingFinished();
 
 private:
     Ui::devSettingsForm *m_ui;

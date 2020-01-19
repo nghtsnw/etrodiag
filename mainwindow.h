@@ -105,6 +105,7 @@ public slots:
     void txtToGuiFunc(QString txtToGui);
     void openDevSett(int devNum, QVector<int> data);
     void openByteSett(int devNum, int byteNum);
+    void frontendDataSort(int devNum, QString devName, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, float endValue, bool viewInLogFlag);
 
 private slots:
     //void handleError(QSerialPort::SerialPortError error);

@@ -17,7 +17,7 @@ public:
     void setNumLabel(int num);
     bool checkboxStatus();
     void setCheckBox(bool bit, int id);
-    void setCheckboxText(QString data);
+    void setCheckboxText(int i, bool data);
 
 signals:
     void scanCheckboxesToMask();

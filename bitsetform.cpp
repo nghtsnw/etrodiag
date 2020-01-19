@@ -31,9 +31,10 @@ void bitSetForm::setCheckBox(bool bit, int id)
     ui->bitCheckBox->setChecked(bit);
 }
 
-void bitSetForm::setCheckboxText(QString data)
+void bitSetForm::setCheckboxText(int i, bool data)
 {
-    ui->bitCheckBox->setText(data);
+    if (i == ui->bitNumLabel->text().toInt(0,10))
+    ui->bitCheckBox->setText(QString::number(data,10));//ui->bitNumLabel->text().toInt(0,10)]);
 }
 
 void bitSetForm::on_bitCheckBox_clicked()

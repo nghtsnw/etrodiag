@@ -21,6 +21,7 @@ public:
     void cleanMaskList();
     void requestAllMasks();
     void deleteMaskItem(int row);
+    void updateMasksList(int _devNum, QString _devName, int _byteNum, QString _byteName, int _wordData, int _id, QString parameterName, int _binRawValue, float _endValue, bool viewInLogFlag);
 
     ~ByteSettingsForm();
 
@@ -34,7 +35,6 @@ signals:
 
 public slots:
     void returnWordType(int _devNum, int _byteNum, int wordType);
-    //void openMaskSettingsForm(int row, int column);
     void addMaskItem(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag, int _wordType);
     void updateHexWordData(int _devNum, int _byteNum, QString _txt);
 private slots:
@@ -46,6 +46,7 @@ private slots:
 
 private:
     Ui::ByteSettingsForm *ui;
+    QStringList lst = {"Parameter", "Value", "ID", "Delete"};
 };
 
 #endif // BYTESETTINGSFORM_H

@@ -15,12 +15,15 @@
   </property>
   <layout class="QGridLayout" name="gridLayoutDVSF_2">
    <item row="0" column="0">
-    <widget class="QLineEdit" name="devNameInputForm">
+    <widget class="QLineEdit" name="devNameEdit">
+     <property name="toolTip">
+      <string>Input device name here</string>
+     </property>
      <property name="autoFillBackground">
       <bool>false</bool>
      </property>
      <property name="text">
-      <string>Input device name here</string>
+      <string/>
      </property>
     </widget>
    </item>

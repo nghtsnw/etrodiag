@@ -122,9 +122,9 @@ void MainWindow::addDeviceToList(QVector<int> ddata)
         connect (dev, &Device::txtToGui, this, &MainWindow::txtToGuiFunc);
         connect (dev, &Device::openDevSettSig, this, &MainWindow::openDevSett);
         connect (dev, &Device::clicked, dev, &Device::clickedF);
-        connect (this, &MainWindow::getDevName, dev, &Device::getDeviceName);
+        //connect (this, &MainWindow::getDevName, dev, &Device::getDeviceName);
         connect (&dvsf, &devSettingsForm::returnDevNameAfterEdit, dev, &Device::setDeviceName);
-        connect (dev, &Device::returnDeviceName, &dvsf, &devSettingsForm::setDevName);
+        //connect (dev, &Device::returnDeviceName, &dvsf, &devSettingsForm::setDevName);
         connect (&dvsf, &devSettingsForm::openByteSettingsFormTX, this, &MainWindow::openByteSett);
         connect (&btsf, &ByteSettingsForm::setWordBit, dev, &Device::setWordTypeInByteProfile);
         connect (&btsf, &ByteSettingsForm::setWordBit, &dvsf, &devSettingsForm::wordTypeChangeRX);//изменить
@@ -144,6 +144,9 @@ void MainWindow::addDeviceToList(QVector<int> ddata)
         connect (&masksd, &maskSettingsDialog::sendMaskData, dev, &Device::sendDataToProfileRX);
         connect (&btsf, &ByteSettingsForm::deleteMaskObj, dev, &Device::deleteMaskObjTX);
         connect (&dvsf, &devSettingsForm::wordDataFullHex, &btsf, &ByteSettingsForm::updateHexWordData);
+        connect (dev, &Device::param2FrontEndTX, this, &MainWindow::frontendDataSort);
+        connect (dev, &Device::param2FrontEndTX, &masksd, &maskSettingsDialog::liveDataSlot);
+        connect (dev, &Device::param2FrontEndTX, &btsf, &ByteSettingsForm::updateMasksList);
     }
 
     vlayChildListIt.toFront();
@@ -181,15 +184,17 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
     if (m_ui->logArea->isHidden())
     {
         m_ui->logArea->show();
+        m_ui->valueArea->show();
         dvsf.hide();
         dvsf.killChildren();
     }
     else
     {
         m_ui->logArea->hide();
+        m_ui->valueArea->hide();
         dvsf.initByteButtons(devNum,data);
         dvsf.show();
-        emit getDevName(devNum);
+        //emit getDevName(devNum);
     }
     }
     }
@@ -210,3 +215,7 @@ void MainWindow::openMaskSettingsDialog()
     masksd.show();
 }
 
+void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, float endValue, bool viewInLogFlag)
+{
+    m_ui->logArea->appendPlainText(devName + "@" + parameterName + ": " + endValue + '\n');
+}

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>887</width>
-    <height>613</height>
+    <width>881</width>
+    <height>605</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -41,53 +41,144 @@
       <height>541</height>
      </size>
     </property>
+    <property name="tabPosition">
+     <enum>QTabWidget::North</enum>
+    </property>
+    <property name="tabShape">
+     <enum>QTabWidget::Rounded</enum>
+    </property>
     <property name="currentIndex">
      <number>1</number>
     </property>
+    <property name="elideMode">
+     <enum>Qt::ElideNone</enum>
+    </property>
+    <property name="documentMode">
+     <bool>false</bool>
+    </property>
+    <property name="tabsClosable">
+     <bool>false</bool>
+    </property>
+    <property name="movable">
+     <bool>false</bool>
+    </property>
+    <property name="tabBarAutoHide">
+     <bool>true</bool>
+    </property>
     <widget class="QWidget" name="tab_connections">
+     <property name="maximumSize">
+      <size>
+       <width>877</width>
+       <height>503</height>
+      </size>
+     </property>
      <attribute name="title">
       <string>Connections</string>
      </attribute>
     </widget>
     <widget class="QWidget" name="tab_work">
+     <property name="maximumSize">
+      <size>
+       <width>877</width>
+       <height>503</height>
+      </size>
+     </property>
      <attribute name="title">
       <string>Work</string>
      </attribute>
-     <widget class="QListView" name="devArea">
+     <widget class="QWidget" name="horizontalLayoutWidget">
       <property name="geometry">
        <rect>
-        <x>1</x>
-        <y>1</y>
-        <width>256</width>
-        <height>511</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QFrame" name="rightFrame">
-      <property name="geometry">
-       <rect>
-        <x>260</x>
+        <x>0</x>
         <y>0</y>
-        <width>621</width>
-        <height>511</height>
+        <width>881</width>
+        <height>501</height>
        </rect>
       </property>
-      <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Raised</enum>
-      </property>
-      <widget class="QPlainTextEdit" name="logArea">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>611</width>
-         <height>511</height>
-        </rect>
+      <layout class="QGridLayout" name="gridLayout">
+       <property name="sizeConstraint">
+        <enum>QLayout::SetMaximumSize</enum>
        </property>
-      </widget>
+       <item row="1" column="2">
+        <widget class="QFrame" name="rightFrame">
+         <property name="maximumSize">
+          <size>
+           <width>650</width>
+           <height>496</height>
+          </size>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Sunken</enum>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <property name="spacing">
+           <number>1</number>
+          </property>
+          <property name="leftMargin">
+           <number>1</number>
+          </property>
+          <property name="topMargin">
+           <number>1</number>
+          </property>
+          <property name="rightMargin">
+           <number>1</number>
+          </property>
+          <property name="bottomMargin">
+           <number>1</number>
+          </property>
+          <item>
+           <widget class="QTreeView" name="valueArea">
+            <property name="maximumSize">
+             <size>
+              <width>200</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPlainTextEdit" name="logArea"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Devices:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QListView" name="devArea">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>200</width>
+           <height>16777215</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Data:</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </widget>
    </widget>
@@ -97,7 +188,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>887</width>
+     <width>881</width>
      <height>30</height>
     </rect>
    </property>

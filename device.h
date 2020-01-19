@@ -15,7 +15,8 @@ class Device : public QPushButton
 public:
     explicit Device(QWidget *parent = nullptr);
     int devNum;
-    dynamicBaseProfile *devPrf = new dynamicBaseProfile;
+    QString devName = "Device name";
+    //dynamicBaseProfile *devPrf = new dynamicBaseProfile;
     QVector<int> currState;
     QVector<int> *oldState = new QVector<int>;
     Device(int id, QVector<int> data);
@@ -30,7 +31,7 @@ public:
 signals:
     void txtToGui(QString);
     void openDevSettSig(int devNum, QVector<int> data);
-    void returnDeviceName(int devNum, QString);
+    //void returnDeviceName(int devNum, QString);
     void setWordBitTX(int _devNum, int _byteNum, int _wordType);
     void getWordTypeTX(int _devNum, int _byteNum);
     void returnWordTypeTX(int _devNum, int _byteNum, int wordType);
@@ -41,9 +42,10 @@ signals:
     void sendDataToProfileTX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag);
     void allMasksToListTX(int devNum, int byteNum, int id, QString paramName, QString paramMask, int paramType, int valueShift, float valueKoef, bool viewInLogFlag, int wordType);
     void deleteMaskObjTX(int devNum, int byteNum, int id);
+    void param2FrontEndTX(int devNum, QString devName, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, float endValue, bool viewInLogFlag);
 
 public slots:
-    void getDeviceName(int devNum);
+    //void getDeviceName(int devNum);
     void updateData(int id, QVector<int> devdata);
     void setDeviceName(int id, QString name);
     void setWordTypeInByteProfile(int _devNum, int _byteNum, int _wordType);
@@ -55,6 +57,7 @@ public slots:
     void requestMaskDataRX(int _devNum, int _byteNum, int _id);
     void sendDataToProfileRX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag, int _wordType);
     void allMasksToListRX(int devNum, int byteNum, int id, QString paramName, QString paramMask, int paramType, int valueShift, float valueKoef, bool viewInLogFlag, int wordType);
+    void param2FrontEndRX(int devNum, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, float endValue, bool viewInLogFlag);
 private:
     Q_DISABLE_COPY(Device)
 

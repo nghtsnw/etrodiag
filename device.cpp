@@ -18,20 +18,10 @@ Device::Device(int id, QVector<int> data) //инициализация ново�
     devNum = id;
     currState = data;
     oldState->reserve(data.size());
-    //oldState = &data;
     oldState->fill(255,0);
     byteObjArr->reserve(data.size());
     byteObjectsInit(currState);
     byteObjArrOld->reserve(data.size());
-    //byteObjArrOld->fill(zeroByteDef);
-    //dynamicBaseProfile devPrf;// = new dynamicBaseProfile; //создаём профиль устройства
-    //devPrf->addDataDev(devNum, data);
-    //connect (this, &Device::setWordBitTX, devPrf, &dynamicBaseProfile::setWordBitRX);
-    //connect (this, &Device::getWordTypeTX, devPrf, &dynamicBaseProfile::getWordTypeFromProfileRetranslator);
-    //connect (devPrf, &dynamicBaseProfile::returnWordTypeTX, this, &Device::returnWordTypeRX);
-    //connect (this, &Device::createNewMaskTX, devPrf, &dynamicBaseProfile::createNewMaskRX);
-    //connect (devPrf, &dynamicBaseProfile::mask2FormTX, this, &Device::mask2FormRX);
-    //connect (devPrf, &dynamicBaseProfile::maskData2FormTX, this, &Device::maskData2FormRX);
 }
 
 void Device::updateData(int id, QVector<int> devdata) //если устройство в списке уже есть, этой функцией оно обновляется
@@ -72,6 +62,7 @@ void Device::byteObjectsInit(QVector<int> data) //инициализируем �
         connect (bytedef, &byteDefinition::allMasksToListTX, this, &Device::allMasksToListRX);
         connect (this, &Device::sendDataToProfileTX, bytedef, &byteDefinition::sendDataToProfileRX);
         connect (this, &Device::deleteMaskObjTX, bytedef, &byteDefinition::deleteMaskObjTX);
+        connect (bytedef, &byteDefinition::param2FrontEndTX, this, &Device::param2FrontEndRX);
         byteObjArr->append(bytedef);
         n++;
     }
@@ -126,16 +117,19 @@ void Device::clickedF()
     emit openDevSettSig(devNum, currState);
 }
 
-void Device::getDeviceName(int id)
-{
-    if (id == devNum)
-    emit returnDeviceName(devNum, devPrf->getDeviceName());
-}
+//void Device::getDeviceName(int id)
+//{
+//    if (id == devNum)
+//    emit returnDeviceName(devNum, devName);
+//}
 
 void Device::setDeviceName(int id, QString name)
 {
     if (id == devNum)
-    devPrf->setDeviceName(name);
+    {
+        devName = name; //найти почему вызывается два раза
+        this->setToolTip(devName);
+    }
 }
 
 void Device::setWordTypeInByteProfile(int _devNum, int _byteNum, int _wordType)
@@ -181,4 +175,9 @@ void Device::sendDataToProfileRX(int _devNum, int _byteNum, int _id, QString _pa
 void Device::allMasksToListRX(int devNum, int byteNum, int id, QString paramName, QString paramMask, int paramType, int valueShift, float valueKoef, bool viewInLogFlag, int wordType)
 {//сигнал от bitmaskobj предназначенный для bytesettingsform, для наполнения листа масок всеми имеющимися у этого байта
     emit allMasksToListTX(devNum, byteNum, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType);
+}
+
+void Device::param2FrontEndRX(int devNum, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, float endValue, bool viewInLogFlag)
+{
+    emit param2FrontEndTX(devNum, devName, byteNum, byteName, wordData, id, parameterName, binRawValue, endValue, viewInLogFlag);
 }

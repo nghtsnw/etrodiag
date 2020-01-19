@@ -25,22 +25,23 @@ devSettingsForm::~devSettingsForm()
 void devSettingsForm::killChildren() //очистка формы от объектов кнопок
 {
     QList<byteButton*> devChildList = this->findChildren<byteButton*>(); //времянка для поиска бага
-    qDebug() << "Childrens living = " << devChildList.size();
+    qDebug() << "dev childrens living = " << devChildList.size();
     QListIterator<byteButton*> devChildListIt(devChildList);
     while (devChildListIt.hasNext())
         devChildListIt.next()->~byteButton();
     devChildList = this->findChildren<byteButton*>(); //времянка для поиска бага
-    qDebug() << "Childrens after holokost = " << devChildList.size();
+    qDebug() << "dev childrens after delete = " << devChildList.size();
 }
 
 void devSettingsForm::setDevName(int id, QString devName) //получаем имя из профиля в форму
 {
     devNameForm->setText(devName);
-    devNum = id;
+    //devNum = id;
 }
 
 void devSettingsForm::initByteButtons(int id, QVector<int> data)
 {//сначала создаём кнопки в форме, потом делаем запрос длины слова из профиля для каждой
+    devNum = id;
     for (int x = 2, y = 0, count = 0; count < data.size(); count++, y++) //забиваем раскладку динамически
     {
         if (y > 4)
@@ -56,7 +57,7 @@ void devSettingsForm::initByteButtons(int id, QVector<int> data)
         connect (this, &devSettingsForm::wordType2ByteBtn, byteBtn, &byteButton::setWordType);
         connect (byteBtn, &byteButton::wordDataFullHex, this, &devSettingsForm::wordDataFullHex);
         QString hexBtnTxt = QString("%1").arg(data.at(count),0,16).toUpper();
-        byteBtn->setText(hexBtnTxt);//QString::number(data.at(count)));
+        byteBtn->setText(hexBtnTxt);
         byteBtn->setByteNum(id, count);
         m_ui->gridLayoutButtonBox->addWidget(byteBtn,x,y);
     }
@@ -70,9 +71,9 @@ void devSettingsForm::updByteButtons(int id, QVector<int> data)
     emit updateBtnDataSIG(id, data);
 }
 
-void devSettingsForm::on_devNameInputForm_editingFinished()
+void devSettingsForm::on_devNameEdit_editingFinished()
 {
-    QString text = devNameForm->text();
+    QString text = m_ui->devNameEdit->text();
     emit returnDevNameAfterEdit(devNum, text);
 }
 
@@ -90,4 +91,6 @@ void devSettingsForm::retranslateByteButtonSetStatus(int byteNum, bool status)
 {//установка кнопок enable или disable по запросу других кнопок, в зависимости от длины слова
     emit setByteButtonStatus(byteNum, status);
 }
+
+
 

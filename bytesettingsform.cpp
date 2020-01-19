@@ -10,7 +10,6 @@ ByteSettingsForm::ByteSettingsForm(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->masksWidget->setEditTriggers(0);
-    QStringList lst = {"Parameter", "Value", "ID", "Delete"};
     ui->masksWidget->setVerticalHeaderLabels(lst);
 }
 
@@ -110,6 +109,23 @@ void ByteSettingsForm::cleanMaskList()
 void ByteSettingsForm::requestAllMasks()
 {
     emit requestAllMaskToList(devNum,byteNum,999);
+}
+
+void ByteSettingsForm::updateMasksList(int _devNum, QString _devName, int _byteNum, QString _byteName, int _wordData, int _id, QString parameterName, int _binRawValue, float _endValue, bool viewInLogFlag)
+{
+    if (devNum == _devNum && byteNum == _byteNum)
+    {
+
+        for (int i = 0; i < ui->masksWidget->rowCount(); i++) {
+            if (ui->masksWidget->item(i,2)->text() == QString::number(_id, 10))
+            {
+                ui->masksWidget->item(i,0)->setText(parameterName);
+                QString endValue2String;
+                endValue2String.setNum(_endValue);
+                ui->masksWidget->item(i,1)->setText(endValue2String);
+            }
+        }
+    }
 }
 
 void ByteSettingsForm::updateHexWordData(int _devNum, int _byteNum, QString _txt)

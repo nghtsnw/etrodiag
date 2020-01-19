@@ -17,8 +17,6 @@ byteDefinition::byteDefinition(int numDev, int byteNum, int data)
     devNum = numDev;
     th_byteNum = byteNum;
     th_data = data;
-    QString byteName = ("<empty>");
-
 }
 
  byteDefinition::~byteDefinition()
@@ -86,6 +84,7 @@ void byteDefinition::createNewMask(int _devNum, int _byteNum)
         connect (mask, &bitMaskObj::maskToListSIG, this, &byteDefinition::allMasksToListRX);
         connect (this, &byteDefinition::sendDataToProfileRX, mask, &bitMaskObj::sendMaskToProfile);
         connect (this, &byteDefinition::deleteMaskObjTX, mask, &bitMaskObj::deleteMaskObjectTX);
+        connect (mask, &bitMaskObj::param2FrontEnd, this, &byteDefinition::param2FrontEndRX);
         mask->newMaskObj(devNum, th_byteNum, id);
     }
 }
@@ -130,6 +129,11 @@ void byteDefinition::calcWordData(int _devNum, QVector<int> data)
     else if (wordType == 2)
         wordData = (data.at(th_byteNum)) + (data.at(th_byteNum+1))
                 + (data.at(th_byteNum+2)) + (data.at(th_byteNum+3));
-    emit wordData2Mask(wordData);
+    emit wordData2Mask(devNum, th_byteNum, wordData);
     }
+}
+
+void byteDefinition::param2FrontEndRX(int devNum, int byteNum, int wordData, int id, QString parameterName, int binRawValue, float endValue, bool viewInLogFlag)
+{
+    emit param2FrontEndTX(devNum, byteNum, byteName, wordData, id, parameterName, binRawValue, endValue, viewInLogFlag);
 }

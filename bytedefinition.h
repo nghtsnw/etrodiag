@@ -11,6 +11,7 @@ class byteDefinition : public QObject
 public:
     byteDefinition();
     byteDefinition(int numDev, int byteNum, int data);
+    QString byteName = ("<empty>");
     int wordType = 0; //0 - 8bit, 1 - 16bit, 2 - 32bit
     void initProfileStrings(int byteNum, int data);
     void calcWordData(int _devNum, QVector<int> data);
@@ -25,9 +26,10 @@ signals:
     void maskData2FormTX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag, int _wordType);
     void requestMaskDataTX(int _devNum, int _byteNum, int _id);
     void sendDataToProfileTX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag);
-    void wordData2Mask(int wordData);
+    void wordData2Mask(int devNum, int byteNum, int wordData);
     void allMasksToListTX(int devNum, int byteNum, int id, QString paramName, QString paramMask, int paramType, int valueShift, float valueKoef, bool viewInLogFlag, int wordType);
     void deleteMaskObjTX(int devNum, int byteNum, int id);
+    void param2FrontEndTX(int devNum, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, float endValue, bool viewInLogFlag);
 
 public slots:
     void setWordBitRX(int _devNum, int _byteNum, int _argBit);
@@ -38,6 +40,7 @@ public slots:
     void requestMaskDataRX(int _devNum, int _byteNum, int _id);
     void sendDataToProfileRX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag);
     void allMasksToListRX(int devNum, int byteNum, int id, QString paramName, QString paramMask, int paramType, int valueShift, float valueKoef, bool viewInLogFlag, int wordType);
+    void param2FrontEndRX(int devNum, int byteNum, int wordData, int id, QString parameterName, int binRawValue, float endValue, bool viewInLogFlag);
 };
 
 #endif // BYTEDEFINITION_H

@@ -19,6 +19,7 @@ public:
     int byteNum;
     int id;
     int wordType = 0;
+    int wordBit = 8;
     void updateBitButtonsAndCheckBoxes();
     QList<bitSetForm*> bitSetList;
     //QListIterator<bitSetForm*> bitSetListIt;
@@ -31,12 +32,24 @@ public slots:
     //void sendDataOnId(int _devNum, int _byteNum, int _id);
     void sendMask2Profile();
     void getDataOnId(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag, int _wordType);
+    void liveDataSlot(int _devNum, QString _devName, int _byteNum, QString _byteName, int _wordData, int _id, QString parameterName, int _binRawValue, float _endValue, bool viewInLogFlag);
 
 signals:
     void requestMaskData(int _devNum, int _byteNum, int _id);
     void sendMaskData(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag, int _wordType);
     void getWordBit(int _devNum, int _byteNum);
     void setCheckBox(bool chk, int var);
+    void wordData2bitSetForm(int i, bool wordDataIntArray);
+
+private slots:
+    void on_maskName_editingFinished();
+
+    void on_shiftTxt_editingFinished();
+
+    void on_koeffTxt_editingFinished();
+
+    void on_checkBox_stateChanged(int arg1);
+
 private:
     Ui::maskSettingsDialog *ui;
 };

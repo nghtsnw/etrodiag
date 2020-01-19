@@ -1,5 +1,6 @@
 #include "bitmaskobj.h"
 #include <QDebug>
+#include <cmath>
 
 bitMaskObj::bitMaskObj()
 {
@@ -26,11 +27,14 @@ void bitMaskObj::sendMaskToProfile(int _devNum, int _byteNum, int _id, QString _
     {
         paramName = _paramName;
         paramMask = _paramMask;
-        paramShift = calculateParamShift();
-        paramLeght = calculateParamLeight();
+        calculateParamShift();
+        qDebug() << "ParamShift after init = " << paramShift;
+        calculateParamLeight();
+        qDebug() << "ParamLeight after init = " << paramLeght;
         paramType = _paramType;
         valueShift = _valueShift;
         valueKoef = _valueKoef;
+        viewInLogFlag = _viewInLogflag;
         //wordData = _wordData;
     }
 }
@@ -53,7 +57,7 @@ void bitMaskObj::allMasksToList(int _devNum, int _byteNum)
 }
 
 
-int bitMaskObj::calculateParamShift()
+void bitMaskObj::calculateParamShift()
 {
     int n = 0;
     int i = 0;
@@ -68,13 +72,19 @@ int bitMaskObj::calculateParamShift()
         else
         {
             i = 1;
-            return n;
+            qDebug() << "ParamShift = " << n;
+            paramShift = n;
         }
-         if (n>32) break; //Eсли за максимальные 32 байта цикл не прервался, принудительно выходим
+        if (n>32)
+        {
+             paramShift = 0;
+             break;
+        }//Eсли за максимальные 32 байта цикл не прервался, принудительно выходим
     }
+    qDebug() << "ParamShift = " << n;
 }
 
-int bitMaskObj::calculateParamLeight()
+void bitMaskObj::calculateParamLeight()
 //считаем длину параметра, двигая маску дальше до первого нуля
 {
     int i = 0;
@@ -89,28 +99,36 @@ int bitMaskObj::calculateParamLeight()
         else
         {
             i = 1;
-            return n;
+            qDebug() << "ParamLeight = " << n;
+            paramLeght = n;
         }
-         if (n>32) break; //Переделать
+        if (n>32)
+        {
+             paramLeght = 0;
+             break;
+        }
     }
+    qDebug() << "ParamLeight = " << n;
 }
 
-void bitMaskObj::calculateValue(int wordData)
+void bitMaskObj::calculateValue(int _devNum, int _byteNum, int wordData)
 {
-    int value = (wordData >> paramShift); //сдвигаем нужные нам биты к началу
-    int mask4calcValue = 1; //Сдвигая единичку влево, будем по этой маске гасить лишние биты.
-    mask4calcValue = mask4calcValue << paramLeght; //сдвигаем маску влево на длину нужных нам данных, чтоб их не трогать
-    for (int var = paramLeght; var < sizeof(wordData); var++)
-    { //забиваем нулями всё что дальше наших данных
-        if (value && mask4calcValue) //если этот бит равен единице...
+    if (devNum == _devNum && byteNum == _byteNum)
+    {
+
+        uint32_t paramMaskInt = 0;
+        for (int i = paramMask.size()-1, y = 0; i > -1; i--, y++) //переводим маску из строки нулей и единиц в число int
         {
-            value |= mask4calcValue; //инвертируем его
+            if (paramMask.at(i) == '1')
+               paramMaskInt+=pow(2,y);
         }
-        mask4calcValue = mask4calcValue << 1;
+        uint32_t value = (wordData & paramMaskInt);
+        value = value >> paramShift; //сдвигаем нужные нам биты к началу
+        int binRawValue = value;
+        qDebug() << "Value is " << value;
+        float endValue = (value+valueShift)*valueKoef;
+        emit param2FrontEnd(devNum, byteNum, wordData, id, paramName, binRawValue, endValue, viewInLogFlag);
     }
-    int binRawValue = value;
-    qDebug() << "Value is " << (value+valueShift)*valueKoef;
-    float endValue = (value+valueShift)*valueKoef;
 }
 
 void bitMaskObj::deleteMaskObjectTX(int _devNum, int _byteNum, int _id)
