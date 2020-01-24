@@ -9,6 +9,7 @@
 #include "mainwindow.h"
 #include "getstream.h"
 #include "dataprofiler.h"
+#include "txtmaskobj.h"
 
 namespace Ui {
 class newconnect;
@@ -27,9 +28,11 @@ public:
     QLabel *m_status = nullptr;
     getStream *gstream = nullptr;
     dataprofiler *datapool = nullptr;
-    QList<QList<QString>*> maskVectorsList;
+    QList<txtmaskobj*> maskVectorsList;
     void readProfile();
-    void saveProfile();    
+    void saveProfile();
+    bool permission2SaveMasks = false;
+    void prepareToSaveProfile();
     ~newconnect();
 
 signals:

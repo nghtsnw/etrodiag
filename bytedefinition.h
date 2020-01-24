@@ -18,7 +18,7 @@ public:
     int devNum;
     int th_byteNum = 0;
     int th_data = 0;
-    int wordData;
+    uint32_t wordData;
     virtual ~byteDefinition();
 signals:
     void returnWordType(int _devNum, int _byteNum, int wordType);

@@ -5,7 +5,6 @@
 #include <QBitArray>
 #include <QDataStream>
 #include <QTextStream>
-#include "dynamicbaseprofile.h"
 
 
 Device::Device(QWidget *parent) : QPushButton(parent)
@@ -135,7 +134,7 @@ void Device::setDeviceName(int id, QString name)
 void Device::requestMasks4Saving()
 {
     //каждому байту устройства отправляем сигнал на выдачу всех масок
-    for (int i = 0; i > currState.size(); i++) {
+    for (int i = 0; i <= currState.size(); i++) {
         requestMaskDataRX(devNum, i, 999);
     }
 }

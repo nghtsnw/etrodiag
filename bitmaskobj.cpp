@@ -118,7 +118,7 @@ void bitMaskObj::calculateValue(int _devNum, int _byteNum, int wordData)
 
         uint32_t paramMaskInt = 0;
         for (int i = paramMask.size()-1, y = 0; i > -1; i--, y++) //переводим маску из строки нулей и единиц в число int
-        {
+        {//тодо: перенести это вычисление в masksettingsdialog, и отправлять сигналом уже готовое число а не строку
             if (paramMask.at(i) == '1')
                paramMaskInt+=pow(2,y);
         }

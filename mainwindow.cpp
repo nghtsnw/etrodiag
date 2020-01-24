@@ -193,6 +193,7 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
     {
         m_ui->logArea->show();
         m_ui->valueArea->show();
+        connection->prepareToSaveProfile();
         connection->saveProfile();
         dvsf.hide();
         dvsf.killChildren();

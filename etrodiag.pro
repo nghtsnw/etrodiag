@@ -13,14 +13,14 @@ SOURCES += \
     dataprofiler.cpp \
     device.cpp \
     devsettingsform.cpp \
-    dynamicbaseprofile.cpp \
     getstream.cpp \
     main.cpp \
     mainwindow.cpp \
     masksettingsdialog.cpp \
     newconnect.cpp \
     settingsdialog.cpp \
-    console.cpp
+    console.cpp \
+    txtmaskobj.cpp
 
 HEADERS += \
     bitmaskobj.h \
@@ -31,13 +31,13 @@ HEADERS += \
     dataprofiler.h \
     device.h \
     devsettingsform.h \
-    dynamicbaseprofile.h \
     getstream.h \
     mainwindow.h \
     masksettingsdialog.h \
     newconnect.h \
     settingsdialog.h \
-    console.h
+    console.h \
+    txtmaskobj.h
 
 FORMS += \
     bitsetform.ui \

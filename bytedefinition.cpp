@@ -3,6 +3,7 @@
 #include "bitmaskobj.h"
 #include <QByteArray>
 #include <QDataStream>
+#include "cmath"
 //Создаётся для каждого байта при инициализации устройства.
 //Данные отсюда будут подтягиваться в гуй (ещё не создал форму) параметров байта, и сюда же сохраняться.
 //Вместе с параметрами устройства (dynamicbaseprofile) данные будут сохраняться в файл.
@@ -122,23 +123,37 @@ void byteDefinition::allMasksToListRX(int devNum, int byteNum, int id, QString p
 
 void byteDefinition::calcWordData(int _devNum, QVector<int> data)
 {//формируем слово из полных данных устройства и заданной длины, и рассылаем слово маскам
+    wordData = 0;
+    uint32_t mask = 1;
+    int bytex = 0;
+    int step = 0;
 
-    QByteArray wordDataBA;
-    QDataStream wordDataStream(&wordDataBA, QIODevice::WriteOnly);
     if (_devNum == devNum)
     {
     if (wordType == 0)
         wordData = (data.at(th_byteNum));
     else if (wordType == 1)
     {
-        wordDataStream << (data.at(th_byteNum)) << (data.at(th_byteNum+1));
-        wordData = wordDataBA.toInt(0,10);
+        for (int y = 0; y <= 1; y++)
+        {
+            bytex = (data.at(th_byteNum+y));
+        for (int i = 0, mask = 1; i <= 7; i++, step++, mask = mask << 1)
+        {
+            if (bytex & mask)
+                wordData+=pow(2,step);
+        }
+        }
     }
         else if (wordType == 2)
     {
-        wordDataStream << (data.at(th_byteNum)) << (data.at(th_byteNum+1))
-                << (data.at(th_byteNum+2)) << (data.at(th_byteNum+3));
-        wordData = wordDataBA.toInt(0,10);
+        for (int y = 0, bytex = (data.at(th_byteNum+y)); y <= 3; y++)
+        {
+        for (int i = 0, mask = 1; i <= 7; i++, step++, mask = mask << 1)
+        {
+            if (bytex & mask)
+                wordData+=pow(2,step);
+        }
+        }
     }
     emit wordData2Mask(devNum, th_byteNum, wordData);
     }

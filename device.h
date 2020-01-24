@@ -6,7 +6,6 @@
 #include <QWidget>
 #include <QPushButton>
 #include "bytedefinition.h"
-#include "dynamicbaseprofile.h"
 
 class Device : public QPushButton
 {

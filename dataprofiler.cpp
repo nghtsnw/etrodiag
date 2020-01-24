@@ -4,7 +4,7 @@
 
 dataprofiler::dataprofiler(QWidget *parent) : QObject(parent)
 {
-    //connect(this, SIGNAL(deviceData()), &w, SLOT(addDeviceToList(QVector<QString> ddata)));
+
 }
 
 void dataprofiler::getByte(int byteFromBuf)
