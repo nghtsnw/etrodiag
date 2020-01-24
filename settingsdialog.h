@@ -54,6 +54,7 @@
 
 #include <QDialog>
 #include <QSerialPort>
+#include <QLineEdit>
 
 QT_BEGIN_NAMESPACE
 
@@ -83,10 +84,14 @@ public:
         QSerialPort::FlowControl flowControl;
         QString stringFlowControl;
         bool localEchoEnabled;
+        QString profilePath;
     };
 
     explicit SettingsDialog(QWidget *parent = nullptr);
     ~SettingsDialog();
+   // QLineEdit newProfileName;
+    QString selectedProfile;
+
 
     Settings settings() const;
 
@@ -96,10 +101,15 @@ private slots:
     void checkCustomBaudRatePolicy(int idx);
     void checkCustomDevicePathPolicy(int idx);
 
+    void on_newProfileButton_clicked();
+
+    void on_profileSelectBox_currentTextChanged(const QString &arg1);
+
 private:
     void fillPortsParameters();
     void fillPortsInfo();
     void updateSettings();
+    void fillProfileList();
 
 private:
     Ui::SettingsDialog *m_ui = nullptr;

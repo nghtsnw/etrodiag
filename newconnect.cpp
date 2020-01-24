@@ -8,6 +8,7 @@
 #include <QDebug>
 #include "getstream.h"
 #include "dataprofiler.h"
+#include <QString>
 
 newconnect::newconnect(QWidget *parent) :
     QWidget(parent),
@@ -27,10 +28,7 @@ newconnect::newconnect(QWidget *parent) :
     m_console->show();
 
     connect(m_serial, &QSerialPort::errorOccurred, this, &newconnect::handleError);
-
-
     connect(m_serial, &QSerialPort::readyRead, this, &newconnect::readData);
-
     connect(m_console, &Console::getData, this, &newconnect::writeData);
     connect(gstream, &getStream::giveMyByte, datapool, &dataprofiler::getByte);
     connect(datapool, SIGNAL(readyGetByte()), gstream, SLOT(profilerReadyToReceive()));
@@ -144,4 +142,84 @@ void newconnect::on_pushButton_2_clicked()
 void newconnect::transData(QVector<int> snapshot)
 {
     emit transmitData(snapshot);
+}
+
+void newconnect::saveProfile()
+{
+    maskVectorsList = this->findChildren<QList<QString>*>();
+    QListIterator<QList<QString>*> maskVectorsListIt(maskVectorsList);
+    maskVectorsListIt.toFront();
+
+    qDebug() << "Save profile initialization";
+    const SettingsDialog::Settings p = m_settings->settings();
+    QFile profile(p.profilePath);
+    QFileInfo info(profile);
+    profile.open(QIODevice::WriteOnly);
+    QXmlStreamWriter profileWriter(&profile);
+    profileWriter.setAutoFormatting(true);
+    profileWriter.writeStartDocument();
+    profileWriter.writeStartElement("profile");
+    profileWriter.writeAttribute("profilename", info.fileName());
+
+    while (maskVectorsListIt.hasNext())
+    {
+        profileWriter.writeStartElement("devices");
+        profileWriter.writeStartElement("devnumber", maskVectorsListIt.peekNext()->at(2));
+        profileWriter.writeAttribute("devname", maskVectorsListIt.peekNext()->at(4));
+        profileWriter.writeStartElement("bytes");
+        profileWriter.writeStartElement("bytenum", maskVectorsListIt.peekNext()->at(3));
+        profileWriter.writeAttribute("bytename", maskVectorsListIt.peekNext()->at(5));
+        profileWriter.writeAttribute("wordlenght", maskVectorsListIt.peekNext()->at(11));
+        profileWriter.writeStartElement("masks");
+        profileWriter.writeStartElement("mask", maskVectorsListIt.peekNext()->at(7));
+        profileWriter.writeAttribute("maskname", maskVectorsListIt.peekNext()->at(6));
+        profileWriter.writeAttribute("valueshift", maskVectorsListIt.peekNext()->at(8));
+        profileWriter.writeAttribute("valuekoef", maskVectorsListIt.peekNext()->at(9));
+        profileWriter.writeAttribute("viewinlog", maskVectorsListIt.peekNext()->at(10));
+        profileWriter.writeEndElement();
+        profileWriter.writeEndElement();
+        profileWriter.writeEndElement();
+        profileWriter.writeEndElement();
+        profileWriter.writeEndElement();
+        profileWriter.writeEndElement();
+        maskVectorsListIt.next();
+    }
+
+    profileWriter.writeEndElement();
+    profileWriter.writeEndDocument();
+    profile.close();
+    emit saveAllMasks();
+}
+
+void newconnect::saveProfileSlot4Masks(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType)
+{
+    //перед сохранением все маски сигналом отправляются сюда, что-бы образовать перечень масок
+    //проверяется что этой маски тут ещё нет, после этого создаётся список с текстовым перечнем всех параметров
+    //создаются только описания масок, само сохранение будет в другой функции
+    maskVectorsList = this->findChildren<QList<QString>*>();
+    QListIterator<QList<QString>*> maskVectorsListIt(maskVectorsList);
+    bool thisMaskHere = false;
+    maskVectorsListIt.toFront();
+    while (maskVectorsListIt.hasNext())
+    {
+        if ((QString::number(id,10) == maskVectorsListIt.peekNext()->at(1))&&(QString::number(devNum,10) == maskVectorsListIt.peekNext()->at(2))&&(QString::number(byteNum,10)==maskVectorsListIt.peekNext()->at(3))&& (maskVectorsListIt.peekNext()->at(0) == "thisIsMask"))
+           thisMaskHere = true;
+        maskVectorsListIt.next();
+    }
+    if (!thisMaskHere)
+    {
+    QList<QString> *mask2string = new QList<QString>;
+    mask2string->append("thisIsMask");//0
+    mask2string->append(QString::number(id,10));//1
+    mask2string->append(QString::number(devNum,10));//2
+    mask2string->append(QString::number(byteNum,10));//3
+    mask2string->append(devName);//4
+    mask2string->append(byteName);//5
+    mask2string->append(paramName);//6
+    mask2string->append(paramMask);//7
+    mask2string->append(QString::number(valueShift,'g',6));//8
+    mask2string->append(QString::number(valueKoef,'g',6));//9
+    mask2string->append((viewInLogFlag ?"true":"false"));//10
+    mask2string->append(QString::number(wordType));//11
+    }
 }

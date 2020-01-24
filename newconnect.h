@@ -23,17 +23,24 @@ public:
     SettingsDialog *m_settings = nullptr;
     QSerialPort *m_serial = nullptr;
     Console *m_console = nullptr;
-    //void sendstatus();
     void showStatusMessage(QString message);
     QLabel *m_status = nullptr;
     getStream *gstream = nullptr;
     dataprofiler *datapool = nullptr;
+    QList<QList<QString>*> maskVectorsList;
+    void readProfile();
+    void saveProfile();    
     ~newconnect();
 
 signals:
 
 void sendStatusStr(QString);
 void transmitData(QVector<int> snapshot);
+void saveAllMasks();
+
+public slots:
+
+void saveProfileSlot4Masks(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType);
 
 
 private slots:

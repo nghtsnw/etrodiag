@@ -35,7 +35,7 @@ signals:
 
 public slots:
     void returnWordType(int _devNum, int _byteNum, int wordType);
-    void addMaskItem(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag, int _wordType);
+    void addMaskItem(int _devNum, QString _devName, int _byteNum, QString _byteName, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag, int _wordType);
     void updateHexWordData(int _devNum, int _byteNum, QString _txt);
 private slots:
     void on_bitBox_valueChanged(int arg1);

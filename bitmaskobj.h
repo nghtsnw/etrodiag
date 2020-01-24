@@ -21,8 +21,8 @@ public:
     void calculateParamLeight();
     int paramLeght = 0;
     int paramType = 0;
-    int valueShift = 0;
-    float valueKoef = 1;
+    double valueShift = 0;
+    double valueKoef = 1;
     int wordData = 0;
     int wordType = 0;
     //void maskToForm();
@@ -31,15 +31,18 @@ public:
     bool viewInLogFlag = true;
 
 signals:
-    void maskToFormSIG(int devNum, int byteNum, int id, QString paramName, QString paramMask, int paramType, int valueShift, float valueKoef, bool viewInLogFlag, int wordType);
+    void maskToFormSIG(int devNum, int byteNum, int id, QString paramName, QString paramMask, int paramType, int valueShift, double valueKoef, bool viewInLogFlag, int wordType);
     void mask2byteSettingsForm(int devNum, int byteNum, int id);
-    void maskToListSIG(int devNum, int byteNum, int id, QString paramName, QString paramMask, int paramType, int valueShift, float valueKoef, bool viewInLogFlag, int wordType);
-    void param2FrontEnd(int devNum, int byteNum, int wordData, int id, QString paramName, int binRawValue, float endValue, bool viewInLogFlag);
+    void maskToListSIG(int devNum, int byteNum, int id, QString paramName, QString paramMask, int paramType, int valueShift, double valueKoef, bool viewInLogFlag, int wordType);
+    void param2FrontEnd(int devNum, int byteNum, int wordData, int id, QString paramName, int binRawValue, double endValue, bool viewInLogFlag);
 public slots:
     void maskToForm(int _devNum, int _byteNum, int _id);
-    void sendMaskToProfile(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag);
+    void sendMaskToProfile(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag);
     void allMasksToList(int _devNum, int _byteNum);
     void deleteMaskObjectTX(int _devNum, int _byteNum, int _id);
+
+private:
+    double oldEndValue = 0.0;
 };
 
 #endif // BITMASKOBJ_H

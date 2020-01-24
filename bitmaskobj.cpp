@@ -21,16 +21,16 @@ void bitMaskObj::newMaskObj(int _devNum, int _byteNum, int _id)
     //после создания новой маски сразу посылаем сигнал на открытие формы masksettingsdialog, сообщая ей параметры маски которую нужно редактировать
 }
 
-void bitMaskObj::sendMaskToProfile(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogflag)
+void bitMaskObj::sendMaskToProfile(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogflag)
 {//забор данных из формы masksettingsdialog и отправка в профиль bitmaskobj
     if (_devNum == devNum && _byteNum == byteNum && _id == id)
     {
         paramName = _paramName;
         paramMask = _paramMask;
         calculateParamShift();
-        qDebug() << "ParamShift after init = " << paramShift;
+        //qDebug() << "ParamShift after init = " << paramShift;
         calculateParamLeight();
-        qDebug() << "ParamLeight after init = " << paramLeght;
+        //qDebug() << "ParamLeight after init = " << paramLeght;
         paramType = _paramType;
         valueShift = _valueShift;
         valueKoef = _valueKoef;
@@ -126,8 +126,10 @@ void bitMaskObj::calculateValue(int _devNum, int _byteNum, int wordData)
         value = value >> paramShift; //сдвигаем нужные нам биты к началу
         int binRawValue = value;
         qDebug() << "Value is " << value;
-        float endValue = (value+valueShift)*valueKoef;
+        double endValue = (value+valueShift)*valueKoef;
+        //if (endValue != oldEndValue)
         emit param2FrontEnd(devNum, byteNum, wordData, id, paramName, binRawValue, endValue, viewInLogFlag);
+        oldEndValue = endValue;
     }
 }
 

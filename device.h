@@ -37,12 +37,12 @@ signals:
     void returnWordTypeTX(int _devNum, int _byteNum, int wordType);
     void createNewMaskTX(int _devNum, int _byteNum);
     void mask2FormTX(int _devNum, int _byteNum, int _id);
-    void maskData2FormTX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag, int wordType);
+    void maskData2FormTX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag, int wordType);
     void requestMaskDataTX(int _devNum, int _byteNum, int _id);
-    void sendDataToProfileTX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag);
-    void allMasksToListTX(int devNum, int byteNum, int id, QString paramName, QString paramMask, int paramType, int valueShift, float valueKoef, bool viewInLogFlag, int wordType);
+    void sendDataToProfileTX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag);
+    void allMasksToListTX(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType);
     void deleteMaskObjTX(int devNum, int byteNum, int id);
-    void param2FrontEndTX(int devNum, QString devName, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, float endValue, bool viewInLogFlag);
+    void param2FrontEndTX(int devNum, QString devName, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag);
 
 public slots:
     //void getDeviceName(int devNum);
@@ -53,11 +53,12 @@ public slots:
     void returnWordTypeRX(int _devNum, int _byteNum, int wordType);
     void createNewMaskRX(int _devNum, int _byteNum);
     void mask2FormRX(int _devNum, int _byteNum, int _id);
-    void maskData2FormRX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag, int wordType);
+    void maskData2FormRX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag, int wordType);
     void requestMaskDataRX(int _devNum, int _byteNum, int _id);
-    void sendDataToProfileRX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag, int _wordType);
-    void allMasksToListRX(int devNum, int byteNum, int id, QString paramName, QString paramMask, int paramType, int valueShift, float valueKoef, bool viewInLogFlag, int wordType);
-    void param2FrontEndRX(int devNum, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, float endValue, bool viewInLogFlag);
+    void sendDataToProfileRX(int _devNum, QString, int _byteNum, QString, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag, int _wordType);
+    void allMasksToListRX(int devNum, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType);
+    void param2FrontEndRX(int devNum, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag);
+    void requestMasks4Saving();
 private:
     Q_DISABLE_COPY(Device)
 

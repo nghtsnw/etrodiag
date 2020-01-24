@@ -132,6 +132,14 @@ void Device::setDeviceName(int id, QString name)
     }
 }
 
+void Device::requestMasks4Saving()
+{
+    //каждому байту устройства отправляем сигнал на выдачу всех масок
+    for (int i = 0; i > currState.size(); i++) {
+        requestMaskDataRX(devNum, i, 999);
+    }
+}
+
 void Device::setWordTypeInByteProfile(int _devNum, int _byteNum, int _wordType)
 {//по изменению битбокса в форме bytesettingsform, отправляем значение в bytedefinition
     emit setWordBitTX(_devNum, _byteNum, _wordType);
@@ -162,22 +170,23 @@ void Device::requestMaskDataRX(int _devNum, int _byteNum, int _id)
     emit requestMaskDataTX(_devNum, _byteNum, _id);
 }
 
-void Device::maskData2FormRX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag, int wordType)
+void Device::maskData2FormRX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag, int wordType)
 {//ответный сигнал со всеми данными маски bitmaskobj в masksettingsdialog
     emit maskData2FormTX(_devNum, _byteNum, _id, _paramName, _paramMask, _paramType, _valueShift, _valueKoef, _viewInLogFlag, wordType);
 }
 
-void Device::sendDataToProfileRX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag, int _wordType)
+void Device::sendDataToProfileRX(int _devNum, QString, int _byteNum, QString, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag, int _wordType)
 {//забор данных из формы masksettingsdialog и отправка в профиль bitmaskobj
     emit sendDataToProfileTX(_devNum, _byteNum, _id, _paramName, _paramMask, _paramType, _valueShift, _valueKoef, _viewInLogFlag);
 }
 
-void Device::allMasksToListRX(int devNum, int byteNum, int id, QString paramName, QString paramMask, int paramType, int valueShift, float valueKoef, bool viewInLogFlag, int wordType)
+void Device::allMasksToListRX(int devNum, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType)
 {//сигнал от bitmaskobj предназначенный для bytesettingsform, для наполнения листа масок всеми имеющимися у этого байта
-    emit allMasksToListTX(devNum, byteNum, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType);
+    emit allMasksToListTX(devNum, devName, byteNum, byteName, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType);
 }
 
-void Device::param2FrontEndRX(int devNum, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, float endValue, bool viewInLogFlag)
+void Device::param2FrontEndRX(int devNum, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag)
 {
     emit param2FrontEndTX(devNum, devName, byteNum, byteName, wordData, id, parameterName, binRawValue, endValue, viewInLogFlag);
 }
+

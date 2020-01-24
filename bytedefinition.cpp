@@ -1,6 +1,8 @@
 #include "bytedefinition.h"
 #include <QDebug>
 #include "bitmaskobj.h"
+#include <QByteArray>
+#include <QDataStream>
 //Создаётся для каждого байта при инициализации устройства.
 //Данные отсюда будут подтягиваться в гуй (ещё не создал форму) параметров байта, и сюда же сохраняться.
 //Вместе с параметрами устройства (dynamicbaseprofile) данные будут сохраняться в файл.
@@ -101,39 +103,48 @@ void byteDefinition::requestMaskDataRX(int _devNum, int _byteNum, int _id)
     emit requestMaskDataTX(_devNum, _byteNum, _id);
 }
 
-void byteDefinition::maskData2FormRX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag, int _wordType)
+void byteDefinition::maskData2FormRX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag, int _wordType)
 {//ответный сигнал со всеми данными маски bitmaskobj в masksettingsdialog
     if (devNum == _devNum && th_byteNum == _byteNum)
     emit maskData2FormTX(_devNum, _byteNum, _id, _paramName, _paramMask, _paramType, _valueShift, _valueKoef, _viewInLogFlag, _wordType);
 }
 
-void byteDefinition::sendDataToProfileRX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag)
+void byteDefinition::sendDataToProfileRX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag)
 {//забор данных из формы masksettingsdialog и отправка в профиль bitmaskobj
     if (devNum == _devNum && th_byteNum == _byteNum)
     emit sendDataToProfileTX(_devNum, _byteNum, _id, _paramName, _paramMask, _paramType, _valueShift, _valueKoef, _viewInLogFlag);
 }
 
-void byteDefinition::allMasksToListRX(int devNum, int byteNum, int id, QString paramName, QString paramMask, int paramType, int valueShift, float valueKoef, bool viewInLogFlag, int wordType)
+void byteDefinition::allMasksToListRX(int devNum, int byteNum, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType)
 {//сигнал от bitmaskobj предназначенный для bytesettingsform, для наполнения листа масок всеми имеющимися у этого байта
-    emit allMasksToListTX(devNum, byteNum, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType);
+    emit allMasksToListTX(devNum, byteNum, byteName, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType);
 }
 
 void byteDefinition::calcWordData(int _devNum, QVector<int> data)
 {//формируем слово из полных данных устройства и заданной длины, и рассылаем слово маскам
+
+    QByteArray wordDataBA;
+    QDataStream wordDataStream(&wordDataBA, QIODevice::WriteOnly);
     if (_devNum == devNum)
     {
     if (wordType == 0)
         wordData = (data.at(th_byteNum));
     else if (wordType == 1)
-        wordData = (data.at(th_byteNum)) + (data.at(th_byteNum+1));
-    else if (wordType == 2)
-        wordData = (data.at(th_byteNum)) + (data.at(th_byteNum+1))
-                + (data.at(th_byteNum+2)) + (data.at(th_byteNum+3));
+    {
+        wordDataStream << (data.at(th_byteNum)) << (data.at(th_byteNum+1));
+        wordData = wordDataBA.toInt(0,10);
+    }
+        else if (wordType == 2)
+    {
+        wordDataStream << (data.at(th_byteNum)) << (data.at(th_byteNum+1))
+                << (data.at(th_byteNum+2)) << (data.at(th_byteNum+3));
+        wordData = wordDataBA.toInt(0,10);
+    }
     emit wordData2Mask(devNum, th_byteNum, wordData);
     }
 }
 
-void byteDefinition::param2FrontEndRX(int devNum, int byteNum, int wordData, int id, QString parameterName, int binRawValue, float endValue, bool viewInLogFlag)
+void byteDefinition::param2FrontEndRX(int devNum, int byteNum, int wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag)
 {
     emit param2FrontEndTX(devNum, byteNum, byteName, wordData, id, parameterName, binRawValue, endValue, viewInLogFlag);
 }

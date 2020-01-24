@@ -27,7 +27,7 @@ void ByteSettingsForm::open(int _devNum, int _byteNum)
     requestAllMasks();
 }
 
-void ByteSettingsForm::addMaskItem(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag, int _wordType)
+void ByteSettingsForm::addMaskItem(int _devNum, QString _devName, int _byteNum, QString _byteName, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag, int _wordType)
 {
     if (devNum == _devNum && byteNum == _byteNum)
     {

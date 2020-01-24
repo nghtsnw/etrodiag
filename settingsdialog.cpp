@@ -55,6 +55,9 @@
 #include <QIntValidator>
 #include <QLineEdit>
 #include <QSerialPortInfo>
+#include <QDir>
+#include <QFileDialog>
+#include <QDebug>
 
 static const char blankString[] = QT_TRANSLATE_NOOP("SettingsDialog", "N/A");
 
@@ -76,7 +79,11 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     connect(m_ui->serialPortInfoListBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &SettingsDialog::checkCustomDevicePathPolicy);
 
+//    QLineEdit newProfileName(m_ui->profileBox);
+    //connect (&newProfileName, &QLineEdit::textEdited, this, &SettingsDialog::profileNameEditFinished);
+
     fillPortsParameters();
+    fillProfileList();
     fillPortsInfo();
 
     updateSettings();
@@ -188,6 +195,32 @@ void SettingsDialog::fillPortsInfo()
     m_ui->serialPortInfoListBox->addItem(tr("Custom"));
 }
 
+void SettingsDialog::fillProfileList()
+{    
+        m_ui->profileSelectBox->clear();
+        QStringList profileList;
+        QDir dir("Profiles");
+        if (!dir.exists())
+            QDir().mkdir("Profiles");
+        bool ok = dir.exists();
+        if (ok)
+        {
+            dir.setFilter(QDir::Files | QDir::Hidden | QDir::NoSymLinks);
+            dir.setSorting(QDir::Name);
+            QStringList filters;
+            filters << "*.eag";
+            dir.setNameFilters(filters);
+            QFileInfoList list = dir.entryInfoList();
+
+            for (int i = 0; i < list.size(); ++i)
+            {
+                QFileInfo fileInfo = list.at(i);
+                profileList << fileInfo.fileName();
+            }
+            m_ui->profileSelectBox->addItems(profileList);
+        }
+}
+
 void SettingsDialog::updateSettings()
 {
     m_currentSettings.name = m_ui->serialPortInfoListBox->currentText();
@@ -217,4 +250,31 @@ void SettingsDialog::updateSettings()
     m_currentSettings.stringFlowControl = m_ui->flowControlBox->currentText();
 
     m_currentSettings.localEchoEnabled = m_ui->localEchoCheckBox->isChecked();
+
+    m_currentSettings.profilePath = selectedProfile;
+}
+
+
+void SettingsDialog::on_newProfileButton_clicked()
+{
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Create new profile"),"Profiles","Electroagregat XML profile(*.eag)");
+    QFile file(fileName);
+    file.open(QIODevice::WriteOnly);
+    file.close();
+    fillProfileList();
+}
+
+
+void SettingsDialog::on_profileSelectBox_currentTextChanged(const QString &arg1)
+{
+    QDir profilesDir("Profiles");
+    QStringList nameFilter;
+    nameFilter << arg1;
+    profilesDir.setNameFilters(nameFilter);
+    QFileInfoList infoList(profilesDir.entryInfoList());
+    QFileInfo fileInfo(infoList.at(0));
+    QString currentProfile = fileInfo.filePath();
+    selectedProfile = currentProfile;
+    nameFilter.clear();
+    infoList.clear();
 }

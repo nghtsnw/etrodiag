@@ -69,13 +69,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
 {
     m_ui->setupUi(this);
-    newconnect *connection = new newconnect(m_ui->tab_connections);
-    connection->show();
+
     //QLabel *statuslbl = new QLabel(this);
     statusBar()->addWidget(statuslbl);
-    statuslbl->setText("Make ETRO great again!");
-    connect (connection, SIGNAL(sendStatusStr(QString)), SLOT(showStatusMessage(QString)));
-    connect (connection, &newconnect::transmitData, this, &MainWindow::addDeviceToList);
+    statuslbl->setText("Make Electroagregat great again!");
+    addConnection();
     connect (&btsf, &ByteSettingsForm::editMask, &masksd, &maskSettingsDialog::requestDataOnId);
 }
 
@@ -83,6 +81,14 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete m_ui;
+}
+
+void MainWindow::addConnection()
+{
+    connection = new newconnect(m_ui->tab_connections);
+    connect (connection, SIGNAL(sendStatusStr(QString)), SLOT(showStatusMessage(QString)));
+    connect (connection, &newconnect::transmitData, this, &MainWindow::addDeviceToList);
+    connection->show();
 }
 
 void MainWindow::showStatusMessage(QString message)
@@ -146,7 +152,9 @@ void MainWindow::addDeviceToList(QVector<int> ddata)
         connect (&dvsf, &devSettingsForm::wordDataFullHex, &btsf, &ByteSettingsForm::updateHexWordData);
         connect (dev, &Device::param2FrontEndTX, this, &MainWindow::frontendDataSort);
         connect (dev, &Device::param2FrontEndTX, &masksd, &maskSettingsDialog::liveDataSlot);
-        connect (dev, &Device::param2FrontEndTX, &btsf, &ByteSettingsForm::updateMasksList);
+        connect (dev, &Device::param2FrontEndTX, &btsf, &ByteSettingsForm::updateMasksList);        
+        connect (connection, &newconnect::saveAllMasks, dev, &Device::requestMasks4Saving);
+        connect (dev, &Device::allMasksToListTX, connection, &newconnect::saveProfileSlot4Masks);
     }
 
     vlayChildListIt.toFront();
@@ -185,6 +193,7 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
     {
         m_ui->logArea->show();
         m_ui->valueArea->show();
+        connection->saveProfile();
         dvsf.hide();
         dvsf.killChildren();
     }
@@ -215,7 +224,8 @@ void MainWindow::openMaskSettingsDialog()
     masksd.show();
 }
 
-void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, float endValue, bool viewInLogFlag)
+void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag)
 {
-    m_ui->logArea->appendPlainText(devName + "@" + parameterName + ": " + endValue + '\n');
+    //QString endValueString = QString::number(endValue,'g',6);
+    m_ui->logArea->appendPlainText(parameterName + "@" + devName + ": " + QString::number(endValue,'g',6));
 }

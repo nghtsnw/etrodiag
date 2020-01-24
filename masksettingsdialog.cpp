@@ -28,7 +28,7 @@ void maskSettingsDialog::requestDataOnId(int _devNum, int _byteNum, int _id)
     //ответный сигнал от masksettingsdialog с запросом всех параметров маски bitmaskobject
 }
 
-void maskSettingsDialog::getDataOnId(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag, int _wordType)
+void maskSettingsDialog::getDataOnId(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag, int _wordType)
 {//ответный сигнал со всеми данными маски bitmaskobj в masksettingsdialog
     if (devNum == _devNum && byteNum == _byteNum && id == _id)
     {
@@ -100,7 +100,7 @@ void maskSettingsDialog::scanCheckboxesToMask()
     sendMask2Profile();
 }
 
-void maskSettingsDialog::liveDataSlot(int _devNum, QString _devName, int _byteNum, QString _byteName, int _wordData, int _id, QString parameterName, int _binRawValue, float _endValue, bool viewInLogFlag)
+void maskSettingsDialog::liveDataSlot(int _devNum, QString _devName, int _byteNum, QString _byteName, int _wordData, int _id, QString parameterName, int _binRawValue, double _endValue, bool viewInLogFlag)
 {//устанавливаем текст каждому чекбоксу, 0 или 1
     bool wordDataIntArray[wordBit];
     uint32_t mask = 1;
@@ -127,7 +127,7 @@ void maskSettingsDialog::sendMask2Profile()
         int _valueShift = ui->shiftTxt->text().toInt(nullptr,10);
         float _valueKoef = ui->koeffTxt->text().toFloat(nullptr);
         bool _viewInLogFlag = ui->checkBox->isChecked();
-        emit sendMaskData(devNum, byteNum, id, _paramName, _paramMask, _paramType, _valueShift, _valueKoef, _viewInLogFlag, wordType);
+        emit sendMaskData(devNum, "",byteNum, "", id, _paramName, _paramMask, _paramType, _valueShift, _valueKoef, _viewInLogFlag, wordType);
     }
 }
 
