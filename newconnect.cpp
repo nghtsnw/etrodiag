@@ -48,6 +48,7 @@ void newconnect::on_pushButton_clicked()
 
 void newconnect::openSerialPort()
 {
+    readProfile();
     const SettingsDialog::Settings p = m_settings->settings();
     m_serial->setPortName(p.name);
     m_serial->setBaudRate(p.baudRate);
@@ -190,7 +191,7 @@ void newconnect::saveProfileSlot4Masks(int devNum, QString devName, int byteNum,
                    maskList.append(QString::number(wordType));//11
                    txtmaskobj *savingMask = new txtmaskobj(maskList);
                    savingMask->setParent(this);
-                   //maskList.clear();
+                   maskList.clear();
                }
            }
            }
@@ -203,42 +204,45 @@ void newconnect::saveProfile()
     const SettingsDialog::Settings p = m_settings->settings();
     QFile profile(p.profilePath);
     QFileInfo info(profile);
-    profile.open(QIODevice::WriteOnly);
-    QXmlStreamWriter profileWriter(&profile);
-    profileWriter.setAutoFormatting(true);
-    profileWriter.writeStartDocument();
-    profileWriter.writeStartElement("profile");
-    profileWriter.writeAttribute("profilename", info.fileName());
-
+    profile.open(QIODevice::WriteOnly|QIODevice::Text);
     while (maskVectorsListIt.hasNext())
     {
-        profileWriter.writeStartElement("devices");
-        profileWriter.writeStartElement("devnumber", maskVectorsListIt.peekNext()->lst.at(2));
-        profileWriter.writeTextElement("devname", maskVectorsListIt.peekNext()->lst.at(4));
-        profileWriter.writeStartElement("bytes");
-        profileWriter.writeStartElement("bytenum", maskVectorsListIt.peekNext()->lst.at(3));
-        profileWriter.writeTextElement("bytename", maskVectorsListIt.peekNext()->lst.at(5));
-        profileWriter.writeTextElement("wordlenght", maskVectorsListIt.peekNext()->lst.at(11));
-        profileWriter.writeStartElement("masks");
-        profileWriter.writeTextElement("mask", maskVectorsListIt.peekNext()->lst.at(7));
-        profileWriter.writeTextElement("maskname", maskVectorsListIt.peekNext()->lst.at(6));
-        profileWriter.writeTextElement("valueshift", maskVectorsListIt.peekNext()->lst.at(8));
-        profileWriter.writeTextElement("valuekoef", maskVectorsListIt.peekNext()->lst.at(9));
-        profileWriter.writeTextElement("viewinlog", maskVectorsListIt.peekNext()->lst.at(10));
-        profileWriter.writeEndElement();
-        profileWriter.writeEndElement();
-        profileWriter.writeEndElement();
-        profileWriter.writeEndElement();
-        profileWriter.writeEndElement();
-        profileWriter.writeEndElement();
+        QTextStream txtStream(&profile);
+        txtStream << info.fileName() << "\n";
+
+        QListIterator<QString> lstIt(maskVectorsListIt.peekNext()->lst);
+        while (lstIt.hasNext())
+        txtStream << lstIt.next() << "\t";
+        txtStream << "\n";
         maskVectorsListIt.next();
     }
 
-    profileWriter.writeEndElement();
-    profileWriter.writeEndDocument();
-    profile.close();
     permission2SaveMasks = false;
-    //emit saveAllMasks();
 }
 
-
+void newconnect::readProfile()
+{
+    const SettingsDialog::Settings p = m_settings->settings();
+    QFile profile(p.profilePath);
+    profile.open(QIODevice::ReadOnly|QIODevice::Text);
+    QTextStream txtStream(&profile);
+    while (!txtStream.atEnd())
+    {
+        QString str = txtStream.readLine();
+        QString word;
+        QStringList strLst;
+        int step = 0;
+        while (!str.end())
+        {
+           if (str.at(step)!='\t')
+            word += str.at(step);
+           else if (str.at(step)!='\t')
+               strLst.append(word);
+           step++;
+        }
+        if (strLst.at(0)=="thisIsMask")
+            emit loadMask(strLst.at(2).toInt(0,10),strLst.at(4),strLst.at(3).toInt(0,10),strLst.at(5),strLst.at(1).toInt(0,10),strLst.at(6),strLst.at(7),0,strLst.at(8).toDouble(),strLst.at(9).toDouble(),((QString::compare(strLst.at(10), "true") == 0) ? true : false),strLst.at(11).toInt(0,10));
+        step = 0;
+        strLst.clear();
+    }
+}

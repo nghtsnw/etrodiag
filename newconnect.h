@@ -40,6 +40,7 @@ signals:
 void sendStatusStr(QString);
 void transmitData(QVector<int> snapshot);
 void saveAllMasks();
+void loadMask(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType);
 
 public slots:
 
