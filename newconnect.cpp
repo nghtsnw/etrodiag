@@ -229,20 +229,20 @@ void newconnect::readProfile()
     while (!txtStream.atEnd())
     {
         QString str = txtStream.readLine();
-        QString word;
-        QStringList strLst;
-        int step = 0;
-        while (!str.end())
-        {
-           if (str.at(step)!='\t')
-            word += str.at(step);
-           else if (str.at(step)!='\t')
-               strLst.append(word);
-           step++;
-        }
+//        QString word;
+        QStringList strLst = str.split('\t');
+//        int step = 0;
+//        while (!str.end())
+//        {
+//           if (str.at(step)!='\t')
+//            word += str.at(step);
+//           else if (str.at(step)!='\t')
+//               strLst.append(word);
+//           step++;
+//        }
         if (strLst.at(0)=="thisIsMask")
             emit loadMask(strLst.at(2).toInt(0,10),strLst.at(4),strLst.at(3).toInt(0,10),strLst.at(5),strLst.at(1).toInt(0,10),strLst.at(6),strLst.at(7),0,strLst.at(8).toDouble(),strLst.at(9).toDouble(),((QString::compare(strLst.at(10), "true") == 0) ? true : false),strLst.at(11).toInt(0,10));
-        step = 0;
+//        step = 0;
         strLst.clear();
     }
 }

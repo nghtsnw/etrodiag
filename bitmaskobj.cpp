@@ -21,6 +21,7 @@ void bitMaskObj::newMaskObj(int _devNum, int _byteNum, int _id)
     //после создания новой маски сразу посылаем сигнал на открытие формы masksettingsdialog, сообщая ей параметры маски которую нужно редактировать
 }
 
+
 void bitMaskObj::sendMaskToProfile(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogflag)
 {//забор данных из формы masksettingsdialog и отправка в профиль bitmaskobj
     if (_devNum == devNum && _byteNum == byteNum && _id == id)
@@ -140,4 +141,19 @@ void bitMaskObj::deleteMaskObjectTX(int _devNum, int _byteNum, int _id)
         qDebug() << "dev " << devNum << ", byte " << byteNum << ", id " << id << " bye bye";
         this->~bitMaskObj();
     }
+}
+
+void bitMaskObj::loadMaskRX(int _devNum, QString _devName, int _byteNum, QString _byteName, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag, int _wordType)
+{
+    if (_devNum == devNum && _byteNum == byteNum && id == _id)
+    {
+        paramName = _paramName;
+        paramMask = _paramMask;
+        calculateParamShift();
+        calculateParamLeight();
+        paramType = _paramType;
+        valueShift = _valueShift;
+        valueKoef = _valueKoef;
+        viewInLogFlag = _viewInLogFlag;
+}
 }

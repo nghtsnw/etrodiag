@@ -90,6 +90,8 @@ public:
     QLabel *statuslbl = nullptr;
     //Device& getLinkOnDev(int devNum);
     void openMaskSettingsDialog();
+    void createDevice(int devNum);
+    void loadProfile(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType);
     ~MainWindow();
 
 
@@ -98,6 +100,7 @@ signals:
     void getDevName(int devNum);
     void setDevName(int devNum, QString name);
     void returnDevNameAfterClose(int devNum, QString text);
+    void sendMaskData(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType);
 
 public slots:
 

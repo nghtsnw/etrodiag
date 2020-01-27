@@ -40,6 +40,7 @@ public slots:
     void sendMaskToProfile(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag);
     void allMasksToList(int _devNum, int _byteNum);
     void deleteMaskObjectTX(int _devNum, int _byteNum, int _id);
+    void loadMaskRX(int _devNum, QString _devName, int _byteNum, QString _byteName, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag, int _wordType);
 
 private:
     double oldEndValue = 0.0;

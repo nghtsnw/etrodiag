@@ -18,7 +18,7 @@ public:
     //dynamicBaseProfile *devPrf = new dynamicBaseProfile;
     QVector<int> currState;
     QVector<int> *oldState = new QVector<int>;
-    Device(int id, QVector<int> data);
+    Device(int id);
     void byteObjectsInit(QVector<int> data);
     QVector<byteDefinition*> *byteObjArr = new QVector<byteDefinition*>;
     QVector<byteDefinition*> *byteObjArrOld = new QVector<byteDefinition*>;
@@ -26,6 +26,7 @@ public:
     byteDefinition zeroByteDef;
     //void getDeviceName();
     void clickedF();
+    bool byteObjReady = false;
 
 signals:
     void txtToGui(QString);
@@ -42,6 +43,7 @@ signals:
     void allMasksToListTX(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType);
     void deleteMaskObjTX(int devNum, int byteNum, int id);
     void param2FrontEndTX(int devNum, QString devName, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag);
+    void loadMaskTX(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType);
 
 public slots:
     //void getDeviceName(int devNum);
@@ -58,6 +60,7 @@ public slots:
     void allMasksToListRX(int devNum, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType);
     void param2FrontEndRX(int devNum, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag);
     void requestMasks4Saving();
+    void loadMaskRX(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType);
 private:
     Q_DISABLE_COPY(Device)
 

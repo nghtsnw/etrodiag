@@ -12,20 +12,21 @@ Device::Device(QWidget *parent) : QPushButton(parent)
 
 }
 
-Device::Device(int id, QVector<int> data) //инициализация нового устройства
+Device::Device(int id) //инициализация нового устройства
 {
     devNum = id;
-    currState = data;
-    oldState->reserve(data.size());
-    oldState->fill(255,0);
-    byteObjArr->reserve(data.size());
-    byteObjectsInit(currState);
-    byteObjArrOld->reserve(data.size());
+    //byteObjectsInit(currState);
+//    oldState->reserve(data.size());
+//    oldState->fill(255,0);
+//    byteObjArr->reserve(data.size());
+//    byteObjArrOld->reserve(data.size());
 }
 
 void Device::updateData(int id, QVector<int> devdata) //если устройство в списке уже есть, этой функцией оно обновляется
 {
-
+    currState = devdata;
+    if (!byteObjReady)
+        byteObjectsInit(currState);
     if (id == devNum)
     {
         if (!(oldState->empty()))
@@ -62,6 +63,7 @@ void Device::byteObjectsInit(QVector<int> data) //инициализируем �
         connect (this, &Device::sendDataToProfileTX, bytedef, &byteDefinition::sendDataToProfileRX);
         connect (this, &Device::deleteMaskObjTX, bytedef, &byteDefinition::deleteMaskObjTX);
         connect (bytedef, &byteDefinition::param2FrontEndTX, this, &Device::param2FrontEndRX);
+        connect (this, &Device::loadMaskTX, bytedef, &byteDefinition::loadMaskRX);
         byteObjArr->append(bytedef);
         n++;
     }
@@ -74,41 +76,6 @@ void Device::byteObjectsUpd(QVector<int> data) //обновляем каждый
         byteObjArr->at(n)->th_data = data.at(n);
         byteObjArr->at(n)->calcWordData(devNum, data);
     }
-//    uint8_t bitmask[] = {0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80};
-//    int oneCurrentObj = 0;
-//    int oneOldObj = 0;
-//    int n = 0;
-//    byteObjArr->clear();
-//    while (n < data.size()) //набиваем массив ссылками на новые динамические объекты байтов
-//    { //цикл перебора байтов
-//        byteDefinition bytedef(devNum, n, data.at(n));
-//        byteObjArr->append(&bytedef);
-//        oneCurrentObj = bytedef.th_data;
-//        oneOldObj = oldState->at(n);//byteObjArrOldIt.next();
-
-//        if (oneCurrentObj != oneOldObj) //сравниваем текущую информацию байта и предыдущую
-//        {
-//            int nz = 0;
-//            qDebug() << "current byte = " << oneCurrentObj << ", old byte = " << oneOldObj;
-//            while (nz<=7) //цикл перебора битов
-//            {
-
-//                if ((oneCurrentObj & bitmask[nz]) != (oneOldObj & bitmask[nz])) //проверяю как работает метод определения изменившегося бита с помощью битовой маски (спойлер: прекрасно работает)
-//                { //сравниваем побитово оба байта, ищем какие изменились
-//                    QString strng;
-//                    QTextStream (&strng) << "devNum = " << devNum << ", byte = " << n << ", bit = " <<  nz << ", new state = " << static_cast<bool>(oneCurrentObj & bitmask[nz]) << ", old state = " << static_cast<bool>(oneOldObj & bitmask[nz])<< '\n';   //тут будет emit сигнала в объект профиля, для демонстрации вывел в дебаг
-//                    emit txtToGui(strng);
-//                    qDebug() << strng;//"devNum = " << devNum << ", byte = " << n << ", bit = " << nz
-//                        //<< "new state = " << static_cast<bool>(oneCurrentObj & bitmask[nz]) << ", old state = " << static_cast<bool>(oneOldObj & bitmask[nz]);
-//                }
-//                nz++;
-//            }
-//        }
-//        n++;
-
-//    }
-
-
 }
 
 void Device::clickedF()
@@ -127,7 +94,7 @@ void Device::setDeviceName(int id, QString name)
     if (id == devNum)
     {
         devName = name; //найти почему вызывается два раза
-        this->setToolTip(devName);
+        this->setText(devName);
     }
 }
 
@@ -137,6 +104,12 @@ void Device::requestMasks4Saving()
     for (int i = 0; i <= currState.size(); i++) {
         requestMaskDataRX(devNum, i, 999);
     }
+}
+
+void Device::loadMaskRX(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType)
+{
+    setDeviceName(devNum,devName);
+    emit loadMaskTX(devNum, devName, byteNum, byteName, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType);
 }
 
 void Device::setWordTypeInByteProfile(int _devNum, int _byteNum, int _wordType)

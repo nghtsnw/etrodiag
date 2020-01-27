@@ -15,6 +15,7 @@ public:
     int wordType = 0; //0 - 8bit, 1 - 16bit, 2 - 32bit
     void initProfileStrings(int byteNum, int data);
     void calcWordData(int _devNum, QVector<int> data);
+    int calcMaskID();
     int devNum;
     int th_byteNum = 0;
     int th_data = 0;
@@ -30,6 +31,7 @@ signals:
     void allMasksToListTX(int devNum, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, int valueShift, double valueKoef, bool viewInLogFlag, int wordType);
     void deleteMaskObjTX(int devNum, int byteNum, int id);
     void param2FrontEndTX(int devNum, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag);
+    void loadMaskTX(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType);
 
 public slots:
     void setWordBitRX(int _devNum, int _byteNum, int _argBit);
@@ -41,6 +43,10 @@ public slots:
     void sendDataToProfileRX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag);
     void allMasksToListRX(int devNum, int byteNum, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType);
     void param2FrontEndRX(int devNum, int byteNum, int wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag);
+    void loadMaskRX(int devNum, QString devName, int byteNum, QString _byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType);
+
+private:
+    int tmpMaskId = 0;
 };
 
 #endif // BYTEDEFINITION_H

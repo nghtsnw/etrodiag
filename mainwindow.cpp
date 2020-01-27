@@ -99,8 +99,8 @@ void MainWindow::showStatusMessage(QString message)
 
 void MainWindow::addDeviceToList(QVector<int> ddata)
 {
-    static QVBoxLayout *vlay = new QVBoxLayout;
-
+    //static QVBoxLayout *vlay = new QVBoxLayout;
+    //m_ui->devArea->setLayout(vlay); //больше некуда воткнуть это, пусть пока побудет здесь
     int devNum = ddata.at(2);//узнаём номер устройства в посылке
     QString devNumHex = QString("%1").arg(devNum,0,16).toUpper();//конвертируем его в хекс-вид
     bool thisDeviceHere = false; //обнуляем флаг
@@ -111,7 +111,7 @@ void MainWindow::addDeviceToList(QVector<int> ddata)
 
     while (vlayChildListIt.hasNext())
     {
-        if (devNumHex == vlayChildListIt.next()->text()) //смотрим, есть ли наше устройство в текущем листе
+        if (devNum == vlayChildListIt.next()->devNum) //смотрим, есть ли наше устройство в текущем листе
         {
            thisDeviceHere = true; //если есть, ставим флаг что оно тут
            emit devUpdate(devNum, ddata); //если есть то пихаем ему обновление через сигнал
@@ -120,49 +120,53 @@ void MainWindow::addDeviceToList(QVector<int> ddata)
     }
     if (!thisDeviceHere) //если устройства нет, то создаём его
     {
-        Device *dev = new Device(devNum,ddata);
-        vlay->addWidget(dev);
-        dev->setText(devNumHex);
-        m_ui->devArea->setLayout(vlay); //больше некуда воткнуть это, пусть пока побудет здесь
-        connect (this, &MainWindow::devUpdate, dev, &Device::updateData);
-        connect (dev, &Device::txtToGui, this, &MainWindow::txtToGuiFunc);
-        connect (dev, &Device::openDevSettSig, this, &MainWindow::openDevSett);
-        connect (dev, &Device::clicked, dev, &Device::clickedF);
-        //connect (this, &MainWindow::getDevName, dev, &Device::getDeviceName);
-        connect (&dvsf, &devSettingsForm::returnDevNameAfterEdit, dev, &Device::setDeviceName);
-        //connect (dev, &Device::returnDeviceName, &dvsf, &devSettingsForm::setDevName);
-        connect (&dvsf, &devSettingsForm::openByteSettingsFormTX, this, &MainWindow::openByteSett);
-        connect (&btsf, &ByteSettingsForm::setWordBit, dev, &Device::setWordTypeInByteProfile);
-        connect (&btsf, &ByteSettingsForm::setWordBit, &dvsf, &devSettingsForm::wordTypeChangeRX);//изменить
-        connect (&btsf, &ByteSettingsForm::getWordType, dev, &Device::getWordTypeFromProfileRetranslator);
-        connect (&dvsf, &devSettingsForm::initByteButtonsWordLeight, dev, &Device::getWordTypeFromProfileRetranslator);
-        connect (dev, &Device::returnWordTypeTX, &btsf, &ByteSettingsForm::returnWordType);
-        //connect (dev, &Device::returnWordTypeTX, &masksd, &maskSettingsDialog::)
-        connect (dev, &Device::returnWordTypeTX, &dvsf, &devSettingsForm::wordTypeChangeRX);
-        connect (&btsf, &ByteSettingsForm::createMask, dev, &Device::createNewMaskRX);
-        connect (dev, &Device::mask2FormTX, &masksd, &maskSettingsDialog::requestDataOnId);
-        connect (&masksd, &maskSettingsDialog::requestMaskData, dev, &Device::requestMaskDataRX);
-        connect (&btsf, &ByteSettingsForm::requestAllMaskToList, dev, &Device::requestMaskDataRX);
-        connect (dev, &Device::maskData2FormTX, &masksd, &maskSettingsDialog::getDataOnId);
-        connect (dev, &Device::allMasksToListTX, &btsf, &ByteSettingsForm::addMaskItem);
-        connect (&masksd, &maskSettingsDialog::sendMaskData, &btsf, &ByteSettingsForm::addMaskItem);
-        connect (&masksd, &maskSettingsDialog::requestMaskData, this, &MainWindow::openMaskSettingsDialog);
-        connect (&masksd, &maskSettingsDialog::sendMaskData, dev, &Device::sendDataToProfileRX);
-        connect (&btsf, &ByteSettingsForm::deleteMaskObj, dev, &Device::deleteMaskObjTX);
-        connect (&dvsf, &devSettingsForm::wordDataFullHex, &btsf, &ByteSettingsForm::updateHexWordData);
-        connect (dev, &Device::param2FrontEndTX, this, &MainWindow::frontendDataSort);
-        connect (dev, &Device::param2FrontEndTX, &masksd, &maskSettingsDialog::liveDataSlot);
-        connect (dev, &Device::param2FrontEndTX, &btsf, &ByteSettingsForm::updateMasksList);        
-        connect (connection, &newconnect::saveAllMasks, dev, &Device::requestMasks4Saving);
-        connect (dev, &Device::allMasksToListTX, connection, &newconnect::saveProfileSlot4Masks);
+        createDevice(devNum);
+        emit devUpdate(devNum, ddata);
+        dvsf.updByteButtons(devNum, ddata);
     }
 
     vlayChildListIt.toFront();
-
-//    while (vlayChildListIt.hasNext()){
-//       qDebug() << vlayChildListIt.next()->text();
-//    }
     m_ui->devArea->update();
+}
+
+void MainWindow::createDevice(int devNum)
+{
+    Device *dev = new Device(devNum);
+    dev->setParent(m_ui->devArea);
+    dev->setText(QString::number(devNum,16));//QString("%1").arg(ddata.at(2),0,16).toUpper());
+
+    connect (this, &MainWindow::devUpdate, dev, &Device::updateData);
+    connect (dev, &Device::txtToGui, this, &MainWindow::txtToGuiFunc);
+    connect (dev, &Device::openDevSettSig, this, &MainWindow::openDevSett);
+    connect (dev, &Device::clicked, dev, &Device::clickedF);
+    //connect (this, &MainWindow::getDevName, dev, &Device::getDeviceName);
+    connect (&dvsf, &devSettingsForm::returnDevNameAfterEdit, dev, &Device::setDeviceName);
+    //connect (dev, &Device::returnDeviceName, &dvsf, &devSettingsForm::setDevName);
+    connect (&dvsf, &devSettingsForm::openByteSettingsFormTX, this, &MainWindow::openByteSett);
+    connect (&btsf, &ByteSettingsForm::setWordBit, dev, &Device::setWordTypeInByteProfile);
+    connect (&btsf, &ByteSettingsForm::setWordBit, &dvsf, &devSettingsForm::wordTypeChangeRX);//изменить
+    connect (&btsf, &ByteSettingsForm::getWordType, dev, &Device::getWordTypeFromProfileRetranslator);
+    connect (&dvsf, &devSettingsForm::initByteButtonsWordLeight, dev, &Device::getWordTypeFromProfileRetranslator);
+    connect (dev, &Device::returnWordTypeTX, &btsf, &ByteSettingsForm::returnWordType);
+    //connect (dev, &Device::returnWordTypeTX, &masksd, &maskSettingsDialog::)
+    connect (dev, &Device::returnWordTypeTX, &dvsf, &devSettingsForm::wordTypeChangeRX);
+    connect (&btsf, &ByteSettingsForm::createMask, dev, &Device::createNewMaskRX);
+    connect (dev, &Device::mask2FormTX, &masksd, &maskSettingsDialog::requestDataOnId);
+    connect (&masksd, &maskSettingsDialog::requestMaskData, dev, &Device::requestMaskDataRX);
+    connect (&btsf, &ByteSettingsForm::requestAllMaskToList, dev, &Device::requestMaskDataRX);
+    connect (dev, &Device::maskData2FormTX, &masksd, &maskSettingsDialog::getDataOnId);
+    connect (dev, &Device::allMasksToListTX, &btsf, &ByteSettingsForm::addMaskItem);
+    connect (&masksd, &maskSettingsDialog::sendMaskData, &btsf, &ByteSettingsForm::addMaskItem);
+    connect (&masksd, &maskSettingsDialog::requestMaskData, this, &MainWindow::openMaskSettingsDialog);
+    connect (&masksd, &maskSettingsDialog::sendMaskData, dev, &Device::sendDataToProfileRX);
+    connect (&btsf, &ByteSettingsForm::deleteMaskObj, dev, &Device::deleteMaskObjTX);
+    connect (&dvsf, &devSettingsForm::wordDataFullHex, &btsf, &ByteSettingsForm::updateHexWordData);
+    connect (dev, &Device::param2FrontEndTX, this, &MainWindow::frontendDataSort);
+    connect (dev, &Device::param2FrontEndTX, &masksd, &maskSettingsDialog::liveDataSlot);
+    connect (dev, &Device::param2FrontEndTX, &btsf, &ByteSettingsForm::updateMasksList);
+    connect (connection, &newconnect::saveAllMasks, dev, &Device::requestMasks4Saving);
+    connect (dev, &Device::allMasksToListTX, connection, &newconnect::saveProfileSlot4Masks);
+    connect (this, &MainWindow::sendMaskData, dev, &Device::loadMaskRX);
 }
 
 void MainWindow::txtToGuiFunc(QString txtToGui)
@@ -229,4 +233,27 @@ void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QStr
 {
     //QString endValueString = QString::number(endValue,'g',6);
     m_ui->logArea->appendPlainText(parameterName + "@" + devName + ": " + QString::number(endValue,'g',6));
+}
+
+void MainWindow::loadProfile(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType)
+{//если устройства нет, то создаём, потом посылаем маску
+    bool thisDeviceHere = false;
+    QList<Device*> vlayChildList = m_ui->devArea->findChildren<Device*>();
+    QListIterator<Device*> vlayChildListIt(vlayChildList);
+    while (vlayChildListIt.hasNext())
+        if (devNum == vlayChildListIt.next()->devNum)
+            thisDeviceHere = true;
+    if (thisDeviceHere)
+        emit sendMaskData(devNum, devName, byteNum, byteName, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType);
+    else if (!thisDeviceHere)
+    {//создаём устройство и инициализируем пустым пакетом в 40 байт, с номером устройства на позиции 2
+        createDevice(devNum);
+        QVector<int> devInitArray;
+        devInitArray.reserve(40);
+        devInitArray.fill(0);
+        devInitArray.replace(2, devNum);
+        emit devUpdate(devNum, devInitArray);
+        dvsf.updByteButtons(devNum, devInitArray);
+    }
+
 }

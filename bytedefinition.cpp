@@ -50,32 +50,8 @@ void byteDefinition::createNewMask(int _devNum, int _byteNum)
     //найти всех детей типа bitMaskObj, что-бы присвоить маске айди
     if (_devNum == devNum && _byteNum == th_byteNum)
     {
-        int id = 0;
-        bool notFoundFlag = 0;
-        QList<bitMaskObj*> bytedefChildList = this->findChildren<bitMaskObj*>();
-        QListIterator<bitMaskObj*> bytedefChildListIt(bytedefChildList);
-        qDebug() << "Children of bytedef (dev " << devNum<< ", byte " << th_byteNum << ")= " << bytedefChildList.size();
-
-        if (bytedefChildList.size() != 0)
-        {
-        for (int n = 0; notFoundFlag == 0 ; n++)
-        {
-            notFoundFlag = 1;
-            while (bytedefChildListIt.hasNext())
-            {//прогоняем число n по всем id
-                if (n == bytedefChildListIt.next()->id)
-                notFoundFlag = 0;//если маска с таким id хоть раз попалась, то скидываем флаг
-            }
-            bytedefChildListIt.toFront();
-            //если после работы цикла флаг остался в состоянии 1, то назначаем ненайденый id новой маске
-            //цикл for прекратится по условию достижения notFoundFlag != 0
-            if (notFoundFlag == 1)
-            {
-                id = n;
-            }
-        }
-        }
-
+        int id = calcMaskID();
+        tmpMaskId = id;
         bitMaskObj *mask = new bitMaskObj;
         mask->wordType = wordType;
         mask->setParent(this);
@@ -88,8 +64,47 @@ void byteDefinition::createNewMask(int _devNum, int _byteNum)
         connect (this, &byteDefinition::sendDataToProfileRX, mask, &bitMaskObj::sendMaskToProfile);
         connect (this, &byteDefinition::deleteMaskObjTX, mask, &bitMaskObj::deleteMaskObjectTX);
         connect (mask, &bitMaskObj::param2FrontEnd, this, &byteDefinition::param2FrontEndRX);
+        connect (this, &byteDefinition::loadMaskTX, mask, &bitMaskObj::loadMaskRX);
         mask->newMaskObj(devNum, th_byteNum, id);
     }
+}
+
+void byteDefinition::loadMaskRX(int devNum, QString devName, int byteNum, QString _byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType)
+{
+    byteName = _byteName;
+    setWordBitRX(devNum,byteNum,wordType);
+    createNewMask(devNum, byteNum);
+    emit loadMaskTX(devNum, devName, byteNum, byteName, tmpMaskId, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType);
+}
+
+int byteDefinition::calcMaskID()
+{
+    int id = 0;
+    bool notFoundFlag = 0;
+    QList<bitMaskObj*> bytedefChildList = this->findChildren<bitMaskObj*>();
+    QListIterator<bitMaskObj*> bytedefChildListIt(bytedefChildList);
+    qDebug() << "Children of bytedef (dev " << devNum<< ", byte " << th_byteNum << ")= " << bytedefChildList.size();
+
+    if (bytedefChildList.size() != 0)
+    {
+    for (int n = 0; notFoundFlag == 0 ; n++)
+    {
+        notFoundFlag = 1;
+        while (bytedefChildListIt.hasNext())
+        {//прогоняем число n по всем id
+            if (n == bytedefChildListIt.next()->id)
+            notFoundFlag = 0;//если маска с таким id хоть раз попалась, то скидываем флаг
+        }
+        bytedefChildListIt.toFront();
+        //если после работы цикла флаг остался в состоянии 1, то назначаем ненайденый id новой маске
+        //цикл for прекратится по условию достижения notFoundFlag != 0
+        if (notFoundFlag == 1)
+        {
+            id = n;
+        }
+    }
+    }
+    return id;
 }
 
 void byteDefinition::mask2FormRX(int _devNum, int _byteNum, int _id)
