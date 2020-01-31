@@ -23,12 +23,12 @@ Device::Device(int id) //инициализация нового устройс�
 }
 
 void Device::updateData(int id, QVector<int> devdata) //если устройство в списке уже есть, этой функцией оно обновляется
-{
-    currState = devdata;
-    if (!byteObjReady)
-        byteObjectsInit(currState);
+{    
     if (id == devNum)
     {
+        currState = devdata;
+        if (!byteObjReady)
+            byteObjectsInit(currState);
         if (!(oldState->empty()))
         oldState->clear();
         for (int n = 0; n<devdata.size(); n++)
@@ -64,9 +64,13 @@ void Device::byteObjectsInit(QVector<int> data) //инициализируем �
         connect (this, &Device::deleteMaskObjTX, bytedef, &byteDefinition::deleteMaskObjTX);
         connect (bytedef, &byteDefinition::param2FrontEndTX, this, &Device::param2FrontEndRX);
         connect (this, &Device::loadMaskTX, bytedef, &byteDefinition::loadMaskRX);
+        connect (this, &Device::getByteNameTX, bytedef, &byteDefinition::getByteNameRX);
+        connect (bytedef, &byteDefinition::returnByteName, this, &Device::returnByteNameTX);
+        connect (this, &Device::saveByteNameTX, bytedef, &byteDefinition::saveByteNameRX);
         byteObjArr->append(bytedef);
         n++;
     }
+    byteObjReady = true;
 }
 
 void Device::byteObjectsUpd(QVector<int> data) //обновляем каждый объект, выявляем обновившиеся и передаём в лист изменений
@@ -83,11 +87,23 @@ void Device::clickedF()
     emit openDevSettSig(devNum, currState);
 }
 
-//void Device::getDeviceName(int id)
-//{
-//    if (id == devNum)
-//    emit returnDeviceName(devNum, devName);
-//}
+void Device::getDeviceName(int id)
+{//при открытии формы devsettingsform, она запрашивает имя устройства, тут устройство отвечает на запрос
+    if (id == devNum)
+    emit returnDeviceName(devNum, devName);
+}
+
+void Device::getByteNameRX(int _devNum, int byteNum)
+{
+    if (devNum == _devNum)
+        emit getByteNameTX(_devNum, byteNum);
+}
+
+void Device::saveByteNameRX(int _devNum, int _byteNum, QString _byteName)
+{
+    if (devNum == _devNum)
+        emit saveByteNameTX(_devNum, _byteNum, _byteName);
+}
 
 void Device::setDeviceName(int id, QString name)
 {
@@ -157,7 +173,7 @@ void Device::allMasksToListRX(int devNum, int byteNum, QString byteName, int id,
     emit allMasksToListTX(devNum, devName, byteNum, byteName, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType);
 }
 
-void Device::param2FrontEndRX(int devNum, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag)
+void Device::param2FrontEndRX(int devNum, int byteNum, QString byteName, uint32_t wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag)
 {
     emit param2FrontEndTX(devNum, devName, byteNum, byteName, wordData, id, parameterName, binRawValue, endValue, viewInLogFlag);
 }

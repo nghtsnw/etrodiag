@@ -112,7 +112,7 @@ void bitMaskObj::calculateParamLeight()
     qDebug() << "ParamLeight = " << n;
 }
 
-void bitMaskObj::calculateValue(int _devNum, int _byteNum, int wordData)
+void bitMaskObj::calculateValue(int _devNum, int _byteNum, uint32_t wordData)
 {
     if (devNum == _devNum && byteNum == _byteNum)
     {

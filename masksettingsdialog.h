@@ -32,7 +32,7 @@ public slots:
     //void sendDataOnId(int _devNum, int _byteNum, int _id);
     void sendMask2Profile();
     void getDataOnId(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag, int _wordType);
-    void liveDataSlot(int _devNum, QString _devName, int _byteNum, QString _byteName, int _wordData, int _id, QString parameterName, int _binRawValue, double _endValue, bool viewInLogFlag);
+    void liveDataSlot(int _devNum, QString _devName, int _byteNum, QString _byteName, uint32_t _wordData, int _id, QString parameterName, int _binRawValue, double _endValue, bool viewInLogFlag);
 
 signals:
     void requestMaskData(int _devNum, int _byteNum, int _id);

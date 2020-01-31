@@ -27,7 +27,7 @@ public:
     int wordType = 0;
     //void maskToForm();
     int paramMask4calcShift = 0;
-    void calculateValue(int _devNum, int _byteNum, int wordData);
+    void calculateValue(int _devNum, int _byteNum, uint32_t wordData);
     bool viewInLogFlag = true;
 
 signals:

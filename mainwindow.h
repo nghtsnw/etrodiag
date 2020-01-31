@@ -101,6 +101,7 @@ signals:
     void setDevName(int devNum, QString name);
     void returnDevNameAfterClose(int devNum, QString text);
     void sendMaskData(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType);
+    void getByteName(int devNum, int byteNum);
 
 public slots:
 

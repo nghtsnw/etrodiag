@@ -134,3 +134,14 @@ void ByteSettingsForm::updateHexWordData(int _devNum, int _byteNum, QString _txt
         ui->hexNumber->setText("Dev " + QString("%1").arg(devNum,0,16).toUpper() + ", Byte " + QString::number(byteNum) + ", Word data " + _txt);
     }
 }
+
+void ByteSettingsForm::on_wordNameEdit_editingFinished()
+{
+    emit saveByteName(devNum, byteNum, ui->wordNameEdit->text());
+}
+
+void ByteSettingsForm::setWordName(int _devNum, int _byteNum, QString _byteName)
+{
+    if (devNum == _devNum && byteNum == _byteNum)
+        ui->wordNameEdit->setText(_byteName);
+}

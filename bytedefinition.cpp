@@ -45,6 +45,18 @@ void byteDefinition::getWordType(int _devNum, int _byteNum)
     emit returnWordType(_devNum, _byteNum, wordType);    
 }
 
+void byteDefinition::getByteNameRX(int _devNum, int _byteNum)
+{
+    if (devNum == _devNum && th_byteNum == _byteNum)
+        emit returnByteName(_devNum, _byteNum, byteName);
+}
+
+void byteDefinition::saveByteNameRX(int _devNum, int _byteNum, QString _byteName)
+{
+    if (devNum == _devNum && th_byteNum == _byteNum)
+        byteName = _byteName;
+}
+
 void byteDefinition::createNewMask(int _devNum, int _byteNum)
 {//по нажатию кнопки добавления маски в bytesettingsform, отправляем сигнал в bytedefinition на создание маски
     //найти всех детей типа bitMaskObj, что-бы присвоить маске айди
@@ -161,8 +173,10 @@ void byteDefinition::calcWordData(int _devNum, QVector<int> data)
     }
         else if (wordType == 2)
     {
-        for (int y = 0, bytex = (data.at(th_byteNum+y)); y <= 3; y++)
+        for (int y = 0; y <= 3; y++)
         {
+            bytex = (data.at(th_byteNum+y));
+            //qDebug() << "bytex = " << bytex;
         for (int i = 0, mask = 1; i <= 7; i++, step++, mask = mask << 1)
         {
             if (bytex & mask)
@@ -171,10 +185,11 @@ void byteDefinition::calcWordData(int _devNum, QVector<int> data)
         }
     }
     emit wordData2Mask(devNum, th_byteNum, wordData);
+    //qDebug() << "worddata = " << wordData << ", byte " << th_byteNum;
     }
 }
 
-void byteDefinition::param2FrontEndRX(int devNum, int byteNum, int wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag)
+void byteDefinition::param2FrontEndRX(int devNum, int byteNum, uint32_t wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag)
 {
     emit param2FrontEndTX(devNum, byteNum, byteName, wordData, id, parameterName, binRawValue, endValue, viewInLogFlag);
 }

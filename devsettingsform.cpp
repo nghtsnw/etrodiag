@@ -35,8 +35,8 @@ void devSettingsForm::killChildren() //очистка формы от объек
 
 void devSettingsForm::setDevName(int id, QString devName) //получаем имя из профиля в форму
 {
-    devNameForm->setText(devName);
-    //devNum = id;
+    if (id == devNum)
+    m_ui->devNameEdit->setText(devName);
 }
 
 void devSettingsForm::initByteButtons(int id, QVector<int> data)

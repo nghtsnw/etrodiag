@@ -74,6 +74,7 @@ MainWindow::MainWindow(QWidget *parent) :
     statusBar()->addWidget(statuslbl);
     statuslbl->setText("Make Electroagregat great again!");
     addConnection();
+    connect (connection, &newconnect::loadMask, this, &MainWindow::loadProfile);
     connect (&btsf, &ByteSettingsForm::editMask, &masksd, &maskSettingsDialog::requestDataOnId);
 }
 
@@ -133,15 +134,17 @@ void MainWindow::createDevice(int devNum)
 {
     Device *dev = new Device(devNum);
     dev->setParent(m_ui->devArea);
+    m_ui->devAreaLay->addWidget(dev);
     dev->setText(QString::number(devNum,16));//QString("%1").arg(ddata.at(2),0,16).toUpper());
-
+    //m_ui->devArea->update();
+    dev->show();
     connect (this, &MainWindow::devUpdate, dev, &Device::updateData);
     connect (dev, &Device::txtToGui, this, &MainWindow::txtToGuiFunc);
     connect (dev, &Device::openDevSettSig, this, &MainWindow::openDevSett);
     connect (dev, &Device::clicked, dev, &Device::clickedF);
-    //connect (this, &MainWindow::getDevName, dev, &Device::getDeviceName);
+    connect (this, &MainWindow::getDevName, dev, &Device::getDeviceName);
     connect (&dvsf, &devSettingsForm::returnDevNameAfterEdit, dev, &Device::setDeviceName);
-    //connect (dev, &Device::returnDeviceName, &dvsf, &devSettingsForm::setDevName);
+    connect (dev, &Device::returnDeviceName, &dvsf, &devSettingsForm::setDevName);
     connect (&dvsf, &devSettingsForm::openByteSettingsFormTX, this, &MainWindow::openByteSett);
     connect (&btsf, &ByteSettingsForm::setWordBit, dev, &Device::setWordTypeInByteProfile);
     connect (&btsf, &ByteSettingsForm::setWordBit, &dvsf, &devSettingsForm::wordTypeChangeRX);//изменить
@@ -167,6 +170,10 @@ void MainWindow::createDevice(int devNum)
     connect (connection, &newconnect::saveAllMasks, dev, &Device::requestMasks4Saving);
     connect (dev, &Device::allMasksToListTX, connection, &newconnect::saveProfileSlot4Masks);
     connect (this, &MainWindow::sendMaskData, dev, &Device::loadMaskRX);
+    connect (this, &MainWindow::getByteName, dev, &Device::getByteNameRX);
+    connect (dev, &Device::returnByteNameTX, &btsf, &ByteSettingsForm::setWordName);
+    connect (&btsf, &ByteSettingsForm::saveByteName, dev, &Device::saveByteNameRX);
+
 }
 
 void MainWindow::txtToGuiFunc(QString txtToGui)
@@ -208,7 +215,7 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
         m_ui->valueArea->hide();
         dvsf.initByteButtons(devNum,data);
         dvsf.show();
-        //emit getDevName(devNum);
+        emit getDevName(devNum);
     }
     }
     }
@@ -216,17 +223,24 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
 
 void MainWindow::openByteSett(int devNum, int byteNum)
 {
-    btsf.setParent(m_ui->rightFrame);
-    dvsf.hide();
-    btsf.open(devNum, byteNum);
-    btsf.show();
+    if (dvsf.isVisible())
+    {
+        btsf.setParent(m_ui->rightFrame);
+        dvsf.hide();
+        btsf.open(devNum, byteNum);
+        btsf.show();
+        emit getByteName(devNum, byteNum);
+    }
 }
 
 void MainWindow::openMaskSettingsDialog()
 {
-    btsf.hide();
-    masksd.setParent(m_ui->rightFrame);
-    masksd.show();
+    if (btsf.isVisible())
+    {
+        btsf.hide();
+        masksd.setParent(m_ui->rightFrame);
+        masksd.show();
+    }
 }
 
 void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag)
@@ -248,12 +262,11 @@ void MainWindow::loadProfile(int devNum, QString devName, int byteNum, QString b
     else if (!thisDeviceHere)
     {//создаём устройство и инициализируем пустым пакетом в 40 байт, с номером устройства на позиции 2
         createDevice(devNum);
-        QVector<int> devInitArray;
-        devInitArray.reserve(40);
-        devInitArray.fill(0);
+        QVector<int> devInitArray(40,0);
         devInitArray.replace(2, devNum);
         emit devUpdate(devNum, devInitArray);
         dvsf.updByteButtons(devNum, devInitArray);
+        emit sendMaskData(devNum, devName, byteNum, byteName, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType);
     }
 
 }
