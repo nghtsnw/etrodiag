@@ -11,8 +11,7 @@ void dataprofiler::getByte(int byteFromBuf)
 {
     rdyGB = false; //readyGetByte
     readyGetByteF();
-    frameMsg.enqueue(byteFromBuf);
-   // qDebug() << "frameMsg.size() = " << frameMsg.size();
+    frameMsg.enqueue(byteFromBuf);   
     if (frameMsg.size() == oneMsgLeight)
     {
         frameSnap();

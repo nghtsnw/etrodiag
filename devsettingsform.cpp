@@ -42,7 +42,7 @@ void devSettingsForm::setDevName(int id, QString devName) //получаем и�
 void devSettingsForm::initByteButtons(int id, QVector<int> data)
 {//сначала создаём кнопки в форме, потом делаем запрос длины слова из профиля для каждой
     devNum = id;
-    for (int x = 2, y = 0, count = 0; count < data.size(); count++, y++) //забиваем раскладку динамически
+    for (int x = 2, y = 0, count = data.size()-1; count >= 0; count--, y++) //забиваем раскладку динамически
     {
         if (y > 4)
         {
@@ -66,9 +66,9 @@ void devSettingsForm::initByteButtons(int id, QVector<int> data)
 
 }
 
-void devSettingsForm::updByteButtons(int id, QVector<int> data)
+void devSettingsForm::updByteButtons(int _devNum, QVector<int> data)
 {
-    emit updateBtnDataSIG(id, data);
+    emit updateBtnDataSIG(_devNum, data);
 }
 
 void devSettingsForm::on_devNameEdit_editingFinished()

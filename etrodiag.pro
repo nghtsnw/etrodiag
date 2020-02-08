@@ -20,6 +20,8 @@ SOURCES += \
     newconnect.cpp \
     settingsdialog.cpp \
     console.cpp \
+    treeitem.cpp \
+    treemodel.cpp \
     txtmaskobj.cpp
 
 HEADERS += \
@@ -37,6 +39,8 @@ HEADERS += \
     newconnect.h \
     settingsdialog.h \
     console.h \
+    treeitem.h \
+    treemodel.h \
     txtmaskobj.h
 
 FORMS += \

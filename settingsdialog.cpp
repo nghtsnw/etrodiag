@@ -79,9 +79,6 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     connect(m_ui->serialPortInfoListBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &SettingsDialog::checkCustomDevicePathPolicy);
 
-//    QLineEdit newProfileName(m_ui->profileBox);
-    //connect (&newProfileName, &QLineEdit::textEdited, this, &SettingsDialog::profileNameEditFinished);
-
     fillPortsParameters();
     fillProfileList();
     fillPortsInfo();

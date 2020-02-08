@@ -58,8 +58,7 @@ void newconnect::openSerialPort()
     m_serial->setFlowControl(p.flowControl);
     if (m_serial->open(QIODevice::ReadWrite)) {
         m_console->setEnabled(true);
-        m_console->setLocalEchoEnabled(p.localEchoEnabled);
-        //getStream *gstream = new getStream(this); //объект обработчика входящих данных
+        m_console->setLocalEchoEnabled(p.localEchoEnabled);        
         showStatusMessage(tr("Connected to %1 : %2, %3, %4, %5, %6")
                           .arg(p.name).arg(p.stringBaudRate).arg(p.stringDataBits)
                           .arg(p.stringParity).arg(p.stringStopBits).arg(p.stringFlowControl));
@@ -101,26 +100,15 @@ void newconnect::handleError(QSerialPort::SerialPortError error)
     }
 }
 
-//void newconnect::sendstatus()
-//{
-//    emit sendStatusStr(*m_status);
-//}
-
 void newconnect::showStatusMessage(QString message)
 {
     m_status->setText(message);
-    emit sendStatusStr(message);
-    //w.showStatusMessage(*m_status);
-    //connect (this, SIGNAL(sendStatusStr()), MainWindow::showStatusMessage(message))
+    emit sendStatusStr(message);    
 }
-
-
-
 
 void newconnect::on_pushButton_2_clicked()
 {
     if (!(m_serial->isOpen()))
-
     {
         qDebug() << "mserial is open: " << (m_serial->isOpen());
         openSerialPort();
@@ -129,9 +117,7 @@ void newconnect::on_pushButton_2_clicked()
             ui->pushButton_2->setText("Disconnect");
             qDebug() << "port open";
         }
-
     }
-
     else if (m_serial->isOpen())
     {
         this->closeSerialPort();
@@ -229,20 +215,9 @@ void newconnect::readProfile()
     while (!txtStream.atEnd())
     {
         QString str = txtStream.readLine();
-//        QString word;
         QStringList strLst = str.split('\t');
-//        int step = 0;
-//        while (!str.end())
-//        {
-//           if (str.at(step)!='\t')
-//            word += str.at(step);
-//           else if (str.at(step)!='\t')
-//               strLst.append(word);
-//           step++;
-//        }
         if (strLst.at(0)=="thisIsMask")
             emit loadMask(strLst.at(2).toInt(0,10),strLst.at(4),strLst.at(3).toInt(0,10),strLst.at(5),strLst.at(1).toInt(0,10),strLst.at(6),strLst.at(7),0,strLst.at(8).toDouble(),strLst.at(9).toDouble(),((QString::compare(strLst.at(10), "true") == 0) ? true : false),strLst.at(11).toInt(0,10));
-//        step = 0;
         strLst.clear();
     }
 }

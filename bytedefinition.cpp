@@ -27,15 +27,20 @@ byteDefinition::byteDefinition(int numDev, int byteNum, int data)
 
 }
 
+void byteDefinition::updateSlot(int _devNum, int _byteNum, QVector<int> _data)
+{
+    if (devNum == _devNum && th_byteNum == _byteNum)
+    {
+    th_data = _data.at(_byteNum);
+    calcWordData(devNum, _data);
+    }
+}
 
 void byteDefinition::setWordBitRX(int _devNum, int _byteNum, int _argBit)
 {//по изменению битбокса в форме bytesettingsform, отправляем значение в byteDefinition
-    //qDebug() << "device "<<devNum<<", byte "<<th_byteNum<<", word type "<<wordType;
-    //qDebug() << "received devNum " << _devNum<<", received byteNum "<< _byteNum;
     if (devNum == _devNum && th_byteNum == _byteNum)
     {
-    wordType = _argBit;
-    //qDebug() << "wordType "<<wordType<<", byte "<<th_byteNum<<", dev "<<devNum;//"device "<<devNum<<", byte "<<th_byteNum<<", word type "<<wordType;
+        wordType = _argBit;
     }
 }
 
@@ -176,7 +181,6 @@ void byteDefinition::calcWordData(int _devNum, QVector<int> data)
         for (int y = 0; y <= 3; y++)
         {
             bytex = (data.at(th_byteNum+y));
-            //qDebug() << "bytex = " << bytex;
         for (int i = 0, mask = 1; i <= 7; i++, step++, mask = mask << 1)
         {
             if (bytex & mask)
@@ -185,7 +189,6 @@ void byteDefinition::calcWordData(int _devNum, QVector<int> data)
         }
     }
     emit wordData2Mask(devNum, th_byteNum, wordData);
-    //qDebug() << "worddata = " << wordData << ", byte " << th_byteNum;
     }
 }
 

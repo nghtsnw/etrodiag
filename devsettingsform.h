@@ -19,7 +19,7 @@ public:
     void initByteButtons(int id, QVector<int> data);
     QLineEdit *devNameForm = new QLineEdit;
     //void onByteBtnClicked();
-    void updByteButtons(int id, QVector<int> data);
+    void updByteButtons(int _devNum, QVector<int> data);
     void retranslateByteButtonSetStatus(int byteNum, bool status);
     void killChildren();
     ~devSettingsForm();

@@ -28,15 +28,12 @@ void bitMaskObj::sendMaskToProfile(int _devNum, int _byteNum, int _id, QString _
     {
         paramName = _paramName;
         paramMask = _paramMask;
-        calculateParamShift();
-        //qDebug() << "ParamShift after init = " << paramShift;
-        calculateParamLeight();
-        //qDebug() << "ParamLeight after init = " << paramLeght;
+        calculateParamShift();        
+        calculateParamLeight();        
         paramType = _paramType;
         valueShift = _valueShift;
         valueKoef = _valueKoef;
-        viewInLogFlag = _viewInLogflag;
-        //wordData = _wordData;
+        viewInLogFlag = _viewInLogflag;        
     }
 }
 
@@ -128,7 +125,6 @@ void bitMaskObj::calculateValue(int _devNum, int _byteNum, uint32_t wordData)
         int binRawValue = value;
         qDebug() << "Value is " << value;
         double endValue = (value+valueShift)*valueKoef;
-        //if (endValue != oldEndValue)
         emit param2FrontEnd(devNum, byteNum, wordData, id, paramName, binRawValue, endValue, viewInLogFlag);
         oldEndValue = endValue;
     }

@@ -63,6 +63,7 @@
 #include "devsettingsform.h"
 #include "bytesettingsform.h"
 #include "bytebutton.h"
+#include "treemodel.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), statuslbl (new QLabel), m_ui (new Ui::MainWindow)
@@ -76,6 +77,7 @@ MainWindow::MainWindow(QWidget *parent) :
     addConnection();
     connect (connection, &newconnect::loadMask, this, &MainWindow::loadProfile);
     connect (&btsf, &ByteSettingsForm::editMask, &masksd, &maskSettingsDialog::requestDataOnId);
+    //connect (this, MainWindow::m_ui->writeLogCheckBox->isChecked(), this, &MainWindow::setLogFlag)
 }
 
 
@@ -135,8 +137,7 @@ void MainWindow::createDevice(int devNum)
     Device *dev = new Device(devNum);
     dev->setParent(m_ui->devArea);
     m_ui->devAreaLay->addWidget(dev);
-    dev->setText(QString::number(devNum,16));//QString("%1").arg(ddata.at(2),0,16).toUpper());
-    //m_ui->devArea->update();
+    dev->setText(QString::number(devNum,16));
     dev->show();
     connect (this, &MainWindow::devUpdate, dev, &Device::updateData);
     connect (dev, &Device::txtToGui, this, &MainWindow::txtToGuiFunc);
@@ -151,7 +152,6 @@ void MainWindow::createDevice(int devNum)
     connect (&btsf, &ByteSettingsForm::getWordType, dev, &Device::getWordTypeFromProfileRetranslator);
     connect (&dvsf, &devSettingsForm::initByteButtonsWordLeight, dev, &Device::getWordTypeFromProfileRetranslator);
     connect (dev, &Device::returnWordTypeTX, &btsf, &ByteSettingsForm::returnWordType);
-    //connect (dev, &Device::returnWordTypeTX, &masksd, &maskSettingsDialog::)
     connect (dev, &Device::returnWordTypeTX, &dvsf, &devSettingsForm::wordTypeChangeRX);
     connect (&btsf, &ByteSettingsForm::createMask, dev, &Device::createNewMaskRX);
     connect (dev, &Device::mask2FormTX, &masksd, &maskSettingsDialog::requestDataOnId);
@@ -204,6 +204,7 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
     {
         m_ui->logArea->show();
         m_ui->valueArea->show();
+        m_ui->writeLogCheckBox->show();
         connection->prepareToSaveProfile();
         connection->saveProfile();
         dvsf.hide();
@@ -213,6 +214,7 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
     {
         m_ui->logArea->hide();
         m_ui->valueArea->hide();
+        m_ui->writeLogCheckBox->hide();
         dvsf.initByteButtons(devNum,data);
         dvsf.show();
         emit getDevName(devNum);
@@ -244,9 +246,36 @@ void MainWindow::openMaskSettingsDialog()
 }
 
 void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag)
-{
-    //QString endValueString = QString::number(endValue,'g',6);
-    m_ui->logArea->appendPlainText(parameterName + "@" + devName + ": " + QString::number(endValue,'g',6));
+{    
+    quint64 timestamp = QDateTime::currentMSecsSinceEpoch();
+    QDateTime dt3 = QDateTime::fromMSecsSinceEpoch(timestamp);
+    QString formString(dt3.toString("hh:mm:ss:zzz") + " " + parameterName + "@" + devName + ": " + QString::number(endValue,'g',6));
+    m_ui->logArea->appendPlainText(formString);
+
+    QDir dir("Logs");
+    if (!dir.exists())
+        QDir().mkdir("Logs");
+    QFile newLogFile;
+
+    if (m_ui->writeLogCheckBox->isChecked() && !newLogFile.isOpen())
+    {
+        newLogFile.setFileName(dir.path() + dt3.toString("dd.MM.yy_hh:mm:ss")+".log");
+        if (!newLogFile.isOpen())
+        {
+        newLogFile.open(QIODevice::WriteOnly|QIODevice::Text);
+        showStatusMessage("Start write log file " + newLogFile.fileName());
+        }
+        if (newLogFile.isOpen())
+        {
+            QTextStream logStream(&newLogFile);
+            logStream << formString << '\n';
+        }
+    }
+    else if(newLogFile.isOpen())
+    {
+            newLogFile.close();
+            showStatusMessage("Stop write log file " + newLogFile.fileName());
+}
 }
 
 void MainWindow::loadProfile(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType)
@@ -254,7 +283,11 @@ void MainWindow::loadProfile(int devNum, QString devName, int byteNum, QString b
     bool thisDeviceHere = false;
     QList<Device*> vlayChildList = m_ui->devArea->findChildren<Device*>();
     QListIterator<Device*> vlayChildListIt(vlayChildList);
+    QString dev2mod;
     while (vlayChildListIt.hasNext())
+//        dev2mod.append("\n" + vlayChildListIt.peekNext()->devName);
+//        TreeModel trmod(dev2mod);
+//        m_ui->valueArea->setModel(&trmod);
         if (devNum == vlayChildListIt.next()->devNum)
             thisDeviceHere = true;
     if (thisDeviceHere)
@@ -269,4 +302,9 @@ void MainWindow::loadProfile(int devNum, QString devName, int byteNum, QString b
         emit sendMaskData(devNum, devName, byteNum, byteName, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType);
     }
 
+}
+
+void MainWindow::setLogFlag(bool _logFlag)
+{
+    logFlag = _logFlag;
 }

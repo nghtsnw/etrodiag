@@ -21,7 +21,6 @@ void bitSetForm::setNumLabel(int num)
 
 bool bitSetForm::checkboxStatus()
 {
-    //qDebug() << "checkbox status " << ui->bitNumLabel->text() << " = " << ui->bitCheckBox->isChecked();
     return ui->bitCheckBox->isChecked();
 }
 
@@ -34,7 +33,7 @@ void bitSetForm::setCheckBox(bool bit, int id)
 void bitSetForm::setCheckboxText(int i, bool data)
 {
     if (i == ui->bitNumLabel->text().toInt(0,10))
-    ui->bitCheckBox->setText(QString::number(data,10));//ui->bitNumLabel->text().toInt(0,10)]);
+    ui->bitCheckBox->setText(QString::number(data,10));
 }
 
 void bitSetForm::on_bitCheckBox_clicked()
