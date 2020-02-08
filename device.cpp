@@ -15,11 +15,6 @@ Device::Device(QWidget *parent) : QPushButton(parent)
 Device::Device(int id) //инициализация нового устройства
 {
     devNum = id;
-    //byteObjectsInit(currState);
-//    oldState->reserve(data.size());
-//    oldState->fill(255,0);
-//    byteObjArr->reserve(data.size());
-//    byteObjArrOld->reserve(data.size());
 }
 
 void Device::updateData(int id, QVector<int> devdata) //если устройство в списке уже есть, этой функцией оно обновляется
@@ -29,14 +24,6 @@ void Device::updateData(int id, QVector<int> devdata) //если устройс�
         currState = devdata;
         if (!byteObjReady)
             byteObjectsInit(currState);
-        if (!(oldState->empty()))
-        oldState->clear();
-        for (int n = 0; n<devdata.size(); n++)
-        {
-        int currStateInt = byteObjArr->at(n)->th_data;
-        oldState->append(currStateInt);
-        }
-        currState = devdata;
         byteObjectsUpd(devdata);
 
     }
@@ -47,12 +34,12 @@ void Device::byteObjectsInit(QVector<int> data) //инициализируем �
 //с параметрами конкретно этого байта и значениями каждого бита, и загоняем объекты в массив
 {
 
-    int n = 0;
-    while (n < data.size()) //набиваем массив ссылками на новые объекты байтов
+    int n = data.size()-1;
+    while (n != 0)//набиваем массив ссылками на новые объекты байтов
     {
         byteDefinition *bytedef = new byteDefinition(devNum, n, data.at(n));
 
-        connect (this, &Device::setWordBitTX, bytedef, &byteDefinition::setWordBitRX);// SIGNAL(setWordBitRX()), byteDef, SLOT()); //ВСЁ ПРОПАЛО
+        connect (this, &Device::setWordBitTX, bytedef, &byteDefinition::setWordBitRX);
         connect (this, &Device::getWordTypeTX, bytedef, &byteDefinition::getWordType);
         connect (bytedef, &byteDefinition::returnWordType, this, &Device::returnWordTypeRX);
         connect (this, &Device::createNewMaskTX, bytedef, &byteDefinition::createNewMask);
@@ -67,18 +54,18 @@ void Device::byteObjectsInit(QVector<int> data) //инициализируем �
         connect (this, &Device::getByteNameTX, bytedef, &byteDefinition::getByteNameRX);
         connect (bytedef, &byteDefinition::returnByteName, this, &Device::returnByteNameTX);
         connect (this, &Device::saveByteNameTX, bytedef, &byteDefinition::saveByteNameRX);
-        byteObjArr->append(bytedef);
-        n++;
+        connect (this, &Device::byteObjUpdSig, bytedef, &byteDefinition::updateSlot);
+        //byteObjArr->append(bytedef);
+        n--;
     }
     byteObjReady = true;
 }
 
 void Device::byteObjectsUpd(QVector<int> data) //обновляем каждый объект, выявляем обновившиеся и передаём в лист изменений
 {
-    for (int n = 0; n < data.size(); n++)
+    for (int n = data.size()-1; n > -1; n--)
     {
-        byteObjArr->at(n)->th_data = data.at(n);
-        byteObjArr->at(n)->calcWordData(devNum, data);
+        emit byteObjUpdSig(devNum, n, data);
     }
 }
 

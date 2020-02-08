@@ -24,7 +24,7 @@ signals:
 
 public slots:
     //void onByteButtonClicked();
-    void updateBtnData(int _devNum, QVector<int> fulldata);
+    void updateBtnData(int _devNum, QVector<int> fullData);
     void setButtonStatus(int byteNum, bool status);
     void setWordType(int _devNum, int _byteNum, int _wordType);
 };

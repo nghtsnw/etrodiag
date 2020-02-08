@@ -17,6 +17,7 @@ public:
     QString devName = "Device name";
     //dynamicBaseProfile *devPrf = new dynamicBaseProfile;
     QVector<int> currState;
+    int currStateInt = 0;
     QVector<int> *oldState = new QVector<int>;
     Device(int id);
     void byteObjectsInit(QVector<int> data);
@@ -47,6 +48,7 @@ signals:
     void getByteNameTX(int _devNum, int byteNum);
     void returnByteNameTX(int devNum, int byteNum, QString byteName);
     void saveByteNameTX(int _devNum, int _byteNum, QString _byteName);
+    void byteObjUpdSig(int devNum, int n, QVector<int> data);
 
 public slots:
     //void getDeviceName(int devNum);
