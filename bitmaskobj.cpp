@@ -123,8 +123,8 @@ void bitMaskObj::calculateValue(int _devNum, int _byteNum, uint32_t wordData)
         uint32_t value = (wordData & paramMaskInt);
         value = value >> paramShift; //сдвигаем нужные нам биты к началу
         int binRawValue = value;
-        qDebug() << "Value is " << value;
         double endValue = (value+valueShift)*valueKoef;
+        if (endValue != oldEndValue || oldEndValue == 1234.56)
         emit param2FrontEnd(devNum, byteNum, wordData, id, paramName, binRawValue, endValue, viewInLogFlag);
         oldEndValue = endValue;
     }

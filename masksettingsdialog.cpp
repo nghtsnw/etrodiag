@@ -63,7 +63,7 @@ void maskSettingsDialog::initBitButtonsAndCheckBoxes(int _wordType)
         connect (this, &maskSettingsDialog::setCheckBox, bs, &bitSetForm::setCheckBox);
         connect (this, &maskSettingsDialog::wordData2bitSetForm, bs, &bitSetForm::setCheckboxText);
         bitSetList.append(bs);        
-        this->ui->dynMaskForm->addWidget(bs, x, y);
+        this->ui->dynamicMaskFormLay->addWidget(bs, x, y);
         bs->setNumLabel(var-1);
         bs->show();
     }

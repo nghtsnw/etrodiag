@@ -16,6 +16,12 @@
   <layout class="QGridLayout" name="gridLayoutDVSF_2">
    <item row="0" column="0">
     <widget class="QLineEdit" name="devNameEdit">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="toolTip">
       <string>Input device name here</string>
      </property>
@@ -29,17 +35,11 @@
    </item>
    <item row="1" column="0">
     <widget class="QFrame" name="byteButtonsBox">
-     <widget class="QWidget" name="gridLayoutWidget">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>581</width>
-        <height>341</height>
-       </rect>
-      </property>
-      <layout class="QGridLayout" name="gridLayoutButtonBox"/>
-     </widget>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <layout class="QGridLayout" name="gridLayoutButtonBox"/>
+      </item>
+     </layout>
     </widget>
    </item>
   </layout>

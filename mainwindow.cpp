@@ -77,7 +77,7 @@ MainWindow::MainWindow(QWidget *parent) :
     addConnection();
     connect (connection, &newconnect::loadMask, this, &MainWindow::loadProfile);
     connect (&btsf, &ByteSettingsForm::editMask, &masksd, &maskSettingsDialog::requestDataOnId);
-    //connect (this, MainWindow::m_ui->writeLogCheckBox->isChecked(), this, &MainWindow::setLogFlag)
+//    connect (this, &MainWindow::resizeEvent, this, &MainWindow::resizeEventSlot);
 }
 
 
@@ -189,6 +189,7 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
             masksd.hide();
             masksd.killChildren();
             btsf.show();
+            btsf.resize(m_ui->rightFrame->size());
     }
     else {
     if (btsf.isVisible())
@@ -196,6 +197,7 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
         btsf.hide();
         btsf.cleanMaskList();
         dvsf.show();
+        dvsf.resize(m_ui->rightFrame->size());
     }
     else
     {
@@ -217,6 +219,7 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
         m_ui->writeLogCheckBox->hide();
         dvsf.initByteButtons(devNum,data);
         dvsf.show();
+        dvsf.resize(m_ui->rightFrame->size());
         emit getDevName(devNum);
     }
     }
@@ -242,39 +245,54 @@ void MainWindow::openMaskSettingsDialog()
         btsf.hide();
         masksd.setParent(m_ui->rightFrame);
         masksd.show();
+        masksd.resize(m_ui->rightFrame->size());
     }
 }
 
 void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag)
 {    
-    quint64 timestamp = QDateTime::currentMSecsSinceEpoch();
-    QDateTime dt3 = QDateTime::fromMSecsSinceEpoch(timestamp);
-    QString formString(dt3.toString("hh:mm:ss:zzz") + " " + parameterName + "@" + devName + ": " + QString::number(endValue,'g',6));
-    m_ui->logArea->appendPlainText(formString);
+    if (viewInLogFlag)
+    {
+        quint64 timestamp = QDateTime::currentMSecsSinceEpoch();
+        QDateTime dt3 = QDateTime::fromMSecsSinceEpoch(timestamp);
+        QString formString(dt3.toString("hh:mm:ss:zzz") + " " + parameterName + "@" + devName + ": " + QString::number(endValue,'g',6));
+        m_ui->logArea->appendPlainText(formString);
+
 
     QDir dir("Logs");
     if (!dir.exists())
         QDir().mkdir("Logs");
     QFile newLogFile;
 
-    if (m_ui->writeLogCheckBox->isChecked() && !newLogFile.isOpen())
+    if (m_ui->writeLogCheckBox->isChecked())
     {
-        newLogFile.setFileName(dir.path() + dt3.toString("dd.MM.yy_hh:mm:ss")+".log");
         if (!newLogFile.isOpen())
         {
-        newLogFile.open(QIODevice::WriteOnly|QIODevice::Text);
-        showStatusMessage("Start write log file " + newLogFile.fileName());
+            if (createNewFileNamePermission)
+            {
+                logFileName = (dir.path() + dt3.toString("\\dd.MM.yy_hh-mm-ss") + ".log");
+                createNewFileNamePermission = false;
+            }
+            newLogFile.setFileName(logFileName);
+            if (!newLogFile.exists())
+            newLogFile.open(QIODevice::WriteOnly|QIODevice::Text);
+            newLogFile.open(QIODevice::Append|QIODevice::Text);
+            showStatusMessage("Start write log file " + newLogFile.fileName());
         }
         if (newLogFile.isOpen())
         {
             QTextStream logStream(&newLogFile);
-            logStream << formString << '\n';
+            logStream << formString << '\n';            
+            newLogFile.close();
         }
+        else showStatusMessage("Error write log");
     }
-    else if(newLogFile.isOpen())
+    else if (!m_ui->writeLogCheckBox->isChecked() && !createNewFileNamePermission)
     {
             newLogFile.close();
+            createNewFileNamePermission = true;
             showStatusMessage("Stop write log file " + newLogFile.fileName());
+    }
 }
 }
 
@@ -285,9 +303,6 @@ void MainWindow::loadProfile(int devNum, QString devName, int byteNum, QString b
     QListIterator<Device*> vlayChildListIt(vlayChildList);
     QString dev2mod;
     while (vlayChildListIt.hasNext())
-//        dev2mod.append("\n" + vlayChildListIt.peekNext()->devName);
-//        TreeModel trmod(dev2mod);
-//        m_ui->valueArea->setModel(&trmod);
         if (devNum == vlayChildListIt.next()->devNum)
             thisDeviceHere = true;
     if (thisDeviceHere)
@@ -307,4 +322,12 @@ void MainWindow::loadProfile(int devNum, QString devName, int byteNum, QString b
 void MainWindow::setLogFlag(bool _logFlag)
 {
     logFlag = _logFlag;
+}
+
+
+void MainWindow::resizeEvent(QResizeEvent* e)
+{
+    dvsf.resize(m_ui->rightFrame->size());
+    btsf.resize(m_ui->rightFrame->size());
+    masksd.resize(m_ui->rightFrame->size());
 }

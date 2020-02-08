@@ -82,7 +82,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     fillPortsParameters();
     fillProfileList();
     fillPortsInfo();
-
+    m_ui->readOnlyCheckBox->setChecked(m_currentSettings.readOnlyProfile);
     updateSettings();
 }
 
@@ -249,6 +249,8 @@ void SettingsDialog::updateSettings()
     m_currentSettings.localEchoEnabled = m_ui->localEchoCheckBox->isChecked();
 
     m_currentSettings.profilePath = selectedProfile;
+
+    m_currentSettings.readOnlyProfile = m_ui->readOnlyCheckBox->isChecked();
 }
 
 

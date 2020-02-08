@@ -85,6 +85,7 @@ public:
         QString stringFlowControl;
         bool localEchoEnabled;
         QString profilePath;
+        bool readOnlyProfile = true;
     };
 
     explicit SettingsDialog(QWidget *parent = nullptr);

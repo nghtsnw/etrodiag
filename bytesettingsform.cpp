@@ -50,7 +50,7 @@ void ByteSettingsForm::addMaskItem(int _devNum, QString _devName, int _byteNum, 
             nameItem->setText(_paramName);
             ui->masksWidget->setItem(row, 0, nameItem);
             QTableWidgetItem *valueItem = new QTableWidgetItem;
-            valueItem->setText("null");
+            valueItem->setText("waiting new data...");
             ui->masksWidget->setItem(row, 1, valueItem);
             QTableWidgetItem *idItem = new QTableWidgetItem;
             idItem->setText(QString::number(_id, 10));
@@ -131,7 +131,7 @@ void ByteSettingsForm::updateMasksList(int _devNum, QString _devName, int _byteN
 void ByteSettingsForm::updateHexWordData(int _devNum, int _byteNum, QString _txt)
 {
     if (devNum == _devNum && byteNum == _byteNum) {
-        ui->hexNumber->setText("Dev " + QString("%1").arg(devNum,0,16).toUpper() + ", Byte " + QString::number(byteNum) + ", Word data " + _txt);
+        ui->hexNumber->setText("Dev " + QString("%1").arg(devNum,0,16).toUpper() + ", Word " + QString::number(byteNum) + ", Word data " + _txt);
     }
 }
 

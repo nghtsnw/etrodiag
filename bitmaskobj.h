@@ -43,7 +43,7 @@ public slots:
     void loadMaskRX(int _devNum, QString _devName, int _byteNum, QString _byteName, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag, int _wordType);
 
 private:
-    double oldEndValue = 0.0;
+    double oldEndValue = 1234.56;
 };
 
 #endif // BITMASKOBJ_H

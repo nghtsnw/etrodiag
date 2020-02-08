@@ -94,6 +94,8 @@ public:
     void createDevice(int devNum);
     void loadProfile(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType);
     bool logFlag = false;
+    bool createNewFileNamePermission = true;
+    QString logFileName;
     ~MainWindow();
 
 
@@ -117,7 +119,7 @@ public slots:
 
 private slots:
     //void handleError(QSerialPort::SerialPortError error);
-
+//    void resizeEventSlot();
 
 private:
     void initActionsConnections();
@@ -127,6 +129,8 @@ private:
     QLabel *m_status = nullptr;
 protected:
     Ui::MainWindow *m_ui = nullptr;
+    virtual void resizeEvent(QResizeEvent *);
+
 
 public:
     devSettingsForm dvsf;//(m_ui->rightFrame);

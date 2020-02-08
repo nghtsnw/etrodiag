@@ -133,13 +133,17 @@ void newconnect::transData(QVector<int> snapshot)
 
 void newconnect::prepareToSaveProfile()
 {
-    maskVectorsList = this->findChildren<txtmaskobj*>();
-    QListIterator<txtmaskobj*> maskVectorsListIt(maskVectorsList);
-    maskVectorsListIt.toFront();
-    while (maskVectorsListIt.hasNext())
-           maskVectorsListIt.next()->~txtmaskobj();
-    permission2SaveMasks = true;
-    emit saveAllMasks();
+    const SettingsDialog::Settings p = m_settings->settings();
+    if (!p.readOnlyProfile)
+    {//очищаем список, выставляем разрешение для дальнейших операций по сохранению, даём сигнал на запрос всех масок
+        maskVectorsList = this->findChildren<txtmaskobj*>();
+        QListIterator<txtmaskobj*> maskVectorsListIt(maskVectorsList);
+        maskVectorsListIt.toFront();
+        while (maskVectorsListIt.hasNext())
+        maskVectorsListIt.next()->~txtmaskobj();
+        permission2SaveMasks = true;
+        emit saveAllMasks();
+    }
 }
 
 void newconnect::saveProfileSlot4Masks(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType)
@@ -147,15 +151,14 @@ void newconnect::saveProfileSlot4Masks(int devNum, QString devName, int byteNum,
                //перед сохранением все маски сигналом отправляются сюда, что-бы образовать перечень масок
                //проверяется что этой маски тут ещё нет, после этого создаётся список с текстовым перечнем всех параметров
                //создаются только описания масок, само сохранение будет в другой функции
-                      if (permission2SaveMasks)
+               if (permission2SaveMasks)
                {
-               maskVectorsList = this->findChildren<txtmaskobj*>();
-               QListIterator<txtmaskobj*> maskVectorsListIt(maskVectorsList);
-               bool thisMaskHere = false;
-               maskVectorsListIt.toFront();
-               while (maskVectorsListIt.hasNext())
+                maskVectorsList = this->findChildren<txtmaskobj*>();
+                QListIterator<txtmaskobj*> maskVectorsListIt(maskVectorsList);
+                bool thisMaskHere = false;
+                maskVectorsListIt.toFront();
+                while (maskVectorsListIt.hasNext())
                {
-
                    if ((QString::number(id,10) == maskVectorsListIt.peekNext()->lst.at(1))&&(QString::number(devNum,10) == maskVectorsListIt.peekNext()->lst.at(2))&&(QString::number(byteNum,10)==maskVectorsListIt.peekNext()->lst.at(3))&& (maskVectorsListIt.peekNext()->lst.at(0) == "thisIsMask"))
                       thisMaskHere = true;
                    maskVectorsListIt.next();
@@ -184,6 +187,8 @@ void newconnect::saveProfileSlot4Masks(int devNum, QString devName, int byteNum,
 
 void newconnect::saveProfile()
 {
+    if (permission2SaveMasks)
+    {
     maskVectorsList = this->findChildren<txtmaskobj*>();
     QListIterator<txtmaskobj*> maskVectorsListIt(maskVectorsList);
     maskVectorsListIt.toFront();
@@ -202,8 +207,8 @@ void newconnect::saveProfile()
         txtStream << "\n";
         maskVectorsListIt.next();
     }
-
     permission2SaveMasks = false;
+}
 }
 
 void newconnect::readProfile()

@@ -28,12 +28,12 @@ void byteButton::updateBtnData(int _devNum, QVector<int> fullData)
     }
     else if (wordType == 1)
     {
-        byteButton::setText((Int2Hex(fullData.at(byteNum))+':'+(Int2Hex(fullData.at(byteNum+1)))));
+        byteButton::setText((Int2Hex(fullData.at(byteNum+1))+':'+(Int2Hex(fullData.at(byteNum)))));
     }
     else if (wordType == 2)
     {
-        byteButton::setText((Int2Hex(fullData.at(byteNum))+':'+(Int2Hex(fullData.at(byteNum+1)))+':'
-                             +(Int2Hex(fullData.at(byteNum+2))+':'+(Int2Hex(fullData.at(byteNum+3))))));
+        byteButton::setText((Int2Hex(fullData.at(byteNum+3))+':'+(Int2Hex(fullData.at(byteNum+2)))+':'
+                             +(Int2Hex(fullData.at(byteNum+1))+':'+(Int2Hex(fullData.at(byteNum))))));
     }
     }
     if (!this->isEnabled()) this->setText("--->");
