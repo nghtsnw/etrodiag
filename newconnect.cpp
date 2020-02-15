@@ -196,11 +196,10 @@ void newconnect::saveProfile()
     QFile profile(p.profilePath);
     QFileInfo info(profile);
     profile.open(QIODevice::WriteOnly|QIODevice::Text);
+    QTextStream txtStream(&profile);
+    txtStream << info.fileName() << "\n";
     while (maskVectorsListIt.hasNext())
     {
-        QTextStream txtStream(&profile);
-        txtStream << info.fileName() << "\n";
-
         QListIterator<QString> lstIt(maskVectorsListIt.peekNext()->lst);
         while (lstIt.hasNext())
         txtStream << lstIt.next() << "\t";
@@ -208,6 +207,7 @@ void newconnect::saveProfile()
         maskVectorsListIt.next();
     }
     permission2SaveMasks = false;
+    emit sendStatusStr("Profile " + info.fileName() + " saved");
 }
 }
 

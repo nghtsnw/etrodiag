@@ -106,12 +106,13 @@ signals:
     void returnDevNameAfterClose(int devNum, QString text);
     void sendMaskData(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType);
     void getByteName(int devNum, int byteNum);
+    void hideOtherDevButtons(bool, int _devNum);
 
 public slots:
 
     void showStatusMessage(QString message);
     void addDeviceToList(QVector<int> ddata);
-    void txtToGuiFunc(QString txtToGui);
+//    void txtToGuiFunc(QString txtToGui);
     void openDevSett(int devNum, QVector<int> data);
     void openByteSett(int devNum, int byteNum);
     void frontendDataSort(int devNum, QString devName, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag);

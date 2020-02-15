@@ -5,6 +5,7 @@
 #include <QBitArray>
 #include <QDataStream>
 #include <QTextStream>
+#include <QTimer>
 
 
 Device::Device(QWidget *parent) : QPushButton(parent)
@@ -25,9 +26,11 @@ void Device::updateData(int id, QVector<int> devdata) //если устройс�
         if (!byteObjReady)
             byteObjectsInit(currState);
         byteObjectsUpd(devdata);
-
+        if (devStatus == "offline") devStatus = "online";
+        changeButtonColor(devStatus);
+        devOnlineWatchdog(5000);
     }
-    else qDebug() << "Dev " << devNum << " get devnum " << id << " in message, and skip this update";
+//    else qDebug() << "Dev " << devNum << " get devnum " << id << " in message, and skip this update";
 }
 
 void Device::byteObjectsInit(QVector<int> data) //инициализируем для каждого байта свой объект,
@@ -165,3 +168,38 @@ void Device::param2FrontEndRX(int devNum, int byteNum, QString byteName, uint32_
     emit param2FrontEndTX(devNum, devName, byteNum, byteName, wordData, id, parameterName, binRawValue, endValue, viewInLogFlag);
 }
 
+void Device::hideDevButton(bool trueOrFalse, int _devNum)
+{
+    if (devNum != _devNum && trueOrFalse)
+        this->hide();
+    else this->show();
+}
+
+void Device::devOnlineWatchdog(int msec)
+{
+        connect (timer, &QTimer::timeout, this, &Device::setOfflineStatus);
+//        timer->setInterval(msec);
+        timer->start(msec);
+        qDebug() << "timer start " << msec;
+}
+
+void Device::setOfflineStatus()
+{
+    qDebug() << "timer timeout!";
+    devStatus = "offline";
+    timer->stop();
+    changeButtonColor(devStatus);
+}
+
+void Device::changeButtonColor(QString _status)
+{
+    qDebug() << "set dev status " << _status;
+    if (_status == "offline")
+    {
+        this->setStyleSheet("QPushButton{background:#add8e6;}");
+    }
+    if (_status == "online")
+    {
+        this->setStyleSheet("QPushButton{background:#90ee90;}");
+    }
+}

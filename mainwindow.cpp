@@ -78,6 +78,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect (connection, &newconnect::loadMask, this, &MainWindow::loadProfile);
     connect (&btsf, &ByteSettingsForm::editMask, &masksd, &maskSettingsDialog::requestDataOnId);
 //    connect (this, &MainWindow::resizeEvent, this, &MainWindow::resizeEventSlot);
+//    m_ui->valueArea->hide();
 }
 
 
@@ -97,20 +98,18 @@ void MainWindow::addConnection()
 void MainWindow::showStatusMessage(QString message)
 {
     statuslbl->setText(message);
+    m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + message + "</span></p>");
 }
 
 
 void MainWindow::addDeviceToList(QVector<int> ddata)
 {
-    //static QVBoxLayout *vlay = new QVBoxLayout;
-    //m_ui->devArea->setLayout(vlay); //больше некуда воткнуть это, пусть пока побудет здесь
     int devNum = ddata.at(2);//узнаём номер устройства в посылке
     QString devNumHex = QString("%1").arg(devNum,0,16).toUpper();//конвертируем его в хекс-вид
     bool thisDeviceHere = false; //обнуляем флаг
 
     QList<Device*> vlayChildList = m_ui->devArea->findChildren<Device*>();
     QListIterator<Device*> vlayChildListIt(vlayChildList); //смотрим сколько в гуе отображается устройств, создаём перечислитель
-    //qDebug() << "Children of devArea = " << vlayChildList.size();
 
     while (vlayChildListIt.hasNext())
     {
@@ -140,7 +139,7 @@ void MainWindow::createDevice(int devNum)
     dev->setText(QString::number(devNum,16));
     dev->show();
     connect (this, &MainWindow::devUpdate, dev, &Device::updateData);
-    connect (dev, &Device::txtToGui, this, &MainWindow::txtToGuiFunc);
+//    connect (dev, &Device::txtToGui, this, &MainWindow::txtToGuiFunc);
     connect (dev, &Device::openDevSettSig, this, &MainWindow::openDevSett);
     connect (dev, &Device::clicked, dev, &Device::clickedF);
     connect (this, &MainWindow::getDevName, dev, &Device::getDeviceName);
@@ -173,13 +172,13 @@ void MainWindow::createDevice(int devNum)
     connect (this, &MainWindow::getByteName, dev, &Device::getByteNameRX);
     connect (dev, &Device::returnByteNameTX, &btsf, &ByteSettingsForm::setWordName);
     connect (&btsf, &ByteSettingsForm::saveByteName, dev, &Device::saveByteNameRX);
-
+    connect (this, &MainWindow::hideOtherDevButtons, dev, &Device::hideDevButton);
 }
 
-void MainWindow::txtToGuiFunc(QString txtToGui)
-{
-    m_ui->logArea->insertPlainText(txtToGui);
-}
+//void MainWindow::txtToGuiFunc(QString txtToGui)
+//{
+//    m_ui->logArea->insertPlainText(txtToGui);
+//}
 
 void MainWindow::openDevSett(int devNum, QVector<int> data)
 {//все реакции на нажатие кнопки устройства в зависимости от состояния окна
@@ -207,6 +206,7 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
         m_ui->logArea->show();
         m_ui->valueArea->show();
         m_ui->writeLogCheckBox->show();
+        emit hideOtherDevButtons(false, devNum);
         connection->prepareToSaveProfile();
         connection->saveProfile();
         dvsf.hide();
@@ -217,6 +217,7 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
         m_ui->logArea->hide();
         m_ui->valueArea->hide();
         m_ui->writeLogCheckBox->hide();
+        emit hideOtherDevButtons(true, devNum);
         dvsf.initByteButtons(devNum,data);
         dvsf.show();
         dvsf.resize(m_ui->rightFrame->size());

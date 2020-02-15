@@ -6,6 +6,7 @@
 #include <QWidget>
 #include <QPushButton>
 #include "bytedefinition.h"
+#include <QTimer>
 
 class Device : public QPushButton
 {
@@ -28,6 +29,7 @@ public:
     void getDeviceName(int id);
     void clickedF();
     bool byteObjReady = false;
+    void devOnlineWatchdog(int msec);
 
 signals:
     void txtToGui(QString);
@@ -68,9 +70,14 @@ public slots:
     void loadMaskRX(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType);
     void getByteNameRX(int _devNum, int byteNum);
     void saveByteNameRX(int _devNum, int _byteNum, QString _byteName);
+    void hideDevButton(bool trueOrFalse, int _devNum);
+    void changeButtonColor(QString _status);
+    void setOfflineStatus();
 
 private:
+    QString devStatus = "offline";
     Q_DISABLE_COPY(Device)
+    QTimer *timer = new QTimer(this);
 
 };
 

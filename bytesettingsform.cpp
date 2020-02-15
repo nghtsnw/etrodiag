@@ -25,6 +25,9 @@ void ByteSettingsForm::open(int _devNum, int _byteNum)
     byteNum = _byteNum;
     getWordTypeFromProfile(devNum, byteNum);
     requestAllMasks();
+    if (ui->masksWidget->rowCount() > 0)
+        ui->bitBox->setDisabled(true);
+    else ui->bitBox->setEnabled(true);
 }
 
 void ByteSettingsForm::addMaskItem(int _devNum, QString _devName, int _byteNum, QString _byteName, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag, int _wordType)
@@ -69,7 +72,7 @@ void ByteSettingsForm::deleteMaskItem(int row)
     emit deleteMaskObj(devNum,byteNum, ui->masksWidget->item(row,2)->text().toInt(0,10));
     ui->masksWidget->removeRow(row);
     if (ui->masksWidget->rowCount() == 0)
-        ui->bitBox->setDisabled(false);
+        ui->bitBox->setEnabled(true);
 }
 void ByteSettingsForm::on_masksWidget_cellClicked(int row, int column)
 {    
