@@ -51,6 +51,7 @@ signals:
     void returnByteNameTX(int devNum, int byteNum, QString byteName);
     void saveByteNameTX(int _devNum, int _byteNum, QString _byteName);
     void byteObjUpdSig(int devNum, int n, QVector<int> data);
+    void devStatusMessage(QString _devname, QString status);
 
 public slots:
     //void getDeviceName(int devNum);
@@ -75,7 +76,7 @@ public slots:
     void setOfflineStatus();
 
 private:
-    QString devStatus = "offline";
+    QString devStatus = "init";
     Q_DISABLE_COPY(Device)
     QTimer *timer = new QTimer(this);
 

@@ -1,9 +1,11 @@
 #include "bytebutton.h"
 #include "QDebug"
+#include <QTimer>
 
 byteButton::byteButton()
 {
     connect(this, &byteButton::clicked, this, &byteButton::onByteButtonClicked);
+    connect (timer, &QTimer::timeout, this, &byteButton::defaultButtonColor);
 }
 
 void byteButton::setByteNum(int _devNum, int _byteNum)
@@ -19,21 +21,26 @@ byteButton::~byteButton()
 
 void byteButton::updateBtnData(int _devNum, QVector<int> fullData)
 {
-
+    QString txttmp;
     if (devNum == _devNum && this->isEnabled())
-    {
+    {        
     if (wordType == 0)
     {
-        byteButton::setText(Int2Hex(fullData.at(byteNum)));
+        txttmp = (Int2Hex(fullData.at(byteNum)));
     }
     else if (wordType == 1)
     {
-        byteButton::setText((Int2Hex(fullData.at(byteNum+1))+':'+(Int2Hex(fullData.at(byteNum)))));
+        txttmp = ((Int2Hex(fullData.at(byteNum+1))+':'+(Int2Hex(fullData.at(byteNum)))));
     }
     else if (wordType == 2)
     {
-        byteButton::setText((Int2Hex(fullData.at(byteNum+3))+':'+(Int2Hex(fullData.at(byteNum+2)))+':'
+        txttmp = ((Int2Hex(fullData.at(byteNum+3))+':'+(Int2Hex(fullData.at(byteNum+2)))+':'
                              +(Int2Hex(fullData.at(byteNum+1))+':'+(Int2Hex(fullData.at(byteNum))))));
+    }
+    if (txttmp != this->text())
+    {
+        byteButton::setText(txttmp);
+        changeButtonColor();
     }
     }
     if (!this->isEnabled()) this->setText("--->");
@@ -85,6 +92,18 @@ void byteButton::setWordType(int _devNum, int _byteNum, int _wordType)
         wordType = _wordType;
         transformToWord(wordType);
     }
+}
+
+void byteButton::changeButtonColor()
+{
+    this->setStyleSheet("QPushButton{background:#00FF00;}");
+    timer->setInterval(500);
+    timer->start();
+}
+void byteButton::defaultButtonColor()
+{
+    timer->stop();
+    this->setStyleSheet("QPushButton{background:none;}");
 }
 
 QString byteButton::Int2Hex(int num) //для удобства конвертирования из инт в хекс

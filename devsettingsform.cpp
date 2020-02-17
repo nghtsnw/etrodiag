@@ -31,6 +31,8 @@ void devSettingsForm::killChildren() //очистка формы от объек
         devChildListIt.next()->~byteButton();
     devChildList = this->findChildren<byteButton*>(); //времянка для поиска бага
     qDebug() << "dev childrens after delete = " << devChildList.size();
+
+    m_ui->devNameEdit->clear();
 }
 
 void devSettingsForm::setDevName(int id, QString devName) //получаем имя из профиля в форму

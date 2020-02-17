@@ -59,9 +59,9 @@ void newconnect::openSerialPort()
     if (m_serial->open(QIODevice::ReadWrite)) {
         m_console->setEnabled(true);
         m_console->setLocalEchoEnabled(p.localEchoEnabled);        
-        showStatusMessage(tr("Connected to %1 : %2, %3, %4, %5, %6")
+        showStatusMessage(tr("Connected to %1 : %2, %3, %4, %5, %6, %7")
                           .arg(p.name).arg(p.stringBaudRate).arg(p.stringDataBits)
-                          .arg(p.stringParity).arg(p.stringStopBits).arg(p.stringFlowControl));
+                          .arg(p.stringParity).arg(p.stringStopBits).arg(p.stringFlowControl).arg(p.profilePath));
     } else {
         QMessageBox::critical(this, tr("Error"), m_serial->errorString());
         showStatusMessage(tr("Open error"));

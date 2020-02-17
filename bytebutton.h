@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QPushButton>
+#include <QTimer>
 
 class byteButton : public QPushButton
 {
@@ -27,6 +28,11 @@ public slots:
     void updateBtnData(int _devNum, QVector<int> fullData);
     void setButtonStatus(int byteNum, bool status);
     void setWordType(int _devNum, int _byteNum, int _wordType);
+    void changeButtonColor();
+    void defaultButtonColor();
+
+private:
+    QTimer *timer = new QTimer;
 };
 
 #endif // BYTEBUTTON_H

@@ -107,6 +107,7 @@ void ByteSettingsForm::cleanMaskList()
 {
     while (ui->masksWidget->rowCount() > 0)
             ui->masksWidget->removeRow(0);
+    ui->hexNumber->clear();
 }
 
 void ByteSettingsForm::requestAllMasks()

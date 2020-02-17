@@ -96,6 +96,7 @@ public:
     bool logFlag = false;
     bool createNewFileNamePermission = true;
     QString logFileName;
+    void logFileCreator(QString string, bool redFlag);
     ~MainWindow();
 
 
@@ -112,11 +113,11 @@ public slots:
 
     void showStatusMessage(QString message);
     void addDeviceToList(QVector<int> ddata);
-//    void txtToGuiFunc(QString txtToGui);
     void openDevSett(int devNum, QVector<int> data);
     void openByteSett(int devNum, int byteNum);
     void frontendDataSort(int devNum, QString devName, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag);
     void setLogFlag(bool _logFlag);
+    void devStatusMsg(QString _devName, QString status);
 
 private slots:
     //void handleError(QSerialPort::SerialPortError error);
@@ -124,6 +125,7 @@ private slots:
 
 private:
     void initActionsConnections();
+    QDateTime returnTimestamp();
 
 private:
 

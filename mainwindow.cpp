@@ -98,7 +98,8 @@ void MainWindow::addConnection()
 void MainWindow::showStatusMessage(QString message)
 {
     statuslbl->setText(message);
-    m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + message + "</span></p>");
+    //m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + message + "</span></p>");
+    logFileCreator(message, true);
 }
 
 
@@ -173,12 +174,8 @@ void MainWindow::createDevice(int devNum)
     connect (dev, &Device::returnByteNameTX, &btsf, &ByteSettingsForm::setWordName);
     connect (&btsf, &ByteSettingsForm::saveByteName, dev, &Device::saveByteNameRX);
     connect (this, &MainWindow::hideOtherDevButtons, dev, &Device::hideDevButton);
+    connect (dev, &Device::devStatusMessage, this, &MainWindow::devStatusMsg);
 }
-
-//void MainWindow::txtToGuiFunc(QString txtToGui)
-//{
-//    m_ui->logArea->insertPlainText(txtToGui);
-//}
 
 void MainWindow::openDevSett(int devNum, QVector<int> data)
 {//все реакции на нажатие кнопки устройства в зависимости от состояния окна
@@ -209,6 +206,7 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
         emit hideOtherDevButtons(false, devNum);
         connection->prepareToSaveProfile();
         connection->saveProfile();
+        //dvsf.devNameForm->setReadOnly(true);
         dvsf.hide();
         dvsf.killChildren();
     }
@@ -218,10 +216,10 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
         m_ui->valueArea->hide();
         m_ui->writeLogCheckBox->hide();
         emit hideOtherDevButtons(true, devNum);
+        emit getDevName(devNum);
         dvsf.initByteButtons(devNum,data);
         dvsf.show();
-        dvsf.resize(m_ui->rightFrame->size());
-        emit getDevName(devNum);
+        dvsf.resize(m_ui->rightFrame->size());        
     }
     }
     }
@@ -250,28 +248,51 @@ void MainWindow::openMaskSettingsDialog()
     }
 }
 
+QDateTime MainWindow::returnTimestamp()
+{
+    quint64 timestamp = QDateTime::currentMSecsSinceEpoch();
+    QDateTime dt3 = QDateTime::fromMSecsSinceEpoch(timestamp);
+    return dt3;
+}
+
 void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag)
 {    
-    if (viewInLogFlag)
+    if (dvsf.isVisible() && dvsf.devNameForm->text().isEmpty())
     {
-        quint64 timestamp = QDateTime::currentMSecsSinceEpoch();
-        QDateTime dt3 = QDateTime::fromMSecsSinceEpoch(timestamp);
-        QString formString(dt3.toString("hh:mm:ss:zzz") + " " + parameterName + "@" + devName + ": " + QString::number(endValue,'g',6));
-        m_ui->logArea->appendPlainText(formString);
+        if (devNum == dvsf.devNum)
+        {
+            dvsf.setDevName(devNum, devName);
+            //dvsf.devNameForm->setReadOnly(false);
+        }
+    }
+
+    if (viewInLogFlag)
+    {        
+        QString formString(parameterName + "@" + devName + ": " + QString::number(endValue,'g',6));
+        logFileCreator(formString, false);
+    }
+}
+
+void MainWindow::logFileCreator(QString string, bool redFlag)
+{
+    QString stringWithTime = (returnTimestamp().toString("hh:mm:ss:zzz") + " " + string);
+    if (!redFlag)
+    m_ui->logArea->appendPlainText(stringWithTime);
+    else m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + stringWithTime + "</span></p>");
 
 
-    QDir dir("Logs");
-    if (!dir.exists())
-        QDir().mkdir("Logs");
     QFile newLogFile;
-
     if (m_ui->writeLogCheckBox->isChecked())
     {
+        QDir dir("Logs");
+        if (!dir.exists())
+        QDir().mkdir("Logs");
+
         if (!newLogFile.isOpen())
         {
             if (createNewFileNamePermission)
             {
-                logFileName = (dir.path() + dt3.toString("\\dd.MM.yy_hh-mm-ss") + ".log");
+                logFileName = (dir.path() + returnTimestamp().toString("\\dd.MM.yy_hh-mm-ss") + ".log");
                 createNewFileNamePermission = false;
             }
             newLogFile.setFileName(logFileName);
@@ -283,7 +304,7 @@ void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QStr
         if (newLogFile.isOpen())
         {
             QTextStream logStream(&newLogFile);
-            logStream << formString << '\n';            
+            logStream << string << '\n';
             newLogFile.close();
         }
         else showStatusMessage("Error write log");
@@ -294,7 +315,6 @@ void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QStr
             createNewFileNamePermission = true;
             showStatusMessage("Stop write log file " + newLogFile.fileName());
     }
-}
 }
 
 void MainWindow::loadProfile(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType)
@@ -325,6 +345,10 @@ void MainWindow::setLogFlag(bool _logFlag)
     logFlag = _logFlag;
 }
 
+void MainWindow::devStatusMsg(QString _devName, QString status)
+{
+    logFileCreator("Device " + _devName + " is " + status, true);
+}
 
 void MainWindow::resizeEvent(QResizeEvent* e)
 {
