@@ -96,20 +96,23 @@ void maskSettingsDialog::scanCheckboxesToMask()
     sendMask2Profile();
 }
 
-void maskSettingsDialog::liveDataSlot(int _devNum, QString _devName, int _byteNum, QString _byteName, uint32_t _wordData, int _id, QString parameterName, int _binRawValue, double _endValue, bool viewInLogFlag)
+void maskSettingsDialog::liveDataSlot(int _devNum, QString _devName, int _byteNum, QString _byteName, uint32_t _wordData, int _id, QString parameterName, int _binRawValue, double _endValue, bool viewInLogFlag, bool isNewData)
 {//устанавливаем текст каждому чекбоксу, 0 или 1
    if (devNum == _devNum && byteNum == _byteNum)
    {
-    bool wordDataIntArray[wordBit];
+    bool wordDataBoolBit;
     uint32_t mask = 1;
     QString endValueToString;
     int i = 0;
-    for (i = 0; i < wordBit; i++) {
+    //qDebug() << "endvalue = " << _endValue;
+    for (i = 0; i < wordBit; i++)
+    {
         if (_wordData & mask)
-            wordDataIntArray[i] = true;
-        else wordDataIntArray[i] = false;
+            wordDataBoolBit = true;
+        else wordDataBoolBit = false;
         mask = mask << 1;
-        emit wordData2bitSetForm(i, wordDataIntArray[i]);
+        emit wordData2bitSetForm(i, wordDataBoolBit);
+        //qDebug() << "wordData2bitSetForm("<<i<<", "<<wordDataBoolBit<<");";
     }    
     endValueToString.setNum(_endValue);
     ui->decimalInt->setText(endValueToString);

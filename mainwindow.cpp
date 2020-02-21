@@ -92,6 +92,7 @@ void MainWindow::addConnection()
     connection = new newconnect(m_ui->tab_connections);
     connect (connection, SIGNAL(sendStatusStr(QString)), SLOT(showStatusMessage(QString)));
     connect (connection, &newconnect::transmitData, this, &MainWindow::addDeviceToList);
+    connect (connection, &newconnect::cleanDevListSig, this, &MainWindow::cleanDevList);
     connection->show();
 }
 
@@ -191,7 +192,7 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
     if (btsf.isVisible())
     {
         btsf.hide();
-        btsf.cleanMaskList();
+        btsf.cleanForm();
         dvsf.show();
         dvsf.resize(m_ui->rightFrame->size());
     }
@@ -255,7 +256,7 @@ QDateTime MainWindow::returnTimestamp()
     return dt3;
 }
 
-void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag)
+void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData)
 {    
     if (dvsf.isVisible() && dvsf.devNameForm->text().isEmpty())
     {
@@ -266,7 +267,7 @@ void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QStr
         }
     }
 
-    if (viewInLogFlag)
+    if (viewInLogFlag && isNewData)
     {        
         QString formString(parameterName + "@" + devName + ": " + QString::number(endValue,'g',6));
         logFileCreator(formString, false);
@@ -337,7 +338,6 @@ void MainWindow::loadProfile(int devNum, QString devName, int byteNum, QString b
         dvsf.updByteButtons(devNum, devInitArray);
         emit sendMaskData(devNum, devName, byteNum, byteName, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType);
     }
-
 }
 
 void MainWindow::setLogFlag(bool _logFlag)
@@ -355,4 +355,12 @@ void MainWindow::resizeEvent(QResizeEvent* e)
     dvsf.resize(m_ui->rightFrame->size());
     btsf.resize(m_ui->rightFrame->size());
     masksd.resize(m_ui->rightFrame->size());
+}
+
+void MainWindow::cleanDevList()
+{
+    QList<Device*> vlayChildList = m_ui->devArea->findChildren<Device*>();
+    QListIterator<Device*> vlayChildListIt(vlayChildList);
+    while(vlayChildListIt.hasNext())
+        vlayChildListIt.next()->~Device();
 }

@@ -37,6 +37,7 @@ public:
 
 signals:
 
+void cleanDevListSig();
 void sendStatusStr(QString);
 void transmitData(QVector<int> snapshot);
 void saveAllMasks();

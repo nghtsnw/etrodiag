@@ -97,6 +97,7 @@ public:
     bool createNewFileNamePermission = true;
     QString logFileName;
     void logFileCreator(QString string, bool redFlag);
+    void cleanDevList();
     ~MainWindow();
 
 
@@ -115,7 +116,7 @@ public slots:
     void addDeviceToList(QVector<int> ddata);
     void openDevSett(int devNum, QVector<int> data);
     void openByteSett(int devNum, int byteNum);
-    void frontendDataSort(int devNum, QString devName, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag);
+    void frontendDataSort(int devNum, QString devName, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData);
     void setLogFlag(bool _logFlag);
     void devStatusMsg(QString _devName, QString status);
 

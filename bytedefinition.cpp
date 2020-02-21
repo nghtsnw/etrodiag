@@ -192,7 +192,7 @@ void byteDefinition::calcWordData(int _devNum, QVector<int> data)
     }
 }
 
-void byteDefinition::param2FrontEndRX(int devNum, int byteNum, uint32_t wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag)
+void byteDefinition::param2FrontEndRX(int devNum, int byteNum, uint32_t wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData)
 {
-    emit param2FrontEndTX(devNum, byteNum, byteName, wordData, id, parameterName, binRawValue, endValue, viewInLogFlag);
+    emit param2FrontEndTX(devNum, byteNum, byteName, wordData, id, parameterName, binRawValue, endValue, viewInLogFlag, isNewData);
 }

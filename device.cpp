@@ -168,9 +168,9 @@ void Device::allMasksToListRX(int devNum, int byteNum, QString byteName, int id,
     emit allMasksToListTX(devNum, devName, byteNum, byteName, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType);
 }
 
-void Device::param2FrontEndRX(int devNum, int byteNum, QString byteName, uint32_t wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag)
+void Device::param2FrontEndRX(int devNum, int byteNum, QString byteName, uint32_t wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData)
 {
-    emit param2FrontEndTX(devNum, devName, byteNum, byteName, wordData, id, parameterName, binRawValue, endValue, viewInLogFlag);
+    emit param2FrontEndTX(devNum, devName, byteNum, byteName, wordData, id, parameterName, binRawValue, endValue, viewInLogFlag, isNewData);
 }
 
 void Device::hideDevButton(bool trueOrFalse, int _devNum)
@@ -195,7 +195,6 @@ void Device::setOfflineStatus()
 
 void Device::changeButtonColor(QString _status)
 {
-    qDebug() << "set dev status " << _status;
     if (_status == "offline")
     {
         this->setStyleSheet("QPushButton{background:#808080;}");

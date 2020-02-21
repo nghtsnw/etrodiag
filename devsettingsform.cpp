@@ -37,7 +37,7 @@ void devSettingsForm::killChildren() //очистка формы от объек
 
 void devSettingsForm::setDevName(int id, QString devName) //получаем имя из профиля в форму
 {
-    if (id == devNum)
+    if (id == devNum && devName != m_ui->devNameEdit->text())
     m_ui->devNameEdit->setText(devName);
 }
 
@@ -54,7 +54,7 @@ void devSettingsForm::initByteButtons(int id, QVector<int> data)
         byteButton *byteBtn = new byteButton;
         connect(byteBtn, &byteButton::setButton, this, &devSettingsForm::retranslateByteButtonSetStatus);
         connect(this, &devSettingsForm::setByteButtonStatus, byteBtn, &byteButton::setButtonStatus);
-        connect(byteBtn, &byteButton::openByteSettingsForm, this, &devSettingsForm::openByteSettingsFormRX); //ретрансляция для дальнейшей передачи в майнвиндов
+        connect(byteBtn, &byteButton::openByteSettingsForm, this, &devSettingsForm::openByteSettingsFormTX); //ретрансляция для дальнейшей передачи в майнвиндов
         connect(this, &devSettingsForm::updateBtnDataSIG, byteBtn, &byteButton::updateBtnData);
         connect (this, &devSettingsForm::wordType2ByteBtn, byteBtn, &byteButton::setWordType);
         connect (byteBtn, &byteButton::wordDataFullHex, this, &devSettingsForm::wordDataFullHex);
@@ -79,10 +79,10 @@ void devSettingsForm::on_devNameEdit_editingFinished()
     emit returnDevNameAfterEdit(devNum, text);
 }
 
-void devSettingsForm::openByteSettingsFormRX(int devNum, int byteNum)
-{//принимаем сигнал от кнопки, отправляем то же в mainwindow чтобы открыть bytesettingsform
-    emit openByteSettingsFormTX(devNum, byteNum);
-}
+//void devSettingsForm::openByteSettingsFormRX(int devNum, int byteNum)
+//{//принимаем сигнал от кнопки, отправляем то же в mainwindow чтобы открыть bytesettingsform
+//    emit openByteSettingsFormTX(devNum, byteNum);
+//}
 
 void devSettingsForm::wordTypeChangeRX(int _devNum, int _byteNum, int wordType)
 {//прослойка для передачи сигнала из bytesettingsform в bytebutton

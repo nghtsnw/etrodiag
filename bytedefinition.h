@@ -30,7 +30,7 @@ signals:
     void wordData2Mask(int devNum, int byteNum, int wordData);
     void allMasksToListTX(int devNum, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, int valueShift, double valueKoef, bool viewInLogFlag, int wordType);
     void deleteMaskObjTX(int devNum, int byteNum, int id);
-    void param2FrontEndTX(int devNum, int byteNum, QString byteName, uint32_t wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag);
+    void param2FrontEndTX(int devNum, int byteNum, QString byteName, uint32_t wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData);
     void loadMaskTX(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType);
     void returnByteName(int devNum, int byteNum, QString byteName);
 
@@ -43,7 +43,7 @@ public slots:
     void requestMaskDataRX(int _devNum, int _byteNum, int _id);
     void sendDataToProfileRX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag);
     void allMasksToListRX(int devNum, int byteNum, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType);
-    void param2FrontEndRX(int devNum, int byteNum, uint32_t wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag);
+    void param2FrontEndRX(int devNum, int byteNum, uint32_t wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData);
     void loadMaskRX(int devNum, QString devName, int byteNum, QString _byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType);
     void getByteNameRX(int _devNum, int _byteNum);
     void saveByteNameRX(int _devNum, int _byteNum, QString _byteName);

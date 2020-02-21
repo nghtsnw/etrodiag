@@ -32,7 +32,7 @@ void ByteSettingsForm::open(int _devNum, int _byteNum)
 
 void ByteSettingsForm::addMaskItem(int _devNum, QString _devName, int _byteNum, QString _byteName, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag, int _wordType)
 {
-    if (devNum == _devNum && byteNum == _byteNum)
+    if (devNum == _devNum && byteNum == _byteNum && this->isVisible())
     {
         bool findRow = 0;
         if (ui->masksWidget->rowCount() > 0)
@@ -103,21 +103,14 @@ void ByteSettingsForm::on_pushButton_clicked()
     emit createMask(devNum, byteNum);
 }
 
-void ByteSettingsForm::cleanMaskList()
-{
-    while (ui->masksWidget->rowCount() > 0)
-            ui->masksWidget->removeRow(0);
-    ui->hexNumber->clear();
-}
-
 void ByteSettingsForm::requestAllMasks()
 {
     emit requestAllMaskToList(devNum,byteNum,999);
 }
 
-void ByteSettingsForm::updateMasksList(int _devNum, QString _devName, int _byteNum, QString _byteName, int _wordData, int _id, QString parameterName, int _binRawValue, float _endValue, bool viewInLogFlag)
+void ByteSettingsForm::updateMasksList(int _devNum, QString _devName, int _byteNum, QString _byteName, int _wordData, int _id, QString parameterName, int _binRawValue, float _endValue, bool viewInLogFlag, bool isNewData)
 {
-    if (devNum == _devNum && byteNum == _byteNum)
+    if (devNum == _devNum && byteNum == _byteNum && this->isVisible())
     {
 
         for (int i = 0; i < ui->masksWidget->rowCount(); i++) {
@@ -134,7 +127,8 @@ void ByteSettingsForm::updateMasksList(int _devNum, QString _devName, int _byteN
 
 void ByteSettingsForm::updateHexWordData(int _devNum, int _byteNum, QString _txt)
 {
-    if (devNum == _devNum && byteNum == _byteNum) {
+    if (devNum == _devNum && byteNum == _byteNum && this->isVisible())
+    {
         ui->hexNumber->setText("Dev " + QString("%1").arg(devNum,0,16).toUpper() + ", Word " + QString::number(byteNum) + ", Word data " + _txt);
     }
 }
@@ -148,4 +142,21 @@ void ByteSettingsForm::setWordName(int _devNum, int _byteNum, QString _byteName)
 {
     if (devNum == _devNum && byteNum == _byteNum)
         ui->wordNameEdit->setText(_byteName);
+}
+
+//void ByteSettingsForm::hideEvent(QHideEvent* e)
+//{
+//    if (e)
+//    {
+//        while (ui->masksWidget->rowCount() > 0)
+//                ui->masksWidget->removeRow(0);
+//        ui->hexNumber->clear();
+//    }
+//}
+
+void ByteSettingsForm::cleanForm()
+{
+    while (ui->masksWidget->rowCount() > 0)
+            ui->masksWidget->removeRow(0);
+    ui->hexNumber->clear();
 }

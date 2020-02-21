@@ -213,6 +213,7 @@ void newconnect::saveProfile()
 
 void newconnect::readProfile()
 {
+    emit cleanDevListSig();
     const SettingsDialog::Settings p = m_settings->settings();
     QFile profile(p.profilePath);
     profile.open(QIODevice::ReadOnly|QIODevice::Text);

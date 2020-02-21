@@ -2,6 +2,7 @@
 #define BITSETFORM_H
 
 #include <QWidget>
+#include <QTimer>
 
 namespace Ui {
 class bitSetForm;
@@ -23,8 +24,11 @@ signals:
     void scanCheckboxesToMask();
 private slots:
     void on_bitCheckBox_clicked();
+    void backgroundReturn();
 
 private:
+    QString oldCheckboxText;
+    QTimer *timer = new QTimer;
     Ui::bitSetForm *ui;
 };
 

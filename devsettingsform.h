@@ -34,7 +34,7 @@ signals:
     void wordDataFullHex(int devNum, int byteNum, QString);
 public slots:
     //void onByteBtnClicked();
-    void openByteSettingsFormRX(int devNum, int byteNum);
+    //void openByteSettingsFormRX(int devNum, int byteNum);
     void wordTypeChangeRX(int _devNum, int _byteNum, int wordType);
     //void retranslateByteButtonSetStatus(int byteNum, bool status);
 

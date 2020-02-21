@@ -18,7 +18,7 @@ public:
     QString paramMask = "00000000";
     int paramShift = 0;
     void calculateParamShift();
-    void calculateParamLeight();
+//    void calculateParamLeight();
     int paramLeght = 0;
     int paramType = 0;
     double valueShift = 0;
@@ -34,7 +34,7 @@ signals:
     void maskToFormSIG(int devNum, int byteNum, int id, QString paramName, QString paramMask, int paramType, int valueShift, double valueKoef, bool viewInLogFlag, int wordType);
     void mask2byteSettingsForm(int devNum, int byteNum, int id);
     void maskToListSIG(int devNum, int byteNum, int id, QString paramName, QString paramMask, int paramType, int valueShift, double valueKoef, bool viewInLogFlag, int wordType);
-    void param2FrontEnd(int devNum, int byteNum, int wordData, int id, QString paramName, int binRawValue, double endValue, bool viewInLogFlag);
+    void param2FrontEnd(int devNum, int byteNum, int wordData, int id, QString paramName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData);
 public slots:
     void maskToForm(int _devNum, int _byteNum, int _id);
     void sendMaskToProfile(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag);
@@ -44,6 +44,8 @@ public slots:
 
 private:
     double oldEndValue = 1234.56;
+    int wordDataSize = 0;
+    bool isNewData = true;
 };
 
 #endif // BITMASKOBJ_H
