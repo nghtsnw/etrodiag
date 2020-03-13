@@ -60,7 +60,6 @@
 #include "bytesettingsform.h"
 #include "device.h"
 #include "masksettingsdialog.h"
-#include "treemodel.h"
 //#include "newconnect.h"
 
 QT_BEGIN_NAMESPACE
@@ -87,9 +86,7 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     void addConnection();
     newconnect *connection = nullptr;
-    //devSettingsForm *dvsf = nullptr;
     QLabel *statuslbl = nullptr;
-    //Device& getLinkOnDev(int devNum);
     void openMaskSettingsDialog();
     void createDevice(int devNum);
     void loadProfile(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType);
@@ -98,6 +95,8 @@ public:
     QString logFileName;
     void logFileCreator(QString string, bool redFlag);
     void cleanDevList();
+    void updValueArea(QString parameterName, QString devName, double endValue, bool isNewData);
+    //void timer4ValueItemBackgroundColor(QString name);
     ~MainWindow();
 
 
@@ -109,6 +108,7 @@ signals:
     void sendMaskData(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType);
     void getByteName(int devNum, int byteNum);
     void hideOtherDevButtons(bool, int _devNum);
+    void dvsfAfterCloseClear();
 
 public slots:
 
@@ -119,14 +119,15 @@ public slots:
     void frontendDataSort(int devNum, QString devName, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData);
     void setLogFlag(bool _logFlag);
     void devStatusMsg(QString _devName, QString status);
+//    void timer4ValueItemBackgroundColorRun(QString name);
 
 private slots:
-    //void handleError(QSerialPort::SerialPortError error);
-//    void resizeEventSlot();
+
 
 private:
     void initActionsConnections();
     QDateTime returnTimestamp();
+    QTimer *timer = new QTimer(this);
 
 private:
 
@@ -134,6 +135,7 @@ private:
 protected:
     Ui::MainWindow *m_ui = nullptr;
     virtual void resizeEvent(QResizeEvent *);
+   // virtual void timerEvent(QTimerEvent *event);
 
 
 public:

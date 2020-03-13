@@ -271,9 +271,12 @@ void SettingsDialog::on_profileSelectBox_currentTextChanged(const QString &arg1)
     nameFilter << arg1;
     profilesDir.setNameFilters(nameFilter);
     QFileInfoList infoList(profilesDir.entryInfoList());
+    if (infoList.size() > 0)
+    {
     QFileInfo fileInfo(infoList.at(0));
     QString currentProfile = fileInfo.filePath();
     selectedProfile = currentProfile;
     nameFilter.clear();
     infoList.clear();
+    }
 }

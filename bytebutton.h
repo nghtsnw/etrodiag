@@ -13,6 +13,7 @@ public:
     int byteNum;
     int devNum;
     int wordType = 0;
+    bool maskInside = false;
     void setByteNum(int _devNum, int _byteNum);
     void onByteButtonClicked();
     void transformToWord(int wordType);
@@ -30,6 +31,7 @@ public slots:
     void setWordType(int _devNum, int _byteNum, int _wordType);
     void changeButtonColor();
     void defaultButtonColor();
+    void setMaskInThisWord(int _devNum, int _byteNum);
 
 private:
     QTimer *timer = new QTimer;

@@ -32,7 +32,7 @@ void ByteSettingsForm::open(int _devNum, int _byteNum)
 
 void ByteSettingsForm::addMaskItem(int _devNum, QString _devName, int _byteNum, QString _byteName, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag, int _wordType)
 {
-    if (devNum == _devNum && byteNum == _byteNum && this->isVisible())
+    if (devNum == _devNum && byteNum == _byteNum)
     {
         bool findRow = 0;
         if (ui->masksWidget->rowCount() > 0)
@@ -76,7 +76,6 @@ void ByteSettingsForm::deleteMaskItem(int row)
 }
 void ByteSettingsForm::on_masksWidget_cellClicked(int row, int column)
 {    
-    qDebug() << QObject::sender() << ", row " << row << ", column " << column;
     if (column == 3) deleteMaskItem(row);
     else emit editMask(devNum, byteNum, ui->masksWidget->item(row,2)->text().toInt(0,10));
 }//найти откуда вызывается второй раз
@@ -110,7 +109,7 @@ void ByteSettingsForm::requestAllMasks()
 
 void ByteSettingsForm::updateMasksList(int _devNum, QString _devName, int _byteNum, QString _byteName, int _wordData, int _id, QString parameterName, int _binRawValue, float _endValue, bool viewInLogFlag, bool isNewData)
 {
-    if (devNum == _devNum && byteNum == _byteNum && this->isVisible())
+    if (devNum == _devNum && byteNum == _byteNum)
     {
 
         for (int i = 0; i < ui->masksWidget->rowCount(); i++) {
@@ -144,19 +143,11 @@ void ByteSettingsForm::setWordName(int _devNum, int _byteNum, QString _byteName)
         ui->wordNameEdit->setText(_byteName);
 }
 
-//void ByteSettingsForm::hideEvent(QHideEvent* e)
-//{
-//    if (e)
-//    {
-//        while (ui->masksWidget->rowCount() > 0)
-//                ui->masksWidget->removeRow(0);
-//        ui->hexNumber->clear();
-//    }
-//}
-
 void ByteSettingsForm::cleanForm()
 {
+    qDebug() << "preclean btsf. row count = " << ui->masksWidget->rowCount();
     while (ui->masksWidget->rowCount() > 0)
             ui->masksWidget->removeRow(0);
+    qDebug() << "clean btsf. row count = " << ui->masksWidget->rowCount();
     ui->hexNumber->clear();
 }

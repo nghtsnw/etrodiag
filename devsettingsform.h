@@ -17,11 +17,12 @@ public:
     void setDevName(int id, QString devName);
     int devNum;
     void initByteButtons(int id, QVector<int> data);
-    QLineEdit *devNameForm = new QLineEdit;
+    //QLineEdit *devNameForm = new QLineEdit;
     //void onByteBtnClicked();
     void updByteButtons(int _devNum, QVector<int> data);
     void retranslateByteButtonSetStatus(int byteNum, bool status);
-    void killChildren();
+    void afterCloseClearing();
+   // void enableNameEdit(bool b);
     ~devSettingsForm();
 
 signals:
@@ -32,17 +33,22 @@ signals:
     void setByteButtonStatus(int byteNum, bool status);
     void initByteButtonsWordLeight(int id,int count);
     void wordDataFullHex(int devNum, int byteNum, QString);
+    void inThisWordLivingMask(int _devNum, int _byteNum);
 public slots:
     //void onByteBtnClicked();
     //void openByteSettingsFormRX(int devNum, int byteNum);
     void wordTypeChangeRX(int _devNum, int _byteNum, int wordType);
+    void liveDataSlot(int _devNum, QString _devName, int _byteNum, QString _byteName, uint32_t _wordData, int _id, QString parameterName, int _binRawValue, double _endValue, bool viewInLogFlag, bool isNewData);
     //void retranslateByteButtonSetStatus(int byteNum, bool status);
 
 private slots:
-    void on_devNameEdit_editingFinished();
+    void on_devNameEditLine_editingFinished();
+
 
 private:
     Ui::devSettingsForm *m_ui;
+    //virtual void hideEvent(QHideEvent *event);
+    bool readyToSetDevNameToForm = true;
 };
 
 #endif // DEVSETTINGSFORM_H

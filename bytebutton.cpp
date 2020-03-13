@@ -95,6 +95,12 @@ void byteButton::setWordType(int _devNum, int _byteNum, int _wordType)
     }
 }
 
+void byteButton::setMaskInThisWord(int _devNum, int _byteNum)
+{
+    if (_byteNum == byteNum && _devNum == devNum && !maskInside)
+        maskInside = true;
+}
+
 void byteButton::changeButtonColor()
 {
     this->setStyleSheet("QPushButton{background:#00FF00;}");
@@ -104,7 +110,10 @@ void byteButton::changeButtonColor()
 void byteButton::defaultButtonColor()
 {
     timer->stop();
+    if (maskInside == false)
     this->setStyleSheet("QPushButton{background:none;}");
+    else if (maskInside == true)
+        this->setStyleSheet("QPushButton{background:#FFFF00;}");
 }
 
 QString byteButton::Int2Hex(int num) //для удобства конвертирования из инт в хекс

@@ -18,7 +18,7 @@ public:
     int byteNum;
     void open(int _devNum, int _byteNum);
     void getWordTypeFromProfile(int _devNum, int _byteNum);
-    void cleanMaskList();
+    //void cleanMaskList();
     void requestAllMasks();
     void deleteMaskItem(int row);
     void updateMasksList(int _devNum, QString _devName, int _byteNum, QString _byteName, int _wordData, int _id, QString parameterName, int _binRawValue, float _endValue, bool viewInLogFlag, bool isNewData);

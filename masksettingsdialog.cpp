@@ -24,7 +24,6 @@ void maskSettingsDialog::requestDataOnId(int _devNum, int _byteNum, int _id)
     id = _id;
     if (!(this->isVisible()))
     emit requestMaskData(_devNum, _byteNum, _id);
-
     //ответный сигнал от masksettingsdialog с запросом всех параметров маски bitmaskobject
 }
 

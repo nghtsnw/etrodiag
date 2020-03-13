@@ -12,9 +12,6 @@ devSettingsForm::devSettingsForm(QWidget *parent) :
     m_ui(new Ui::devSettingsForm)
 {
     m_ui->setupUi(this);
-    //запиливаем валидатор только ради того что бы работал сигнал завершения редактирования формы имени
-    QRegExpValidator *val = new QRegExpValidator(this);
-    devNameForm->setValidator(val);
 }
 
 devSettingsForm::~devSettingsForm()
@@ -22,23 +19,14 @@ devSettingsForm::~devSettingsForm()
     delete m_ui;
 }
 
-void devSettingsForm::killChildren() //очистка формы от объектов кнопок
-{
-    QList<byteButton*> devChildList = this->findChildren<byteButton*>(); //времянка для поиска бага
-    qDebug() << "dev childrens living = " << devChildList.size();
-    QListIterator<byteButton*> devChildListIt(devChildList);
-    while (devChildListIt.hasNext())
-        devChildListIt.next()->~byteButton();
-    devChildList = this->findChildren<byteButton*>(); //времянка для поиска бага
-    qDebug() << "dev childrens after delete = " << devChildList.size();
-
-    m_ui->devNameEdit->clear();
-}
-
 void devSettingsForm::setDevName(int id, QString devName) //получаем имя из профиля в форму
 {
-    if (id == devNum && devName != m_ui->devNameEdit->text())
-    m_ui->devNameEdit->setText(devName);
+    if (id == devNum && readyToSetDevNameToForm)
+    {
+        m_ui->devNameEditLine->setText(devName);
+        readyToSetDevNameToForm = false;
+        m_ui->devNameEditLine->setEnabled(true);
+    }
 }
 
 void devSettingsForm::initByteButtons(int id, QVector<int> data)
@@ -54,10 +42,11 @@ void devSettingsForm::initByteButtons(int id, QVector<int> data)
         byteButton *byteBtn = new byteButton;
         connect(byteBtn, &byteButton::setButton, this, &devSettingsForm::retranslateByteButtonSetStatus);
         connect(this, &devSettingsForm::setByteButtonStatus, byteBtn, &byteButton::setButtonStatus);
-        connect(byteBtn, &byteButton::openByteSettingsForm, this, &devSettingsForm::openByteSettingsFormTX); //ретрансляция для дальнейшей передачи в майнвиндов
+        connect(byteBtn, &byteButton::openByteSettingsForm, this, &devSettingsForm::openByteSettingsFormTX);
         connect(this, &devSettingsForm::updateBtnDataSIG, byteBtn, &byteButton::updateBtnData);
         connect (this, &devSettingsForm::wordType2ByteBtn, byteBtn, &byteButton::setWordType);
         connect (byteBtn, &byteButton::wordDataFullHex, this, &devSettingsForm::wordDataFullHex);
+        connect (this, &devSettingsForm::inThisWordLivingMask, byteBtn, &byteButton::setMaskInThisWord);
         QString hexBtnTxt = QString("%1").arg(data.at(count),0,16).toUpper();
         byteBtn->setText(hexBtnTxt);
         byteBtn->setByteNum(id, count);
@@ -68,21 +57,23 @@ void devSettingsForm::initByteButtons(int id, QVector<int> data)
 
 }
 
+void devSettingsForm::liveDataSlot(int _devNum, QString _devName, int _byteNum, QString _byteName, uint32_t _wordData, int _id, QString parameterName, int _binRawValue, double _endValue, bool viewInLogFlag, bool isNewData)
+{
+    //получаем живые данные, что-бы определить по факту их наличия что в слове есть маски и соответственно установить кнопке фоновый цвет, например жёлтый
+    emit inThisWordLivingMask(_devNum, _byteNum);
+}
+
 void devSettingsForm::updByteButtons(int _devNum, QVector<int> data)
 {
     emit updateBtnDataSIG(_devNum, data);
 }
 
-void devSettingsForm::on_devNameEdit_editingFinished()
+void devSettingsForm::on_devNameEditLine_editingFinished()
 {
-    QString text = m_ui->devNameEdit->text();
+    QString text = m_ui->devNameEditLine->text();
     emit returnDevNameAfterEdit(devNum, text);
 }
 
-//void devSettingsForm::openByteSettingsFormRX(int devNum, int byteNum)
-//{//принимаем сигнал от кнопки, отправляем то же в mainwindow чтобы открыть bytesettingsform
-//    emit openByteSettingsFormTX(devNum, byteNum);
-//}
 
 void devSettingsForm::wordTypeChangeRX(int _devNum, int _byteNum, int wordType)
 {//прослойка для передачи сигнала из bytesettingsform в bytebutton
@@ -94,5 +85,15 @@ void devSettingsForm::retranslateByteButtonSetStatus(int byteNum, bool status)
     emit setByteButtonStatus(byteNum, status);
 }
 
-
-
+void devSettingsForm::afterCloseClearing()
+{//очистка формы от объектов кнопок
+    QList<byteButton*> devChildList = this->findChildren<byteButton*>();
+    QListIterator<byteButton*> devChildListIt(devChildList);
+    while (devChildListIt.hasNext())
+        devChildListIt.next()->~byteButton();
+    devChildList = this->findChildren<byteButton*>();
+    //очистка формы ввода имени устройства и блокировка ввода
+    m_ui->devNameEditLine->clear();
+    m_ui->devNameEditLine->setDisabled(true);
+    readyToSetDevNameToForm = true;
+}

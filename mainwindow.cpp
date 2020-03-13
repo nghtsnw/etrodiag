@@ -63,24 +63,19 @@
 #include "devsettingsform.h"
 #include "bytesettingsform.h"
 #include "bytebutton.h"
-#include "treemodel.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), statuslbl (new QLabel), m_ui (new Ui::MainWindow)
 
 {
     m_ui->setupUi(this);
-
-    //QLabel *statuslbl = new QLabel(this);
     statusBar()->addWidget(statuslbl);
     statuslbl->setText("Make Electroagregat great again!");
     addConnection();
     connect (connection, &newconnect::loadMask, this, &MainWindow::loadProfile);
     connect (&btsf, &ByteSettingsForm::editMask, &masksd, &maskSettingsDialog::requestDataOnId);
-//    connect (this, &MainWindow::resizeEvent, this, &MainWindow::resizeEventSlot);
-//    m_ui->valueArea->hide();
+    connect (this, &MainWindow::dvsfAfterCloseClear, &dvsf, &devSettingsForm::afterCloseClearing);
 }
-
 
 MainWindow::~MainWindow()
 {
@@ -99,10 +94,8 @@ void MainWindow::addConnection()
 void MainWindow::showStatusMessage(QString message)
 {
     statuslbl->setText(message);
-    //m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + message + "</span></p>");
     logFileCreator(message, true);
 }
-
 
 void MainWindow::addDeviceToList(QVector<int> ddata)
 {
@@ -141,7 +134,6 @@ void MainWindow::createDevice(int devNum)
     dev->setText(QString::number(devNum,16));
     dev->show();
     connect (this, &MainWindow::devUpdate, dev, &Device::updateData);
-//    connect (dev, &Device::txtToGui, this, &MainWindow::txtToGuiFunc);
     connect (dev, &Device::openDevSettSig, this, &MainWindow::openDevSett);
     connect (dev, &Device::clicked, dev, &Device::clickedF);
     connect (this, &MainWindow::getDevName, dev, &Device::getDeviceName);
@@ -168,6 +160,7 @@ void MainWindow::createDevice(int devNum)
     connect (dev, &Device::param2FrontEndTX, this, &MainWindow::frontendDataSort);
     connect (dev, &Device::param2FrontEndTX, &masksd, &maskSettingsDialog::liveDataSlot);
     connect (dev, &Device::param2FrontEndTX, &btsf, &ByteSettingsForm::updateMasksList);
+    connect (dev, &Device::param2FrontEndTX, &dvsf, &devSettingsForm::liveDataSlot);
     connect (connection, &newconnect::saveAllMasks, dev, &Device::requestMasks4Saving);
     connect (dev, &Device::allMasksToListTX, connection, &newconnect::saveProfileSlot4Masks);
     connect (this, &MainWindow::sendMaskData, dev, &Device::loadMaskRX);
@@ -201,25 +194,26 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
     dvsf.setParent(m_ui->rightFrame);
     if (m_ui->logArea->isHidden())
     {
+        dvsf.hide();
+        emit dvsfAfterCloseClear();
         m_ui->logArea->show();
+        m_ui->valueArea->clear();
+        m_ui->valueArea->setRowCount(0);
         m_ui->valueArea->show();
         m_ui->writeLogCheckBox->show();
         emit hideOtherDevButtons(false, devNum);
         connection->prepareToSaveProfile();
-        connection->saveProfile();
-        //dvsf.devNameForm->setReadOnly(true);
-        dvsf.hide();
-        dvsf.killChildren();
+        connection->saveProfile();        
     }
     else
     {
         m_ui->logArea->hide();
         m_ui->valueArea->hide();
         m_ui->writeLogCheckBox->hide();
-        emit hideOtherDevButtons(true, devNum);
-        emit getDevName(devNum);
+        emit hideOtherDevButtons(true, devNum);        
         dvsf.initByteButtons(devNum,data);
-        dvsf.show();
+        emit getDevName(devNum);
+        dvsf.show();        
         dvsf.resize(m_ui->rightFrame->size());        
     }
     }
@@ -232,7 +226,9 @@ void MainWindow::openByteSett(int devNum, int byteNum)
     {
         btsf.setParent(m_ui->rightFrame);
         dvsf.hide();
+        btsf.cleanForm();
         btsf.open(devNum, byteNum);
+        btsf.resize(m_ui->rightFrame->size());
         btsf.show();
         emit getByteName(devNum, byteNum);
     }
@@ -256,22 +252,56 @@ QDateTime MainWindow::returnTimestamp()
     return dt3;
 }
 
-void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData)
-{    
-    if (dvsf.isVisible() && dvsf.devNameForm->text().isEmpty())
+void MainWindow::updValueArea(QString parameterName, QString devName, double endValue, bool isNewData)
+{
     {
-        if (devNum == dvsf.devNum)
+        bool findRow = false;
+        QString value2str;
+        QString namesUnited = (parameterName+'@'+devName);
+        value2str.setNum(endValue, 'g', 6);
+        if (m_ui->valueArea->rowCount() > 0)
         {
-            dvsf.setDevName(devNum, devName);
-            //dvsf.devNameForm->setReadOnly(false);
+            for (int i = 0; i < m_ui->valueArea->rowCount(); i++)
+            {
+                if ((namesUnited) == m_ui->valueArea->item(i,0)->text())
+                {
+                    findRow = true;
+                    if (value2str != m_ui->valueArea->item(i,1)->text())
+                    {
+                        m_ui->valueArea->item(i,1)->setText(value2str);
+                        m_ui->valueArea->item(i,1)->setBackgroundColor(Qt::green);
+                       //метод setbackgroundcolor устаревший, по возможности переписать на делегаты
+                    }
+                    else if (value2str == m_ui->valueArea->item(i,1)->text())
+                        m_ui->valueArea->item(i,1)->setBackgroundColor(Qt::white);
+                }
+            }
+        }
+        if (!findRow)
+        {
+            m_ui->valueArea->setRowCount(m_ui->valueArea->rowCount()+1); //добавляем новую строку
+            int row = m_ui->valueArea->rowCount()-1;//определяем индекс строки
+            QTableWidgetItem *nameItem = new QTableWidgetItem;
+            nameItem->setText(parameterName+'@'+devName);
+            m_ui->valueArea->setItem(row, 0, nameItem);
+            QTableWidgetItem *valueItem = new QTableWidgetItem;
+            valueItem->setText(value2str);
+            m_ui->valueArea->setItem(row, 1, valueItem);
         }
     }
+}
+
+void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData)
+{    
+    if (dvsf.isVisible() && devNum == dvsf.devNum)
+        dvsf.setDevName(devNum, devName);
 
     if (viewInLogFlag && isNewData)
     {        
         QString formString(parameterName + "@" + devName + ": " + QString::number(endValue,'g',6));
         logFileCreator(formString, false);
     }
+    updValueArea(parameterName, devName, endValue, isNewData);
 }
 
 void MainWindow::logFileCreator(QString string, bool redFlag)
@@ -280,7 +310,6 @@ void MainWindow::logFileCreator(QString string, bool redFlag)
     if (!redFlag)
     m_ui->logArea->appendPlainText(stringWithTime);
     else m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + stringWithTime + "</span></p>");
-
 
     QFile newLogFile;
     if (m_ui->writeLogCheckBox->isChecked())
@@ -298,9 +327,11 @@ void MainWindow::logFileCreator(QString string, bool redFlag)
             }
             newLogFile.setFileName(logFileName);
             if (!newLogFile.exists())
-            newLogFile.open(QIODevice::WriteOnly|QIODevice::Text);
-            newLogFile.open(QIODevice::Append|QIODevice::Text);
-            showStatusMessage("Start write log file " + newLogFile.fileName());
+            {
+                newLogFile.open(QIODevice::WriteOnly|QIODevice::Text);
+                showStatusMessage("Start write log file " + newLogFile.fileName());
+            }
+            else newLogFile.open(QIODevice::Append|QIODevice::Text);
         }
         if (newLogFile.isOpen())
         {
