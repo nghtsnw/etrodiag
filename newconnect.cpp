@@ -23,7 +23,8 @@ newconnect::newconnect(QWidget *parent) :
     ui->setupUi(this);
     m_console->setEnabled(false);
 
-    m_console->setParent(ui->label);
+    m_console->setParent(ui->consoleFrame);
+    //m_console->resize(this);
 
     m_console->show();
 
@@ -33,6 +34,8 @@ newconnect::newconnect(QWidget *parent) :
     connect(gstream, &getStream::giveMyByte, datapool, &dataprofiler::getByte);
     connect(datapool, SIGNAL(readyGetByte()), gstream, SLOT(profilerReadyToReceive()));
     connect(datapool, &dataprofiler::deviceData, this, &newconnect::transData);
+    connect (m_settings, &SettingsDialog::restoreConsoleAndButtons, this, &newconnect::restoreWindowAfterApplySettings);
+    on_pushButton_clicked();
 }
 
 newconnect::~newconnect()
@@ -43,6 +46,13 @@ newconnect::~newconnect()
 
 void newconnect::on_pushButton_clicked()
 {
+    m_settings->setParent(this);
+    m_settings->resize(ui->consoleFrame->size());
+    m_console->hide();
+    ui->pushButton->hide();
+    ui->pushButton_2->hide();
+    ui->consoleFrame->hide();
+    ui->pushButton_3->hide(); //временная кнопка
     m_settings->show();
 }
 
@@ -50,6 +60,7 @@ void newconnect::openSerialPort()
 {
     readProfile();
     const SettingsDialog::Settings p = m_settings->settings();
+    qDebug() << "Open serial port " << p.name;
     m_serial->setPortName(p.name);
     m_serial->setBaudRate(p.baudRate);
     m_serial->setDataBits(p.dataBits);
@@ -133,7 +144,9 @@ void newconnect::transData(QVector<int> snapshot)
 
 void newconnect::prepareToSaveProfile()
 {
+    qDebug() << "Check access to m_settings. " << m_settings->settings().name;
     const SettingsDialog::Settings p = m_settings->settings();
+
     if (!p.readOnlyProfile)
     {//очищаем список, выставляем разрешение для дальнейших операций по сохранению, даём сигнал на запрос всех масок
         maskVectorsList = this->findChildren<txtmaskobj*>();
@@ -226,4 +239,27 @@ void newconnect::readProfile()
             emit loadMask(strLst.at(2).toInt(0,10),strLst.at(4),strLst.at(3).toInt(0,10),strLst.at(5),strLst.at(1).toInt(0,10),strLst.at(6),strLst.at(7),0,strLst.at(8).toDouble(),strLst.at(9).toDouble(),((QString::compare(strLst.at(10), "true") == 0) ? true : false),strLst.at(11).toInt(0,10));
         strLst.clear();
     }
+}
+
+void newconnect::resizeEvent(QResizeEvent *event)
+{
+    if (event)
+    {
+        m_console->resize(event->size());
+        m_settings->resize(event->size());
+    }
+}
+
+void newconnect::restoreWindowAfterApplySettings()
+{
+    m_console->show();
+    ui->pushButton->show();
+    ui->pushButton_2->show();
+    ui->consoleFrame->show();
+    ui->pushButton_3->show(); //временная кнопка
+}
+
+void newconnect::on_pushButton_3_clicked()
+{
+        qDebug() << "return address m_settings: " << &m_settings;
 }

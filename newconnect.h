@@ -46,7 +46,8 @@ void loadMask(int devNum, QString devName, int byteNum, QString byteName, int id
 public slots:
 
 void saveProfileSlot4Masks(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType);
-
+void restoreWindowAfterApplySettings();
+void on_pushButton_3_clicked();
 
 private slots:
     void on_pushButton_clicked();
@@ -60,9 +61,15 @@ private slots:
 
     void on_pushButton_2_clicked();
 
+
+
 private:
     Ui::newconnect *ui;
     QString message;
+
+
+protected:
+    virtual void resizeEvent(QResizeEvent *event);
 };
 
 #endif // NEWCONNECT_H

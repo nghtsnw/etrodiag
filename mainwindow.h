@@ -123,6 +123,9 @@ public slots:
 
 private slots:
 
+    void on_pushButton_clicked();
+
+    void on_tabWidget_currentChanged(int index);
 
 private:
     void initActionsConnections();

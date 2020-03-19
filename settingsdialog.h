@@ -52,7 +52,7 @@
 #ifndef SETTINGSDIALOG_H
 #define SETTINGSDIALOG_H
 
-#include <QDialog>
+#include <QWidget>
 #include <QSerialPort>
 #include <QLineEdit>
 
@@ -66,7 +66,7 @@ class QIntValidator;
 
 QT_END_NAMESPACE
 
-class SettingsDialog : public QDialog
+class SettingsDialog : public QWidget
 {
     Q_OBJECT
 
@@ -93,8 +93,10 @@ public:
    // QLineEdit newProfileName;
     QString selectedProfile;
 
-
     Settings settings() const;
+
+signals:
+    void restoreConsoleAndButtons();
 
 private slots:
     void showPortInfo(int idx);
