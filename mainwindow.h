@@ -60,7 +60,6 @@
 #include "bytesettingsform.h"
 #include "device.h"
 #include "masksettingsdialog.h"
-//#include "newconnect.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -96,7 +95,6 @@ public:
     void logFileCreator(QString string, bool redFlag);
     void cleanDevList();
     void updValueArea(QString parameterName, QString devName, double endValue, bool isNewData);
-    SettingsDialog *m_settings_bicycle = nullptr;
     ~MainWindow();
 
 

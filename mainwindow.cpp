@@ -84,7 +84,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::addConnection()
 {
-    newconnect *connection = new newconnect;
+    connection = new newconnect;
     m_ui->horizontalLayout_3->addWidget(connection);
 
     connect (connection, &newconnect::loadMask, this, &MainWindow::loadProfile);
@@ -172,7 +172,6 @@ void MainWindow::createDevice(int devNum)
     connect (&btsf, &ByteSettingsForm::saveByteName, dev, &Device::saveByteNameRX);
     connect (this, &MainWindow::hideOtherDevButtons, dev, &Device::hideDevButton);
     connect (dev, &Device::devStatusMessage, this, &MainWindow::devStatusMsg);
-//следующие два соединения не работают, нужно починить
     connect (connection, &newconnect::saveAllMasks, dev, &Device::requestMasks4Saving);
     connect (dev, &Device::allMasksToListTX, connection, &newconnect::saveProfileSlot4Masks);
 
