@@ -91,6 +91,8 @@ void MainWindow::addConnection()
     connect (connection, SIGNAL(sendStatusStr(QString)), SLOT(showStatusMessage(QString)));
     connect (connection, &newconnect::transmitData, this, &MainWindow::addDeviceToList);
     connect (connection, &newconnect::cleanDevListSig, this, &MainWindow::cleanDevList);
+    connect (this, &MainWindow::prepareToSaveProfile, connection, &newconnect::prepareToSaveProfile);
+    connect (this, &MainWindow::saveProfile, connection, &newconnect::saveProfile);
     connection->show();
 
 }
@@ -135,8 +137,7 @@ void MainWindow::createDevice(int devNum)
     Device *dev = new Device(devNum);
     dev->setParent(m_ui->devArea);
     m_ui->devAreaLay->addWidget(dev);
-    dev->setText(QString::number(devNum,16));
-    dev->show();
+    dev->setText(QString::number(devNum,16));    
     connect (this, &MainWindow::devUpdate, dev, &Device::updateData);
     connect (dev, &Device::openDevSettSig, this, &MainWindow::openDevSett);
     connect (dev, &Device::clicked, dev, &Device::clickedF);
@@ -155,9 +156,7 @@ void MainWindow::createDevice(int devNum)
     connect (&masksd, &maskSettingsDialog::requestMaskData, dev, &Device::requestMaskDataRX);
     connect (&btsf, &ByteSettingsForm::requestAllMaskToList, dev, &Device::requestMaskDataRX);
     connect (dev, &Device::maskData2FormTX, &masksd, &maskSettingsDialog::getDataOnId);
-    connect (dev, &Device::allMasksToListTX, &btsf, &ByteSettingsForm::addMaskItem);
-    connect (connection, &newconnect::saveAllMasks, dev, &Device::requestMasks4Saving);
-    connect (dev, &Device::allMasksToListTX, connection, &newconnect::saveProfileSlot4Masks);
+    connect (dev, &Device::allMasksToListTX, &btsf, &ByteSettingsForm::addMaskItem);    
     connect (&masksd, &maskSettingsDialog::sendMaskData, &btsf, &ByteSettingsForm::addMaskItem);
     connect (&masksd, &maskSettingsDialog::requestMaskData, this, &MainWindow::openMaskSettingsDialog);
     connect (&masksd, &maskSettingsDialog::sendMaskData, dev, &Device::sendDataToProfileRX);
@@ -173,6 +172,11 @@ void MainWindow::createDevice(int devNum)
     connect (&btsf, &ByteSettingsForm::saveByteName, dev, &Device::saveByteNameRX);
     connect (this, &MainWindow::hideOtherDevButtons, dev, &Device::hideDevButton);
     connect (dev, &Device::devStatusMessage, this, &MainWindow::devStatusMsg);
+//следующие два соединения не работают, нужно починить
+    connect (connection, &newconnect::saveAllMasks, dev, &Device::requestMasks4Saving);
+    connect (dev, &Device::allMasksToListTX, connection, &newconnect::saveProfileSlot4Masks);
+
+    dev->show();
 }
 
 void MainWindow::openDevSett(int devNum, QVector<int> data)
@@ -206,12 +210,13 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
         m_ui->valueArea->show();
         m_ui->writeLogCheckBox->show();
         emit hideOtherDevButtons(false, devNum);
-        connection->prepareToSaveProfile();
-        connection->saveProfile();        
+//        connection->prepareToSaveProfile();
+//        connection->saveProfile();
+        emit prepareToSaveProfile();
+        emit saveProfile();
     }
     else
     {
-        //connection->on_pushButton_3_clicked(); //проверка доступности настроек
         m_ui->logArea->hide();
         m_ui->valueArea->hide();
         m_ui->writeLogCheckBox->hide();        
@@ -399,14 +404,4 @@ void MainWindow::cleanDevList()
     QListIterator<Device*> vlayChildListIt(vlayChildList);
     while(vlayChildListIt.hasNext())
         vlayChildListIt.next()->~Device();
-}
-
-void MainWindow::on_pushButton_clicked()
-{
-    connection->on_pushButton_3_clicked(); //проверка доступности настроек
-}
-
-void MainWindow::on_tabWidget_currentChanged(int index)
-{
-    qDebug() << "change current tab to " << index;
 }

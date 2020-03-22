@@ -22,10 +22,7 @@ newconnect::newconnect(QWidget *parent) :
 {
     ui->setupUi(this);
     m_console->setEnabled(false);
-
     m_console->setParent(ui->consoleFrame);
-    //m_console->resize(this);
-
     m_console->show();
 
     connect(m_serial, &QSerialPort::errorOccurred, this, &newconnect::handleError);
@@ -35,7 +32,9 @@ newconnect::newconnect(QWidget *parent) :
     connect(datapool, SIGNAL(readyGetByte()), gstream, SLOT(profilerReadyToReceive()));
     connect(datapool, &dataprofiler::deviceData, this, &newconnect::transData);
     connect (m_settings, &SettingsDialog::restoreConsoleAndButtons, this, &newconnect::restoreWindowAfterApplySettings);
+
     on_pushButton_clicked();
+
 }
 
 newconnect::~newconnect()
@@ -52,13 +51,11 @@ void newconnect::on_pushButton_clicked()
     ui->pushButton->hide();
     ui->pushButton_2->hide();
     ui->consoleFrame->hide();
-    ui->pushButton_3->hide(); //временная кнопка
     m_settings->show();
 }
 
 void newconnect::openSerialPort()
-{
-    readProfile();
+{    
     const SettingsDialog::Settings p = m_settings->settings();
     qDebug() << "Open serial port " << p.name;
     m_serial->setPortName(p.name);
@@ -68,6 +65,7 @@ void newconnect::openSerialPort()
     m_serial->setStopBits(p.stopBits);
     m_serial->setFlowControl(p.flowControl);
     if (m_serial->open(QIODevice::ReadWrite)) {
+        readProfile();
         m_console->setEnabled(true);
         m_console->setLocalEchoEnabled(p.localEchoEnabled);        
         showStatusMessage(tr("Connected to %1 : %2, %3, %4, %5, %6, %7")
@@ -144,7 +142,6 @@ void newconnect::transData(QVector<int> snapshot)
 
 void newconnect::prepareToSaveProfile()
 {
-    qDebug() << "Check access to m_settings. " << m_settings->settings().name;
     const SettingsDialog::Settings p = m_settings->settings();
 
     if (!p.readOnlyProfile)
@@ -155,6 +152,7 @@ void newconnect::prepareToSaveProfile()
         while (maskVectorsListIt.hasNext())
         maskVectorsListIt.next()->~txtmaskobj();
         permission2SaveMasks = true;
+        qDebug() << "prepare to save profile";
         emit saveAllMasks();
     }
 }
@@ -164,6 +162,7 @@ void newconnect::saveProfileSlot4Masks(int devNum, QString devName, int byteNum,
                //перед сохранением все маски сигналом отправляются сюда, что-бы образовать перечень масок
                //проверяется что этой маски тут ещё нет, после этого создаётся список с текстовым перечнем всех параметров
                //создаются только описания масок, само сохранение будет в другой функции
+                qDebug() << "create obj to save mask " << paramName;
                if (permission2SaveMasks)
                {
                 maskVectorsList = this->findChildren<txtmaskobj*>();
@@ -192,6 +191,7 @@ void newconnect::saveProfileSlot4Masks(int devNum, QString devName, int byteNum,
                    maskList.append((viewInLogFlag ?"true":"false"));//10
                    maskList.append(QString::number(wordType));//11
                    txtmaskobj *savingMask = new txtmaskobj(maskList);
+                   qDebug() << "create obj to save mask " << maskList[6];
                    savingMask->setParent(this);
                    maskList.clear();
                }
@@ -213,6 +213,7 @@ void newconnect::saveProfile()
     txtStream << info.fileName() << "\n";
     while (maskVectorsListIt.hasNext())
     {
+        qDebug() << "saving in progress...";
         QListIterator<QString> lstIt(maskVectorsListIt.peekNext()->lst);
         while (lstIt.hasNext())
         txtStream << lstIt.next() << "\t";
@@ -256,10 +257,4 @@ void newconnect::restoreWindowAfterApplySettings()
     ui->pushButton->show();
     ui->pushButton_2->show();
     ui->consoleFrame->show();
-    ui->pushButton_3->show(); //временная кнопка
-}
-
-void newconnect::on_pushButton_3_clicked()
-{
-        qDebug() << "return address m_settings: " << &m_settings;
 }

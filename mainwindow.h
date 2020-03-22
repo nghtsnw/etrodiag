@@ -96,7 +96,7 @@ public:
     void logFileCreator(QString string, bool redFlag);
     void cleanDevList();
     void updValueArea(QString parameterName, QString devName, double endValue, bool isNewData);
-    //void timer4ValueItemBackgroundColor(QString name);
+    SettingsDialog *m_settings_bicycle = nullptr;
     ~MainWindow();
 
 
@@ -109,7 +109,8 @@ signals:
     void getByteName(int devNum, int byteNum);
     void hideOtherDevButtons(bool, int _devNum);
     void dvsfAfterCloseClear();
-
+    void prepareToSaveProfile();
+    void saveProfile();
 public slots:
 
     void showStatusMessage(QString message);
@@ -119,13 +120,8 @@ public slots:
     void frontendDataSort(int devNum, QString devName, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData);
     void setLogFlag(bool _logFlag);
     void devStatusMsg(QString _devName, QString status);
-//    void timer4ValueItemBackgroundColorRun(QString name);
 
 private slots:
-
-    void on_pushButton_clicked();
-
-    void on_tabWidget_currentChanged(int index);
 
 private:
     void initActionsConnections();
@@ -138,11 +134,9 @@ private:
 protected:
     Ui::MainWindow *m_ui = nullptr;
     virtual void resizeEvent(QResizeEvent *);
-   // virtual void timerEvent(QTimerEvent *event);
-
 
 public:
-    devSettingsForm dvsf;//(m_ui->rightFrame);
+    devSettingsForm dvsf;
     ByteSettingsForm btsf;
     maskSettingsDialog masksd;
 

@@ -16,7 +16,6 @@ byteDefinition::byteDefinition()//(QObject *parent)
 
 byteDefinition::byteDefinition(int numDev, int byteNum, int data)
 {
-    //qDebug() << "new byte def";
     devNum = numDev;
     th_byteNum = byteNum;
     th_data = data;

@@ -30,9 +30,9 @@ public:
     dataprofiler *datapool = nullptr;
     QList<txtmaskobj*> maskVectorsList;
     void readProfile();
-    void saveProfile();
+
     bool permission2SaveMasks = false;
-    void prepareToSaveProfile();
+
     ~newconnect();
 
 signals:
@@ -47,7 +47,8 @@ public slots:
 
 void saveProfileSlot4Masks(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType);
 void restoreWindowAfterApplySettings();
-void on_pushButton_3_clicked();
+void prepareToSaveProfile();
+void saveProfile();
 
 private slots:
     void on_pushButton_clicked();

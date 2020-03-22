@@ -56,12 +56,11 @@
 Console::Console(QWidget *parent) :
     QPlainTextEdit(parent)
 {
-    document()->setMaximumBlockCount(400);
+    document()->setMaximumBlockCount(100);
     QPalette p = palette();
     p.setColor(QPalette::Base, Qt::darkBlue);
     p.setColor(QPalette::Text, Qt::gray);
     setPalette(p);
-    //this->resize(1000, 3000);
 }
 
 void Console::putData(const QByteArray &data)

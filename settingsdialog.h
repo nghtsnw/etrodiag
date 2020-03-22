@@ -90,7 +90,6 @@ public:
 
     explicit SettingsDialog(QWidget *parent = nullptr);
     ~SettingsDialog();
-   // QLineEdit newProfileName;
     QString selectedProfile;
 
     Settings settings() const;

@@ -283,11 +283,3 @@ void SettingsDialog::on_profileSelectBox_currentTextChanged(const QString &arg1)
     infoList.clear();
     }
 }
-
-//void SettingsDialog::resizeEvent(QResizeEvent *event)
-//{
-//    if (event)
-//    {
-//        m_console->resize(ui->consoleFrame->size());
-//    }
-//}
