@@ -22,9 +22,7 @@ newconnect::newconnect(QWidget *parent) :
 {
     ui->setupUi(this);
     m_console->setEnabled(false);
-
-    m_console->setParent(ui->label);
-
+    m_console->setParent(ui->consoleFrame);
     m_console->show();
 
     connect(m_serial, &QSerialPort::errorOccurred, this, &newconnect::handleError);
@@ -33,6 +31,10 @@ newconnect::newconnect(QWidget *parent) :
     connect(gstream, &getStream::giveMyByte, datapool, &dataprofiler::getByte);
     connect(datapool, SIGNAL(readyGetByte()), gstream, SLOT(profilerReadyToReceive()));
     connect(datapool, &dataprofiler::deviceData, this, &newconnect::transData);
+    connect (m_settings, &SettingsDialog::restoreConsoleAndButtons, this, &newconnect::restoreWindowAfterApplySettings);
+
+    on_pushButton_clicked();
+
 }
 
 newconnect::~newconnect()
@@ -43,13 +45,19 @@ newconnect::~newconnect()
 
 void newconnect::on_pushButton_clicked()
 {
+    m_settings->setParent(this);
+    //m_settings->resize(ui->consoleFrame->size());
+    m_console->hide();
+    ui->pushButton->hide();
+    ui->pushButton_2->hide();
+    ui->consoleFrame->hide();
     m_settings->show();
 }
 
 void newconnect::openSerialPort()
-{
-    readProfile();
+{    
     const SettingsDialog::Settings p = m_settings->settings();
+    qDebug() << "Open serial port " << p.name;
     m_serial->setPortName(p.name);
     m_serial->setBaudRate(p.baudRate);
     m_serial->setDataBits(p.dataBits);
@@ -57,6 +65,7 @@ void newconnect::openSerialPort()
     m_serial->setStopBits(p.stopBits);
     m_serial->setFlowControl(p.flowControl);
     if (m_serial->open(QIODevice::ReadWrite)) {
+        readProfile();
         m_console->setEnabled(true);
         m_console->setLocalEchoEnabled(p.localEchoEnabled);        
         showStatusMessage(tr("Connected to %1 : %2, %3, %4, %5, %6, %7")
@@ -134,6 +143,7 @@ void newconnect::transData(QVector<int> snapshot)
 void newconnect::prepareToSaveProfile()
 {
     const SettingsDialog::Settings p = m_settings->settings();
+
     if (!p.readOnlyProfile)
     {//очищаем список, выставляем разрешение для дальнейших операций по сохранению, даём сигнал на запрос всех масок
         maskVectorsList = this->findChildren<txtmaskobj*>();
@@ -142,6 +152,7 @@ void newconnect::prepareToSaveProfile()
         while (maskVectorsListIt.hasNext())
         maskVectorsListIt.next()->~txtmaskobj();
         permission2SaveMasks = true;
+        qDebug() << "prepare to save profile";
         emit saveAllMasks();
     }
 }
@@ -151,6 +162,7 @@ void newconnect::saveProfileSlot4Masks(int devNum, QString devName, int byteNum,
                //перед сохранением все маски сигналом отправляются сюда, что-бы образовать перечень масок
                //проверяется что этой маски тут ещё нет, после этого создаётся список с текстовым перечнем всех параметров
                //создаются только описания масок, само сохранение будет в другой функции
+                qDebug() << "create obj to save mask " << paramName;
                if (permission2SaveMasks)
                {
                 maskVectorsList = this->findChildren<txtmaskobj*>();
@@ -179,6 +191,7 @@ void newconnect::saveProfileSlot4Masks(int devNum, QString devName, int byteNum,
                    maskList.append((viewInLogFlag ?"true":"false"));//10
                    maskList.append(QString::number(wordType));//11
                    txtmaskobj *savingMask = new txtmaskobj(maskList);
+                   qDebug() << "create obj to save mask " << maskList[6];
                    savingMask->setParent(this);
                    maskList.clear();
                }
@@ -200,6 +213,7 @@ void newconnect::saveProfile()
     txtStream << info.fileName() << "\n";
     while (maskVectorsListIt.hasNext())
     {
+        qDebug() << "saving in progress...";
         QListIterator<QString> lstIt(maskVectorsListIt.peekNext()->lst);
         while (lstIt.hasNext())
         txtStream << lstIt.next() << "\t";
@@ -226,4 +240,21 @@ void newconnect::readProfile()
             emit loadMask(strLst.at(2).toInt(0,10),strLst.at(4),strLst.at(3).toInt(0,10),strLst.at(5),strLst.at(1).toInt(0,10),strLst.at(6),strLst.at(7),0,strLst.at(8).toDouble(),strLst.at(9).toDouble(),((QString::compare(strLst.at(10), "true") == 0) ? true : false),strLst.at(11).toInt(0,10));
         strLst.clear();
     }
+}
+
+void newconnect::resizeEvent(QResizeEvent *event)
+{
+    if (event)
+    {
+        m_console->resize(event->size());
+        m_settings->resize(event->size());
+    }
+}
+
+void newconnect::restoreWindowAfterApplySettings()
+{
+    m_console->show();
+    ui->pushButton->show();
+    ui->pushButton_2->show();
+    ui->consoleFrame->show();
 }

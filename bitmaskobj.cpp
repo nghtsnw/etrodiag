@@ -51,7 +51,10 @@ void bitMaskObj::allMasksToList(int _devNum, int _byteNum)
 //сигнал от bytesettingsform с запросом всех масок байта в список (id = 999)
 {
     if (_devNum == devNum && _byteNum == byteNum)
-    emit maskToListSIG(devNum, byteNum, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType);
+    {
+        qDebug() << "emit mask " << paramName << " to saving";
+        emit maskToListSIG(devNum, byteNum, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType);
+    }
 }
 
 
@@ -70,16 +73,14 @@ void bitMaskObj::calculateParamShift()
     {//тодо: перенести это вычисление в masksettingsdialog, и отправлять сигналом уже готовое число а не строку
         if (paramMask.at(i) == '1')
            paramMask4calcShift+=pow(2,y);
-    }
-    qDebug() << "paramMask4calcShift = " << paramMask4calcShift;
+    }    
     while(!stopFlag)
     {
 
         if (!(paramMask4calcShift & 0x01))
         {//вычисляем число сдвига, просто двигая маску к началу до первой единицы
                 paramMask4calcShift = paramMask4calcShift >> 1;
-                n++;
-                qDebug() << "paramMask4calcShift with shift " << n << " " << paramMask4calcShift;
+                n++;                
         }
         else if (paramMask4calcShift & 0x01)
         {
@@ -88,14 +89,12 @@ void bitMaskObj::calculateParamShift()
         }
 
         if (n > wordTypeInt)
-        {
-            qDebug() << "ParamShift overflow = " << n;
+        {            
             paramShift = 0;
              n = 0;
              stopFlag = true;
         }//Eсли за максимальные 32 бита цикл не прервался, прекращаем
     }
-    qDebug() << "ParamShift = " << paramShift;
 }
 
 //void bitMaskObj::calculateParamLeight()
@@ -129,7 +128,6 @@ void bitMaskObj::calculateValue(int _devNum, int _byteNum, uint32_t wordData)
 {
     if (devNum == _devNum && byteNum == _byteNum)
     {
-        //wordDataSize = sizeof (wordData);
         uint32_t paramMaskInt = 0;
         for (int i = paramMask.size()-1, y = 0; i > -1; i--, y++) //переводим маску из строки нулей и единиц в число int
         {//тодо: перенести это вычисление в masksettingsdialog, и отправлять сигналом уже готовое число а не строку
@@ -152,7 +150,6 @@ void bitMaskObj::deleteMaskObjectTX(int _devNum, int _byteNum, int _id)
 {
     if (devNum == _devNum && byteNum == _byteNum && id == _id)
     {
-        qDebug() << "dev " << devNum << ", byte " << byteNum << ", id " << id << " bye bye";
         this->~bitMaskObj();
     }
 }

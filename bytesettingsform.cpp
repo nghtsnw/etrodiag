@@ -145,9 +145,7 @@ void ByteSettingsForm::setWordName(int _devNum, int _byteNum, QString _byteName)
 
 void ByteSettingsForm::cleanForm()
 {
-    qDebug() << "preclean btsf. row count = " << ui->masksWidget->rowCount();
     while (ui->masksWidget->rowCount() > 0)
             ui->masksWidget->removeRow(0);
-    qDebug() << "clean btsf. row count = " << ui->masksWidget->rowCount();
     ui->hexNumber->clear();
 }

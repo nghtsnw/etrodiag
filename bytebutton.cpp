@@ -49,8 +49,7 @@ void byteButton::updateBtnData(int _devNum, QVector<int> fullData)
 
 void byteButton::onByteButtonClicked()
 {
-    emit openByteSettingsForm(devNum, byteNum);
-    qDebug() << "openByteSettingsForm("<<devNum<<", "<<byteNum<<")";
+    emit openByteSettingsForm(devNum, byteNum);    
 }
 
 void byteButton::transformToWord(int _wordType)

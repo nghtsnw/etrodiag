@@ -71,10 +71,10 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->setupUi(this);
     statusBar()->addWidget(statuslbl);
     statuslbl->setText("Make Electroagregat great again!");
-    addConnection();
-    connect (connection, &newconnect::loadMask, this, &MainWindow::loadProfile);
+    addConnection();    
     connect (&btsf, &ByteSettingsForm::editMask, &masksd, &maskSettingsDialog::requestDataOnId);
     connect (this, &MainWindow::dvsfAfterCloseClear, &dvsf, &devSettingsForm::afterCloseClearing);
+    m_ui->tab_connections->show();
 }
 
 MainWindow::~MainWindow()
@@ -84,11 +84,17 @@ MainWindow::~MainWindow()
 
 void MainWindow::addConnection()
 {
-    connection = new newconnect(m_ui->tab_connections);
+    connection = new newconnect;
+    m_ui->horizontalLayout_3->addWidget(connection);
+
+    connect (connection, &newconnect::loadMask, this, &MainWindow::loadProfile);
     connect (connection, SIGNAL(sendStatusStr(QString)), SLOT(showStatusMessage(QString)));
     connect (connection, &newconnect::transmitData, this, &MainWindow::addDeviceToList);
     connect (connection, &newconnect::cleanDevListSig, this, &MainWindow::cleanDevList);
+    connect (this, &MainWindow::prepareToSaveProfile, connection, &newconnect::prepareToSaveProfile);
+    connect (this, &MainWindow::saveProfile, connection, &newconnect::saveProfile);
     connection->show();
+
 }
 
 void MainWindow::showStatusMessage(QString message)
@@ -131,8 +137,7 @@ void MainWindow::createDevice(int devNum)
     Device *dev = new Device(devNum);
     dev->setParent(m_ui->devArea);
     m_ui->devAreaLay->addWidget(dev);
-    dev->setText(QString::number(devNum,16));
-    dev->show();
+    dev->setText(QString::number(devNum,16));    
     connect (this, &MainWindow::devUpdate, dev, &Device::updateData);
     connect (dev, &Device::openDevSettSig, this, &MainWindow::openDevSett);
     connect (dev, &Device::clicked, dev, &Device::clickedF);
@@ -151,7 +156,7 @@ void MainWindow::createDevice(int devNum)
     connect (&masksd, &maskSettingsDialog::requestMaskData, dev, &Device::requestMaskDataRX);
     connect (&btsf, &ByteSettingsForm::requestAllMaskToList, dev, &Device::requestMaskDataRX);
     connect (dev, &Device::maskData2FormTX, &masksd, &maskSettingsDialog::getDataOnId);
-    connect (dev, &Device::allMasksToListTX, &btsf, &ByteSettingsForm::addMaskItem);
+    connect (dev, &Device::allMasksToListTX, &btsf, &ByteSettingsForm::addMaskItem);    
     connect (&masksd, &maskSettingsDialog::sendMaskData, &btsf, &ByteSettingsForm::addMaskItem);
     connect (&masksd, &maskSettingsDialog::requestMaskData, this, &MainWindow::openMaskSettingsDialog);
     connect (&masksd, &maskSettingsDialog::sendMaskData, dev, &Device::sendDataToProfileRX);
@@ -160,15 +165,17 @@ void MainWindow::createDevice(int devNum)
     connect (dev, &Device::param2FrontEndTX, this, &MainWindow::frontendDataSort);
     connect (dev, &Device::param2FrontEndTX, &masksd, &maskSettingsDialog::liveDataSlot);
     connect (dev, &Device::param2FrontEndTX, &btsf, &ByteSettingsForm::updateMasksList);
-    connect (dev, &Device::param2FrontEndTX, &dvsf, &devSettingsForm::liveDataSlot);
-    connect (connection, &newconnect::saveAllMasks, dev, &Device::requestMasks4Saving);
-    connect (dev, &Device::allMasksToListTX, connection, &newconnect::saveProfileSlot4Masks);
+    connect (dev, &Device::param2FrontEndTX, &dvsf, &devSettingsForm::liveDataSlot);    
     connect (this, &MainWindow::sendMaskData, dev, &Device::loadMaskRX);
     connect (this, &MainWindow::getByteName, dev, &Device::getByteNameRX);
     connect (dev, &Device::returnByteNameTX, &btsf, &ByteSettingsForm::setWordName);
     connect (&btsf, &ByteSettingsForm::saveByteName, dev, &Device::saveByteNameRX);
     connect (this, &MainWindow::hideOtherDevButtons, dev, &Device::hideDevButton);
     connect (dev, &Device::devStatusMessage, this, &MainWindow::devStatusMsg);
+    connect (connection, &newconnect::saveAllMasks, dev, &Device::requestMasks4Saving);
+    connect (dev, &Device::allMasksToListTX, connection, &newconnect::saveProfileSlot4Masks);
+
+    dev->show();
 }
 
 void MainWindow::openDevSett(int devNum, QVector<int> data)
@@ -202,14 +209,16 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
         m_ui->valueArea->show();
         m_ui->writeLogCheckBox->show();
         emit hideOtherDevButtons(false, devNum);
-        connection->prepareToSaveProfile();
-        connection->saveProfile();        
+//        connection->prepareToSaveProfile();
+//        connection->saveProfile();
+        emit prepareToSaveProfile();
+        emit saveProfile();
     }
     else
     {
         m_ui->logArea->hide();
         m_ui->valueArea->hide();
-        m_ui->writeLogCheckBox->hide();
+        m_ui->writeLogCheckBox->hide();        
         emit hideOtherDevButtons(true, devNum);        
         dvsf.initByteButtons(devNum,data);
         emit getDevName(devNum);

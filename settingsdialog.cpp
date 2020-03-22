@@ -62,7 +62,7 @@
 static const char blankString[] = QT_TRANSLATE_NOOP("SettingsDialog", "N/A");
 
 SettingsDialog::SettingsDialog(QWidget *parent) :
-    QDialog(parent),
+    QWidget(parent),
     m_ui(new Ui::SettingsDialog),
     m_intValidator(new QIntValidator(0, 4000000, this))
 {
@@ -113,7 +113,8 @@ void SettingsDialog::showPortInfo(int idx)
 void SettingsDialog::apply()
 {
     updateSettings();
-    hide();
+    this->hide();
+    emit restoreConsoleAndButtons();
 }
 
 void SettingsDialog::checkCustomBaudRatePolicy(int idx)
@@ -251,6 +252,8 @@ void SettingsDialog::updateSettings()
     m_currentSettings.profilePath = selectedProfile;
 
     m_currentSettings.readOnlyProfile = m_ui->readOnlyCheckBox->isChecked();
+
+    qDebug() << "Settings updated. Profile " << m_currentSettings.profilePath;
 }
 
 

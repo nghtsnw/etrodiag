@@ -16,7 +16,6 @@ byteDefinition::byteDefinition()//(QObject *parent)
 
 byteDefinition::byteDefinition(int numDev, int byteNum, int data)
 {
-    //qDebug() << "new byte def";
     devNum = numDev;
     th_byteNum = byteNum;
     th_data = data;
@@ -78,7 +77,7 @@ void byteDefinition::createNewMask(int _devNum, int _byteNum)
         connect (this, &byteDefinition::sendDataToProfileTX, mask, &bitMaskObj::sendMaskToProfile);
         connect (this, &byteDefinition::wordData2Mask, mask, &bitMaskObj::calculateValue);
         connect (mask, &bitMaskObj::maskToListSIG, this, &byteDefinition::allMasksToListRX);
-        connect (this, &byteDefinition::sendDataToProfileRX, mask, &bitMaskObj::sendMaskToProfile);
+        connect (this, &byteDefinition::sendDataToProfileTX, mask, &bitMaskObj::sendMaskToProfile);
         connect (this, &byteDefinition::deleteMaskObjTX, mask, &bitMaskObj::deleteMaskObjectTX);
         connect (mask, &bitMaskObj::param2FrontEnd, this, &byteDefinition::param2FrontEndRX);
         connect (this, &byteDefinition::loadMaskTX, mask, &bitMaskObj::loadMaskRX);

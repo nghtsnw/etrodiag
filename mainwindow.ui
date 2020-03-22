@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -29,14 +29,11 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
-      <property name="tabPosition">
-       <enum>QTabWidget::North</enum>
-      </property>
       <property name="tabShape">
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="elideMode">
        <enum>Qt::ElideNone</enum>
@@ -55,8 +52,9 @@
       </property>
       <widget class="QWidget" name="tab_connections">
        <attribute name="title">
-        <string>Connections</string>
+        <string>Connection</string>
        </attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout_3"/>
       </widget>
       <widget class="QWidget" name="tab_work">
        <attribute name="title">
@@ -132,35 +130,6 @@
              <enum>QFrame::Sunken</enum>
             </property>
             <layout class="QGridLayout" name="gridLayout_2">
-             <item row="1" column="0">
-              <widget class="QCheckBox" name="writeLogCheckBox">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>20</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>Write log</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QPlainTextEdit" name="logArea">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-              </widget>
-             </item>
              <item row="0" column="0">
               <widget class="QTableWidget" name="valueArea">
                <property name="enabled">
@@ -216,6 +185,35 @@
                </column>
               </widget>
              </item>
+             <item row="1" column="0">
+              <widget class="QCheckBox" name="writeLogCheckBox">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>20</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Write log</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QPlainTextEdit" name="logArea">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
             </layout>
            </widget>
           </item>
@@ -233,7 +231,7 @@
      <x>0</x>
      <y>0</y>
      <width>998</width>
-     <height>30</height>
+     <height>20</height>
     </rect>
    </property>
   </widget>
