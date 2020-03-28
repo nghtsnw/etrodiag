@@ -46,7 +46,6 @@ newconnect::~newconnect()
 void newconnect::on_pushButton_clicked()
 {
     m_settings->setParent(this);
-    //m_settings->resize(ui->consoleFrame->size());
     m_console->hide();
     ui->pushButton->hide();
     ui->pushButton_2->hide();
@@ -112,7 +111,7 @@ void newconnect::handleError(QSerialPort::SerialPortError error)
 void newconnect::showStatusMessage(QString message)
 {
     m_status->setText(message);
-    emit sendStatusStr(message);    
+    emit sendStatusStr(message);
 }
 
 void newconnect::on_pushButton_2_clicked()

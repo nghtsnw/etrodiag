@@ -88,7 +88,7 @@ void MainWindow::addConnection()
     m_ui->horizontalLayout_3->addWidget(connection);
 
     connect (connection, &newconnect::loadMask, this, &MainWindow::loadProfile);
-    connect (connection, SIGNAL(sendStatusStr(QString)), SLOT(showStatusMessage(QString)));
+    connect (connection, &newconnect::sendStatusStr, this, &MainWindow::showStatusMessage);
     connect (connection, &newconnect::transmitData, this, &MainWindow::addDeviceToList);
     connect (connection, &newconnect::cleanDevListSig, this, &MainWindow::cleanDevList);
     connect (this, &MainWindow::prepareToSaveProfile, connection, &newconnect::prepareToSaveProfile);
@@ -209,8 +209,6 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
         m_ui->valueArea->show();
         m_ui->writeLogCheckBox->show();
         emit hideOtherDevButtons(false, devNum);
-//        connection->prepareToSaveProfile();
-//        connection->saveProfile();
         emit prepareToSaveProfile();
         emit saveProfile();
     }
@@ -337,24 +335,26 @@ void MainWindow::logFileCreator(QString string, bool redFlag)
             newLogFile.setFileName(logFileName);
             if (!newLogFile.exists())
             {
-                newLogFile.open(QIODevice::WriteOnly|QIODevice::Text);
-                showStatusMessage("Start write log file " + newLogFile.fileName());
+                newLogFile.open(QIODevice::WriteOnly|QIODevice::Text);                
+                m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + returnTimestamp().toString("hh:mm:ss:zzz") + " "
+                                          + QString("Start write log file ") + newLogFile.fileName() + "</span></p>");
             }
             else newLogFile.open(QIODevice::Append|QIODevice::Text);
         }
         if (newLogFile.isOpen())
         {
             QTextStream logStream(&newLogFile);
-            logStream << string << '\n';
+            logStream << stringWithTime << '\n';
             newLogFile.close();
         }
         else showStatusMessage("Error write log");
     }
     else if (!m_ui->writeLogCheckBox->isChecked() && !createNewFileNamePermission)
     {
+            m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + returnTimestamp().toString("hh:mm:ss:zzz") + " "
+                                  + QString("Stop write log file") + "</span></p>");
             newLogFile.close();
-            createNewFileNamePermission = true;
-            showStatusMessage("Stop write log file " + newLogFile.fileName());
+            createNewFileNamePermission = true;            
     }
 }
 
