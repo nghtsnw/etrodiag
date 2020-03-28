@@ -65,8 +65,7 @@ void newconnect::openSerialPort()
     m_serial->setFlowControl(p.flowControl);
     if (m_serial->open(QIODevice::ReadWrite)) {
         readProfile();
-        m_console->setEnabled(true);
-        m_console->setLocalEchoEnabled(p.localEchoEnabled);        
+        m_console->setEnabled(true);          
         showStatusMessage(tr("Connected to %1 : %2, %3, %4, %5, %6, %7")
                           .arg(p.name).arg(p.stringBaudRate).arg(p.stringDataBits)
                           .arg(p.stringParity).arg(p.stringStopBits).arg(p.stringFlowControl).arg(p.profilePath));

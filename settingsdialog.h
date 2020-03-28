@@ -83,7 +83,6 @@ public:
         QString stringStopBits;
         QSerialPort::FlowControl flowControl;
         QString stringFlowControl;
-        bool localEchoEnabled;
         QString profilePath;
         bool readOnlyProfile = true;
     };
@@ -106,6 +105,10 @@ private slots:
     void on_newProfileButton_clicked();
 
     void on_profileSelectBox_currentTextChanged(const QString &arg1);
+
+    void on_deleteProfileButton_clicked();
+
+    void on_readOnlyCheckBox_stateChanged(int arg1);
 
 private:
     void fillPortsParameters();

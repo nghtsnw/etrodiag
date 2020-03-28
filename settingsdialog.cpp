@@ -83,6 +83,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     fillProfileList();
     fillPortsInfo();
     m_ui->readOnlyCheckBox->setChecked(m_currentSettings.readOnlyProfile);
+    m_ui->deleteProfileButton->setDisabled(m_ui->readOnlyCheckBox->isChecked());
     updateSettings();
 }
 
@@ -247,13 +248,9 @@ void SettingsDialog::updateSettings()
                 m_ui->flowControlBox->itemData(m_ui->flowControlBox->currentIndex()).toInt());
     m_currentSettings.stringFlowControl = m_ui->flowControlBox->currentText();
 
-    m_currentSettings.localEchoEnabled = m_ui->localEchoCheckBox->isChecked();
-
     m_currentSettings.profilePath = selectedProfile;
 
     m_currentSettings.readOnlyProfile = m_ui->readOnlyCheckBox->isChecked();
-
-    qDebug() << "Settings updated. Profile " << m_currentSettings.profilePath;
 }
 
 
@@ -282,4 +279,20 @@ void SettingsDialog::on_profileSelectBox_currentTextChanged(const QString &arg1)
     nameFilter.clear();
     infoList.clear();
     }
+}
+
+void SettingsDialog::on_deleteProfileButton_clicked()
+{
+    if (!(m_ui->readOnlyCheckBox->isChecked()))
+    {
+        QFile profile(selectedProfile);
+        if (profile.exists())
+            profile.remove();
+        fillProfileList();
+    }
+}
+
+void SettingsDialog::on_readOnlyCheckBox_stateChanged(int arg1)
+{
+    m_ui->deleteProfileButton->setDisabled(m_ui->readOnlyCheckBox->isChecked());
 }
