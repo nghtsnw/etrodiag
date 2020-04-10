@@ -75,6 +75,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect (&btsf, &ByteSettingsForm::editMask, &masksd, &maskSettingsDialog::requestDataOnId);
     connect (this, &MainWindow::dvsfAfterCloseClear, &dvsf, &devSettingsForm::afterCloseClearing);
     m_ui->tab_connections->show();
+
+    m_ui->aboutimg->setPixmap(pixmap->scaledToWidth(m_ui->tab_about->size().width(), Qt::FastTransformation));
+    m_ui->aboutimg->setScaledContents(true);
+    m_ui->aboutimg->show();
 }
 
 MainWindow::~MainWindow()
@@ -94,7 +98,6 @@ void MainWindow::addConnection()
     connect (this, &MainWindow::prepareToSaveProfile, connection, &newconnect::prepareToSaveProfile);
     connect (this, &MainWindow::saveProfile, connection, &newconnect::saveProfile);
     connection->show();
-
 }
 
 void MainWindow::showStatusMessage(QString message)
@@ -395,6 +398,7 @@ void MainWindow::resizeEvent(QResizeEvent* e)
     dvsf.resize(m_ui->rightFrame->size());
     btsf.resize(m_ui->rightFrame->size());
     masksd.resize(m_ui->rightFrame->size());
+    m_ui->aboutimg->move((m_ui->scrollAreaWidgetContents->size().width()/2)-(m_ui->aboutimg->size().width()/2), 0);
 }
 
 void MainWindow::cleanDevList()
@@ -403,4 +407,9 @@ void MainWindow::cleanDevList()
     QListIterator<Device*> vlayChildListIt(vlayChildList);
     while(vlayChildListIt.hasNext())
         vlayChildListIt.next()->~Device();
+}
+
+void MainWindow::on_tabWidget_currentChanged(int index)
+{//так как сразу после пуска перемещение виджета не срабатывает, вешаю его на событие
+    m_ui->aboutimg->move((m_ui->scrollAreaWidgetContents->size().width()/2)-(m_ui->aboutimg->size().width()/2), 0);
 }

@@ -48,6 +48,9 @@ FORMS += \
     newconnect.ui \
     settingsdialog.ui
 
-RESOURCES +=
+RESOURCES += \
+    resources.qrc
 
 INSTALLS += target
+
+DISTFILES +=

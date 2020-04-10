@@ -121,13 +121,15 @@ public slots:
 
 private slots:
 
+    void on_tabWidget_currentChanged(int index);
+
 private:
     void initActionsConnections();
     QDateTime returnTimestamp();
     QTimer *timer = new QTimer(this);
 
 private:
-
+    QPixmap *pixmap = new QPixmap(":/etrodiag.png");
     QLabel *m_status = nullptr;
 protected:
     Ui::MainWindow *m_ui = nullptr;
