@@ -95,6 +95,8 @@ void MainWindow::addConnection()
     connect (connection, &newconnect::sendStatusStr, this, &MainWindow::showStatusMessage);
     connect (connection, &newconnect::transmitData, this, &MainWindow::addDeviceToList);
     connect (connection, &newconnect::cleanDevListSig, this, &MainWindow::cleanDevList);
+    connect (connection, &newconnect::writeTextLog, this, &MainWindow::setWriteTextLog);
+    connect (connection, &newconnect::directly2logArea, this, &MainWindow::logAreaAppendHtml);
     connect (this, &MainWindow::prepareToSaveProfile, connection, &newconnect::prepareToSaveProfile);
     connect (this, &MainWindow::saveProfile, connection, &newconnect::saveProfile);
     connection->show();
@@ -202,24 +204,22 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
     else
     {
     dvsf.setParent(m_ui->rightFrame);
-    if (m_ui->logArea->isHidden())
+    if (m_ui->valueArea->isHidden())
     {
         dvsf.hide();
         emit dvsfAfterCloseClear();
-        m_ui->logArea->show();
+        //m_ui->logArea->show();
         m_ui->valueArea->clear();
         m_ui->valueArea->setRowCount(0);
         m_ui->valueArea->show();
-        m_ui->writeLogCheckBox->show();
         emit hideOtherDevButtons(false, devNum);
         emit prepareToSaveProfile();
         emit saveProfile();
     }
     else
     {
-        m_ui->logArea->hide();
-        m_ui->valueArea->hide();
-        m_ui->writeLogCheckBox->hide();        
+        //m_ui->logArea->hide();
+        m_ui->valueArea->hide();       
         emit hideOtherDevButtons(true, devNum);        
         dvsf.initByteButtons(devNum,data);
         emit getDevName(devNum);
@@ -322,7 +322,7 @@ void MainWindow::logFileCreator(QString string, bool redFlag)
     else m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + stringWithTime + "</span></p>");
 
     QFile newLogFile;
-    if (m_ui->writeLogCheckBox->isChecked())
+    if (writeTextLog)
     {
         QDir dir("Logs");
         if (!dir.exists())
@@ -352,7 +352,7 @@ void MainWindow::logFileCreator(QString string, bool redFlag)
         }
         else showStatusMessage("Error write log");
     }
-    else if (!m_ui->writeLogCheckBox->isChecked() && !createNewFileNamePermission)
+    else if (!writeTextLog && !createNewFileNamePermission)
     {
             m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + returnTimestamp().toString("hh:mm:ss:zzz") + " "
                                   + QString("Stop write log file") + "</span></p>");
@@ -412,4 +412,14 @@ void MainWindow::cleanDevList()
 void MainWindow::on_tabWidget_currentChanged(int index)
 {//так как сразу после пуска перемещение виджета не срабатывает, вешаю его на событие
     m_ui->aboutimg->move((m_ui->scrollAreaWidgetContents->size().width()/2)-(m_ui->aboutimg->size().width()/2), 0);
+}
+
+void MainWindow::setWriteTextLog(bool arg)
+{
+    writeTextLog = arg;
+}
+
+void MainWindow::logAreaAppendHtml(QString str)
+{
+    m_ui->logArea->appendHtml(str);
 }

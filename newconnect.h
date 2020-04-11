@@ -30,7 +30,7 @@ public:
     dataprofiler *datapool = nullptr;
     QList<txtmaskobj*> maskVectorsList;
     void readProfile();
-
+    QDateTime returnTimestamp();
     bool permission2SaveMasks = false;
 
     ~newconnect();
@@ -42,6 +42,8 @@ void sendStatusStr(QString);
 void transmitData(QVector<int> snapshot);
 void saveAllMasks();
 void loadMask(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType);
+void writeTextLog(bool);
+void directly2logArea(QString);
 
 public slots:
 
@@ -49,6 +51,7 @@ void saveProfileSlot4Masks(int devNum, QString devName, int byteNum, QString byt
 void restoreWindowAfterApplySettings();
 void prepareToSaveProfile();
 void saveProfile();
+void writeBinLogSlot(bool);
 
 private slots:
     void on_pushButton_clicked();
@@ -67,7 +70,9 @@ private slots:
 private:
     Ui::newconnect *ui;
     QString message;
-
+    bool writeBinLog = false;
+    bool createNewFileNamePermission = true;
+    QString binFileName;
 
 protected:
     virtual void resizeEvent(QResizeEvent *event);

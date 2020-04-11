@@ -31,8 +31,9 @@ newconnect::newconnect(QWidget *parent) :
     connect(gstream, &getStream::giveMyByte, datapool, &dataprofiler::getByte);
     connect(datapool, SIGNAL(readyGetByte()), gstream, SLOT(profilerReadyToReceive()));
     connect(datapool, &dataprofiler::deviceData, this, &newconnect::transData);
-    connect (m_settings, &SettingsDialog::restoreConsoleAndButtons, this, &newconnect::restoreWindowAfterApplySettings);
-
+    connect(m_settings, &SettingsDialog::restoreConsoleAndButtons, this, &newconnect::restoreWindowAfterApplySettings);
+    connect (m_settings, &SettingsDialog::writeTextLog, this, &newconnect::writeTextLog);
+    connect (m_settings, &SettingsDialog::writeBinLog, this, &newconnect::writeBinLogSlot);
     on_pushButton_clicked();
 
 }
@@ -96,7 +97,44 @@ void newconnect::readData()
     m_console->putData(data);
     gstream->getRawData(data);
 
+    QFile newBinFile;
+    if (writeBinLog)
+    {
+        QDir dir("Logs");
+        if (!dir.exists())
+        QDir().mkdir("Logs");
 
+        if (!newBinFile.isOpen())
+        {
+            if (createNewFileNamePermission)
+            {
+                binFileName = (dir.path() + returnTimestamp().toString("\\dd.MM.yy_hh-mm-ss") + ".bin");
+                createNewFileNamePermission = false;
+            }
+            newBinFile.setFileName(binFileName);
+            if (!newBinFile.exists())
+            {
+                newBinFile.open(QIODevice::WriteOnly);
+                emit directly2logArea("<p><span style=color:#ff0000>" + returnTimestamp().toString("hh:mm:ss:zzz") + " "
+                                          + QString("Start write log file ") + newBinFile.fileName() + "</span></p>");
+            }
+            else newBinFile.open(QIODevice::Append);
+        }
+        if (newBinFile.isOpen())
+        {
+            QDataStream binStream(&newBinFile);
+            binStream << data;
+            newBinFile.close();
+        }
+        else showStatusMessage("Error write bin");
+    }
+    else if (!writeBinLog && !createNewFileNamePermission)
+    {
+            emit directly2logArea("<p><span style=color:#ff0000>" + returnTimestamp().toString("hh:mm:ss:zzz") + " "
+                                  + QString("Stop write bin file") + "</span></p>");
+            newBinFile.close();
+            createNewFileNamePermission = true;
+    }
 }
 
 void newconnect::handleError(QSerialPort::SerialPortError error)
@@ -255,4 +293,16 @@ void newconnect::restoreWindowAfterApplySettings()
     ui->pushButton->show();
     ui->pushButton_2->show();
     ui->consoleFrame->show();
+}
+
+void newconnect::writeBinLogSlot(bool arg)
+{
+    writeBinLog = arg;
+}
+
+QDateTime newconnect::returnTimestamp()
+{
+    quint64 timestamp = QDateTime::currentMSecsSinceEpoch();
+    QDateTime dt3 = QDateTime::fromMSecsSinceEpoch(timestamp);
+    return dt3;
 }

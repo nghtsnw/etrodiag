@@ -109,6 +109,7 @@ signals:
     void dvsfAfterCloseClear();
     void prepareToSaveProfile();
     void saveProfile();
+
 public slots:
 
     void showStatusMessage(QString message);
@@ -118,6 +119,8 @@ public slots:
     void frontendDataSort(int devNum, QString devName, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData);
     void setLogFlag(bool _logFlag);
     void devStatusMsg(QString _devName, QString status);
+    void setWriteTextLog(bool arg);
+    void logAreaAppendHtml(QString);
 
 private slots:
 
@@ -127,6 +130,7 @@ private:
     void initActionsConnections();
     QDateTime returnTimestamp();
     QTimer *timer = new QTimer(this);
+    bool writeTextLog = false;
 
 private:
     QPixmap *pixmap = new QPixmap(":/etrodiag.png");

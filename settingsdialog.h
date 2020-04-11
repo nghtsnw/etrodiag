@@ -95,6 +95,8 @@ public:
 
 signals:
     void restoreConsoleAndButtons();
+    void writeTextLog(bool);
+    void writeBinLog(bool);
 
 private slots:
     void showPortInfo(int idx);
@@ -109,6 +111,10 @@ private slots:
     void on_deleteProfileButton_clicked();
 
     void on_readOnlyCheckBox_stateChanged(int arg1);
+
+    void on_writeBinChkBox_stateChanged(int arg1);
+
+    void on_writeTxtLogChkBox_stateChanged(int arg1);
 
 private:
     void fillPortsParameters();

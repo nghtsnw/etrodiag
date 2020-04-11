@@ -217,6 +217,12 @@ void SettingsDialog::fillProfileList()
                 profileList << fileInfo.fileName();
             }
             m_ui->profileSelectBox->addItems(profileList);
+            if (list.size() == 0)
+            {
+                m_ui->applyButton->setDisabled(true);
+
+            }
+            else m_ui->applyButton->setEnabled(true);
         }
 }
 
@@ -295,4 +301,14 @@ void SettingsDialog::on_deleteProfileButton_clicked()
 void SettingsDialog::on_readOnlyCheckBox_stateChanged(int arg1)
 {
     m_ui->deleteProfileButton->setDisabled(m_ui->readOnlyCheckBox->isChecked());
+}
+
+void SettingsDialog::on_writeBinChkBox_stateChanged(int arg1)
+{
+    emit writeBinLog(m_ui->writeBinChkBox->isChecked());
+}
+
+void SettingsDialog::on_writeTxtLogChkBox_stateChanged(int arg1)
+{
+    emit writeTextLog(m_ui->writeTxtChkBox->isChecked());
 }
