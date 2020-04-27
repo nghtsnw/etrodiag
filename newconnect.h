@@ -30,6 +30,8 @@ public:
     dataprofiler *datapool = nullptr;
     QList<txtmaskobj*> maskVectorsList;
     void readProfile();
+    void readFromFile(QString pathToFile);
+
     QDateTime returnTimestamp();
     bool permission2SaveMasks = false;
 
@@ -57,7 +59,6 @@ private slots:
     void on_pushButton_clicked();
     void openSerialPort();
     void closeSerialPort();
-//    void about();
     void writeData(const QByteArray &data);
     void readData();
     void handleError(QSerialPort::SerialPortError error);
@@ -73,6 +74,9 @@ private:
     bool writeBinLog = false;
     bool createNewFileNamePermission = true;
     QString binFileName;
+    SettingsDialog::Settings p_local;
+    QDataStream filestream;
+    QByteArray fsba;
 
 protected:
     virtual void resizeEvent(QResizeEvent *event);

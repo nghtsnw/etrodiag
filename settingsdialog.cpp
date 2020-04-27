@@ -133,8 +133,18 @@ void SettingsDialog::checkCustomDevicePathPolicy(int idx)
 {
     const bool isCustomPath = !m_ui->serialPortInfoListBox->itemData(idx).isValid();
     m_ui->serialPortInfoListBox->setEditable(isCustomPath);
-    if (isCustomPath)
-        m_ui->serialPortInfoListBox->clearEditText();
+
+    if (m_ui->serialPortInfoListBox->currentText() == "Read from file")
+    {
+        m_currentSettings.readFromFileFlag = true;
+        QString file = QFileDialog::getOpenFileName(this, tr("Open binary data file"), "Logs", tr("Binary data (*.bin)"));
+        m_ui->serialPortInfoListBox->setCurrentText(file);
+        m_currentSettings.pathToFile = file;
+    }
+    else m_currentSettings.readFromFileFlag = false;
+
+    if (isCustomPath && m_ui->serialPortInfoListBox->currentText() == "Custom")
+        m_ui->serialPortInfoListBox->clearEditText();    
 }
 
 void SettingsDialog::fillPortsParameters()
@@ -144,6 +154,7 @@ void SettingsDialog::fillPortsParameters()
     m_ui->baudRateBox->addItem(QStringLiteral("38400"), QSerialPort::Baud38400);
     m_ui->baudRateBox->addItem(QStringLiteral("115200"), QSerialPort::Baud115200);
     m_ui->baudRateBox->addItem(tr("Custom"));
+    m_ui->baudRateBox->addItem(tr("Read from file"));
 
     m_ui->dataBitsBox->addItem(QStringLiteral("5"), QSerialPort::Data5);
     m_ui->dataBitsBox->addItem(QStringLiteral("6"), QSerialPort::Data6);
@@ -263,6 +274,8 @@ void SettingsDialog::updateSettings()
 void SettingsDialog::on_newProfileButton_clicked()
 {
     QString fileName = QFileDialog::getSaveFileName(this, tr("Create new profile"),"Profiles","Electroagregat XML profile(*.eag)");
+    if (!fileName.endsWith("eag"))
+       fileName = fileName + ".eag";
     QFile file(fileName);
     file.open(QIODevice::WriteOnly);
     file.close();

@@ -57,6 +57,10 @@ void newconnect::on_pushButton_clicked()
 void newconnect::openSerialPort()
 {    
     const SettingsDialog::Settings p = m_settings->settings();
+    p_local = m_settings->settings();
+    if (p.readFromFileFlag) readFromFile(p.pathToFile);
+    else
+    {
     qDebug() << "Open serial port " << p.name;
     m_serial->setPortName(p.name);
     m_serial->setBaudRate(p.baudRate);
@@ -71,12 +75,25 @@ void newconnect::openSerialPort()
                           .arg(p.name).arg(p.stringBaudRate).arg(p.stringDataBits)
                           .arg(p.stringParity).arg(p.stringStopBits).arg(p.stringFlowControl).arg(p.profilePath));
     } else {
-        QMessageBox::critical(this, tr("Error"), m_serial->errorString());
-        showStatusMessage(tr("Open error"));
-
-  }
+                QMessageBox::critical(this, tr("Error"), m_serial->errorString());
+                showStatusMessage(tr("Open error"));
+           }
+    }
 }
 
+void newconnect::readFromFile(QString pathToFile)
+{
+    QFile file(pathToFile);
+    file.open(QIODevice::ReadOnly);
+    filestream.setDevice(&file);
+    static char *s;
+    static uint y=40;
+    while(!filestream.atEnd())
+    {//добавить делитель скорости чтения по таймеру
+        filestream.readBytes(s, y) >> fsba;
+        readData();
+    }
+}
 
 void newconnect::closeSerialPort()
 {
@@ -93,7 +110,9 @@ void newconnect::writeData(const QByteArray &data)
 
 void newconnect::readData()
 {
-    const QByteArray data = m_serial->readAll();
+    static QByteArray data; //было const
+    if (p_local.readFromFileFlag) data = fsba;
+    else data = m_serial->readAll();
     m_console->putData(data);
     gstream->getRawData(data);
 
@@ -135,6 +154,7 @@ void newconnect::readData()
             newBinFile.close();
             createNewFileNamePermission = true;
     }
+    data.clear();
 }
 
 void newconnect::handleError(QSerialPort::SerialPortError error)

@@ -85,6 +85,8 @@ public:
         QString stringFlowControl;
         QString profilePath;
         bool readOnlyProfile = true;
+        bool readFromFileFlag = false;
+        QString pathToFile;
     };
 
     explicit SettingsDialog(QWidget *parent = nullptr);
