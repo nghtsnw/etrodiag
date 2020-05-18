@@ -60,11 +60,13 @@
 #include "bytesettingsform.h"
 #include "device.h"
 #include "masksettingsdialog.h"
+#include <QGestureEvent>
 
 QT_BEGIN_NAMESPACE
 
 class QLabel;
-
+class QGestureEvent;
+class QSwipeGesture;
 
 namespace Ui {
 class MainWindow;
@@ -95,6 +97,7 @@ public:
     void logFileCreator(QString string, bool redFlag);
     void cleanDevList();
     void updValueArea(QString parameterName, QString devName, double endValue, bool isNewData);
+    void grabGestures(const QVector<Qt::GestureType> &gestures);
     ~MainWindow();
 
 
@@ -131,6 +134,8 @@ private:
     QDateTime returnTimestamp();
     QTimer *timer = new QTimer(this);
     bool writeTextLog = false;
+    bool gestureEvent(QGestureEvent *event);
+    void swipeTriggered(QSwipeGesture*);
 
 private:
     QPixmap *pixmap = new QPixmap(":/etrodiag.png");
@@ -138,6 +143,8 @@ private:
 protected:
     Ui::MainWindow *m_ui = nullptr;
     virtual void resizeEvent(QResizeEvent *);
+     bool event(QEvent *event) override;
+
 
 public:
     devSettingsForm dvsf;

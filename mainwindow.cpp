@@ -63,6 +63,8 @@
 #include "devsettingsform.h"
 #include "bytesettingsform.h"
 #include "bytebutton.h"
+#include <QGestureEvent>
+#include <QSwipeGesture>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), statuslbl (new QLabel), m_ui (new Ui::MainWindow)
@@ -401,6 +403,7 @@ void MainWindow::resizeEvent(QResizeEvent* e)
     m_ui->aboutimg->move((m_ui->scrollAreaWidgetContents->size().width()/2)-(m_ui->aboutimg->size().width()/2), 0);
 }
 
+
 void MainWindow::cleanDevList()
 {
     QList<Device*> vlayChildList = m_ui->devArea->findChildren<Device*>();
@@ -422,4 +425,46 @@ void MainWindow::setWriteTextLog(bool arg)
 void MainWindow::logAreaAppendHtml(QString str)
 {
     m_ui->logArea->appendHtml(str);
+}
+//следующие функции для работы свайпа заимствованы из стандартного примера qt qimagegestures
+void MainWindow::grabGestures(const QVector<Qt::GestureType> &gestures)
+{
+    for (Qt::GestureType gesture : gestures)
+        grabGesture(gesture);
+}
+
+bool MainWindow::event(QEvent *event)
+{
+    if (event->type() == QEvent::Gesture)
+    {
+        return gestureEvent(static_cast<QGestureEvent*>(event));
+    }
+    return QWidget::event(event);
+}
+
+bool MainWindow::gestureEvent(QGestureEvent *event)
+{
+    if (event->gesture(Qt::SwipeGesture))
+        qDebug() << "gestureEvent():" << event->activeGestures();
+    //мы застряли здесь. Проходят все типы жестов, и только свайп почему-то не получается.
+    if (QGesture *swipe = event->gesture(Qt::SwipeGesture))
+        swipeTriggered(static_cast<QSwipeGesture *>(swipe));
+    return true;
+}
+
+void MainWindow::swipeTriggered(QSwipeGesture *gesture)
+{
+
+    if (gesture->state() == Qt::GestureFinished) {
+        if (gesture->horizontalDirection() == QSwipeGesture::Left)
+        {
+            qDebug() << "swipeTriggered(): swipe to previous";
+            m_ui->tabWidget->setCurrentIndex(m_ui->tabWidget->currentIndex()-1);
+        } else if (gesture->horizontalDirection() == QSwipeGesture::Right)
+        {
+            qDebug() << "swipeTriggered(): swipe to next";
+            m_ui->tabWidget->setCurrentIndex(m_ui->tabWidget->currentIndex()+1);
+        }
+        update();
+    }
 }
