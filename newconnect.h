@@ -49,7 +49,7 @@ void directly2logArea(QString);
 
 public slots:
 
-void saveProfileSlot4Masks(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType);
+void saveProfileSlot4Masks(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int, double valueShift, double valueKoef, bool viewInLogFlag, int wordType);
 void restoreWindowAfterApplySettings();
 void prepareToSaveProfile();
 void saveProfile();

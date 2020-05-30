@@ -70,6 +70,10 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), statuslbl (new QLabel), m_ui (new Ui::MainWindow)
 
 {
+    QVector<Qt::GestureType> gestures;
+    gestures << Qt::SwipeGesture << Qt::TapGesture;
+    for (Qt::GestureType gesture : gestures)
+    grabGesture(gesture);
     m_ui->setupUi(this);
     statusBar()->addWidget(statuslbl);
     statuslbl->setText("Make Electroagregat great again!");
@@ -264,7 +268,7 @@ QDateTime MainWindow::returnTimestamp()
     return dt3;
 }
 
-void MainWindow::updValueArea(QString parameterName, QString devName, double endValue, bool isNewData)
+void MainWindow::updValueArea(QString parameterName, QString devName, double endValue, bool)
 {
     {
         bool findRow = false;
@@ -303,7 +307,7 @@ void MainWindow::updValueArea(QString parameterName, QString devName, double end
     }
 }
 
-void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData)
+void MainWindow::frontendDataSort(int devNum, QString devName, int, QString, int, int, QString parameterName, int, double endValue, bool viewInLogFlag, bool isNewData)
 {    
     if (dvsf.isVisible() && devNum == dvsf.devNum)
         dvsf.setDevName(devNum, devName);
@@ -395,7 +399,7 @@ void MainWindow::devStatusMsg(QString _devName, QString status)
     logFileCreator("Device " + _devName + " is " + status, true);
 }
 
-void MainWindow::resizeEvent(QResizeEvent* e)
+void MainWindow::resizeEvent(QResizeEvent*)
 {
     dvsf.resize(m_ui->rightFrame->size());
     btsf.resize(m_ui->rightFrame->size());
@@ -412,7 +416,7 @@ void MainWindow::cleanDevList()
         vlayChildListIt.next()->~Device();
 }
 
-void MainWindow::on_tabWidget_currentChanged(int index)
+void MainWindow::on_tabWidget_currentChanged(int)
 {//так как сразу после пуска перемещение виджета не срабатывает, вешаю его на событие
     m_ui->aboutimg->move((m_ui->scrollAreaWidgetContents->size().width()/2)-(m_ui->aboutimg->size().width()/2), 0);
 }
@@ -427,25 +431,62 @@ void MainWindow::logAreaAppendHtml(QString str)
     m_ui->logArea->appendHtml(str);
 }
 //следующие функции для работы свайпа заимствованы из стандартного примера qt qimagegestures
-void MainWindow::grabGestures(const QVector<Qt::GestureType> &gestures)
-{
-    for (Qt::GestureType gesture : gestures)
-        grabGesture(gesture);
-}
-
+//grabgestures инициализировано в конструкторе mainwindow, там же и лист с жестами которые грабятся
 bool MainWindow::event(QEvent *event)
 {
+//    if (event)
+//        qDebug() << "Event: " << event;
     if (event->type() == QEvent::Gesture)
     {
-        return gestureEvent(static_cast<QGestureEvent*>(event));
+        gestureTrigger = true;
     }
+    if (gestureTrigger && (event->type() == (QEvent::MouseMove|QEvent::MouseButtonPress|QEvent::MouseButtonRelease)))
+    {
+        const QMouseEvent mouseev(*static_cast<QMouseEvent*>(event));
+        if (mouseev.type() == QEvent::MouseButtonPress)
+        {
+            mouseStartX = mouseev.x();
+            mouseStartY = mouseev.y();
+        }
+        if (mouseev.type() == QEvent::MouseButtonRelease)
+        {
+            mouseStopX = mouseev.x();
+            mouseStopY = mouseev.y();
+            swipeCalc(mouseStartX, mouseStartY, mouseStopX, mouseStopY);
+        }
+    }
+
+//    if (event->type() == QEvent::Gesture)
+//    {
+//        return gestureEvent(static_cast<QGestureEvent*>(event));
+//    }
     return QWidget::event(event);
+}
+
+void MainWindow::swipeCalc(int startx, int starty, int stopx, int stopy)
+{
+    int calcx = startx - stopx;
+    int calcy = starty - stopy;
+    if (calcx > 0) qDebug() << "Swipe x to Right";
+    else if (calcx < 0)
+    {
+        qDebug() << "Swipe x to Left";
+        calcx = calcx * -1;
+    }
+    if (calcy > 0) qDebug() << "Swipe y to Down";
+    else if (calcy < 0)
+    {
+        qDebug() << "Swipe y to Up";
+        calcy = calcy * -1;
+    }
+    if (calcx > calcy) qDebug() << "Swipe is Horisontal";
+    else if (calcx < calcy) qDebug() << "Swipe is Vertical";
 }
 
 bool MainWindow::gestureEvent(QGestureEvent *event)
 {
-    if (event->gesture(Qt::SwipeGesture))
-        qDebug() << "gestureEvent():" << event->activeGestures();
+//    if (event)
+//        qDebug() << "gestureEvent():" << event->activeGestures();
     //мы застряли здесь. Проходят все типы жестов, и только свайп почему-то не получается.
     if (QGesture *swipe = event->gesture(Qt::SwipeGesture))
         swipeTriggered(static_cast<QSwipeGesture *>(swipe));

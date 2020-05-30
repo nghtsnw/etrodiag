@@ -55,12 +55,7 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-
-    QVector<Qt::GestureType> gestures;
-    gestures << Qt::SwipeGesture << Qt::TapGesture;
-
     MainWindow w;
-    w.grabGestures(gestures);
     w.show();
     return a.exec();
 }

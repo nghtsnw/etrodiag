@@ -38,7 +38,7 @@ public slots:
     //void onByteBtnClicked();
     //void openByteSettingsFormRX(int devNum, int byteNum);
     void wordTypeChangeRX(int _devNum, int _byteNum, int wordType);
-    void liveDataSlot(int _devNum, QString _devName, int _byteNum, QString _byteName, uint32_t _wordData, int _id, QString parameterName, int _binRawValue, double _endValue, bool viewInLogFlag, bool isNewData);
+    void liveDataSlot(int _devNum, QString, int _byteNum, QString, uint32_t, int, QString, int, double, bool, bool);
     //void retranslateByteButtonSetStatus(int byteNum, bool status);
 
 private slots:

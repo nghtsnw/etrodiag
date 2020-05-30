@@ -96,7 +96,7 @@ public:
     QString logFileName;
     void logFileCreator(QString string, bool redFlag);
     void cleanDevList();
-    void updValueArea(QString parameterName, QString devName, double endValue, bool isNewData);
+    void updValueArea(QString parameterName, QString devName, double endValue, bool);
     void grabGestures(const QVector<Qt::GestureType> &gestures);
     ~MainWindow();
 
@@ -119,7 +119,7 @@ public slots:
     void addDeviceToList(QVector<int> ddata);
     void openDevSett(int devNum, QVector<int> data);
     void openByteSett(int devNum, int byteNum);
-    void frontendDataSort(int devNum, QString devName, int byteNum, QString byteName, int wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData);
+    void frontendDataSort(int devNum, QString devName, int, QString, int, int, QString parameterName, int, double endValue, bool viewInLogFlag, bool isNewData);
     void setLogFlag(bool _logFlag);
     void devStatusMsg(QString _devName, QString status);
     void setWriteTextLog(bool arg);
@@ -140,9 +140,15 @@ private:
 private:
     QPixmap *pixmap = new QPixmap(":/etrodiag.png");
     QLabel *m_status = nullptr;
+    bool gestureTrigger = false;
+    int mouseStartX;
+    int mouseStartY;
+    int mouseStopX;
+    int mouseStopY;
+    void swipeCalc(int startx, int starty, int stopx, int stopy);
 protected:
     Ui::MainWindow *m_ui = nullptr;
-    virtual void resizeEvent(QResizeEvent *);
+    virtual void resizeEvent(QResizeEvent *) override;
      bool event(QEvent *event) override;
 
 
