@@ -134,8 +134,7 @@ private:
     QDateTime returnTimestamp();
     QTimer *timer = new QTimer(this);
     bool writeTextLog = false;
-    bool gestureEvent(QGestureEvent *event);
-    void swipeTriggered(QSwipeGesture*);
+    void swipeTriggered(QString);
 
 private:
     QPixmap *pixmap = new QPixmap(":/etrodiag.png");

@@ -430,17 +430,16 @@ void MainWindow::logAreaAppendHtml(QString str)
 {
     m_ui->logArea->appendHtml(str);
 }
-//следующие функции для работы свайпа заимствованы из стандартного примера qt qimagegestures
-//grabgestures инициализировано в конструкторе mainwindow, там же и лист с жестами которые грабятся
+
+//так как не получилось заставить работать SwipeGesture, я напишу свой свайп. Для пролистывания табов его хватит.
 bool MainWindow::event(QEvent *event)
 {
-//    if (event)
-//        qDebug() << "Event: " << event;
+    qDebug() << event->type();
     if (event->type() == QEvent::Gesture)
     {
-        gestureTrigger = true;
+        gestureTrigger = true;        
     }
-    if (gestureTrigger && (event->type() == (QEvent::MouseMove|QEvent::MouseButtonPress|QEvent::MouseButtonRelease)))
+    if (gestureTrigger && (event->type() == QEvent::MouseButtonPress||QEvent::MouseButtonRelease))
     {
         const QMouseEvent mouseev(*static_cast<QMouseEvent*>(event));
         if (mouseev.type() == QEvent::MouseButtonPress)
@@ -455,53 +454,53 @@ bool MainWindow::event(QEvent *event)
             swipeCalc(mouseStartX, mouseStartY, mouseStopX, mouseStopY);
         }
     }
-
-//    if (event->type() == QEvent::Gesture)
-//    {
-//        return gestureEvent(static_cast<QGestureEvent*>(event));
-//    }
     return QWidget::event(event);
 }
 
-void MainWindow::swipeCalc(int startx, int starty, int stopx, int stopy)
+void MainWindow::swipeCalc(int startx, int starty, int stopx, int stopy) //по координатам начала и конца жеста высчитываем свайп
 {
+    QSwipeGesture swipeGesture;
     int calcx = startx - stopx;
     int calcy = starty - stopy;
-    if (calcx > 0) qDebug() << "Swipe x to Right";
+    bool xpositive;
+    bool ypositive;
+    QString direction;
+    int pixelsToSwipe = 200; //граница после которой действие будет однозначно восприниматься как свайп, в пикселях
+    if (calcx > pixelsToSwipe) xpositive = true;
     else if (calcx < 0)
     {
-        qDebug() << "Swipe x to Left";
         calcx = calcx * -1;
+        if (calcx > pixelsToSwipe) xpositive = false;
     }
-    if (calcy > 0) qDebug() << "Swipe y to Down";
+    if (calcy > pixelsToSwipe) ypositive = true;
     else if (calcy < 0)
     {
-        qDebug() << "Swipe y to Up";
         calcy = calcy * -1;
+        if (calcy > pixelsToSwipe) ypositive = false;
     }
-    if (calcx > calcy) qDebug() << "Swipe is Horisontal";
-    else if (calcx < calcy) qDebug() << "Swipe is Vertical";
+    if ((calcx > calcy) && (calcx > pixelsToSwipe))
+    {
+        if (xpositive) direction = "Right";
+        else if (!xpositive) direction = "Left";
+    }
+    else if ((calcx < calcy) && (calcy > pixelsToSwipe))
+    {
+        if (ypositive) direction = "Up";
+        else if (!ypositive) direction = "Down";
+    }
+    swipeTriggered(direction);
 }
 
-bool MainWindow::gestureEvent(QGestureEvent *event)
-{
-//    if (event)
-//        qDebug() << "gestureEvent():" << event->activeGestures();
-    //мы застряли здесь. Проходят все типы жестов, и только свайп почему-то не получается.
-    if (QGesture *swipe = event->gesture(Qt::SwipeGesture))
-        swipeTriggered(static_cast<QSwipeGesture *>(swipe));
-    return true;
-}
 
-void MainWindow::swipeTriggered(QSwipeGesture *gesture)
+void MainWindow::swipeTriggered(QString gesture)
 {
 
-    if (gesture->state() == Qt::GestureFinished) {
-        if (gesture->horizontalDirection() == QSwipeGesture::Left)
+    if (gestureTrigger) {
+        if (gesture == "Left")
         {
             qDebug() << "swipeTriggered(): swipe to previous";
             m_ui->tabWidget->setCurrentIndex(m_ui->tabWidget->currentIndex()-1);
-        } else if (gesture->horizontalDirection() == QSwipeGesture::Right)
+        } else if (gesture == "Right")
         {
             qDebug() << "swipeTriggered(): swipe to next";
             m_ui->tabWidget->setCurrentIndex(m_ui->tabWidget->currentIndex()+1);
