@@ -139,16 +139,17 @@ private:
 private:
     QPixmap *pixmap = new QPixmap(":/etrodiag.png");
     QLabel *m_status = nullptr;
-    bool gestureTrigger = false;
+    bool touchTrigger = false;
     int mouseStartX;
     int mouseStartY;
     int mouseStopX;
     int mouseStopY;
-    void swipeCalc(int startx, int starty, int stopx, int stopy);
+    void swipeCalc(QMouseEvent mouseev);
 protected:
     Ui::MainWindow *m_ui = nullptr;
     virtual void resizeEvent(QResizeEvent *) override;
-     bool event(QEvent *event) override;
+    bool event(QEvent *event) override;
+    bool eventFilter(QObject *obj, QEvent *ev) override;
 
 
 public:

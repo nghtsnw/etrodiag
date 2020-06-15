@@ -82,6 +82,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect (this, &MainWindow::dvsfAfterCloseClear, &dvsf, &devSettingsForm::afterCloseClearing);
     m_ui->tab_connections->show();
 
+    m_ui->logArea->viewport()->installEventFilter(this);
+    m_ui->valueArea->viewport()->installEventFilter(this);
+
     m_ui->aboutimg->setPixmap(pixmap->scaledToWidth(m_ui->tab_about->size().width(), Qt::FastTransformation));
     m_ui->aboutimg->setScaledContents(true);
     m_ui->aboutimg->show();
@@ -90,6 +93,22 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete m_ui;
+}
+
+bool MainWindow::eventFilter(QObject *obj, QEvent *event)//взято из документации к QObject::eventFilter
+{//ещё немножко костылей ради того что-бы свайп работал
+    if (obj == m_ui->logArea||m_ui->valueArea) {
+        if (event->type() == QEvent::MouseButtonPress||QEvent::MouseButtonRelease) {
+            const QMouseEvent mouseev(*static_cast<QMouseEvent*>(event));
+            swipeCalc(mouseev);
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        // pass the event on to the parent class
+        return QMainWindow::eventFilter(obj, event);
+    }
 }
 
 void MainWindow::addConnection()
@@ -434,77 +453,69 @@ void MainWindow::logAreaAppendHtml(QString str)
 //так как не получилось заставить работать SwipeGesture, я напишу свой свайп. Для пролистывания табов его хватит.
 bool MainWindow::event(QEvent *event)
 {
-    qDebug() << event->type();
-    if (event->type() == QEvent::Gesture)
-    {
-        gestureTrigger = true;        
-    }
-    if (gestureTrigger && (event->type() == QEvent::MouseButtonPress||QEvent::MouseButtonRelease))
+    if (event->type() == QEvent::TouchBegin) touchTrigger = true;
+
+    if (touchTrigger && (event->type() == QEvent::MouseButtonPress||QEvent::MouseButtonRelease))
     {
         const QMouseEvent mouseev(*static_cast<QMouseEvent*>(event));
-        if (mouseev.type() == QEvent::MouseButtonPress)
-        {
-            mouseStartX = mouseev.x();
-            mouseStartY = mouseev.y();
-        }
-        if (mouseev.type() == QEvent::MouseButtonRelease)
-        {
-            mouseStopX = mouseev.x();
-            mouseStopY = mouseev.y();
-            swipeCalc(mouseStartX, mouseStartY, mouseStopX, mouseStopY);
-        }
+        swipeCalc(mouseev);
     }
     return QWidget::event(event);
 }
 
-void MainWindow::swipeCalc(int startx, int starty, int stopx, int stopy) //по координатам начала и конца жеста высчитываем свайп
+void MainWindow::swipeCalc(QMouseEvent mouseev)
 {
-    QSwipeGesture swipeGesture;
-    int calcx = startx - stopx;
-    int calcy = starty - stopy;
-    bool xpositive;
-    bool ypositive;
-    QString direction;
-    int pixelsToSwipe = 200; //граница после которой действие будет однозначно восприниматься как свайп, в пикселях
-    if (calcx > pixelsToSwipe) xpositive = true;
-    else if (calcx < 0)
-    {
-        calcx = calcx * -1;
-        if (calcx > pixelsToSwipe) xpositive = false;
-    }
-    if (calcy > pixelsToSwipe) ypositive = true;
-    else if (calcy < 0)
-    {
-        calcy = calcy * -1;
-        if (calcy > pixelsToSwipe) ypositive = false;
-    }
-    if ((calcx > calcy) && (calcx > pixelsToSwipe))
-    {
-        if (xpositive) direction = "Right";
-        else if (!xpositive) direction = "Left";
-    }
-    else if ((calcx < calcy) && (calcy > pixelsToSwipe))
-    {
-        if (ypositive) direction = "Up";
-        else if (!ypositive) direction = "Down";
-    }
-    swipeTriggered(direction);
+    if (mouseev.type() == QMouseEvent::MouseButtonPress)
+        {
+            mouseStartX = mouseev.x();
+            mouseStartY = mouseev.y();
+        }
+        if (mouseev.type() == QMouseEvent::MouseButtonRelease)
+        {
+            touchTrigger = false;
+            mouseStopX = mouseev.x();
+            mouseStopY = mouseev.y();
+            //swipeCalc(mouseStartX, mouseStartY, mouseStopX, mouseStopY);
+            int calcx = mouseStartX - mouseStopX;
+            int calcy = mouseStartY - mouseStopY;
+            bool xpositive;
+            bool ypositive;
+            QString direction;
+            int pixelsToSwipe = 200; //граница после которой действие будет однозначно восприниматься как свайп, в пикселях
+            if (calcx > pixelsToSwipe) xpositive = true;
+            else if (calcx < 0)
+            {
+                calcx = calcx * -1;
+                if (calcx > pixelsToSwipe) xpositive = false;
+            }
+            if (calcy > pixelsToSwipe) ypositive = true;
+            else if (calcy < 0)
+            {
+                calcy = calcy * -1;
+                if (calcy > pixelsToSwipe) ypositive = false;
+            }
+            if ((calcx > calcy) && (calcx > pixelsToSwipe))
+            {
+                if (xpositive) direction = "Right";
+                else if (!xpositive) direction = "Left";
+            }
+            else if ((calcx < calcy) && (calcy > pixelsToSwipe))
+            {
+                if (ypositive) direction = "Up";
+                else if (!ypositive) direction = "Down";
+            }
+            swipeTriggered(direction);
+        }
 }
-
 
 void MainWindow::swipeTriggered(QString gesture)
 {
-
-    if (gestureTrigger) {
-        if (gesture == "Left")
+    if (gesture == "Left")
         {
-            qDebug() << "swipeTriggered(): swipe to previous";
             m_ui->tabWidget->setCurrentIndex(m_ui->tabWidget->currentIndex()-1);
         } else if (gesture == "Right")
         {
-            qDebug() << "swipeTriggered(): swipe to next";
             m_ui->tabWidget->setCurrentIndex(m_ui->tabWidget->currentIndex()+1);
         }
         update();
-    }
 }
