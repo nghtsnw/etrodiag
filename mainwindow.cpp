@@ -80,10 +80,12 @@ MainWindow::MainWindow(QWidget *parent) :
     addConnection();    
     connect (&btsf, &ByteSettingsForm::editMask, &masksd, &maskSettingsDialog::requestDataOnId);
     connect (this, &MainWindow::dvsfAfterCloseClear, &dvsf, &devSettingsForm::afterCloseClearing);
+    m_ui->tabWidget->setCurrentIndex(0);
     m_ui->tab_connections->show();
 
     m_ui->logArea->viewport()->installEventFilter(this);
     m_ui->valueArea->viewport()->installEventFilter(this);
+    m_ui->textBrowser->viewport()->installEventFilter(this);
 
     m_ui->aboutimg->setPixmap(pixmap->scaledToWidth(m_ui->tab_about->size().width(), Qt::FastTransformation));
     m_ui->aboutimg->setScaledContents(true);
@@ -93,22 +95,6 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete m_ui;
-}
-
-bool MainWindow::eventFilter(QObject *obj, QEvent *event)//взято из документации к QObject::eventFilter
-{//ещё немножко костылей ради того что-бы свайп работал
-    if (obj == m_ui->logArea||m_ui->valueArea) {
-        if (event->type() == QEvent::MouseButtonPress||QEvent::MouseButtonRelease) {
-            const QMouseEvent mouseev(*static_cast<QMouseEvent*>(event));
-            swipeCalc(mouseev);
-            return true;
-        } else {
-            return false;
-        }
-    } else {
-        // pass the event on to the parent class
-        return QMainWindow::eventFilter(obj, event);
-    }
 }
 
 void MainWindow::addConnection()
@@ -451,16 +437,37 @@ void MainWindow::logAreaAppendHtml(QString str)
 }
 
 //так как не получилось заставить работать SwipeGesture, я напишу свой свайп. Для пролистывания табов его хватит.
+bool MainWindow::eventFilter(QObject *obj, QEvent *event)//взято из документации к QObject::eventFilter
+{//ещё немножко костылей ради того что-бы свайп работал
+
+    if (obj == m_ui->logArea || m_ui->valueArea || m_ui->textBrowser)
+    {
+        if ((event->type() == QEvent::MouseButtonPress) || (event->type() == QEvent::MouseButtonRelease))
+        {
+            QMouseEvent mouseev(*static_cast<QMouseEvent*>(event));            
+            swipeCalc(mouseev);
+            return true;
+        }
+    else
+    {
+            return false;
+    }
+    }
+    else
+    {
+        // pass the event on to the parent class
+        return QMainWindow::eventFilter(obj, event);
+    }
+}
+
 bool MainWindow::event(QEvent *event)
 {
-    if (event->type() == QEvent::TouchBegin) touchTrigger = true;
-
-    if (touchTrigger && (event->type() == QEvent::MouseButtonPress||QEvent::MouseButtonRelease))
+    if ((event->type() == QEvent::MouseButtonPress) || (event->type() == QEvent::MouseButtonRelease))
     {
-        const QMouseEvent mouseev(*static_cast<QMouseEvent*>(event));
-        swipeCalc(mouseev);
+          QMouseEvent mouseEvent = *static_cast<QMouseEvent*>(event);
+          swipeCalc(mouseEvent);
     }
-    return QWidget::event(event);
+    return QMainWindow::event(event);
 }
 
 void MainWindow::swipeCalc(QMouseEvent mouseev)
@@ -470,17 +477,16 @@ void MainWindow::swipeCalc(QMouseEvent mouseev)
             mouseStartX = mouseev.x();
             mouseStartY = mouseev.y();
         }
-        if (mouseev.type() == QMouseEvent::MouseButtonRelease)
-        {
+    if (mouseev.type() == QMouseEvent::MouseButtonRelease)
+        {            
             touchTrigger = false;
             mouseStopX = mouseev.x();
-            mouseStopY = mouseev.y();
-            //swipeCalc(mouseStartX, mouseStartY, mouseStopX, mouseStopY);
+            mouseStopY = mouseev.y();            
             int calcx = mouseStartX - mouseStopX;
             int calcy = mouseStartY - mouseStopY;
             bool xpositive;
             bool ypositive;
-            QString direction;
+            static QString direction;
             int pixelsToSwipe = 200; //граница после которой действие будет однозначно восприниматься как свайп, в пикселях
             if (calcx > pixelsToSwipe) xpositive = true;
             else if (calcx < 0)
@@ -504,6 +510,7 @@ void MainWindow::swipeCalc(QMouseEvent mouseev)
                 if (ypositive) direction = "Up";
                 else if (!ypositive) direction = "Down";
             }
+            if (!direction.isEmpty())
             swipeTriggered(direction);
         }
 }
