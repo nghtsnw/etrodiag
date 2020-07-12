@@ -112,11 +112,11 @@ private slots:
 
     void on_deleteProfileButton_clicked();
 
-    void on_readOnlyCheckBox_stateChanged(int arg1);
+    void on_readOnlyCheckBox_stateChanged(int);
 
-    void on_writeBinChkBox_stateChanged(int arg1);
+    void on_writeBinChkBox_stateChanged(int);
 
-    void on_writeTxtLogChkBox_stateChanged(int arg1);
+    void on_writeTxtLogChkBox_stateChanged(int);
 
 private:
     void fillPortsParameters();

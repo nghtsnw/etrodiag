@@ -140,13 +140,15 @@ void SettingsDialog::checkCustomDevicePathPolicy(int idx)
     if (m_ui->serialPortInfoListBox->currentText() == "Read from file")
         {
             m_ui->serialPortInfoListBox->clearEditText();
-            m_currentSettings.readFromFileFlag = true;
             QString file = QFileDialog::getOpenFileName(this, tr("Open binary data file"), "Logs", tr("Binary data (*.bin)"));
             m_ui->serialPortInfoListBox->setCurrentText(file);
-            m_currentSettings.pathToBinFile = file;
+            if (!m_ui->serialPortInfoListBox->currentText().isEmpty())
+            {
+                m_currentSettings.readFromFileFlag = true;
+                m_currentSettings.pathToBinFile = file;
+            }
         }
         else m_currentSettings.readFromFileFlag = false;
-
 }
 
 void SettingsDialog::fillPortsParameters()
@@ -313,17 +315,17 @@ void SettingsDialog::on_deleteProfileButton_clicked()
     }
 }
 
-void SettingsDialog::on_readOnlyCheckBox_stateChanged(int arg1)
+void SettingsDialog::on_readOnlyCheckBox_stateChanged(int)
 {
     m_ui->deleteProfileButton->setDisabled(m_ui->readOnlyCheckBox->isChecked());
 }
 
-void SettingsDialog::on_writeBinChkBox_stateChanged(int arg1)
+void SettingsDialog::on_writeBinChkBox_stateChanged(int)
 {
     emit writeBinLog(m_ui->writeBinChkBox->isChecked());
 }
 
-void SettingsDialog::on_writeTxtLogChkBox_stateChanged(int arg1)
+void SettingsDialog::on_writeTxtLogChkBox_stateChanged(int)
 {
     emit writeTextLog(m_ui->writeTxtChkBox->isChecked());
 }

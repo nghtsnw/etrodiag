@@ -34,7 +34,7 @@ newconnect::newconnect(QWidget *parent) :
     connect(m_settings, &SettingsDialog::restoreConsoleAndButtons, this, &newconnect::restoreWindowAfterApplySettings);
     connect (m_settings, &SettingsDialog::writeTextLog, this, &newconnect::writeTextLog);
     connect (m_settings, &SettingsDialog::writeBinLog, this, &newconnect::writeBinLogSlot);
-    on_pushButton_clicked();
+    on_settingsButton_clicked();
 
 }
 
@@ -44,12 +44,12 @@ newconnect::~newconnect()
     delete ui;
 }
 
-void newconnect::on_pushButton_clicked()
+void newconnect::on_settingsButton_clicked()
 {
     m_settings->setParent(this);
     m_console->hide();
-    ui->pushButton->hide();
-    ui->pushButton_2->hide();
+    ui->connectButton->hide();
+    ui->settingsButton->hide();
     ui->consoleFrame->hide();
     m_settings->show();
 }
@@ -58,7 +58,11 @@ void newconnect::openSerialPort()
 {    
     const SettingsDialog::Settings p = m_settings->settings();
     p_local = m_settings->settings();
-    if (p.readFromFileFlag) readFromFile(p.pathToBinFile);
+    if (p.readFromFileFlag)
+    {
+        readFromFile(p.pathToBinFile);
+        showStatusMessage(tr("Read file %1").arg(p.pathToBinFile));
+    }
     else
     {
     qDebug() << "Open serial port " << p.name;
@@ -85,22 +89,41 @@ void newconnect::readFromFile(QString pathToFile)
 {
     QFile file(pathToFile);
     file.open(QIODevice::ReadOnly);
-    filestream.setDevice(&file);
-    static char *s;
-    static uint y=40;
-    while(!filestream.atEnd())
-    {//добавить делитель скорости чтения по таймеру
-        filestream.readBytes(s, y) >> fsba;
-        readData();
+    if (file.isOpen())
+    {
+        filestream.setDevice(&file);
+        static char *s;
+        static uint y=40;
+        static double scale = 1/p_local.baudRate;
+        while(!filestream.atEnd() && p_local.readFromFileFlag)
+        {
+            filestream.readBytes(s, y) >> fsba;
+            readData();
+            delay(scale);
+        }
+        showStatusMessage(tr("End of file"));
     }
+    else if (!file.isOpen())
+    {
+        showStatusMessage(tr("Binary file open error"));
+        p_local.readFromFileFlag = false;
+    }
+}
+
+void newconnect::delay(double scale)
+{
+    scaler->start(scale);
+    while(scaler->isActive()){};
 }
 
 void newconnect::closeSerialPort()
 {
     if (m_serial->isOpen())
+    {
         m_serial->close();
-
-    showStatusMessage(tr("Disconnected"));
+        showStatusMessage(tr("Disconnected"));
+    }
+    if (p_local.readFromFileFlag) p_local.readFromFileFlag = false;
 }
 
 void newconnect::writeData(const QByteArray &data)
@@ -171,23 +194,21 @@ void newconnect::showStatusMessage(QString message)
     emit sendStatusStr(message);
 }
 
-void newconnect::on_pushButton_2_clicked()
+void newconnect::on_connectButton_clicked()
 {
-    if (!(m_serial->isOpen()))
+    if (!(m_serial->isOpen()) || !p_local.readFromFileFlag)
     {
-        qDebug() << "mserial is open: " << (m_serial->isOpen());
         openSerialPort();
-        if (m_serial->isOpen())
+        if (m_serial->isOpen() || p_local.readFromFileFlag)
         {
-            ui->pushButton_2->setText("Disconnect");
-            qDebug() << "port open";
+            ui->connectButton->setText("Disconnect");
         }
     }
-    else if (m_serial->isOpen())
-    {
+    else if (m_serial->isOpen() || p_local.readFromFileFlag)
+    {        
         this->closeSerialPort();
-        if (!(m_serial->isOpen()))
-        ui->pushButton_2->setText("Connect");
+        if (!(m_serial->isOpen()) && !p_local.readFromFileFlag)
+        ui->connectButton->setText("Connect");
     }
 }
 
@@ -310,8 +331,8 @@ void newconnect::resizeEvent(QResizeEvent *event)
 void newconnect::restoreWindowAfterApplySettings()
 {
     m_console->show();
-    ui->pushButton->show();
-    ui->pushButton_2->show();
+    ui->connectButton->show();
+    ui->settingsButton->show();
     ui->consoleFrame->show();
 }
 
@@ -326,3 +347,4 @@ QDateTime newconnect::returnTimestamp()
     QDateTime dt3 = QDateTime::fromMSecsSinceEpoch(timestamp);
     return dt3;
 }
+

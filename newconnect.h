@@ -56,17 +56,14 @@ void saveProfile();
 void writeBinLogSlot(bool);
 
 private slots:
-    void on_pushButton_clicked();
     void openSerialPort();
     void closeSerialPort();
     void writeData(const QByteArray &data);
     void readData();
     void handleError(QSerialPort::SerialPortError error);
     void transData(QVector<int> snapshot);
-
-    void on_pushButton_2_clicked();
-
-
+    void on_connectButton_clicked();
+    void on_settingsButton_clicked();
 
 private:
     Ui::newconnect *ui;
@@ -77,6 +74,8 @@ private:
     SettingsDialog::Settings p_local;
     QDataStream filestream;
     QByteArray fsba;
+    void delay(double scale);
+    QTimer *scaler = new QTimer(this);
 
 protected:
     virtual void resizeEvent(QResizeEvent *event);
