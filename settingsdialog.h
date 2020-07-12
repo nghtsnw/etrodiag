@@ -86,7 +86,7 @@ public:
         QString profilePath;
         bool readOnlyProfile = true;
         bool readFromFileFlag = false;
-        QString pathToFile;
+        QString pathToBinFile;
     };
 
     explicit SettingsDialog(QWidget *parent = nullptr);

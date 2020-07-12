@@ -58,7 +58,7 @@ void newconnect::openSerialPort()
 {    
     const SettingsDialog::Settings p = m_settings->settings();
     p_local = m_settings->settings();
-    if (p.readFromFileFlag) readFromFile(p.pathToFile);
+    if (p.readFromFileFlag) readFromFile(p.pathToBinFile);
     else
     {
     qDebug() << "Open serial port " << p.name;
