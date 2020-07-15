@@ -70,13 +70,13 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), statuslbl (new QLabel), m_ui (new Ui::MainWindow)
 
 {
-    QVector<Qt::GestureType> gestures;
-    gestures << Qt::SwipeGesture << Qt::TapGesture;
-    for (Qt::GestureType gesture : gestures)
-    grabGesture(gesture);
+//    QVector<Qt::GestureType> gestures;
+//    gestures << Qt::SwipeGesture << Qt::TapGesture;
+//    for (Qt::GestureType gesture : gestures)
+//    grabGesture(gesture);
     m_ui->setupUi(this);
     statusBar()->addWidget(statuslbl);
-    statuslbl->setText("Make Electroagregat great again!");
+    statuslbl->setText("Etrodiag beta");
     addConnection();    
     connect (&btsf, &ByteSettingsForm::editMask, &masksd, &maskSettingsDialog::requestDataOnId);
     connect (this, &MainWindow::dvsfAfterCloseClear, &dvsf, &devSettingsForm::afterCloseClearing);

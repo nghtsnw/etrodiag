@@ -60,13 +60,13 @@
 #include "bytesettingsform.h"
 #include "device.h"
 #include "masksettingsdialog.h"
-#include <QGestureEvent>
+//#include <QGestureEvent>
 
 QT_BEGIN_NAMESPACE
 
 class QLabel;
-class QGestureEvent;
-class QSwipeGesture;
+//class QGestureEvent;
+//class QSwipeGesture;
 
 namespace Ui {
 class MainWindow;
@@ -97,7 +97,7 @@ public:
     void logFileCreator(QString string, bool redFlag);
     void cleanDevList();
     void updValueArea(QString parameterName, QString devName, double endValue, bool);
-    void grabGestures(const QVector<Qt::GestureType> &gestures);
+//    void grabGestures(const QVector<Qt::GestureType> &gestures);
     ~MainWindow();
 
 
@@ -127,7 +127,7 @@ public slots:
 
 private slots:
 
-    void on_tabWidget_currentChanged(int index);
+    void on_tabWidget_currentChanged(int);
 
 private:
     void initActionsConnections();

@@ -30,7 +30,7 @@ public:
     dataprofiler *datapool = nullptr;
     QList<txtmaskobj*> maskVectorsList;
     void readProfile();
-    void readFromFile(QString pathToFile);
+    void readFromFile();
 
     QDateTime returnTimestamp();
     bool permission2SaveMasks = false;
@@ -72,10 +72,12 @@ private:
     bool createNewFileNamePermission = true;
     QString binFileName;
     SettingsDialog::Settings p_local;
-    QDataStream filestream;
     QByteArray fsba;
-    void delay(double scale);
-    QTimer *scaler = new QTimer(this);
+    QByteArray arr4byteStream;
+    QTimer *timer = new QTimer(this);
+    QList<QByteArray> fileSplitted;
+    const int bytesPerOneShot = 20;
+    int pos = 0;
 
 protected:
     virtual void resizeEvent(QResizeEvent *event);

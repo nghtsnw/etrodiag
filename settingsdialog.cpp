@@ -277,7 +277,7 @@ void SettingsDialog::updateSettings()
 
 void SettingsDialog::on_newProfileButton_clicked()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Create new profile"),"Profiles","Electroagregat XML profile(*.eag)");
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Create new profile"),"Profiles","Etrodiag devices profile(*.eag)");
     if (!fileName.endsWith("eag"))
        fileName = fileName + ".eag";
     QFile file(fileName);

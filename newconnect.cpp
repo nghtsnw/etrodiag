@@ -34,6 +34,7 @@ newconnect::newconnect(QWidget *parent) :
     connect(m_settings, &SettingsDialog::restoreConsoleAndButtons, this, &newconnect::restoreWindowAfterApplySettings);
     connect (m_settings, &SettingsDialog::writeTextLog, this, &newconnect::writeTextLog);
     connect (m_settings, &SettingsDialog::writeBinLog, this, &newconnect::writeBinLogSlot);
+    connect (timer, &QTimer::timeout, this, &newconnect::readFromFile);
     on_settingsButton_clicked();
 
 }
@@ -60,8 +61,27 @@ void newconnect::openSerialPort()
     p_local = m_settings->settings();
     if (p.readFromFileFlag)
     {
-        readFromFile(p.pathToBinFile);
+        readProfile();        
         showStatusMessage(tr("Read file %1").arg(p.pathToBinFile));
+        pos = 0;
+        fileSplitted.clear();
+        int freq = 1000/((p_local.baudRate/8)/bytesPerOneShot);
+        QFile file(p_local.pathToBinFile);
+        file.open(QIODevice::ReadOnly);
+        QByteArray fileBuffer = file.readAll();
+        for (int i = 0; i < fileBuffer.size();)
+        {
+            static QByteArray ch;
+            while (ch.size() < bytesPerOneShot && i < fileBuffer.size())
+            {
+                ch.append(fileBuffer.at(i));
+                i++;
+            }
+            fileSplitted.push_back(ch);
+            ch.clear();
+        }
+        fileBuffer.clear();
+        timer->start(freq);
     }
     else
     {
@@ -85,35 +105,21 @@ void newconnect::openSerialPort()
     }
 }
 
-void newconnect::readFromFile(QString pathToFile)
+void newconnect::readFromFile()
 {
-    QFile file(pathToFile);
-    file.open(QIODevice::ReadOnly);
-    if (file.isOpen())
+    if (pos < fileSplitted.size())
     {
-        filestream.setDevice(&file);
-        static char *s;
-        static uint y=40;
-        static double scale = 1/p_local.baudRate;
-        while(!filestream.atEnd() && p_local.readFromFileFlag)
-        {
-            filestream.readBytes(s, y) >> fsba;
-            readData();
-            delay(scale);
-        }
+        fsba.clear();
+        fsba.append(fileSplitted.at(pos));
+        pos++;
+        readData();
+    }
+    else
+    {
         showStatusMessage(tr("End of file"));
+        timer->stop();
+        on_connectButton_clicked();
     }
-    else if (!file.isOpen())
-    {
-        showStatusMessage(tr("Binary file open error"));
-        p_local.readFromFileFlag = false;
-    }
-}
-
-void newconnect::delay(double scale)
-{
-    scaler->start(scale);
-    while(scaler->isActive()){};
 }
 
 void newconnect::closeSerialPort()
@@ -133,7 +139,7 @@ void newconnect::writeData(const QByteArray &data)
 
 void newconnect::readData()
 {
-    static QByteArray data; //было const
+    static QByteArray data;
     if (p_local.readFromFileFlag) data = fsba;
     else data = m_serial->readAll();
     m_console->putData(data);
@@ -196,19 +202,23 @@ void newconnect::showStatusMessage(QString message)
 
 void newconnect::on_connectButton_clicked()
 {
-    if (!(m_serial->isOpen()) || !p_local.readFromFileFlag)
+    if (m_serial->isOpen() || p_local.readFromFileFlag)
+        {
+            this->closeSerialPort();
+            p_local.readFromFileFlag = false;
+            if (!(m_serial->isOpen()) && !p_local.readFromFileFlag)
+            {
+                ui->connectButton->setText("Connect");
+                showStatusMessage("Connection closed");
+            }
+        }
+    else if (!(m_serial->isOpen()) || !p_local.readFromFileFlag)
     {
         openSerialPort();
         if (m_serial->isOpen() || p_local.readFromFileFlag)
         {
             ui->connectButton->setText("Disconnect");
         }
-    }
-    else if (m_serial->isOpen() || p_local.readFromFileFlag)
-    {        
-        this->closeSerialPort();
-        if (!(m_serial->isOpen()) && !p_local.readFromFileFlag)
-        ui->connectButton->setText("Connect");
     }
 }
 
