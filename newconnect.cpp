@@ -31,6 +31,7 @@ newconnect::newconnect(QWidget *parent) :
     connect(gstream, &getStream::giveMyByte, datapool, &dataprofiler::getByte);
     connect(datapool, SIGNAL(readyGetByte()), gstream, SLOT(profilerReadyToReceive()));
     connect(datapool, &dataprofiler::deviceData, this, &newconnect::transData);
+    connect(datapool, &dataprofiler::statusMessage, this, &newconnect::showStatusMessage);
     connect(m_settings, &SettingsDialog::restoreConsoleAndButtons, this, &newconnect::restoreWindowAfterApplySettings);
     connect (m_settings, &SettingsDialog::writeTextLog, this, &newconnect::writeTextLog);
     connect (m_settings, &SettingsDialog::writeBinLog, this, &newconnect::writeBinLogSlot);

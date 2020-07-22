@@ -14,19 +14,17 @@ public:
     void frameSnap();
     void ffffchk();
     QVector<int> snapshot;
-    void deviceManager(QVector<int> snapshot);
-    void readyGetByteF();
-    bool rdyGB = true;
-
 
 private:
-    int oneMsgLeight = 40;
+    const int oneMsgLeight = 40;
     bool ffffbool;
+    int countToNewFFFF;
 
 
 signals:
     void readyGetByte(bool rdyGB);
     void deviceData(QVector<int> snapshot);
+    void statusMessage(QString);
 
 public slots:
     void getByte(int byteFromBuf);

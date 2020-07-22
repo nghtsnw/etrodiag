@@ -32,7 +32,10 @@ void Device::updateData(int id, QVector<int> devdata) //если устройс�
             emit devStatusMessage(devName, devStatus);
         }
         if (devStatus == "init")
+        {
+            setDeviceName(id, QString("%1").arg(devdata.at(2),0,16).toUpper());
             devStatus = "offline";
+        }
         changeButtonColor(devStatus);
         if (devStatus == "online")
         devOnlineWatchdog(5000);

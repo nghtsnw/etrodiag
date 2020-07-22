@@ -9,20 +9,20 @@ dataprofiler::dataprofiler(QWidget *parent) : QObject(parent)
 
 void dataprofiler::getByte(int byteFromBuf)
 {
-    rdyGB = false; //readyGetByte
-    readyGetByteF();
+    emit readyGetByte(false);
     frameMsg.enqueue(byteFromBuf);   
     if (frameMsg.size() == oneMsgLeight)
     {
         frameSnap();
         ffffchk();
-        if (ffffbool) deviceManager(snapshot);
+        if (ffffbool)
+        {
+            emit deviceData(snapshot);//если маска начала пакета сошлась, отправляем пакет в гуй
+        }
         snapshot.clear();
         frameMsg.dequeue();
     }
-
-    rdyGB = true;
-    readyGetByteF();
+    emit readyGetByte(true);
 }
 
 void dataprofiler::frameSnap()
@@ -37,18 +37,14 @@ void dataprofiler::frameSnap()
 
 void dataprofiler::ffffchk()
 {
-    if ((snapshot[0]==0xFF) && (snapshot[1]==0xFF))
+    if (countToNewFFFF < oneMsgLeight) countToNewFFFF++;
+    if ((snapshot[0]==0xFF) && (snapshot[1]==0xFF)){
         ffffbool = true;
+        countToNewFFFF = -2;
+    }
     else ffffbool = false;
+    if (countToNewFFFF == oneMsgLeight && !((snapshot[0]==0xFF) && (snapshot[1]==0xFF))){
+                emit statusMessage (tr("Not detect FF:FF after %1 byte. Waiting correct data...").arg(oneMsgLeight));
+                countToNewFFFF = oneMsgLeight + 1;
+    }
 }
-
-void dataprofiler::deviceManager(QVector<int> snapshot)
-{
-    emit deviceData(snapshot); //чтобы передать этот сигнал главному окну в gui, приходится передавать через посредника newconnect
-}
-
-void dataprofiler::readyGetByteF()
-{
-    emit readyGetByte(rdyGB);
-}
-
