@@ -96,7 +96,7 @@ public:
     QString logFileName;
     void logFileCreator(QString string, bool redFlag);
     void cleanDevList();
-    void updValueArea(QString parameterName, QString devName, double endValue, bool);
+    void updValueArea(QString parameterName, int devNum, QString devName, double endValue, bool);
 //    void grabGestures(const QVector<Qt::GestureType> &gestures);
     ~MainWindow();
 

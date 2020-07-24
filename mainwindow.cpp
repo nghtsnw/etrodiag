@@ -84,7 +84,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->tab_connections->show();
 
     m_ui->logArea->viewport()->installEventFilter(this);
-    m_ui->valueArea->viewport()->installEventFilter(this);
+
     m_ui->textBrowser->viewport()->installEventFilter(this);
 
     m_ui->aboutimg->setPixmap(pixmap->scaledToWidth(m_ui->tab_about->size().width(), Qt::FastTransformation));
@@ -221,7 +221,7 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
         emit dvsfAfterCloseClear();
         //m_ui->logArea->show();
         m_ui->valueArea->clear();
-        m_ui->valueArea->setRowCount(0);
+        //valueTable->setRowCount(0);
         m_ui->valueArea->show();
         emit hideOtherDevButtons(false, devNum);
         emit prepareToSaveProfile();
@@ -273,43 +273,95 @@ QDateTime MainWindow::returnTimestamp()
     return dt3;
 }
 
-void MainWindow::updValueArea(QString parameterName, QString devName, double endValue, bool)
-{
+void MainWindow::updValueArea(QString parameterName, int devNum, QString devName, double endValue, bool)
+{//сначала проверяем есть ли уже вкладка с этим устройством по имени
+    static int thisDeviceIndex = -1;
+    for (int var = m_ui->valueArea->count(); var >= 0; --var) {
+        if (m_ui->valueArea->tabText(var) == devName)
+            {//если есть то сохраняем индекс вкладки и покидаем цикл
+                thisDeviceIndex = var;
+                break;
+            }
+        else//если нет то ставим индекс -1 чтоб триггернуться для последующей обработки
+            {
+                thisDeviceIndex = -1;
+            }
+    }
+
+    if (thisDeviceIndex == -1)
+    {//создаём и инициализируем таблицу, добавляем виджет таблицы в новую вкладку имени девайса пришедшего в этой посылке
+        QTableWidget *valueTableNew = new QTableWidget(m_ui->valueArea);
+        valueTableNew->viewport()->installEventFilter(this);
+        valueTableNew->insertColumn(0);
+        valueTableNew->insertColumn(1);
+        valueTableNew->horizontalHeader()->hide();
+        m_ui->valueArea->addTab(valueTableNew, devName);
+        //узнаём индекс только что созданной вкладки
+        for (int var = m_ui->valueArea->count(); var >= 0; --var) {
+            if (m_ui->valueArea->tabText(var) == devName)
+                {//если есть то сохраняем индекс вкладки и покидаем цикл
+                    thisDeviceIndex = var;
+                    break;
+                }
+            else//если нет то ставим индекс -1 чтоб триггернуться для последующей обработки
+                {
+                    thisDeviceIndex = -1;
+                }
+        }
+    }
+
+    static QTableWidget *valueTable = nullptr;
+    static QString tmp = (m_ui->valueArea->widget(thisDeviceIndex)->metaObject()->className());
+    //ищем виджет таблицы на вкладке и ссылаем на него статичный указатель
+    if (tmp == "QTableWidget")
     {
+        valueTable = (QTableWidget*)m_ui->valueArea->widget(thisDeviceIndex);
+    }
+    else //излишество на всякий случай. Сделано по образцу со stackoverflow.
+    {
+        QList<QTableWidget*> allTableWidgets = m_ui->valueArea->widget(thisDeviceIndex)->findChildren<QTableWidget *>();
+        if (allTableWidgets.count() != 1)
+        {
+            qDebug() << "Error";
+            return;
+        }
+        valueTable = allTableWidgets[0];
+    }    
+    //далее работаем со строками таблицы по указателю
         bool findRow = false;
         QString value2str;
         QString namesUnited = (parameterName+'@'+devName);
         value2str.setNum(endValue, 'g', 6);
-        if (m_ui->valueArea->rowCount() > 0)
-        {
-            for (int i = 0; i < m_ui->valueArea->rowCount(); i++)
+        if (valueTable->rowCount() > 0)
+        {//если строки есть то ищем нужную
+            for (int i = 0; i < valueTable->rowCount(); i++)
             {
-                if ((namesUnited) == m_ui->valueArea->item(i,0)->text())
-                {
+                if ((namesUnited) == valueTable->item(i,0)->text())
+                {//если найдена строка с именем и значение обновилось, подсвечиваем
                     findRow = true;
-                    if (value2str != m_ui->valueArea->item(i,1)->text())
+                    if (value2str != valueTable->item(i,1)->text())
                     {
-                        m_ui->valueArea->item(i,1)->setText(value2str);
-                        m_ui->valueArea->item(i,1)->setBackgroundColor(Qt::green);
+                        valueTable->item(i,1)->setText(value2str);
+                        valueTable->item(i,1)->setBackgroundColor(Qt::green);
                        //метод setbackgroundcolor устаревший, по возможности переписать на делегаты
                     }
-                    else if (value2str == m_ui->valueArea->item(i,1)->text())
-                        m_ui->valueArea->item(i,1)->setBackgroundColor(Qt::white);
+                    else if (value2str == valueTable->item(i,1)->text())
+                        valueTable->item(i,1)->setBackgroundColor(Qt::white);
                 }
             }
-        }
+        }        
         if (!findRow)
-        {
-            m_ui->valueArea->setRowCount(m_ui->valueArea->rowCount()+1); //добавляем новую строку
-            int row = m_ui->valueArea->rowCount()-1;//определяем индекс строки
+        {//если строка не найдена - создаём
+            valueTable->setRowCount(valueTable->rowCount()+1); //добавляем новую строку
+            int row = valueTable->rowCount()-1;//определяем индекс строки
             QTableWidgetItem *nameItem = new QTableWidgetItem;
             nameItem->setText(parameterName+'@'+devName);
-            m_ui->valueArea->setItem(row, 0, nameItem);
+            valueTable->setItem(row, 0, nameItem);
             QTableWidgetItem *valueItem = new QTableWidgetItem;
             valueItem->setText(value2str);
-            m_ui->valueArea->setItem(row, 1, valueItem);
+            valueTable->setItem(row, 1, valueItem);
         }
-    }
+        valueTable->resizeColumnsToContents();
 }
 
 void MainWindow::frontendDataSort(int devNum, QString devName, int, QString, int, int, QString parameterName, int, double endValue, bool viewInLogFlag, bool isNewData)
@@ -322,7 +374,7 @@ void MainWindow::frontendDataSort(int devNum, QString devName, int, QString, int
         QString formString(parameterName + "@" + devName + ": " + QString::number(endValue,'g',6));
         logFileCreator(formString, false);
     }
-    updValueArea(parameterName, devName, endValue, isNewData);
+    updValueArea(parameterName, devNum, devName, endValue, isNewData);
 }
 
 void MainWindow::logFileCreator(QString string, bool redFlag)
