@@ -96,8 +96,9 @@ public:
     QString logFileName;
     void logFileCreator(QString string, bool redFlag);
     void cleanDevList();
-    void updValueArea(QString parameterName, int devNum, QString devName, double endValue, bool);
+    void updValueArea(QString parameterName, int devNum, QString devName, double endValue, int byteNum, int maskId, bool);
 //    void grabGestures(const QVector<Qt::GestureType> &gestures);
+    void ValueArea_CellClicked(int row, int);
     ~MainWindow();
 
 
@@ -135,7 +136,8 @@ private:
     QTimer *timer = new QTimer(this);
     bool writeTextLog = false;
     void swipeTriggered(QString);
-
+    int currentOpenTab = 0;
+    void setCurrentOpenTab(int index);
 private:
     QPixmap *pixmap = new QPixmap(":/etrodiag.png");
     QLabel *m_status = nullptr;
@@ -145,6 +147,9 @@ private:
     int mouseStopX;
     int mouseStopY;
     void swipeCalc(QMouseEvent mouseev);
+    int grabDevNum = 0;
+    int grabByteNum = 0;
+    int grabMaskId = 0;
 protected:
     Ui::MainWindow *m_ui = nullptr;
     virtual void resizeEvent(QResizeEvent *) override;

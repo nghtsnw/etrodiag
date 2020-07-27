@@ -74,12 +74,14 @@ MainWindow::MainWindow(QWidget *parent) :
 //    gestures << Qt::SwipeGesture << Qt::TapGesture;
 //    for (Qt::GestureType gesture : gestures)
 //    grabGesture(gesture);
+//  Надеюсь, что когда в qt починят qswipegesture, я раскомментирую это и удалю тот ужас что сейчас заменяет свайп.
     m_ui->setupUi(this);
     statusBar()->addWidget(statuslbl);
     statuslbl->setText("Etrodiag beta");
     addConnection();    
     connect (&btsf, &ByteSettingsForm::editMask, &masksd, &maskSettingsDialog::requestDataOnId);
     connect (this, &MainWindow::dvsfAfterCloseClear, &dvsf, &devSettingsForm::afterCloseClearing);
+    connect (m_ui->valueArea, &QTabWidget::currentChanged, this, &MainWindow::setCurrentOpenTab);
     m_ui->tabWidget->setCurrentIndex(0);
     m_ui->tab_connections->show();
 
@@ -101,7 +103,6 @@ void MainWindow::addConnection()
 {
     connection = new newconnect;
     m_ui->horizontalLayout_3->addWidget(connection);
-
     connect (connection, &newconnect::loadMask, this, &MainWindow::loadProfile);
     connect (connection, &newconnect::sendStatusStr, this, &MainWindow::showStatusMessage);
     connect (connection, &newconnect::transmitData, this, &MainWindow::addDeviceToList);
@@ -143,7 +144,6 @@ void MainWindow::addDeviceToList(QVector<int> ddata)
         emit devUpdate(devNum, ddata);
         dvsf.updByteButtons(devNum, ddata);
     }
-
     vlayChildListIt.toFront();
     m_ui->devArea->update();
 }
@@ -201,8 +201,18 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
             masksd.sendMask2Profile();
             masksd.hide();
             masksd.killChildren();
+            if (masksd.openDirectly)
+            {
+                emit hideOtherDevButtons(false, devNum);
+                emit prepareToSaveProfile();
+                emit saveProfile();
+                masksd.openDirectly = false;
+                m_ui->valueArea->show();
+            }
+            else {
             btsf.show();
             btsf.resize(m_ui->rightFrame->size());
+            }
     }
     else {
     if (btsf.isVisible())
@@ -219,9 +229,7 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
     {
         dvsf.hide();
         emit dvsfAfterCloseClear();
-        //m_ui->logArea->show();
         m_ui->valueArea->clear();
-        //valueTable->setRowCount(0);
         m_ui->valueArea->show();
         emit hideOtherDevButtons(false, devNum);
         emit prepareToSaveProfile();
@@ -229,7 +237,6 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
     }
     else
     {
-        //m_ui->logArea->hide();
         m_ui->valueArea->hide();       
         emit hideOtherDevButtons(true, devNum);        
         dvsf.initByteButtons(devNum,data);
@@ -273,7 +280,7 @@ QDateTime MainWindow::returnTimestamp()
     return dt3;
 }
 
-void MainWindow::updValueArea(QString parameterName, int devNum, QString devName, double endValue, bool)
+void MainWindow::updValueArea(QString parameterName, int devNum, QString devName, double endValue, int byteNum, int maskId, bool)
 {//сначала проверяем есть ли уже вкладка с этим устройством по имени
     static int thisDeviceIndex = -1;
     for (int var = m_ui->valueArea->count(); var >= 0; --var) {
@@ -282,51 +289,41 @@ void MainWindow::updValueArea(QString parameterName, int devNum, QString devName
                 thisDeviceIndex = var;
                 break;
             }
-        else//если нет то ставим индекс -1 чтоб триггернуться для последующей обработки
-            {
-                thisDeviceIndex = -1;
-            }
+        else thisDeviceIndex = -1;
+            //если нет то ставим индекс -1 чтоб триггернуться для последующей обработки
     }
 
     if (thisDeviceIndex == -1)
     {//создаём и инициализируем таблицу, добавляем виджет таблицы в новую вкладку имени девайса пришедшего в этой посылке
         QTableWidget *valueTableNew = new QTableWidget(m_ui->valueArea);
-        valueTableNew->viewport()->installEventFilter(this);
-        valueTableNew->insertColumn(0);
-        valueTableNew->insertColumn(1);
+        //connect(valueTableNew, &QTableWidget::cellClicked, this, &MainWindow::ValueArea_CellClicked);
+         connect(valueTableNew, &QTableWidget::cellClicked, this, &MainWindow::ValueArea_CellClicked);
+
+        //valueTableNew->viewport()->installEventFilter(this);
+        valueTableNew->insertColumn(0);//name
+        valueTableNew->insertColumn(1);//value
+        valueTableNew->insertColumn(2);//devnum
+        valueTableNew->insertColumn(3);//bytenum
+        valueTableNew->insertColumn(4);//maskid
+        valueTableNew->hideColumn(2);//скрываем колонки с виду, данные в них нужны только для открытия настроек нужной маски
+        valueTableNew->hideColumn(3);
+        valueTableNew->hideColumn(4);
         valueTableNew->horizontalHeader()->hide();
         m_ui->valueArea->addTab(valueTableNew, devName);
-        //узнаём индекс только что созданной вкладки
+
+        //узнаём индекс только что созданной вкладки. Может быть стоит выделить это в отдельную функцию, но пока и так сойдёт
         for (int var = m_ui->valueArea->count(); var >= 0; --var) {
-            if (m_ui->valueArea->tabText(var) == devName)
-                {//если есть то сохраняем индекс вкладки и покидаем цикл
+            if (m_ui->valueArea->tabText(var) == devName){
                     thisDeviceIndex = var;
                     break;
                 }
-            else//если нет то ставим индекс -1 чтоб триггернуться для последующей обработки
-                {
-                    thisDeviceIndex = -1;
-                }
+            else thisDeviceIndex = -1;
         }
     }
-
     static QTableWidget *valueTable = nullptr;
     static QString tmp = (m_ui->valueArea->widget(thisDeviceIndex)->metaObject()->className());
     //ищем виджет таблицы на вкладке и ссылаем на него статичный указатель
-    if (tmp == "QTableWidget")
-    {
-        valueTable = (QTableWidget*)m_ui->valueArea->widget(thisDeviceIndex);
-    }
-    else //излишество на всякий случай. Сделано по образцу со stackoverflow.
-    {
-        QList<QTableWidget*> allTableWidgets = m_ui->valueArea->widget(thisDeviceIndex)->findChildren<QTableWidget *>();
-        if (allTableWidgets.count() != 1)
-        {
-            qDebug() << "Error";
-            return;
-        }
-        valueTable = allTableWidgets[0];
-    }    
+    if (tmp == "QTableWidget") valueTable = (QTableWidget*)m_ui->valueArea->widget(thisDeviceIndex);
     //далее работаем со строками таблицы по указателю
         bool findRow = false;
         QString value2str;
@@ -360,11 +357,41 @@ void MainWindow::updValueArea(QString parameterName, int devNum, QString devName
             QTableWidgetItem *valueItem = new QTableWidgetItem;
             valueItem->setText(value2str);
             valueTable->setItem(row, 1, valueItem);
+            QTableWidgetItem *devNumItem = new QTableWidgetItem;
+            devNumItem->setText(QString::number(devNum));
+            valueTable->setItem(row, 2, devNumItem);
+            QTableWidgetItem *byteNumItem = new QTableWidgetItem;
+            byteNumItem->setText(QString::number(byteNum));
+            valueTable->setItem(row, 3, byteNumItem);
+            QTableWidgetItem *maskIdItem = new QTableWidgetItem;
+            maskIdItem->setText(QString::number(maskId));
+            valueTable->setItem(row, 4, maskIdItem);
         }
         valueTable->resizeColumnsToContents();
 }
 
-void MainWindow::frontendDataSort(int devNum, QString devName, int, QString, int, int, QString parameterName, int, double endValue, bool viewInLogFlag, bool isNewData)
+void MainWindow::setCurrentOpenTab(int index)
+{
+    currentOpenTab = index;
+}
+
+void MainWindow::ValueArea_CellClicked(int row, int)
+{
+    masksd.openDirectly = true;
+    static QTableWidget *table = nullptr;
+    table = (QTableWidget*)m_ui->valueArea->widget(currentOpenTab);
+    grabDevNum = table->item(row, 2)->text().toInt();
+    grabByteNum = table->item(row, 3)->text().toInt();
+    grabMaskId = table->item(row, 4)->text().toInt();
+    masksd.requestDataOnId(grabDevNum, grabByteNum, grabMaskId);
+    masksd.setParent(m_ui->rightFrame);
+    m_ui->valueArea->hide();
+    masksd.show();
+    masksd.resize(m_ui->rightFrame->size());
+    emit hideOtherDevButtons(true, grabDevNum);
+}
+
+void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QString, int, int maskId, QString parameterName, int, double endValue, bool viewInLogFlag, bool isNewData)
 {    
     if (dvsf.isVisible() && devNum == dvsf.devNum)
         dvsf.setDevName(devNum, devName);
@@ -374,7 +401,7 @@ void MainWindow::frontendDataSort(int devNum, QString devName, int, QString, int
         QString formString(parameterName + "@" + devName + ": " + QString::number(endValue,'g',6));
         logFileCreator(formString, false);
     }
-    updValueArea(parameterName, devNum, devName, endValue, isNewData);
+    updValueArea(parameterName, devNum, devName, endValue, byteNum, maskId, isNewData);
 }
 
 void MainWindow::logFileCreator(QString string, bool redFlag)
@@ -500,16 +527,9 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)//взято из до�
             swipeCalc(mouseev);
             return true;
         }
-    else
-    {
-            return false;
+    else return false;
     }
-    }
-    else
-    {
-        // pass the event on to the parent class
-        return QMainWindow::eventFilter(obj, event);
-    }
+    else return QMainWindow::eventFilter(obj, event);
 }
 
 bool MainWindow::event(QEvent *event)

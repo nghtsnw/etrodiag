@@ -26,6 +26,7 @@ public:
     void initBitButtonsAndCheckBoxes(int _wordType);
     void killChildren();
     void scanCheckboxesToMask();
+    bool openDirectly = false;
 
 public slots:
     void requestDataOnId(int _devNum, int _byteNum, int _id);
@@ -48,7 +49,7 @@ private slots:
 
     void on_koeffTxt_editingFinished();
 
-    void on_checkBox_stateChanged(int arg1);
+    void on_checkBox_stateChanged(int);
 
 private:
     Ui::maskSettingsDialog *ui;

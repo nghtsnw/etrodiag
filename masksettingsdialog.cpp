@@ -156,7 +156,7 @@ void maskSettingsDialog::on_koeffTxt_editingFinished()
     sendMask2Profile();
 }
 
-void maskSettingsDialog::on_checkBox_stateChanged(int arg1)
+void maskSettingsDialog::on_checkBox_stateChanged(int)
 {
     sendMask2Profile();
 }
