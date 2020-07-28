@@ -87,7 +87,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     m_ui->logArea->viewport()->installEventFilter(this);
 
-    m_ui->textBrowser->viewport()->installEventFilter(this);
+    //m_ui->textBrowser->viewport()->installEventFilter(this);
 
     m_ui->aboutimg->setPixmap(pixmap->scaledToWidth(m_ui->tab_about->size().width(), Qt::FastTransformation));
     m_ui->aboutimg->setScaledContents(true);

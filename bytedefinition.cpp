@@ -5,7 +5,7 @@
 #include <QDataStream>
 #include "cmath"
 //Создаётся для каждого байта при инициализации устройства.
-//Данные отсюда будут подтягиваться в гуй (ещё не создал форму) параметров байта, и сюда же сохраняться.
+//Данные отсюда будут подтягиваться в гуй параметров байта, и сюда же сохраняться.
 //Вместе с параметрами устройства (dynamicbaseprofile) данные будут сохраняться в файл.
 byteDefinition::byteDefinition()//(QObject *parent)
 {
@@ -99,7 +99,6 @@ int byteDefinition::calcMaskID()
     bool notFoundFlag = 0;
     QList<bitMaskObj*> bytedefChildList = this->findChildren<bitMaskObj*>();
     QListIterator<bitMaskObj*> bytedefChildListIt(bytedefChildList);
-    qDebug() << "Children of bytedef (dev " << devNum<< ", byte " << th_byteNum << ")= " << bytedefChildList.size();
 
     if (bytedefChildList.size() != 0)
     {
