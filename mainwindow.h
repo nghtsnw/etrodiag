@@ -99,6 +99,7 @@ public:
     void updValueArea(QString parameterName, int devNum, QString devName, double endValue, int byteNum, int maskId, bool);
 //    void grabGestures(const QVector<Qt::GestureType> &gestures);
     void ValueArea_CellClicked(int row, int);
+    void initGraph();
     ~MainWindow();
 
 

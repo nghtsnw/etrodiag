@@ -78,6 +78,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->setupUi(this);
     statusBar()->addWidget(statuslbl);
     statuslbl->setText("Etrodiag beta");
+    initGraph();
     addConnection();    
     connect (&btsf, &ByteSettingsForm::editMask, &masksd, &maskSettingsDialog::requestDataOnId);
     connect (this, &MainWindow::dvsfAfterCloseClear, &dvsf, &devSettingsForm::afterCloseClearing);
@@ -470,6 +471,32 @@ void MainWindow::loadProfile(int devNum, QString devName, int byteNum, QString b
         emit devUpdate(devNum, devInitArray);
         dvsf.updByteButtons(devNum, devInitArray);
         emit sendMaskData(devNum, devName, byteNum, byteName, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType);
+    }
+}
+
+void MainWindow::initGraph()
+{
+    QPixmap graph(m_ui->graphLabel->size()); // создаем саму картинку
+    int pictH = m_ui->graphLabel->size().width();//размер слоя
+    int pictV = m_ui->graphLabel->size().height();
+    QPainter paint; // и пэинтер
+    m_ui->graphLabel->setPixmap(graph);
+    paint.begin(&graph); // запускаем отрисовку
+    paint.eraseRect(0,0,pictH,pictV); // очищаем рисунок
+    int vLineCount = 20;
+    int hLineCount = 10;
+    //int frameSizeSecond = 60;
+    int oneCellXpix = pictH/vLineCount; //рисуем сетку 10Х20 клеток
+    int oneCellYpix = pictV/hLineCount;
+    for (int i = hLineCount, vCoord = 0; i > 0; --i) //рисуем горизонтальные линии
+    {
+        paint.drawLine(0,vCoord,pictH,vCoord);
+        vCoord+=oneCellYpix;
+    }
+    for (int i = vLineCount, hCoord = 0; i > 0; --i) //рисуем вертикальные линии
+    {
+        paint.drawLine(hCoord,0,hCoord,pictV);
+        hCoord+=oneCellXpix;
     }
 }
 

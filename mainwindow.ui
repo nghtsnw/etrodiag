@@ -33,7 +33,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>2</number>
       </property>
       <property name="elideMode">
        <enum>Qt::ElideNone</enum>
@@ -117,6 +117,13 @@
         <string>Log</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QLabel" name="graphLabel">
+          <property name="text">
+           <string>Graph here</string>
+          </property>
+         </widget>
+        </item>
         <item>
          <widget class="QPlainTextEdit" name="logArea">
           <property name="sizePolicy">
