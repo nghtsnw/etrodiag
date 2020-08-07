@@ -60,6 +60,7 @@
 #include "bytesettingsform.h"
 #include "device.h"
 #include "masksettingsdialog.h"
+#include <livegraph.h>
 //#include <QGestureEvent>
 
 QT_BEGIN_NAMESPACE
@@ -99,7 +100,6 @@ public:
     void updValueArea(QString parameterName, int devNum, QString devName, double endValue, int byteNum, int maskId, bool);
 //    void grabGestures(const QVector<Qt::GestureType> &gestures);
     void ValueArea_CellClicked(int row, int);
-    void initGraph();
     ~MainWindow();
 
 
@@ -151,6 +151,7 @@ private:
     int grabDevNum = 0;
     int grabByteNum = 0;
     int grabMaskId = 0;
+
 protected:
     Ui::MainWindow *m_ui = nullptr;
     virtual void resizeEvent(QResizeEvent *) override;
@@ -158,10 +159,12 @@ protected:
     bool eventFilter(QObject *obj, QEvent *ev) override;
 
 
+
 public:
     devSettingsForm dvsf;
     ByteSettingsForm btsf;
     maskSettingsDialog masksd;
+    liveGraph graphiq;
 
 };
 

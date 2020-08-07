@@ -14,6 +14,7 @@ SOURCES += \
     device.cpp \
     devsettingsform.cpp \
     getstream.cpp \
+    livegraph.cpp \
     main.cpp \
     mainwindow.cpp \
     masksettingsdialog.cpp \
@@ -32,6 +33,7 @@ HEADERS += \
     device.h \
     devsettingsform.h \
     getstream.h \
+    livegraph.h \
     mainwindow.h \
     masksettingsdialog.h \
     newconnect.h \
@@ -43,6 +45,7 @@ FORMS += \
     bitsetform.ui \
     bytesettingsform.ui \
     devsettingsform.ui \
+    livegraph.ui \
     mainwindow.ui \
     masksettingsdialog.ui \
     newconnect.ui \
