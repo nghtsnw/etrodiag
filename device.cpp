@@ -42,7 +42,7 @@ void Device::updateData(int id, QVector<int> devdata) //если устройс�
     }
 }
 
-void Device::byteObjectsInit(QVector<int> data) //инициализируем для каждого байта свой объект,
+void Device::byteObjectsInit(QVector<int> &data) //инициализируем для каждого байта свой объект,
 //с параметрами конкретно этого байта и значениями каждого бита, и загоняем объекты в массив
 {
     connect (timer, &QTimer::timeout, this, &Device::setOfflineStatus);
@@ -72,7 +72,7 @@ void Device::byteObjectsInit(QVector<int> data) //инициализируем �
     byteObjReady = true;
 }
 
-void Device::byteObjectsUpd(QVector<int> data) //обновляем каждый объект, выявляем обновившиеся и передаём в лист изменений
+void Device::byteObjectsUpd(QVector<int> &data) //обновляем каждый объект, выявляем обновившиеся и передаём в лист изменений
 {
     for (int n = data.size()-1; n > -1; n--)
     {

@@ -44,7 +44,7 @@ void dataprofiler::ffffchk()
     }
     else ffffbool = false;
     if (countToNewFFFF == oneMsgLeight && !((snapshot[0]==0xFF) && (snapshot[1]==0xFF))){
-                emit statusMessage (tr("Not detect FF:FF after %1 byte. Waiting correct data...").arg(oneMsgLeight));
+                emit statusMessage (tr("Incorrect data frame"));
                 countToNewFFFF = oneMsgLeight + 1;
     }
 }

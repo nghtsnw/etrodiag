@@ -93,7 +93,6 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->aboutimg->setScaledContents(true);
     m_ui->aboutimg->show();
     graphiq.setParent(m_ui->graphLabel);
-    graphiq.resize(m_ui->graphLabel->size());
 }
 
 MainWindow::~MainWindow()
@@ -509,6 +508,7 @@ void MainWindow::cleanDevList()
 void MainWindow::on_tabWidget_currentChanged(int)
 {//так как сразу после пуска перемещение виджета не срабатывает, вешаю его на событие
     m_ui->aboutimg->move((m_ui->scrollAreaWidgetContents->size().width()/2)-(m_ui->aboutimg->size().width()/2), 0);
+    graphiq.resize(m_ui->graphLabel->size().width(), m_ui->graphLabel->size().height());
 }
 
 void MainWindow::setWriteTextLog(bool arg)

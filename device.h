@@ -21,10 +21,10 @@ public:
     int currStateInt = 0;
     QVector<int> *oldState = new QVector<int>;
     Device(int id);
-    void byteObjectsInit(QVector<int> data);
+    void byteObjectsInit(QVector<int> &data);
     QVector<byteDefinition*> *byteObjArr = new QVector<byteDefinition*>;
     QVector<byteDefinition*> *byteObjArrOld = new QVector<byteDefinition*>;
-    void byteObjectsUpd(QVector<int> data);
+    void byteObjectsUpd(QVector<int> &data);
     byteDefinition zeroByteDef;
     void getDeviceName(int id);
     void clickedF();

@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QPainter>
+#include <QTimer>
 
 namespace Ui {
 class liveGraph;
@@ -19,7 +20,11 @@ public:
 
 private:
     Ui::liveGraph *ui;
-    //QPixmap *graph = new QPixmap();
+    QTimer *timer = new QTimer(this); //таймер 1 сек для сдвига ячеек и перерисовки графика
+    int xShift = 0; //индекс сдвига ячеек разметки поля
+    void shiftCells();
+    int xShiftPix;
+
 
 protected:
     void paintEvent(QPaintEvent *event) override;
