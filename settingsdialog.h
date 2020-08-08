@@ -116,7 +116,7 @@ private slots:
 
     void on_writeBinChkBox_stateChanged(int);
 
-    void on_writeTxtLogChkBox_stateChanged(int);
+    void on_writeTxtChkBox_stateChanged(int);
 
 private:
     void fillPortsParameters();

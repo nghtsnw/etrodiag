@@ -22,7 +22,7 @@ void bitMaskObj::newMaskObj(int _devNum, int _byteNum, int _id)
 }
 
 
-void bitMaskObj::sendMaskToProfile(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogflag)
+void bitMaskObj::sendMaskToProfile(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogflag, bool _drawGraphFlag, QString _drawGraphColor)
 {//забор данных из формы masksettingsdialog и отправка в профиль bitmaskobj
     if (_devNum == devNum && _byteNum == byteNum && _id == id)
     {
@@ -33,7 +33,9 @@ void bitMaskObj::sendMaskToProfile(int _devNum, int _byteNum, int _id, QString _
         paramType = _paramType;
         valueShift = _valueShift;
         valueKoef = _valueKoef;
-        viewInLogFlag = _viewInLogflag;        
+        viewInLogFlag = _viewInLogflag;
+        drawGraphFlag = _drawGraphFlag;
+        drawGraphColor = _drawGraphColor;
     }
 }
 
@@ -42,7 +44,7 @@ void bitMaskObj::maskToForm(int _devNum, int _byteNum, int _id)
 //по запросу формы настроек маски сообщаем ей все параметры маски
 {
     if (_devNum == devNum && _byteNum == byteNum && _id == id)
-    emit maskToFormSIG(devNum, byteNum, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType);
+    emit maskToFormSIG(devNum, byteNum, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType, drawGraphFlag, drawGraphColor);
     else if (_devNum == devNum && _byteNum == byteNum && _id == 999)
         allMasksToList(_devNum, _byteNum); //если пришёл id 999, то вызывается функция на отправку сигнала от всех масок данного байта устройства в лист масок в bytesettingsform
 }
@@ -53,7 +55,7 @@ void bitMaskObj::allMasksToList(int _devNum, int _byteNum)
     if (_devNum == devNum && _byteNum == byteNum)
     {
         qDebug() << "emit mask " << paramName << " to saving";
-        emit maskToListSIG(devNum, byteNum, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType);
+        emit maskToListSIG(devNum, byteNum, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType, drawGraphFlag, drawGraphColor);
     }
 }
 
@@ -154,7 +156,7 @@ void bitMaskObj::deleteMaskObjectTX(int _devNum, int _byteNum, int _id)
     }
 }
 
-void bitMaskObj::loadMaskRX(int _devNum, QString _devName, int _byteNum, QString _byteName, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag, int _wordType)
+void bitMaskObj::loadMaskRX(int _devNum, QString _devName, int _byteNum, QString _byteName, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag, int _wordType, bool _drawGraphFlag, QString _drawGraphColor)
 {
     if (_devNum == devNum && _byteNum == byteNum && id == _id)
     {
@@ -166,5 +168,7 @@ void bitMaskObj::loadMaskRX(int _devNum, QString _devName, int _byteNum, QString
         valueShift = _valueShift;
         valueKoef = _valueKoef;
         viewInLogFlag = _viewInLogFlag;
+        drawGraphFlag = _drawGraphFlag;
+        drawGraphColor = _drawGraphColor;
 }
 }

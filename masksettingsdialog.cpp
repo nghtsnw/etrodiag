@@ -3,6 +3,7 @@
 #include <QList>
 #include "bitsetform.h"
 #include <QDebug>
+#include <QColorDialog>
 
 maskSettingsDialog::maskSettingsDialog(QWidget *parent) :
     QWidget(parent),
@@ -27,7 +28,7 @@ void maskSettingsDialog::requestDataOnId(int _devNum, int _byteNum, int _id)
     //ответный сигнал от masksettingsdialog с запросом всех параметров маски bitmaskobject
 }
 
-void maskSettingsDialog::getDataOnId(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag, int _wordType)
+void maskSettingsDialog::getDataOnId(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag, int _wordType, bool _drawGraphFlag, QString _drawGraphColor)
 {//ответный сигнал со всеми данными маски bitmaskobj в masksettingsdialog
     if (devNum == _devNum && byteNum == _byteNum && id == _id)
     {
@@ -36,7 +37,14 @@ void maskSettingsDialog::getDataOnId(int _devNum, int _byteNum, int _id, QString
         ui->binNum->setText(_paramMask);
         ui->shiftTxt->setText(QString::number(_valueShift));
         ui->koeffTxt->setText(QString::number(_valueKoef));
-        ui->checkBox->setChecked(_viewInLogFlag);        
+        chkBoxStopSignal = true; //на время инициализации окна глушим переменную, что-бы не сработал сигнал state changed
+        ui->logCheckBox->setChecked(_viewInLogFlag);
+        ui->drawGraphCheckBox->setChecked(_drawGraphFlag);
+        chkBoxStopSignal = false;
+        QString style = "background: %1;";
+        style = style.arg(_drawGraphColor);
+        ui->drawGraphCheckBox->setStyleSheet(style);
+        drawColor.setNamedColor(_drawGraphColor);
         initBitButtonsAndCheckBoxes(wordType);
     }
 }
@@ -126,8 +134,10 @@ void maskSettingsDialog::sendMask2Profile()
         int _paramType = 0;
         int _valueShift = ui->shiftTxt->text().toInt(nullptr,10);
         float _valueKoef = ui->koeffTxt->text().toFloat(nullptr);
-        bool _viewInLogFlag = ui->checkBox->isChecked();
-        emit sendMaskData(devNum, "",byteNum, "", id, _paramName, _paramMask, _paramType, _valueShift, _valueKoef, _viewInLogFlag, wordType);
+        bool _viewInLogFlag = ui->logCheckBox->isChecked();
+        bool _drawGraphFlag = ui->drawGraphCheckBox->isChecked();
+        QString _drawGraphColor = drawColor.name();
+        emit sendMaskData(devNum, "",byteNum, "", id, _paramName, _paramMask, _paramType, _valueShift, _valueKoef, _viewInLogFlag, wordType, _drawGraphFlag, _drawGraphColor);
     }
 }
 
@@ -156,7 +166,28 @@ void maskSettingsDialog::on_koeffTxt_editingFinished()
     sendMask2Profile();
 }
 
-void maskSettingsDialog::on_checkBox_stateChanged(int)
+void maskSettingsDialog::on_logCheckBox_stateChanged(int)
 {
-    sendMask2Profile();
+    if (!chkBoxStopSignal) sendMask2Profile();
+}
+
+void maskSettingsDialog::on_drawGraphCheckBox_stateChanged(int)
+{
+    if (!chkBoxStopSignal)
+    {
+        QString style = "background: %1;";
+        if (ui->drawGraphCheckBox->isChecked())
+        {
+            drawColor = QColorDialog::getColor(Qt::white, this, "Choose color");
+            if (!drawColor.isValid())
+            {
+                ui->drawGraphCheckBox->setChecked(false);
+                drawColor.setNamedColor("#ffffff");
+            }
+        }
+        else drawColor.setNamedColor("#ffffff");
+        style = style.arg(drawColor.name());
+        ui->drawGraphCheckBox->setStyleSheet(style);
+        sendMask2Profile();
+    }
 }

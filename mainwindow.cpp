@@ -452,7 +452,7 @@ void MainWindow::logFileCreator(QString string, bool redFlag)
     }
 }
 
-void MainWindow::loadProfile(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType)
+void MainWindow::loadProfile(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor)
 {//если устройства нет, то создаём, потом посылаем маску
     bool thisDeviceHere = false;
     QList<Device*> vlayChildList = m_ui->devArea->findChildren<Device*>();
@@ -462,7 +462,7 @@ void MainWindow::loadProfile(int devNum, QString devName, int byteNum, QString b
         if (devNum == vlayChildListIt.next()->devNum)
             thisDeviceHere = true;
     if (thisDeviceHere)
-        emit sendMaskData(devNum, devName, byteNum, byteName, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType);
+        emit sendMaskData(devNum, devName, byteNum, byteName, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType, drawGraphFlag, drawGraphColor);
     else if (!thisDeviceHere)
     {//создаём устройство и инициализируем пустым пакетом в 40 байт, с номером устройства на позиции 2
         createDevice(devNum);
@@ -470,7 +470,7 @@ void MainWindow::loadProfile(int devNum, QString devName, int byteNum, QString b
         devInitArray.replace(2, devNum);
         emit devUpdate(devNum, devInitArray);
         dvsf.updByteButtons(devNum, devInitArray);
-        emit sendMaskData(devNum, devName, byteNum, byteName, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType);
+        emit sendMaskData(devNum, devName, byteNum, byteName, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType, drawGraphFlag, drawGraphColor);
     }
 }
 

@@ -245,7 +245,7 @@ void newconnect::prepareToSaveProfile()
     }
 }
 
-void newconnect::saveProfileSlot4Masks(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int, double valueShift, double valueKoef, bool viewInLogFlag, int wordType)
+void newconnect::saveProfileSlot4Masks(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool _drawGraphFlag, QString _drawGraphColor)
      {
                //перед сохранением все маски сигналом отправляются сюда, что-бы образовать перечень масок
                //проверяется что этой маски тут ещё нет, после этого создаётся список с текстовым перечнем всех параметров
@@ -278,6 +278,8 @@ void newconnect::saveProfileSlot4Masks(int devNum, QString devName, int byteNum,
                    maskList.append(QString::number(valueKoef,'g',6));//9
                    maskList.append((viewInLogFlag ?"true":"false"));//10
                    maskList.append(QString::number(wordType));//11
+                   maskList.append(_drawGraphFlag ?"true":"false");//12
+                   maskList.append(_drawGraphColor);//13
                    txtmaskobj *savingMask = new txtmaskobj(maskList);
                    qDebug() << "create obj to save mask " << maskList[6];
                    savingMask->setParent(this);
@@ -325,7 +327,7 @@ void newconnect::readProfile()
         QString str = txtStream.readLine();
         QStringList strLst = str.split('\t');
         if (strLst.at(0)=="thisIsMask")
-            emit loadMask(strLst.at(2).toInt(0,10),strLst.at(4),strLst.at(3).toInt(0,10),strLst.at(5),strLst.at(1).toInt(0,10),strLst.at(6),strLst.at(7),0,strLst.at(8).toDouble(),strLst.at(9).toDouble(),((QString::compare(strLst.at(10), "true") == 0) ? true : false),strLst.at(11).toInt(0,10));
+            emit loadMask(strLst.at(2).toInt(0,10),strLst.at(4),strLst.at(3).toInt(0,10),strLst.at(5),strLst.at(1).toInt(0,10),strLst.at(6),strLst.at(7),0,strLst.at(8).toDouble(),strLst.at(9).toDouble(),((QString::compare(strLst.at(10), "true") == 0) ? true : false),strLst.at(11).toInt(0,10), ((QString::compare(strLst.at(12), "true") == 0) ? true : false), strLst.at(13));
         strLst.clear();
     }
 }

@@ -91,7 +91,7 @@ public:
     QLabel *statuslbl = nullptr;
     void openMaskSettingsDialog();
     void createDevice(int devNum);
-    void loadProfile(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType);
+    void loadProfile(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor);
     bool logFlag = false;
     bool createNewFileNamePermission = true;
     QString logFileName;
@@ -108,7 +108,7 @@ signals:
     void getDevName(int devNum);
     void setDevName(int devNum, QString name);
     void returnDevNameAfterClose(int devNum, QString text);
-    void sendMaskData(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType);
+    void sendMaskData(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor);
     void getByteName(int devNum, int byteNum);
     void hideOtherDevButtons(bool, int _devNum);
     void dvsfAfterCloseClear();

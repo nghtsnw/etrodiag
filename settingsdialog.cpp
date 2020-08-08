@@ -325,7 +325,7 @@ void SettingsDialog::on_writeBinChkBox_stateChanged(int)
     emit writeBinLog(m_ui->writeBinChkBox->isChecked());
 }
 
-void SettingsDialog::on_writeTxtLogChkBox_stateChanged(int)
+void SettingsDialog::on_writeTxtChkBox_stateChanged(int)
 {
     emit writeTextLog(m_ui->writeTxtChkBox->isChecked());
 }

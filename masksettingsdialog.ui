@@ -102,9 +102,16 @@
       <enum>QLayout::SetMaximumSize</enum>
      </property>
      <item>
-      <widget class="QCheckBox" name="checkBox">
+      <widget class="QCheckBox" name="logCheckBox">
        <property name="text">
         <string>View change to main log</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="drawGraphCheckBox">
+       <property name="text">
+        <string>Draw a graph</string>
        </property>
       </widget>
      </item>
