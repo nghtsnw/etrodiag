@@ -19,6 +19,7 @@ SOURCES += \
     mainwindow.cpp \
     masksettingsdialog.cpp \
     newconnect.cpp \
+    newgraph.cpp \
     settingsdialog.cpp \
     console.cpp \
     txtmaskobj.cpp
@@ -37,6 +38,7 @@ HEADERS += \
     mainwindow.h \
     masksettingsdialog.h \
     newconnect.h \
+    newgraph.h \
     settingsdialog.h \
     console.h \
     txtmaskobj.h

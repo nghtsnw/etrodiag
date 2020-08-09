@@ -143,7 +143,7 @@ void bitMaskObj::calculateValue(int _devNum, int _byteNum, uint32_t wordData)
         if (endValue == oldEndValue) isNewData = false;
         else isNewData = true;
         //if (endValue != oldEndValue || oldEndValue == 1234.56)
-        emit param2FrontEnd(devNum, byteNum, wordData, id, paramName, binRawValue, endValue, viewInLogFlag, isNewData);
+        emit param2FrontEnd(devNum, byteNum, wordData, id, paramName, binRawValue, endValue, viewInLogFlag, isNewData, drawGraphFlag, drawGraphColor);
         oldEndValue = endValue;
     }
 }

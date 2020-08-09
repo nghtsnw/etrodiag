@@ -107,7 +107,7 @@ void ByteSettingsForm::requestAllMasks()
     emit requestAllMaskToList(devNum,byteNum,999);
 }
 
-void ByteSettingsForm::updateMasksList(int _devNum, QString _devName, int _byteNum, QString _byteName, int _wordData, int _id, QString parameterName, int _binRawValue, float _endValue, bool viewInLogFlag, bool isNewData)
+void ByteSettingsForm::updateMasksList(int _devNum, QString _devName, int _byteNum, QString _byteName, int _wordData, int _id, QString parameterName, int _binRawValue, float _endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor)
 {
     if (devNum == _devNum && byteNum == _byteNum)
     {

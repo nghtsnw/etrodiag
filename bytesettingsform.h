@@ -21,7 +21,7 @@ public:
     //void cleanMaskList();
     void requestAllMasks();
     void deleteMaskItem(int row);
-    void updateMasksList(int _devNum, QString _devName, int _byteNum, QString _byteName, int _wordData, int _id, QString parameterName, int _binRawValue, float _endValue, bool viewInLogFlag, bool isNewData);
+    void updateMasksList(int _devNum, QString _devName, int _byteNum, QString _byteName, int _wordData, int _id, QString parameterName, int _binRawValue, float _endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor);
 //    virtual void hideEvent(QHideEvent* e);
     void cleanForm();
     ~ByteSettingsForm();

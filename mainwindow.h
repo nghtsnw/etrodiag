@@ -121,7 +121,7 @@ public slots:
     void addDeviceToList(QVector<int> ddata);
     void openDevSett(int devNum, QVector<int> data);
     void openByteSett(int devNum, int byteNum);
-    void frontendDataSort(int devNum, QString devName, int, QString, int, int, QString parameterName, int, double endValue, bool viewInLogFlag, bool isNewData);
+    void frontendDataSort(int devNum, QString devName, int, QString, int, int, QString parameterName, int, double endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor);
     void setLogFlag(bool _logFlag);
     void devStatusMsg(QString _devName, QString status);
     void setWriteTextLog(bool arg);

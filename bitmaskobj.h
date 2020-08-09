@@ -36,7 +36,7 @@ signals:
     void maskToFormSIG(int devNum, int byteNum, int id, QString paramName, QString paramMask, int paramType, int valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor);
     void mask2byteSettingsForm(int devNum, int byteNum, int id);
     void maskToListSIG(int devNum, int byteNum, int id, QString paramName, QString paramMask, int paramType, int valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor);
-    void param2FrontEnd(int devNum, int byteNum, int wordData, int id, QString paramName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData);
+    void param2FrontEnd(int devNum, int byteNum, int wordData, int id, QString paramName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor);
 public slots:
     void maskToForm(int _devNum, int _byteNum, int _id);
     void sendMaskToProfile(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag, bool _drawGraphFlag, QString _drawGraphColor);

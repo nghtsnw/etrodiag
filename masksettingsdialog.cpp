@@ -103,7 +103,7 @@ void maskSettingsDialog::scanCheckboxesToMask()
     sendMask2Profile();
 }
 
-void maskSettingsDialog::liveDataSlot(int _devNum, QString _devName, int _byteNum, QString _byteName, uint32_t _wordData, int _id, QString parameterName, int _binRawValue, double _endValue, bool viewInLogFlag, bool isNewData)
+void maskSettingsDialog::liveDataSlot(int _devNum, QString _devName, int _byteNum, QString _byteName, uint32_t _wordData, int _id, QString parameterName, int _binRawValue, double _endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor)
 {//устанавливаем текст каждому чекбоксу, 0 или 1
    if (devNum == _devNum && byteNum == _byteNum)
    {

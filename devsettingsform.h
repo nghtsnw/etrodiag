@@ -17,12 +17,9 @@ public:
     void setDevName(int id, QString devName);
     int devNum;
     void initByteButtons(int id, QVector<int> data);
-    //QLineEdit *devNameForm = new QLineEdit;
-    //void onByteBtnClicked();
     void updByteButtons(int _devNum, QVector<int> data);
     void retranslateByteButtonSetStatus(int byteNum, bool status);
     void afterCloseClearing();
-   // void enableNameEdit(bool b);
     ~devSettingsForm();
 
 signals:
@@ -34,20 +31,16 @@ signals:
     void initByteButtonsWordLeight(int id,int count);
     void wordDataFullHex(int devNum, int byteNum, QString);
     void inThisWordLivingMask(int _devNum, int _byteNum);
+
 public slots:
-    //void onByteBtnClicked();
-    //void openByteSettingsFormRX(int devNum, int byteNum);
     void wordTypeChangeRX(int _devNum, int _byteNum, int wordType);
-    void liveDataSlot(int _devNum, QString, int _byteNum, QString, uint32_t, int, QString, int, double, bool, bool);
-    //void retranslateByteButtonSetStatus(int byteNum, bool status);
+    void liveDataSlot(int _devNum, QString, int _byteNum, QString, uint32_t, int, QString, int, double, bool, bool, bool _drawGraphFlag, QString _drawGraphColor);
 
 private slots:
     void on_devNameEditLine_editingFinished();
 
-
 private:
     Ui::devSettingsForm *m_ui;
-    //virtual void hideEvent(QHideEvent *event);
     bool readyToSetDevNameToForm = true;
 };
 

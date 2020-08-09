@@ -182,7 +182,8 @@ void MainWindow::createDevice(int devNum)
     connect (dev, &Device::param2FrontEndTX, this, &MainWindow::frontendDataSort);
     connect (dev, &Device::param2FrontEndTX, &masksd, &maskSettingsDialog::liveDataSlot);
     connect (dev, &Device::param2FrontEndTX, &btsf, &ByteSettingsForm::updateMasksList);
-    connect (dev, &Device::param2FrontEndTX, &dvsf, &devSettingsForm::liveDataSlot);    
+    connect (dev, &Device::param2FrontEndTX, &dvsf, &devSettingsForm::liveDataSlot);
+    connect (dev, &Device::param2FrontEndTX, &graphiq, &liveGraph::incomingDataSlot);
     connect (this, &MainWindow::sendMaskData, dev, &Device::loadMaskRX);
     connect (this, &MainWindow::getByteName, dev, &Device::getByteNameRX);
     connect (dev, &Device::returnByteNameTX, &btsf, &ByteSettingsForm::setWordName);
@@ -392,7 +393,7 @@ void MainWindow::ValueArea_CellClicked(int row, int)
     emit hideOtherDevButtons(true, grabDevNum);
 }
 
-void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QString, int, int maskId, QString parameterName, int, double endValue, bool viewInLogFlag, bool isNewData)
+void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QString, int, int maskId, QString parameterName, int, double endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor)
 {    
     if (dvsf.isVisible() && devNum == dvsf.devNum)
         dvsf.setDevName(devNum, devName);
