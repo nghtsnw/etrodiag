@@ -12,17 +12,15 @@ public:
     int devNum;
     int byteNum;
     int id;
-    int pointsOnGraph;
-    void setNextValue(int value);
 
 public slots:
-    void dataPool(int _devNum, QString _devName, int _byteNum, QString _byteName, uint32_t _wordData, int _id, QString parameterName, int _binRawValue, double _endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor);//приём живых данных
+    void dataPool(int _devNum, int _byteNum, int _id, double _endValue, int pointsOnGraph, QString _drawGraphColor);//приём живых данных
     void oscillatorInput();//по внешнему таймеру сдвиг массива с точками на один шаг и отправка на рисование
     void repaintThis();
 private:
     QVector<double> pointsWithValues;
     QString graphColor;
-    int value;
+    double value = 0.0;
     int watchDogCount = 0;
     void watchDog();
 

@@ -32,8 +32,10 @@ private:
     int horizontalLineCount;
     int oneCellXpix;
     int oneCellYpix;
+    int oneStepXpix;
     QVector<double> findDeltaValue(QVector<double> &points);
-    double findYScale(double delta_value);
+    double findYScale(QVector<double> values);
+    bool foundFlag = false;
 
     const int oneStepTime = 1000;//время для таймера сдвига на шаг и перерисовки (мсек)
     const int steps = 60; //ширина графика в шагах
@@ -43,6 +45,7 @@ protected:
 
 signals:
     void repaintCurves();
+    void data2graph(int devNum, int byteNum, int id, double endValue, int steps, QString drawGraphColor);
 };
 
 #endif // LIVEGRAPH_H

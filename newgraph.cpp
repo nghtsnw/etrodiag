@@ -10,28 +10,26 @@ newgraph::~newgraph()
 
 }
 
-void newgraph::setNextValue(int _value)
-{
-    value = _value;
-}
-
-void newgraph::dataPool(int _devNum, QString _devName, int _byteNum, QString _byteName, uint32_t _wordData, int _id, QString parameterName, int _binRawValue, double _endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor)
+void newgraph::dataPool(int _devNum, int _byteNum, int _id, double _endValue, int _pointsOnGraph, QString _drawGraphColor)
 {
     if (devNum == _devNum && byteNum == _byteNum && id == _id)
     {
         value = _endValue;
         if (graphColor!=_drawGraphColor) graphColor = _drawGraphColor;
-        if (pointsWithValues.size() != pointsOnGraph) pointsWithValues.resize(pointsOnGraph);
+        if (pointsWithValues.size() != _pointsOnGraph) pointsWithValues.resize(_pointsOnGraph);
     }
 }
 
 void newgraph::oscillatorInput()
 {
-    pointsWithValues.pop_back();
-    pointsWithValues.push_front(value);
-    //watchDog();
-    value = 0; //если не будет новых данных, следующий шаг будет нарисован через 0
-    emit graph2Painter(pointsWithValues, graphColor);
+    if (!pointsWithValues.isEmpty())
+    {
+        pointsWithValues.pop_back();
+        pointsWithValues.push_front(value);
+        //watchDog();
+        value = 0; //если не будет новых данных, следующий шаг будет нарисован через 0
+        emit graph2Painter(pointsWithValues, graphColor);
+    }
 }
 
 void newgraph::repaintThis()
