@@ -2,6 +2,7 @@
 #define NEWGRAPH_H
 
 #include <QObject>
+#include <QTimer>
 
 class newgraph : public QObject
 {
@@ -19,10 +20,12 @@ public slots:
     void repaintThis();
 private:
     QVector<double> pointsWithValues;
+    QVector<double> bufferForMidValue;
     QString graphColor;
     double value = 0.0;
     int watchDogCount = 0;
     void watchDog();
+    QTimer watchDogTimer;
 
 signals:
     void graph2Painter(QVector<double> data, QString color);

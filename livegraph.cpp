@@ -71,23 +71,30 @@ void liveGraph::shiftCells()
 }
 
 void liveGraph::incomingDataSlot(int devNum, QString devName, int byteNum, QString byteName, uint32_t wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData, bool drawGraphFlag, QString drawGraphColor)
-{
-    if (drawGraphFlag)
-    {
+{    
         QList<newgraph*> graphList = this->findChildren<newgraph*>();
-        qDebug() << "graphlist count " << graphList.size();
         QListIterator<newgraph*> graphListIt(graphList);
-
+        foundFlag = false;
         if (!graphList.empty())
         {
+            //while(graphListIt.hasNext())
             for (int i = 0; i < graphList.size(); ++i)
             {
                 if (graphListIt.peekNext()->devNum == devNum && graphListIt.peekNext()->byteNum == byteNum && graphListIt.peekNext()->id == id)
-                {
-                    foundFlag = true;
-                    emit data2graph(devNum, byteNum, id, endValue, steps, drawGraphColor);
-                    break;
+                {//если нашёлся график
+                    if (drawGraphFlag)
+                    {//и в новых данных флаг на разрешение рисования, то обновляем график
+                        foundFlag = true;
+                        emit data2graph(devNum, byteNum, id, endValue, steps, drawGraphColor);
+                        break;
+                    }
+                    else
+                    {
+                        graphListIt.next()->~newgraph(); //если флаг снят - удаляем объект графика
+                        break;
+                    }
                 }
+                graphListIt.next();
             }
         }
         if (!foundFlag)
@@ -102,13 +109,11 @@ void liveGraph::incomingDataSlot(int devNum, QString devName, int byteNum, QStri
             emit data2graph(devNum, byteNum, id, endValue, steps, drawGraphColor);
             connect (timer, &QTimer::timeout, graph, &newgraph::oscillatorInput);
         }
-    }
 }
+
 
 void liveGraph::paintCurve(QVector<double> points, QString color)
 {
-    qDebug() << "paint curve, color " << color;
-    const int Yzero = pictHeight; //так как нули координат находятся в левом верхнем углу, сделаю условные координаты для удобства
     QPainter paintcv(this);
     if (!paintcv.isActive()) paintcv.begin(this);
     QColor paintColor;
