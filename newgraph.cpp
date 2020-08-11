@@ -23,15 +23,16 @@ void newgraph::dataPool(int _devNum, int _byteNum, int _id, double _endValue, in
 
 void newgraph::oscillatorInput()
 {
-    if (!pointsWithValues.isEmpty())
+    if (!pointsWithValues.isEmpty() && !bufferForMidValue.isEmpty())
     {
         pointsWithValues.pop_back();
         for (double num : bufferForMidValue) //если за время паузы успело прийти несколько значений, вычисляется среднее
             value += num;
         value = value/bufferForMidValue.size();
-        pointsWithValues.push_front(value);
-        bufferForMidValue.clear();
+        pointsWithValues.push_front(value);        
         emit graph2Painter(pointsWithValues, graphColor);
+        bufferForMidValue.clear();
+        value = 0;
     }
 }
 

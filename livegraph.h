@@ -25,14 +25,14 @@ private:
     int xShift = 0; //индекс сдвига ячеек разметки поля
     void shiftCells();
     void paintCurve(QVector<double> points, QString color);
-    int xShiftPix;
-    int pictWidth;
-    int pictHeight;
-    int verticalLineCount;
-    int horizontalLineCount;
-    int oneCellXpix;
-    int oneCellYpix;
-    int oneStepXpix;
+    int xShiftPix = 0;
+    int pictWidth = 0;
+    int pictHeight = 0;
+    int verticalLineCount = 0;
+    int horizontalLineCount = 0;
+    int oneCellXpix = 0;
+    int oneCellYpix = 0;
+    int oneStepXpix = 0;
     QVector<double> findDeltaValue(QVector<double> &points);
     double findYScale(QVector<double> values);
     bool foundFlag = false;

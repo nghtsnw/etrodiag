@@ -74,10 +74,10 @@ void liveGraph::incomingDataSlot(int devNum, QString devName, int byteNum, QStri
 {    
         QList<newgraph*> graphList = this->findChildren<newgraph*>();
         QListIterator<newgraph*> graphListIt(graphList);
+        qDebug() << "graphlist count " << graphList.size();
         foundFlag = false;
         if (!graphList.empty())
         {
-            //while(graphListIt.hasNext())
             for (int i = 0; i < graphList.size(); ++i)
             {
                 if (graphListIt.peekNext()->devNum == devNum && graphListIt.peekNext()->byteNum == byteNum && graphListIt.peekNext()->id == id)
@@ -97,7 +97,7 @@ void liveGraph::incomingDataSlot(int devNum, QString devName, int byteNum, QStri
                 graphListIt.next();
             }
         }
-        if (!foundFlag)
+        if (!foundFlag && drawGraphFlag)
         {
             newgraph *graph = new newgraph(this);
             connect (this, &liveGraph::repaintCurves, graph, &newgraph::repaintThis);
@@ -128,7 +128,7 @@ void liveGraph::paintCurve(QVector<double> points, QString color)
     double oneUnitPix = pictHeight/yScale; //цена одного деления в пикселях
 
     for (int i = 0, x = pictWidth; i < points.size()-1; ++i, x = x - oneStepXpix) {
-        paintcv.drawLine(x, (((points.at(i)+zeroShift)*oneUnitPix)-pictHeight)*-1, x - oneStepXpix, (((points.at(i+1)+zeroShift)*oneUnitPix)-pictHeight)*-1);
+        paintcv.drawLine(x, (((points.at(i)+zeroShift)*oneUnitPix)-pictHeight)*-1, x - oneStepXpix+1, (((points.at(i+1)+zeroShift)*oneUnitPix)-pictHeight)*-1);
     }
 }
 
