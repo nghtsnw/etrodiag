@@ -209,6 +209,7 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
                 emit prepareToSaveProfile();
                 emit saveProfile();
                 masksd.openDirectly = false;
+                m_ui->valueArea->clear();
                 m_ui->valueArea->show();
             }
             else {
@@ -474,9 +475,6 @@ void MainWindow::loadProfile(int devNum, QString devName, int byteNum, QString b
         emit sendMaskData(devNum, devName, byteNum, byteName, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType, drawGraphFlag, drawGraphColor);
     }
 }
-
-
-//void MainWindow::
 
 void MainWindow::setLogFlag(bool _logFlag)
 {

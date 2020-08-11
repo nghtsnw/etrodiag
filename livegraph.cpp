@@ -41,11 +41,13 @@ void liveGraph::initGraph()
     horizontalLineCount = 10;
     oneCellXpix = pictWidth/verticalLineCount; //определяем габариты ячеек
     oneCellYpix = pictHeight/horizontalLineCount;
+    scaleErrorPix = pictHeight-(oneCellYpix*horizontalLineCount);//погрешность от деления высоты окна на количество ячеек, для коррекции масштаба графика
     oneStepXpix = pictWidth/steps; //один шаг это ширина кадра делённая на количество шагов
-    if (xShift == 1) xShiftPix = oneCellXpix/3; //для текущего вызова функции определяем горизонтальный сдвиг в пикселях, с которым рисуем вертикальные линии
-    else if (xShift == 2) xShiftPix = (oneCellXpix/3)*2;
+    vZeroLevel = oneCellYpix*horizontalLineCount;//вертикальный уровень нуля
+    if (xShift == 1) xShiftPix = oneStepXpix;//xShiftPix = oneCellXpix/3; //для текущего вызова функции определяем горизонтальный сдвиг в пикселях, с которым рисуем вертикальные линии
+    else if (xShift == 2) xShiftPix = oneStepXpix*2;//(oneCellXpix/3)*2;
     else xShiftPix = 0;
-    for (int i = horizontalLineCount, vCoord = 0; i > 0; --i) //рисуем горизонтальные линии
+    for (int i = horizontalLineCount+1, vCoord = scaleErrorPix; i > 0; --i) //рисуем горизонтальные линии
     {
         paint.drawLine(0,vCoord,pictWidth,vCoord);
         vCoord+=oneCellYpix;
@@ -125,10 +127,11 @@ void liveGraph::paintCurve(QVector<double> points, QString color)
     double zeroShift = 0;
     if (minMaxDeltaValue.at(0) < 0)
     zeroShift = minMaxDeltaValue.at(0)*-1; //смещение нуля если минимальное значение меньше нуля
-    double oneUnitPix = pictHeight/yScale; //цена одного деления в пикселях
-
-    for (int i = 0, x = pictWidth; i < points.size()-1; ++i, x = x - oneStepXpix) {
-        paintcv.drawLine(x, (((points.at(i)+zeroShift)*oneUnitPix)-pictHeight)*-1, x - oneStepXpix+1, (((points.at(i+1)+zeroShift)*oneUnitPix)-pictHeight)*-1);
+    double oneUnitPix = vZeroLevel/yScale; //цена одного деления в пикселях
+    //рисуем линии с учётом всех смещений и поправок на масштабирование
+    for (double i = 0, x = oneCellXpix*verticalLineCount; i < points.size()-1; ++i, x = x - oneStepXpix) {
+        paintcv.drawLine(x, (((points.at(i)+zeroShift)*oneUnitPix)-vZeroLevel-scaleErrorPix)*-1,
+                         x - oneStepXpix, (((points.at(i+1)+zeroShift)*oneUnitPix)-vZeroLevel-scaleErrorPix)*-1);
     }
 }
 
@@ -143,7 +146,7 @@ QVector<double> liveGraph::findDeltaValue(QVector<double>& points)
             lastMinValue = num;
     }
     double deltaValue = 0.0;
-    if (lastMinValue >= 0) deltaValue = lastMaxValue + lastMinValue;
+    if (lastMinValue >= 0) deltaValue = lastMaxValue;
     else if (lastMinValue < 0) deltaValue = lastMaxValue + (lastMinValue * -1);
     QVector<double> values = {lastMinValue, lastMaxValue, deltaValue};
     return values;

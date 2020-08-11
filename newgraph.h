@@ -23,9 +23,11 @@ private:
     QVector<double> bufferForMidValue;
     QString graphColor;
     double value = 0.0;
+    double lastValue = 0.0;
     int watchDogCount = 0;
     void watchDog();
     QTimer watchDogTimer;
+    bool watchDogFlag = false;
 
 signals:
     void graph2Painter(QVector<double> data, QString color);

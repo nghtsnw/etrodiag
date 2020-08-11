@@ -91,7 +91,6 @@ void devSettingsForm::afterCloseClearing()
     QListIterator<byteButton*> devChildListIt(devChildList);
     while (devChildListIt.hasNext())
         devChildListIt.next()->~byteButton();
-    devChildList = this->findChildren<byteButton*>();
     //очистка формы ввода имени устройства и блокировка ввода
     m_ui->devNameEditLine->clear();
     m_ui->devNameEditLine->setDisabled(true);

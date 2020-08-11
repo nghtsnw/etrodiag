@@ -15,9 +15,10 @@ void newgraph::dataPool(int _devNum, int _byteNum, int _id, double _endValue, in
     if (devNum == _devNum && byteNum == _byteNum && id == _id)
     {
         bufferForMidValue.push_back(_endValue);
+        watchDogFlag = false;
         watchDogTimer.start(3000);
         if (graphColor!=_drawGraphColor) graphColor = _drawGraphColor;
-        if (pointsWithValues.size() != _pointsOnGraph) pointsWithValues.resize(_pointsOnGraph);
+        if (pointsWithValues.size() != _pointsOnGraph+4) pointsWithValues.resize(_pointsOnGraph+4);//+4 потому что по другому почему-то график рисуется обрезаным, так что небольшой запас
     }
 }
 
@@ -32,7 +33,16 @@ void newgraph::oscillatorInput()
         pointsWithValues.push_front(value);        
         emit graph2Painter(pointsWithValues, graphColor);
         bufferForMidValue.clear();
+        lastValue = value,
         value = 0;
+    }
+    else if (bufferForMidValue.isEmpty())
+    {
+        pointsWithValues.pop_back();
+        if (!watchDogFlag) pointsWithValues.push_front(lastValue);
+        else if (watchDogFlag) pointsWithValues.push_front(0);
+        emit graph2Painter(pointsWithValues, graphColor);
+
     }
 }
 
@@ -42,6 +52,6 @@ void newgraph::repaintThis()
 }
 
 void newgraph::watchDog()
-{//если данных нет на протяжении размера окна, освобождаем память от объекта графика
-    value = 0;
+{//если данных нет в течении времени таймера (например нет связи с устройством), шлём на отрисовку нули
+    watchDogFlag = true;
 }
