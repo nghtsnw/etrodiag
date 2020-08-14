@@ -76,7 +76,6 @@ void liveGraph::incomingDataSlot(int devNum, QString devName, int byteNum, QStri
 {    
         QList<newgraph*> graphList = this->findChildren<newgraph*>();
         QListIterator<newgraph*> graphListIt(graphList);
-        qDebug() << "graphlist count " << graphList.size();
         foundFlag = false;
         if (!graphList.empty())
         {
@@ -92,6 +91,7 @@ void liveGraph::incomingDataSlot(int devNum, QString devName, int byteNum, QStri
                     }
                     else
                     {
+                        graphAnnotation.remove(drawGraphColor);
                         graphListIt.next()->~newgraph(); //если флаг снят - удаляем объект графика
                         break;
                     }
@@ -100,7 +100,7 @@ void liveGraph::incomingDataSlot(int devNum, QString devName, int byteNum, QStri
             }
         }
         if (!foundFlag && drawGraphFlag)
-        {
+        {//если график не найден то создаём, инициализируем и сразу отправляем данные
             newgraph *graph = new newgraph(this);
             connect (this, &liveGraph::repaintCurves, graph, &newgraph::repaintThis);
             connect (graph, &newgraph::graph2Painter, this, &liveGraph::paintCurve);
@@ -111,11 +111,15 @@ void liveGraph::incomingDataSlot(int devNum, QString devName, int byteNum, QStri
             emit data2graph(devNum, byteNum, id, endValue, steps, drawGraphColor);
             connect (timer, &QTimer::timeout, graph, &newgraph::oscillatorInput);
         }
+        if (drawGraphFlag)
+        {
+            QString tmp = parameterName+'@'+devName;
+            graphAnnotation.insert(drawGraphColor, tmp);
+        }
 }
 
-
 void liveGraph::paintCurve(QVector<double> points, QString color)
-{
+{//сюда каждый объект графика отдаёт массив данных и цвет на рисование
     QPainter paintcv(this);
     if (!paintcv.isActive()) paintcv.begin(this);
     QColor paintColor;
@@ -133,6 +137,46 @@ void liveGraph::paintCurve(QVector<double> points, QString color)
         paintcv.drawLine(x, (((points.at(i)+zeroShift)*oneUnitPix)-vZeroLevel-scaleErrorPix)*-1,
                          x - oneStepXpix, (((points.at(i+1)+zeroShift)*oneUnitPix)-vZeroLevel-scaleErrorPix)*-1);
     }
+    paintAnnotation();
+}
+
+void liveGraph::paintAnnotation()
+{
+    QPainter paintan(this);
+    if (!paintan.isActive()) paintan.begin(this);
+    QColor paintColor;
+    QFont font("Times", 8);
+    paintan.setFont(font);
+    annotationKeys = graphAnnotation.keys();
+    QVector<int> rectXSizePix = maxStringSizePix(font, graphAnnotation.values());
+    const int oneStringYpix = 18;
+    paintan.setPen(Qt::blue);
+    paintan.drawRect(0, 0, rectXSizePix.at(0)+15, oneStringYpix*graphAnnotation.size()+3);
+    paintan.eraseRect(0, 0, rectXSizePix.at(0)+15, oneStringYpix*graphAnnotation.size()+3);
+    for (int i = 0, y = 4; i < graphAnnotation.size(); ++i, y+=oneStringYpix) {
+        paintColor.setNamedColor(annotationKeys.at(i));
+        paintan.setPen(paintColor);
+        paintan.setBrush(QBrush(paintColor));
+        paintan.drawEllipse(2,y,8,8);
+        paintan.setPen(Qt::black);
+        paintan.setBrush(QBrush(Qt::black));
+        paintan.drawText(12, y+10, graphAnnotation.value(annotationKeys.at(i)));
+    }
+    paintan.end();
+}
+
+QVector<int> liveGraph::maxStringSizePix(QFont font, QList<QString> str)
+{
+    QFontMetrics fm(font);
+    int pixelsWideMax = 0;
+    for (QString string : str)
+    {
+        int pixelsWide = fm.horizontalAdvance(string);
+        if (pixelsWide > pixelsWideMax) pixelsWideMax = pixelsWide;
+    }
+    int pixelsHigh = fm.height();
+    QVector<int> maxSizePix = {pixelsWideMax, pixelsHigh};
+    return maxSizePix;
 }
 
 QVector<double> liveGraph::findDeltaValue(QVector<double>& points)

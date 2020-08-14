@@ -210,6 +210,7 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
                 emit saveProfile();
                 masksd.openDirectly = false;
                 m_ui->valueArea->clear();
+                graphiq.graphAnnotation.clear();
                 m_ui->valueArea->show();
             }
             else {
@@ -233,6 +234,7 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
         dvsf.hide();
         emit dvsfAfterCloseClear();
         m_ui->valueArea->clear();
+        graphiq.graphAnnotation.clear();
         m_ui->valueArea->show();
         emit hideOtherDevButtons(false, devNum);
         emit prepareToSaveProfile();
