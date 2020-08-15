@@ -43,6 +43,8 @@ private:
     double findYScale(QVector<double> values);
     bool foundFlag = false;
     QList<QString> annotationKeys;
+    QVector<int> rectXSizePix;
+    int curvesCount = 0;
 
     const int oneStepTime = 1000;//время для таймера сдвига на шаг и перерисовки (мсек)
     const int steps = 60; //ширина графика в шагах

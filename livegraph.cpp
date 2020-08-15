@@ -31,11 +31,11 @@ void liveGraph::initGraph()
     pictHeight = this->size().height();//высота
     QPainter paint(this);
     if (!paint.isActive()) paint.begin(this); // запускаем отрисовку
-    paint.eraseRect(0,0,pictWidth,pictHeight); // очищаем рисунок
-
+    paint.eraseRect(0,0,pictWidth,pictHeight); // очищаем рисунок    
     paint.setBrush(QBrush(Qt::white));
     paint.drawRect(0,0,pictWidth,pictHeight);
-    paint.setPen(Qt::gray);
+    paint.setPen(Qt::lightGray);
+    paint.setOpacity(0.5);
 
     verticalLineCount = steps/3;//кол-во вертикальных линий рассчитывается по количеству шагов на кадр делённому на три, что-бы три шага соответствовало одной ячейке (для возможного масштабирования)
     horizontalLineCount = 10;
@@ -57,8 +57,8 @@ void liveGraph::initGraph()
         paint.drawLine(hCoord,0,hCoord,pictHeight);
         hCoord+=oneCellXpix;
     }
-
-    paint.setPen(Qt::blue);//рисуем рамки
+    paint.setOpacity(1.0);
+    paint.setPen(Qt::white);//рисуем рамки белым цветом, создавая безрамочный эффект
     paint.drawLine(0,0,0,pictHeight);
     paint.drawLine(0,pictHeight-1,pictWidth,pictHeight-1);
     paint.drawLine(pictWidth-1, pictHeight, pictWidth-1, 0);
@@ -125,6 +125,7 @@ void liveGraph::paintCurve(QVector<double> points, QString color)
     QColor paintColor;
     paintColor.setNamedColor(color);
     QPen pen(paintColor, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+    paintcv.setBrush(QBrush(paintColor));
     paintcv.setPen(pen);
     QVector<double> minMaxDeltaValue = findDeltaValue(points); //мнимальное, максимальное и дельта между ними
     double yScale = findYScale(minMaxDeltaValue); //вычисляем по дельте высоту шкалы Y, кратную 10
@@ -136,8 +137,10 @@ void liveGraph::paintCurve(QVector<double> points, QString color)
     for (double i = 0, x = oneCellXpix*verticalLineCount; i < points.size()-1; ++i, x = x - oneStepXpix) {
         paintcv.drawLine(x, (((points.at(i)+zeroShift)*oneUnitPix)-vZeroLevel-scaleErrorPix)*-1,
                          x - oneStepXpix, (((points.at(i+1)+zeroShift)*oneUnitPix)-vZeroLevel-scaleErrorPix)*-1);
+        paintcv.drawEllipse(x-2,(((points.at(i)+zeroShift)*oneUnitPix)-vZeroLevel-scaleErrorPix+2)*-1,4,4);
     }
-    paintAnnotation();
+    curvesCount++;
+    if (curvesCount == graphAnnotation.size()) paintAnnotation();
 }
 
 void liveGraph::paintAnnotation()
@@ -148,11 +151,13 @@ void liveGraph::paintAnnotation()
     QFont font("Times", 8);
     paintan.setFont(font);
     annotationKeys = graphAnnotation.keys();
-    QVector<int> rectXSizePix = maxStringSizePix(font, graphAnnotation.values());
+    rectXSizePix = maxStringSizePix(font, graphAnnotation.values());
     const int oneStringYpix = 18;
-    paintan.setPen(Qt::blue);
+    paintan.setPen(Qt::white);
+    paintan.setBrush(QBrush(Qt::white));
+    paintan.setOpacity(0.7);
     paintan.drawRect(0, 0, rectXSizePix.at(0)+15, oneStringYpix*graphAnnotation.size()+3);
-    paintan.eraseRect(0, 0, rectXSizePix.at(0)+15, oneStringYpix*graphAnnotation.size()+3);
+    paintan.setOpacity(1.0);
     for (int i = 0, y = 4; i < graphAnnotation.size(); ++i, y+=oneStringYpix) {
         paintColor.setNamedColor(annotationKeys.at(i));
         paintan.setPen(paintColor);
@@ -163,6 +168,7 @@ void liveGraph::paintAnnotation()
         paintan.drawText(12, y+10, graphAnnotation.value(annotationKeys.at(i)));
     }
     paintan.end();
+    curvesCount = 0;
 }
 
 QVector<int> liveGraph::maxStringSizePix(QFont font, QList<QString> str)
