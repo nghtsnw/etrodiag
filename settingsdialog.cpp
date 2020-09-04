@@ -58,6 +58,8 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QDebug>
+#include <QStandardPaths>
+#include <QInputDialog>
 
 static const char blankString[] = QT_TRANSLATE_NOOP("SettingsDialog", "N/A");
 
@@ -69,7 +71,12 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     m_ui->setupUi(this);
 
     m_ui->baudRateBox->setInsertPolicy(QComboBox::NoInsert);
-
+    #ifdef Q_OS_WIN32
+        appHomeDir = qApp->applicationDirPath() + QDir::separator();
+    #endif
+    #ifdef Q_OS_ANDROID
+        appHomeDir = QStandardPaths::standardLocations(QStandardPaths::DataLocation)[1] + QDir::separator();
+    #endif
     connect(m_ui->applyButton, &QPushButton::clicked,
             this, &SettingsDialog::apply);
     connect(m_ui->serialPortInfoListBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
@@ -213,9 +220,9 @@ void SettingsDialog::fillProfileList()
 {    
         m_ui->profileSelectBox->clear();
         QStringList profileList;
-        QDir dir("Profiles");
+        QDir dir(appHomeDir + "Profiles");
         if (!dir.exists())
-            QDir().mkdir("Profiles");
+            QDir().mkdir(appHomeDir + "Profiles");
         bool ok = dir.exists();
         if (ok)
         {
@@ -277,19 +284,28 @@ void SettingsDialog::updateSettings()
 
 void SettingsDialog::on_newProfileButton_clicked()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Create new profile"),"Profiles","Etrodiag devices profile(*.eag)");
-    if (!fileName.endsWith("eag"))
-       fileName = fileName + ".eag";
-    QFile file(fileName);
-    file.open(QIODevice::WriteOnly);
-    file.close();
-    fillProfileList();
+    bool ok;
+    #ifdef Q_OS_WIN32
+        QString fileName = QFileDialog::getSaveFileName(this, tr("newprofile"),appHomeDir + "Profiles","Etrodiag devices profile(*.eag)");
+    #endif
+    #ifdef Q_OS_ANDROID
+        QString fileName = appHomeDir + "Profiles" + QDir::separator() + QInputDialog::getText(this, tr("Enter profile name"), tr("Enter profile name"), QLineEdit::Normal, "", &ok);
+    #endif
+    if (ok && !fileName.isEmpty())
+    {
+        if (!fileName.endsWith("eag"))
+           fileName = fileName + ".eag";
+        QFile file(fileName);
+        file.open(QIODevice::WriteOnly);
+        file.close();
+        fillProfileList();
+    }
 }
 
 
 void SettingsDialog::on_profileSelectBox_currentTextChanged(const QString &arg1)
 {
-    QDir profilesDir("Profiles");
+    QDir profilesDir(appHomeDir + "Profiles");
     QStringList nameFilter;
     nameFilter << arg1;
     profilesDir.setNameFilters(nameFilter);

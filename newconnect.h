@@ -31,7 +31,7 @@ public:
     QList<txtmaskobj*> maskVectorsList;
     void readProfile();
     void readFromFile();
-
+    QString appHomeDir;
     QDateTime returnTimestamp();
     bool permission2SaveMasks = false;
 

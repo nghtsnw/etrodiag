@@ -65,6 +65,7 @@
 #include "bytebutton.h"
 #include <QGestureEvent>
 #include <QSwipeGesture>
+#include <QStandardPaths>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), statuslbl (new QLabel), m_ui (new Ui::MainWindow)
@@ -76,6 +77,12 @@ MainWindow::MainWindow(QWidget *parent) :
 //    grabGesture(gesture);
 //  Надеюсь, что когда в qt починят qswipegesture, я раскомментирую это и удалю тот ужас что сейчас заменяет свайп.
     m_ui->setupUi(this);
+    #ifdef Q_OS_WIN32
+        appHomeDir = qApp->applicationDirPath() + QDir::separator();
+    #endif
+    #ifdef Q_OS_ANDROID
+        appHomeDir = QStandardPaths::standardLocations(QStandardPaths::DataLocation)[1] + QDir::separator();
+    #endif
     statusBar()->addWidget(statuslbl);
     statuslbl->setText("Etrodiag beta");
     addConnection();    
@@ -419,9 +426,9 @@ void MainWindow::logFileCreator(QString string, bool redFlag)
     QFile newLogFile;
     if (writeTextLog)
     {
-        QDir dir("Logs");
+        QDir dir(appHomeDir + "Logs");
         if (!dir.exists())
-        QDir().mkdir("Logs");
+        QDir().mkdir(appHomeDir + "Logs");
 
         if (!newLogFile.isOpen())
         {
