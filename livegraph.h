@@ -40,7 +40,7 @@ private:
     double vZeroLevel = 0;
     double scaleErrorPix = 0;
     QVector<double> findDeltaValue(QVector<double> &points);
-    double findYScale(QVector<double> values);
+    double findYScale(const QVector<double> &values);
     bool foundFlag = false;
     QList<QString> annotationKeys;
     QVector<int> rectXSizePix;
