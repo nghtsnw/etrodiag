@@ -9,6 +9,7 @@
 #include "getstream.h"
 #include "dataprofiler.h"
 #include "txtmaskobj.h"
+#include <QStandardPaths>
 
 newconnect::newconnect(QWidget *parent) :
     QWidget(parent),
@@ -24,7 +25,13 @@ newconnect::newconnect(QWidget *parent) :
     m_console->setEnabled(false);
     m_console->setParent(ui->consoleFrame);
     m_console->show();
-
+    #ifdef Q_OS_WIN32
+        appHomeDir = qApp->applicationDirPath() + QDir::separator();
+    #endif
+    #ifdef Q_OS_ANDROID
+        appHomeDir = QStandardPaths::standardLocations(QStandardPaths::DataLocation)[1] + QDir::separator();
+    #endif
+    qDebug() << appHomeDir;
     connect(m_serial, &QSerialPort::errorOccurred, this, &newconnect::handleError);
     connect(m_serial, &QSerialPort::readyRead, this, &newconnect::readData);
     connect(m_console, &Console::getData, this, &newconnect::writeData);
@@ -149,9 +156,9 @@ void newconnect::readData()
     QFile newBinFile;
     if (writeBinLog)
     {
-        QDir dir("Logs");
+        QDir dir(appHomeDir + "Logs");
         if (!dir.exists())
-        QDir().mkdir("Logs");
+        QDir().mkdir(appHomeDir + "Logs");
 
         if (!newBinFile.isOpen())
         {
@@ -300,6 +307,7 @@ void newconnect::saveProfile()
     QFileInfo info(profile);
     profile.open(QIODevice::WriteOnly|QIODevice::Text);
     QTextStream txtStream(&profile);
+    txtStream.setCodec("UTF-8");
     txtStream << info.fileName() << "\n";
     while (maskVectorsListIt.hasNext())
     {
@@ -322,6 +330,7 @@ void newconnect::readProfile()
     QFile profile(p.profilePath);
     profile.open(QIODevice::ReadOnly|QIODevice::Text);
     QTextStream txtStream(&profile);
+    txtStream.setCodec("UTF-8");
     while (!txtStream.atEnd())
     {
         QString str = txtStream.readLine();

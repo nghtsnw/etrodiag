@@ -92,7 +92,7 @@ public:
     explicit SettingsDialog(QWidget *parent = nullptr);
     ~SettingsDialog();
     QString selectedProfile;
-
+    QString appHomeDir;
     Settings settings() const;
 
 signals:

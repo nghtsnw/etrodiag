@@ -202,37 +202,57 @@ QVector<double> liveGraph::findDeltaValue(QVector<double>& points)
     return values;
 }
 
-double liveGraph::findYScale(QVector<double> values)
-{
-    if (values.at(2) >= 1)
-    {
-        for (int var = 0, x = 10; var < 10; ++var) {
-            if (values.at(2)>x) x = x * 10;
-            else return x;
-        }
-    }
-    else if (values.at(2) < 1 && values.at(2) > 0)
-    {
-        for (double var = 0, x = 1; var < 10; ++var) {
-            if (values.at(2)>x) x = x / 10;
-            else return x*10;
-        }
-    }
-    else if (values.at(2) == 0)
-    { //если дельта между размерами равна нулю, то вычисляем разрешение вертикальной шкалы по мин или макс размеру
-        if (values.at(1) >= 1)
+double liveGraph::findYScale(const QVector<double>& values)
+{//вычисляем цену шкалы делений кратную 10
+    double val0 = values.at(0);
+    double val1 = values.at(1);
+    double val2 = values.at(2);
+    double result = 1;
+    if (val2 >= 1)
         {
             for (int var = 0, x = 10; var < 10; ++var) {
-                if (values.at(1)>x) x = x * 10;
-                else return x;
+                if (val2>x) x = x * 10;
+                else {
+                        result = x;
+                        continue;
+                }
             }
         }
-        else if (values.at(1) < 1 && values.at(1) > 0)
+        else
+        if (val2 < 1 && val2 > 0)
         {
             for (double var = 0, x = 1; var < 10; ++var) {
-                if (values.at(1)>x) x = x / 10;
-                else return x*10;
+                if (val2>x) x = x / 10;
+                else {
+                        result = x*10;
+                        continue;
+                }
             }
         }
-    }
+        else if (val2 == 0)
+        { //если дельта между размерами равна нулю, то вычисляем разрешение вертикальной шкалы по мин или макс размеру
+            if (val1 >= 1)
+            {
+                for (int var = 0, x = 10; var < 10; ++var) {
+                        if (val1>x) x = x * 10;
+                        else {
+                            result = x;
+                            continue;
+                        }
+                }
+            }
+            else if (val1 < 1 && val1 > 0)
+            {
+                for (double var = 0, x = 1; var < 10; ++var) {
+                    if (val1>x) x = x / 10;
+                        else {
+                            result = x*10;
+                            continue;
+                        }
+                    }
+            }
+        }
+        else result = 1;
+        return result;
 }
+
