@@ -46,8 +46,8 @@ private:
     QVector<int> rectXSizePix;
     int curvesCount = 0;
 
-    const int oneStepTime = 1000;//время для таймера сдвига на шаг и перерисовки (мсек)
-    const int steps = 60; //ширина графика в шагах
+    const int oneStepTime = 500;//время для таймера сдвига на шаг и перерисовки (мсек)
+    const int steps = 120; //ширина графика в шагах
 
 protected:
     void paintEvent(QPaintEvent *event) override;

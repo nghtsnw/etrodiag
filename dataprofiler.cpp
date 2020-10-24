@@ -8,43 +8,16 @@ dataprofiler::dataprofiler(QWidget *parent) : QObject(parent)
 }
 
 void dataprofiler::getByte(int byteFromBuf)
-{
-    emit readyGetByte(false);
-    frameMsg.enqueue(byteFromBuf);   
-    if (frameMsg.size() == oneMsgLeight)
+{    
+    frameMsg.enqueue(byteFromBuf);
+    if ((frameMsg.size() >= 2) && (frameMsg[0] == 0xFF) && (frameMsg[1]==0xFF))//если начало буффера соответствует началу пакета то продолжаем читать
     {
-        frameSnap();
-        ffffchk();
-        if (ffffbool)
+        if (frameMsg.size() == oneMsgLeight)
         {
-            emit deviceData(snapshot);//если маска начала пакета сошлась, отправляем пакет в гуй
+            emit deviceData(frameMsg.toVector());//если пакет сформирован, отправляем пакет в гуй и обнуляем буффер
+            frameMsg.clear();
         }
-        snapshot.clear();
-        frameMsg.dequeue();
     }
-    emit readyGetByte(true);
-}
-
-void dataprofiler::frameSnap()
-{
-    int n = 0;
-    while (n < oneMsgLeight)
-    {
-        snapshot.append(frameMsg.at(n));
-        n++;
-    }
-}
-
-void dataprofiler::ffffchk()
-{
-    if (countToNewFFFF < oneMsgLeight) countToNewFFFF++;
-    if ((snapshot[0]==0xFF) && (snapshot[1]==0xFF)){
-        ffffbool = true;
-        countToNewFFFF = -2;
-    }
-    else ffffbool = false;
-    if (countToNewFFFF == oneMsgLeight && !((snapshot[0]==0xFF) && (snapshot[1]==0xFF))){
-                emit statusMessage (tr("Incorrect data frame"));
-                countToNewFFFF = oneMsgLeight + 1;
-    }
+    else//а если начало пакета не сошлось то сдвигаем очередь
+            if (frameMsg.size() >= 2) frameMsg.dequeue();
 }

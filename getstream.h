@@ -10,24 +10,18 @@ class getStream : public QObject
     Q_OBJECT
 public:
     explicit getStream(QWidget *parent = nullptr);
-    QQueue<int> generalBuffer;
-
-    void ffffCheck();
-    int n;
-    bool ok;
-    bool compareLeight;
-    QByteArray toQue;
-    int intToQue;
-    bool getByteFlag;
 
 signals:
     void giveMyByte(int byte);
 
 public slots:
     void getRawData(QByteArray r_data);
-    void profilerReadyToReceive(bool getByteFlag);
 
 private:
+    int n;
+    bool ok;
+    QByteArray toQue;
+    int intToQue = 0;
 
 };
 

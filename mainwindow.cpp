@@ -551,7 +551,9 @@ bool MainWindow::event(QEvent *event)
     if ((event->type() == QEvent::MouseButtonPress) || (event->type() == QEvent::MouseButtonRelease))
     {
           QMouseEvent mouseEvent = *static_cast<QMouseEvent*>(event);
+          #ifdef Q_OS_ANDROID
           swipeCalc(mouseEvent);
+          #endif
     }
     return QMainWindow::event(event);
 }
