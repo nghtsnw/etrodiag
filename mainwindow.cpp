@@ -131,9 +131,7 @@ void MainWindow::showStatusMessage(QString message)
 void MainWindow::addDeviceToList(QVector<int> ddata)
 {
     int devNum = ddata.at(2);//узнаём номер устройства в посылке
-    QString devNumHex = QString("%1").arg(devNum,0,16).toUpper();//конвертируем его в хекс-вид
     bool thisDeviceHere = false; //обнуляем флаг
-
     QList<Device*> vlayChildList = m_ui->devArea->findChildren<Device*>();
     QListIterator<Device*> vlayChildListIt(vlayChildList); //смотрим сколько в гуе отображается устройств, создаём перечислитель
 
@@ -468,7 +466,6 @@ void MainWindow::loadProfile(int devNum, QString devName, int byteNum, QString b
     bool thisDeviceHere = false;
     QList<Device*> vlayChildList = m_ui->devArea->findChildren<Device*>();
     QListIterator<Device*> vlayChildListIt(vlayChildList);
-    QString dev2mod;
     while (vlayChildListIt.hasNext())
         if (devNum == vlayChildListIt.next()->devNum)
             thisDeviceHere = true;

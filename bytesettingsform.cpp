@@ -39,8 +39,6 @@ void ByteSettingsForm::addMaskItem(int _devNum, QString _devName, int _byteNum, 
         {
             for (int i = 0; i < ui->masksWidget->rowCount(); i++)
             {
-                QString temp = ui->masksWidget->item(i,2)->text();
-                QString temp2 = QString::number(_id,10);
                 if (QString::number(_id,10) == ui->masksWidget->item(i,2)->text())
                 findRow = true;
             }

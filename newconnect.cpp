@@ -40,7 +40,7 @@ newconnect::newconnect(QWidget *parent) :
     connect(m_settings, &SettingsDialog::restoreConsoleAndButtons, this, &newconnect::restoreWindowAfterApplySettings);
     connect (m_settings, &SettingsDialog::writeTextLog, this, &newconnect::writeTextLog);
     connect (m_settings, &SettingsDialog::writeBinLog, this, &newconnect::writeBinLogSlot);
-    connect (timer, &QTimer::timeout, this, &newconnect::readFromFile);
+    connect (timer, &QTimer::timeout, this, &newconnect::readFromFile);//читаем из файла по таймеру
     on_settingsButton_clicked();
 
 }
@@ -68,17 +68,18 @@ void newconnect::openSerialPort()
     if (p.readFromFileFlag)
     {
         readProfile();        
-        showStatusMessage(tr("Read file %1").arg(p.pathToBinFile));
-        pos = 0;
+        pos = 0;//задаём позицию для чтения FileSplitted в readFromFile()
         fileSplitted.clear();
         int freq = 1000/((p_local.baudRate/8)/bytesPerOneShot);
+        qDebug() << freq;
         QFile file(p_local.pathToBinFile);
         file.open(QIODevice::ReadOnly);
-        QByteArray fileBuffer = file.readAll();
+        showStatusMessage(tr("Bufferisation..."));
+        QByteArray fileBuffer = file.readAll();//читаем весь файл в память
         for (int i = 0; i < fileBuffer.size();)
         {
             static QByteArray ch;
-            while (ch.size() < bytesPerOneShot && i < fileBuffer.size())
+            while (ch.size() < bytesPerOneShot && i < fileBuffer.size())//создаём список FileSplitted с кусками файла fileBuffer равными bytesPerOneShot
             {
                 ch.append(fileBuffer.at(i));
                 i++;
@@ -87,7 +88,8 @@ void newconnect::openSerialPort()
             ch.clear();
         }
         fileBuffer.clear();
-        timer->start(freq);
+        showStatusMessage(tr("Read file %1").arg(p.pathToBinFile));
+        timer->start(freq);//запускаем таймер, по нему читается по порядку FileSplitted функцией readFromFile()
     }
     else
     {
@@ -114,11 +116,10 @@ void newconnect::openSerialPort()
 void newconnect::readFromFile()
 {
     if (pos < fileSplitted.size())
-    {
-        fsba.clear();
-        fsba.append(fileSplitted.at(pos));
+    {//если текущая позиция не в конце списка (костыль вместо итератора) то кусок по нужному номеру листа добавляем в fsba
+        fsba.append(fileSplitted.at(pos));//добавляем кусок по указателю
         pos++;
-        readData();
+        readData();//вызываем читалку данных
     }
     else
     {
@@ -135,7 +136,11 @@ void newconnect::closeSerialPort()
         m_serial->close();
         showStatusMessage(tr("Disconnected"));
     }
-    if (p_local.readFromFileFlag) p_local.readFromFileFlag = false;
+    if (p_local.readFromFileFlag)
+    {
+        p_local.readFromFileFlag = false;
+        timer->stop();
+    }
 }
 
 void newconnect::writeData(const QByteArray &data)
@@ -146,11 +151,19 @@ void newconnect::writeData(const QByteArray &data)
 void newconnect::readData()
 {
     static QByteArray data;
-    if (p_local.readFromFileFlag) data = fsba;
-    else data = m_serial->readAll();
-    m_console->putData(data);
-    gstream->getRawData(data);
-
+    if (p_local.readFromFileFlag)
+    {
+        data = fsba;//если есть флаг чтения из файла, то читаем из fsba
+        fsba.clear();
+    }
+    else
+    {
+        data = m_serial->readAll();//если нет то читаем всё что есть с порта
+        qDebug() << "read from port";
+    }
+    m_console->putData(data);//пихаем сырые данные в консоль
+    gstream->getRawData(data);//их же отправляем сигналом на обработку в объект getstream
+    //дальше при наличии флага пишем сырые данные в лог-бинарник
     QFile newBinFile;
     if (writeBinLog)
     {
