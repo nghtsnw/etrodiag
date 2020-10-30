@@ -18,6 +18,8 @@ private:
 
 signals:
     void deviceData(QVector<int> snapshot);
+    void readNext();
+    void ready4read(bool);
 
 public slots:
     void getByte(int byteFromBuf);

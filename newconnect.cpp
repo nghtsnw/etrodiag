@@ -37,6 +37,8 @@ newconnect::newconnect(QWidget *parent) :
     connect(m_console, &Console::getData, this, &newconnect::writeData);
     connect(gstream, &getStream::giveMyByte, datapool, &dataprofiler::getByte);
     connect(datapool, &dataprofiler::deviceData, this, &newconnect::transData);
+    connect(datapool, &dataprofiler::ready4read, gstream, &getStream::readPermission);
+    connect(datapool, &dataprofiler::readNext, gstream, &getStream::readIntByte);
     connect(m_settings, &SettingsDialog::restoreConsoleAndButtons, this, &newconnect::restoreWindowAfterApplySettings);
     connect (m_settings, &SettingsDialog::writeTextLog, this, &newconnect::writeTextLog);
     connect (m_settings, &SettingsDialog::writeBinLog, this, &newconnect::writeBinLogSlot);
@@ -161,8 +163,11 @@ void newconnect::readData()
         data = m_serial->readAll();//если нет то читаем всё что есть с порта
         qDebug() << "read from port";
     }
+
+    //переделать на сигнал-слот
     m_console->putData(data);//пихаем сырые данные в консоль
-    gstream->getRawData(data);//их же отправляем сигналом на обработку в объект getstream
+    gstream->getRawData(data);//их же отправляем на обработку в объект getstream
+
     //дальше при наличии флага пишем сырые данные в лог-бинарник
     QFile newBinFile;
     if (writeBinLog)

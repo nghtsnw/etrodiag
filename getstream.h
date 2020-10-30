@@ -16,13 +16,16 @@ signals:
 
 public slots:
     void getRawData(QByteArray r_data);
+    void readIntByte();
+    void readPermission(bool p);
 
 private:
     int n;
     bool ok;
     QByteArray toQue;
     int intToQue = 0;
-
+    QQueue<int> buffer;
+    bool profilerReadyToReceive = true;
 };
 
 #endif // GETSTREAM_H

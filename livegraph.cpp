@@ -9,7 +9,6 @@ liveGraph::liveGraph(QWidget *parent) :
 {
     ui->setupUi(this);
     connect (timer, &QTimer::timeout, this, &liveGraph::shiftCells);
-    initGraph();
     timer->start(oneStepTime);
 }
 
@@ -30,13 +29,13 @@ void liveGraph::initGraph()
     pictWidth = this->size().width();//ширина
     pictHeight = this->size().height();//высота
     QPainter paint(this);
-    if (!paint.isActive()) paint.begin(this); // запускаем отрисовку
-    paint.eraseRect(0,0,pictWidth,pictHeight); // очищаем рисунок    
+    if (paint.isActive())
+    {
+    paint.eraseRect(0,0,pictWidth,pictHeight); // очищаем рисунок
     paint.setBrush(QBrush(Qt::white));
     paint.drawRect(0,0,pictWidth,pictHeight);
     paint.setPen(Qt::lightGray);
     paint.setOpacity(0.5);
-
     verticalLineCount = steps/3;//кол-во вертикальных линий рассчитывается по количеству шагов на кадр делённому на три, что-бы три шага соответствовало одной ячейке (для возможного масштабирования)
     horizontalLineCount = 10;
     oneCellXpix = pictWidth/verticalLineCount; //определяем габариты ячеек
@@ -63,6 +62,8 @@ void liveGraph::initGraph()
     paint.drawLine(0,pictHeight-1,pictWidth,pictHeight-1);
     paint.drawLine(pictWidth-1, pictHeight, pictWidth-1, 0);
     paint.drawLine(pictWidth-1,0,0,0);
+    paint.end();
+    }
 }
 
 void liveGraph::shiftCells()
@@ -121,7 +122,8 @@ void liveGraph::incomingDataSlot(int devNum, QString devName, int byteNum, QStri
 void liveGraph::paintCurve(QVector<double> points, QString color)
 {//сюда каждый объект графика отдаёт массив данных и цвет на рисование
     QPainter paintcv(this);
-    if (!paintcv.isActive()) paintcv.begin(this);
+    if (paintcv.isActive())
+    {
     QColor paintColor;
     paintColor.setNamedColor(color);
     QPen pen(paintColor, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
@@ -140,13 +142,15 @@ void liveGraph::paintCurve(QVector<double> points, QString color)
         paintcv.drawEllipse(x-2,(((points.at(i)+zeroShift)*oneUnitPix)-vZeroLevel-scaleErrorPix+2)*-1,4,4);
     }
     curvesCount++;
+    }
     if (curvesCount == graphAnnotation.size()) paintAnnotation();
 }
 
 void liveGraph::paintAnnotation()
 {
-    QPainter paintan(this);
-    if (!paintan.isActive()) paintan.begin(this);
+    //QPainter paintan(this);
+    if (paintan.isActive())
+    {
     QColor paintColor;
     QFont font("Times", 8);
     paintan.setFont(font);
@@ -167,7 +171,7 @@ void liveGraph::paintAnnotation()
         paintan.setBrush(QBrush(Qt::black));
         paintan.drawText(12, y+10, graphAnnotation.value(annotationKeys.at(i)));
     }
-    paintan.end();
+    }
     curvesCount = 0;
 }
 
