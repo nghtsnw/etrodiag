@@ -24,7 +24,6 @@ public:
     void byteObjectsInit(QVector<int> &data);
     QVector<byteDefinition*> *byteObjArr = new QVector<byteDefinition*>;
     QVector<byteDefinition*> *byteObjArrOld = new QVector<byteDefinition*>;
-    void byteObjectsUpd(QVector<int> &data);
     byteDefinition zeroByteDef;
     void getDeviceName(int id);
     void clickedF();
@@ -50,7 +49,7 @@ signals:
     void getByteNameTX(int _devNum, int byteNum);
     void returnByteNameTX(int devNum, int byteNum, QString byteName);
     void saveByteNameTX(int _devNum, int _byteNum, QString _byteName);
-    void byteObjUpdSig(int devNum, int n, QVector<int> data);
+    void byteObjUpdSig(int devNum, QVector<int> data);
     void devStatusMessage(QString _devname, QString status);
 
 public slots:

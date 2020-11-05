@@ -7,7 +7,7 @@
 //Создаётся для каждого байта при инициализации устройства.
 //Данные отсюда будут подтягиваться в гуй параметров байта, и сюда же сохраняться.
 //Вместе с параметрами устройства (dynamicbaseprofile) данные будут сохраняться в файл.
-byteDefinition::byteDefinition()//(QObject *parent)
+byteDefinition::byteDefinition()
 {
     devNum = 0;
     th_byteNum = 0;
@@ -26,12 +26,12 @@ byteDefinition::byteDefinition(int numDev, int byteNum, int data)
 
 }
 
-void byteDefinition::updateSlot(int _devNum, int _byteNum, QVector<int> _data)
+void byteDefinition::updateSlot(int _devNum, QVector<int> _data)
 {
-    if (devNum == _devNum && th_byteNum == _byteNum)
+    if (devNum == _devNum)
     {
-    th_data = _data.at(_byteNum);
-    calcWordData(devNum, _data);
+        th_data = _data.at(th_byteNum);
+        calcWordData(devNum, _data);
     }
 }
 
@@ -77,7 +77,6 @@ void byteDefinition::createNewMask(int _devNum, int _byteNum)
         connect (this, &byteDefinition::sendDataToProfileTX, mask, &bitMaskObj::sendMaskToProfile);
         connect (this, &byteDefinition::wordData2Mask, mask, &bitMaskObj::calculateValue);
         connect (mask, &bitMaskObj::maskToListSIG, this, &byteDefinition::allMasksToListRX);
-        //connect (this, &byteDefinition::sendDataToProfileTX, mask, &bitMaskObj::sendMaskToProfile);
         connect (this, &byteDefinition::deleteMaskObjTX, mask, &bitMaskObj::deleteMaskObjectTX);
         connect (mask, &bitMaskObj::param2FrontEnd, this, &byteDefinition::param2FrontEndRX);
         connect (this, &byteDefinition::loadMaskTX, mask, &bitMaskObj::loadMaskRX);

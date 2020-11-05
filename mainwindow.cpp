@@ -130,9 +130,8 @@ void MainWindow::showStatusMessage(QString message)
 
 void MainWindow::addDeviceToList(QVector<int> ddata)
 {
-    int devNum = ddata.at(2);//узнаём номер устройства в посылке
-    bool thisDeviceHere = false; //обнуляем флаг
-    QList<Device*> vlayChildList = m_ui->devArea->findChildren<Device*>();
+    devNum = ddata.at(2);//узнаём номер устройства в посылке
+    thisDeviceHere = false; //обнуляем флаг
     QListIterator<Device*> vlayChildListIt(vlayChildList); //смотрим сколько в гуе отображается устройств, создаём перечислитель
 
     while (vlayChildListIt.hasNext())
@@ -147,8 +146,9 @@ void MainWindow::addDeviceToList(QVector<int> ddata)
     if (!thisDeviceHere) //если устройства нет, то создаём его
     {
         createDevice(devNum);
+        vlayChildList = m_ui->devArea->findChildren<Device*>();
         emit devUpdate(devNum, ddata);
-        dvsf.updByteButtons(devNum, ddata);
+        dvsf.updByteButtons(devNum, ddata);        
     }
     vlayChildListIt.toFront();
     m_ui->devArea->update();
@@ -306,10 +306,8 @@ void MainWindow::updValueArea(QString parameterName, int devNum, QString devName
     if (thisDeviceIndex == -1)
     {//создаём и инициализируем таблицу, добавляем виджет таблицы в новую вкладку имени девайса пришедшего в этой посылке
         QTableWidget *valueTableNew = new QTableWidget(m_ui->valueArea);
-        //connect(valueTableNew, &QTableWidget::cellClicked, this, &MainWindow::ValueArea_CellClicked);
          connect(valueTableNew, &QTableWidget::cellClicked, this, &MainWindow::ValueArea_CellClicked);
 
-        //valueTableNew->viewport()->installEventFilter(this);
         valueTableNew->insertColumn(0);//name
         valueTableNew->insertColumn(1);//value
         valueTableNew->insertColumn(2);//devnum
@@ -330,14 +328,13 @@ void MainWindow::updValueArea(QString parameterName, int devNum, QString devName
             else thisDeviceIndex = -1;
         }
     }
-    static QTableWidget *valueTable = nullptr;
-    static QString tmp = (m_ui->valueArea->widget(thisDeviceIndex)->metaObject()->className());
+
+    tmp = (m_ui->valueArea->widget(thisDeviceIndex)->metaObject()->className());
     //ищем виджет таблицы на вкладке и ссылаем на него статичный указатель
     if (tmp == "QTableWidget") valueTable = (QTableWidget*)m_ui->valueArea->widget(thisDeviceIndex);
     //далее работаем со строками таблицы по указателю
-        bool findRow = false;
-        QString value2str;
-        QString namesUnited = (parameterName+'@'+devName);
+        findRow = false;
+        namesUnited = (parameterName+'@'+devName);
         value2str.setNum(endValue, 'g', 6);
         if (valueTable->rowCount() > 0)
         {//если строки есть то ищем нужную
@@ -356,7 +353,7 @@ void MainWindow::updValueArea(QString parameterName, int devNum, QString devName
                         valueTable->item(i,1)->setBackgroundColor(Qt::white);
                 }
             }
-        }        
+        }
         if (!findRow)
         {//если строка не найдена - создаём
             valueTable->setRowCount(valueTable->rowCount()+1); //добавляем новую строку
@@ -376,8 +373,8 @@ void MainWindow::updValueArea(QString parameterName, int devNum, QString devName
             QTableWidgetItem *maskIdItem = new QTableWidgetItem;
             maskIdItem->setText(QString::number(maskId));
             valueTable->setItem(row, 4, maskIdItem);
-        }
-        valueTable->resizeColumnsToContents();
+            valueTable->resizeColumnsToContents();
+        }        
 }
 
 void MainWindow::setCurrentOpenTab(int index)

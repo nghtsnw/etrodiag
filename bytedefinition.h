@@ -47,7 +47,7 @@ public slots:
     void loadMaskRX(int devNum, QString devName, int byteNum, QString _byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor);
     void getByteNameRX(int _devNum, int _byteNum);
     void saveByteNameRX(int _devNum, int _byteNum, QString _byteName);
-    void updateSlot(int _devNum, int _byteNum, QVector<int> _data);
+    void updateSlot(int _devNum, QVector<int> _data);
 
 private:
     int tmpMaskId = 0;

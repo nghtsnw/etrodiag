@@ -148,7 +148,7 @@ void liveGraph::paintCurve(QVector<double> points, QString color)
 
 void liveGraph::paintAnnotation()
 {
-    //QPainter paintan(this);
+    QPainter paintan(this);
     if (paintan.isActive())
     {
     QColor paintColor;

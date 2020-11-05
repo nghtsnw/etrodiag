@@ -16,6 +16,7 @@ public:
     int byteNum;
     int id;
     QString paramMask = "00000000";
+    QString paramMaskNew;
     int paramShift = 0;
     void calculateParamShift();
 //    void calculateParamLeight();
@@ -48,6 +49,8 @@ private:
     double oldEndValue = 1234.56;
     int wordDataSize = 0;
     bool isNewData = true;
+    uint32_t paramMaskInt;
+    void recalcMask();
 };
 
 #endif // BITMASKOBJ_H

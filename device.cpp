@@ -25,7 +25,7 @@ void Device::updateData(int id, QVector<int> devdata) //если устройс�
         currState = devdata;
         if (!byteObjReady)
             byteObjectsInit(currState);
-        byteObjectsUpd(devdata);
+        emit byteObjUpdSig(devNum, devdata);
         if (devStatus == "offline")
         {
             devStatus = "online";
@@ -70,14 +70,6 @@ void Device::byteObjectsInit(QVector<int> &data) //инициализируем 
         n--;
     }
     byteObjReady = true;
-}
-
-void Device::byteObjectsUpd(QVector<int> &data) //обновляем каждый объект, выявляем обновившиеся и передаём в лист изменений
-{
-    for (int n = data.size()-1; n > -1; n--)
-    {
-        emit byteObjUpdSig(devNum, n, data);
-    }
 }
 
 void Device::clickedF()

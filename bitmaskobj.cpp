@@ -27,7 +27,8 @@ void bitMaskObj::sendMaskToProfile(int _devNum, int _byteNum, int _id, QString _
     if (_devNum == devNum && _byteNum == byteNum && _id == id)
     {
         paramName = _paramName;
-        paramMask = _paramMask;
+        paramMaskNew = _paramMask;
+        recalcMask();
         calculateParamShift();        
 //        calculateParamLeight();
         paramType = _paramType;
@@ -71,11 +72,11 @@ void bitMaskObj::calculateParamShift()
     bool stopFlag = false;
     //paramMask4calcShift = paramMask.toInt(0,10);
     paramMask4calcShift = 0;
-    for (int i = paramMask.size()-1, y = 0; i > -1; i--, y++) //переводим маску из строки нулей и единиц в число int
-    {//тодо: перенести это вычисление в masksettingsdialog, и отправлять сигналом уже готовое число а не строку
-        if (paramMask.at(i) == '1')
-           paramMask4calcShift+=pow(2,y);
-    }    
+    if (paramMask != paramMaskNew)
+    {//если маска изменилась - заново её вычисляем
+        recalcMask();
+        paramMask = paramMaskNew;
+    }
     while(!stopFlag)
     {
 
@@ -130,11 +131,10 @@ void bitMaskObj::calculateValue(int _devNum, int _byteNum, uint32_t wordData)
 {
     if (devNum == _devNum && byteNum == _byteNum)
     {
-        uint32_t paramMaskInt = 0;
-        for (int i = paramMask.size()-1, y = 0; i > -1; i--, y++) //переводим маску из строки нулей и единиц в число int
-        {//тодо: перенести это вычисление в masksettingsdialog, и отправлять сигналом уже готовое число а не строку
-            if (paramMask.at(i) == '1')
-               paramMaskInt+=pow(2,y);
+        if (paramMask != paramMaskNew)
+        {//если маска изменилась - заново её вычисляем
+            recalcMask();
+            paramMask = paramMaskNew;
         }
         uint32_t value = (wordData & paramMaskInt);
         value = value >> paramShift; //сдвигаем нужные нам биты к началу
@@ -146,6 +146,15 @@ void bitMaskObj::calculateValue(int _devNum, int _byteNum, uint32_t wordData)
         emit param2FrontEnd(devNum, byteNum, wordData, id, paramName, binRawValue, endValue, viewInLogFlag, isNewData, drawGraphFlag, drawGraphColor);
         oldEndValue = endValue;
     }
+}
+
+void bitMaskObj::recalcMask()
+{
+        for (int i = paramMaskNew.size()-1, y = 0; i > -1; i--, y++) //переводим маску из строки нулей и единиц в число int
+        {
+            if (paramMaskNew.at(i) == '1')
+               paramMaskInt+=pow(2,y);
+        }
 }
 
 void bitMaskObj::deleteMaskObjectTX(int _devNum, int _byteNum, int _id)
@@ -161,7 +170,8 @@ void bitMaskObj::loadMaskRX(int _devNum, QString _devName, int _byteNum, QString
     if (_devNum == devNum && _byteNum == byteNum && id == _id)
     {
         paramName = _paramName;
-        paramMask = _paramMask;
+        paramMaskNew = _paramMask;
+        recalcMask();
         calculateParamShift();
 //        calculateParamLeight();
         paramType = _paramType;

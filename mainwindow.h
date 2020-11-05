@@ -61,6 +61,7 @@
 #include "device.h"
 #include "masksettingsdialog.h"
 #include <livegraph.h>
+#include <QTableWidget>
 //#include <QGestureEvent>
 
 QT_BEGIN_NAMESPACE
@@ -140,6 +141,14 @@ private:
     void swipeTriggered(QString);
     int currentOpenTab = 0;
     void setCurrentOpenTab(int index);
+    QList<Device*> vlayChildList;
+    int devNum;
+    bool thisDeviceHere = false;
+    bool findRow;
+    QString value2str;
+    QString namesUnited;
+    QTableWidget *valueTable = nullptr;
+    QString tmp;
 private:
     QPixmap *pixmap = new QPixmap(":/etrodiag.png");
     QLabel *m_status = nullptr;
