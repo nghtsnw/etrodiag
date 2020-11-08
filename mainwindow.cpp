@@ -132,6 +132,7 @@ void MainWindow::addDeviceToList(QVector<int> ddata)
 {
     devNum = ddata.at(2);//узнаём номер устройства в посылке
     thisDeviceHere = false; //обнуляем флаг
+    vlayChildList = m_ui->devArea->findChildren<Device*>();
     QListIterator<Device*> vlayChildListIt(vlayChildList); //смотрим сколько в гуе отображается устройств, создаём перечислитель
 
     while (vlayChildListIt.hasNext())
@@ -146,7 +147,6 @@ void MainWindow::addDeviceToList(QVector<int> ddata)
     if (!thisDeviceHere) //если устройства нет, то создаём его
     {
         createDevice(devNum);
-        vlayChildList = m_ui->devArea->findChildren<Device*>();
         emit devUpdate(devNum, ddata);
         dvsf.updByteButtons(devNum, ddata);        
     }
@@ -306,8 +306,7 @@ void MainWindow::updValueArea(QString parameterName, int devNum, QString devName
     if (thisDeviceIndex == -1)
     {//создаём и инициализируем таблицу, добавляем виджет таблицы в новую вкладку имени девайса пришедшего в этой посылке
         QTableWidget *valueTableNew = new QTableWidget(m_ui->valueArea);
-         connect(valueTableNew, &QTableWidget::cellClicked, this, &MainWindow::ValueArea_CellClicked);
-
+        connect(valueTableNew, &QTableWidget::cellClicked, this, &MainWindow::ValueArea_CellClicked);
         valueTableNew->insertColumn(0);//name
         valueTableNew->insertColumn(1);//value
         valueTableNew->insertColumn(2);//devnum
@@ -374,6 +373,7 @@ void MainWindow::updValueArea(QString parameterName, int devNum, QString devName
             maskIdItem->setText(QString::number(maskId));
             valueTable->setItem(row, 4, maskIdItem);
             valueTable->resizeColumnsToContents();
+            valueTable->resizeRowsToContents();
         }        
 }
 

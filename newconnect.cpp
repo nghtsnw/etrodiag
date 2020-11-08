@@ -323,7 +323,7 @@ void newconnect::saveProfile()
     QFileInfo info(profile);
     profile.open(QIODevice::WriteOnly|QIODevice::Text);
     QTextStream txtStream(&profile);
-    txtStream.setCodec("UTF-8");
+    //txtStream.setCodec("UTF-8");
     txtStream << info.fileName() << "\n";
     while (maskVectorsListIt.hasNext())
     {

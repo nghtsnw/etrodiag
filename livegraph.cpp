@@ -114,8 +114,8 @@ void liveGraph::incomingDataSlot(int devNum, QString devName, int byteNum, QStri
         }
         if (drawGraphFlag)
         {
-            QString tmp = parameterName+'@'+devName;
-            graphAnnotation.insert(drawGraphColor, tmp);
+            QString annotationString = parameterName+'@'+devName+" - "+QString::number(endValue);
+            graphAnnotation.insert(drawGraphColor, annotationString);
         }
 }
 
@@ -143,7 +143,8 @@ void liveGraph::paintCurve(QVector<double> points, QString color)
     }
     curvesCount++;
     }
-    if (curvesCount == graphAnnotation.size()) paintAnnotation();
+    //if (curvesCount == graphAnnotation.size())
+        paintAnnotation();
 }
 
 void liveGraph::paintAnnotation()
@@ -152,14 +153,14 @@ void liveGraph::paintAnnotation()
     if (paintan.isActive())
     {
     QColor paintColor;
-    QFont font("Times", 8);
+    QFont font("Times", 10);
     paintan.setFont(font);
     annotationKeys = graphAnnotation.keys();
-    rectXSizePix = maxStringSizePix(font, graphAnnotation.values());
-    const int oneStringYpix = 18;
+    rectXSizePix = maxStringSizePix(font, graphAnnotation.values());//[0] - длина строки, [1] - высота
+    const int oneStringYpix = rectXSizePix.at(1)+2;
     paintan.setPen(Qt::white);
     paintan.setBrush(QBrush(Qt::white));
-    paintan.setOpacity(0.7);
+    paintan.setOpacity(0.5);
     paintan.drawRect(0, 0, rectXSizePix.at(0)+15, oneStringYpix*graphAnnotation.size()+3);
     paintan.setOpacity(1.0);
     for (int i = 0, y = 4; i < graphAnnotation.size(); ++i, y+=oneStringYpix) {
@@ -175,7 +176,7 @@ void liveGraph::paintAnnotation()
     curvesCount = 0;
 }
 
-QVector<int> liveGraph::maxStringSizePix(QFont font, QList<QString> str)
+QVector<int> liveGraph::maxStringSizePix(QFont font, QList<QString> str)//считаем максимальный размер строки для рисования аннотации к графику
 {
     QFontMetrics fm(font);
     int pixelsWideMax = 0;
@@ -183,9 +184,8 @@ QVector<int> liveGraph::maxStringSizePix(QFont font, QList<QString> str)
     {
         int pixelsWide = fm.horizontalAdvance(string);
         if (pixelsWide > pixelsWideMax) pixelsWideMax = pixelsWide;
-    }
-    int pixelsHigh = fm.height();
-    QVector<int> maxSizePix = {pixelsWideMax, pixelsHigh};
+    }    
+    QVector<int> maxSizePix = {pixelsWideMax, fm.height()};
     return maxSizePix;
 }
 
@@ -208,54 +208,25 @@ QVector<double> liveGraph::findDeltaValue(QVector<double>& points)
 
 double liveGraph::findYScale(const QVector<double>& values)
 {//вычисляем цену шкалы делений кратную 10
-    double val0 = values.at(0);
-    double val1 = values.at(1);
-    double val2 = values.at(2);
+    double val4CalcYScale;
+    if (values.at(2) != 0) val4CalcYScale = values.at(2);
+    else val4CalcYScale = values.at(1);//если дельта 0, то вычисляем по мин(макс) размеру
     double result = 1;
-    if (val2 >= 1)
+        if (val4CalcYScale >= 1)
         {
             for (int var = 0, x = 10; var < 10; ++var) {
-                if (val2>x) x = x * 10;
-                else {
+                if (val4CalcYScale>x) x = x * 10;
+                else
+                {
                         result = x;
                         continue;
                 }
             }
         }
-        else
-        if (val2 < 1 && val2 > 0)
+        else if (val4CalcYScale < 1 && val4CalcYScale > 0)
         {
-            for (double var = 0, x = 1; var < 10; ++var) {
-                if (val2>x) x = x / 10;
-                else {
-                        result = x*10;
-                        continue;
-                }
-            }
-        }
-        else if (val2 == 0)
-        { //если дельта между размерами равна нулю, то вычисляем разрешение вертикальной шкалы по мин или макс размеру
-            if (val1 >= 1)
-            {
-                for (int var = 0, x = 10; var < 10; ++var) {
-                        if (val1>x) x = x * 10;
-                        else {
-                            result = x;
-                            continue;
-                        }
-                }
-            }
-            else if (val1 < 1 && val1 > 0)
-            {
-                for (double var = 0, x = 1; var < 10; ++var) {
-                    if (val1>x) x = x / 10;
-                        else {
-                            result = x*10;
-                            continue;
-                        }
-                    }
-            }
-        }
+            result = 1;
+        }        
         else result = 1;
         return result;
 }
