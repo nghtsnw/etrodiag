@@ -30,8 +30,8 @@ private:
     void paintAnnotation();
     QVector<int> maxStringSizePix(QFont font, QList<QString> str);
     double xShiftPix = 0;
-    int pictWidth = 0;
-    int pictHeight = 0;
+    double pictWidth = 0;
+    double pictHeight = 0;
     int verticalLineCount = 0;
     int horizontalLineCount = 0;
     double oneCellXpix = 0;

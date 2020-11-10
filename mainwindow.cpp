@@ -414,8 +414,7 @@ void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QStr
 void MainWindow::logFileCreator(QString string, bool redFlag)
 {
     QString stringWithTime = (returnTimestamp().toString("hh:mm:ss:zzz") + " " + string);
-    if (!redFlag)
-    m_ui->logArea->appendPlainText(stringWithTime);
+    if (!redFlag) m_ui->logArea->appendHtml("<p><span style=color:#000000>" + stringWithTime + "</span></p>");
     else m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + stringWithTime + "</span></p>");
 
     QFile newLogFile;
