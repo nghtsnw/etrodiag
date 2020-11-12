@@ -18,7 +18,7 @@ void newgraph::dataPool(int _devNum, int _byteNum, int _id, double _endValue, in
         watchDogFlag = false;
         watchDogTimer.start(3000);
         if (graphColor!=_drawGraphColor) graphColor = _drawGraphColor;
-        if (pointsWithValues.size() != _pointsOnGraph+4) pointsWithValues.resize(_pointsOnGraph+4);//+4 потому что по другому почему-то график рисуется обрезаным, так что небольшой запас
+        if (pointsWithValues.size() != _pointsOnGraph+1) pointsWithValues.resize(_pointsOnGraph+1);
     }
 }
 

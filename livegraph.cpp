@@ -54,7 +54,7 @@ void liveGraph::initGraph()
     for (int i = verticalLineCount+1, hCoord = xShiftPix*-1; i > 0; --i) //рисуем вертикальные линии
     {
         paint.drawLine(hCoord,0,hCoord,pictHeight);
-        hCoord+=oneCellXpix;
+        hCoord+=(oneStepXpix*3);//oneCellXpix;
     }
     paint.setOpacity(1.0);
     paint.setPen(Qt::white);//рисуем рамки белым цветом, создавая безрамочный эффект
