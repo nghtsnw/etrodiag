@@ -43,6 +43,8 @@ newconnect::newconnect(QWidget *parent) :
     connect (m_settings, &SettingsDialog::writeTextLog, this, &newconnect::writeTextLog);
     connect (m_settings, &SettingsDialog::writeBinLog, this, &newconnect::writeBinLogSlot);
     connect (timer, &QTimer::timeout, this, &newconnect::readFromFile);//читаем из файла по таймеру
+    connect (this, &newconnect::sendRawData, gstream, &getStream::getRawData);
+    connect (this, &newconnect::sendRawData, m_console, &Console::putData);
     on_settingsButton_clicked();
 
 }
@@ -161,12 +163,8 @@ void newconnect::readData()
     else
     {
         data = m_serial->readAll();//если нет то читаем всё что есть с порта
-        qDebug() << "read from port";
     }
-
-    //переделать на сигнал-слот
-    m_console->putData(data);//пихаем сырые данные в консоль
-    gstream->getRawData(data);//их же отправляем на обработку в объект getstream
+    emit sendRawData(data);
 
     //дальше при наличии флага пишем сырые данные в лог-бинарник
     QFile newBinFile;
@@ -195,7 +193,7 @@ void newconnect::readData()
         if (newBinFile.isOpen())
         {
             QDataStream binStream(&newBinFile);
-            binStream << data;
+            binStream.writeRawData(data.constData(), data.size());
             newBinFile.close();
         }
         else showStatusMessage("Error write bin");

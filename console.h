@@ -61,10 +61,11 @@ class Console : public QPlainTextEdit
 signals:
     void getData(const QByteArray &data);
 
-public:
-    explicit Console(QWidget *parent = nullptr);
-
+public slots:
     void putData(const QByteArray &data);
+
+public:
+    explicit Console(QWidget *parent = nullptr);    
     void setLocalEchoEnabled(bool set);
 
 protected:
