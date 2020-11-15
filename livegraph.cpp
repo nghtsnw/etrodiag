@@ -47,10 +47,10 @@ void liveGraph::initGraph()
     if (xShift == 1) xShiftPix = oneStepXpix;//xShiftPix = oneCellXpix/3; //для текущего вызова функции определяем горизонтальный сдвиг в пикселях, с которым рисуем вертикальные линии
     else if (xShift == 2) xShiftPix = oneStepXpix*2;//(oneCellXpix/3)*2;
     else xShiftPix = 0;
-    for (int i = horizontalLineCount+1, vCoord = scaleErrorPix; i > 0; --i) //рисуем горизонтальные линии
+    for (int i = horizontalLineCount+1, vCoord = pictHeight; i > 0; --i) //рисуем горизонтальные линии
     {
         paint.drawLine(0,vCoord,pictWidth,vCoord);
-        vCoord+=oneCellYpix;
+        vCoord-=oneCellYpix;
     }
     for (int i = verticalLineCount+1, hCoord = xShiftPix*-1; i > 0; --i) //рисуем вертикальные линии
     {

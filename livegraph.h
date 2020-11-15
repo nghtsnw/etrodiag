@@ -35,10 +35,10 @@ private:
     int verticalLineCount = 0;
     int horizontalLineCount = 0;
     double oneCellXpix = 0;
-    double oneCellYpix = 0;
+    double oneCellYpix = 0.0;
     double oneStepXpix = 0;
     double vZeroLevel = 0;
-    double scaleErrorPix = 0;
+    double scaleErrorPix = 0.0;
     QVector<double> findDeltaValue(QVector<double> &points);
     double findYScale(const QVector<double> &values);
     bool foundFlag = false;
