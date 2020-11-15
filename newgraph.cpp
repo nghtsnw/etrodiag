@@ -22,7 +22,7 @@ void newgraph::dataPool(int _devNum, int _byteNum, int _id, double _endValue, in
     }
 }
 
-void newgraph::oscillatorInput()
+void newgraph::oscillatorInput()//формирование массива чисел для отрисовки графика по тактовому сигналу
 {
     if (!pointsWithValues.isEmpty() && !bufferForMidValue.isEmpty())
     {
@@ -31,7 +31,6 @@ void newgraph::oscillatorInput()
             value += num;
         value = value/bufferForMidValue.size();
         pointsWithValues.push_front(value);        
-        emit graph2Painter(pointsWithValues, graphColor);
         bufferForMidValue.clear();
         lastValue = value,
         value = 0;
@@ -41,8 +40,6 @@ void newgraph::oscillatorInput()
         pointsWithValues.pop_back();
         if (!watchDogFlag) pointsWithValues.push_front(lastValue);
         else if (watchDogFlag) pointsWithValues.push_front(0);
-        emit graph2Painter(pointsWithValues, graphColor);
-
     }
 }
 
