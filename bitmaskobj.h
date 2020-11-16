@@ -10,7 +10,6 @@ public:
     bitMaskObj();
     ~bitMaskObj();
     void newMaskObj(int _devNum, int _byteNum, int _id);
-    //void sendMaskToProfile(QString _paramName, int _paramMask, int _paramType, int _valueShift, float _valueKoef, int _wordData);
     QString paramName = "Parameter";
     int devNum;
     int byteNum;
@@ -26,7 +25,6 @@ public:
     double valueKoef = 1;
     int wordData = 0;
     int wordType = 0;
-    //void maskToForm();
     int paramMask4calcShift = 0;
     void calculateValue(int _devNum, int _byteNum, uint32_t wordData);
     bool viewInLogFlag = true;

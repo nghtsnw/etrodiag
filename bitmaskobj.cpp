@@ -67,16 +67,14 @@ void bitMaskObj::calculateParamShift()
     if (wordType == 0) wordTypeInt = 8;
     else if (wordType == 1) wordTypeInt = 16;
     else if (wordType == 2) wordTypeInt = 32;
-
     int n = 0;
-    bool stopFlag = false;
-    //paramMask4calcShift = paramMask.toInt(0,10);
-    paramMask4calcShift = 0;
+    bool stopFlag = false;    
     if (paramMask != paramMaskNew)
     {//если маска изменилась - заново её вычисляем
         recalcMask();
         paramMask = paramMaskNew;
     }
+    paramMask4calcShift = paramMask.toInt(0,10);
     while(!stopFlag)
     {
 
@@ -150,10 +148,11 @@ void bitMaskObj::calculateValue(int _devNum, int _byteNum, uint32_t wordData)
 
 void bitMaskObj::recalcMask()
 {
+        paramMaskInt = 0;
         for (int i = paramMaskNew.size()-1, y = 0; i > -1; i--, y++) //переводим маску из строки нулей и единиц в число int
         {
             if (paramMaskNew.at(i) == '1')
-               paramMaskInt+=pow(2,y);
+                paramMaskInt+=pow(2,y);
         }
 }
 
