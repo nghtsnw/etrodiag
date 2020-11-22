@@ -200,6 +200,7 @@ void MainWindow::createDevice(int devNum)
     connect (dev, &Device::devStatusMessage, this, &MainWindow::devStatusMsg);
     connect (connection, &newconnect::saveAllMasks, dev, &Device::requestMasks4Saving);
     connect (dev, &Device::allMasksToListTX, connection, &newconnect::saveProfileSlot4Masks);
+    connect (this, &MainWindow::toJsonMap, dev, &Device::jsonMap);
     connect (this, &MainWindow::getJsonMap, dev, &Device::returnDevParams);
     connect (dev, &Device::devParamsToJson, this, &MainWindow::jsonFileCreator);
     dev->show();
@@ -412,6 +413,7 @@ void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QStr
         QString formString(parameterName + "@" + devName + ": " + QString::number(endValue,'g',6));
         logFileCreator(formString, false);
     }
+    emit toJsonMap(devNum, devName, parameterName, endValue);
     jsonDevCaller(devNum);//маркер для определения начала прихода данных от масок следующего устройства
     updValueArea(parameterName, devNum, devName, endValue, byteNum, maskId, isNewData);
 }
@@ -472,7 +474,7 @@ void MainWindow::jsonDevCaller(int _devNum)
     }
 }
 
-void MainWindow::jsonFileCreator(QVariantMap &jsonMap)
+void MainWindow::jsonFileCreator(QVariantMap jsonMap)
 {
     QFile newJsonFile;
     if (writeJsonLog)
@@ -491,16 +493,16 @@ void MainWindow::jsonFileCreator(QVariantMap &jsonMap)
             newJsonFile.setFileName(logFileName);
             if (!newJsonFile.exists())
             {
-                newJsonFile.open(QIODevice::WriteOnly|QIODevice::Text);
+                newJsonFile.open(QIODevice::WriteOnly);
                 m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + returnTimestamp().toString("hh:mm:ss:zzz") + " "
                                           + QString("Start write json file ") + newJsonFile.fileName() + "</span></p>");
             }
-            else newJsonFile.open(QIODevice::Append|QIODevice::Text);
+            else newJsonFile.open(QIODevice::Append);
         }
         if (newJsonFile.isOpen())
         {
             QJsonObject jsonObj = QJsonObject::fromVariantMap(jsonMap);
-            newJsonFile.write(QJsonDocument(jsonObj).toJson());
+            newJsonFile.write(QJsonDocument(jsonObj).toJson(QJsonDocument::Indented));
             newJsonFile.close();
         }
         else showStatusMessage("Error write json");

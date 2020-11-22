@@ -99,7 +99,7 @@ public:
     QString logFileName;
     void logFileCreator(QString string, bool redFlag);
     void jsonDevCaller(int _devNum);
-    void jsonFileCreator(QVariantMap &jsonMap);
+    void jsonFileCreator(QVariantMap jsonMap);
     void cleanDevList();
     void updValueArea(QString parameterName, int devNum, QString devName, double endValue, int byteNum, int maskId, bool);
 //    void grabGestures(const QVector<Qt::GestureType> &gestures);
@@ -119,6 +119,7 @@ signals:
     void dvsfAfterCloseClear();
     void prepareToSaveProfile();
     void saveProfile();
+    void toJsonMap(int devNum, QString devName, QString parameterName, double endValue);
     void getJsonMap(int devNum);
 
 public slots:

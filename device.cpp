@@ -172,18 +172,19 @@ void Device::param2FrontEndRX(int devNum, int byteNum, QString byteName, uint32_
 void Device::jsonMap(int _devNum, QString _devName, QString _parameterName, double _endValue)
 {
     devParams->insert("DeviceName", _devName);
-    devParams->insert("NumberBlock", _devNum);
-    devParams->insert(_parameterName, _endValue);
+    devParams->insert("NumberBlock", QString::number(_devNum));
+    devParams->insert(_parameterName, QString::number(_endValue));
 }
 
 void Device::returnDevParams(int _devNum)
 {
-    if (devNum == _devNum)
+    if (devNum == _devNum && skippedFirstJsonSending)//пропускаем первую отправку данных в джысон считая что данные в этот момент могут быть не полными
     {
         devParams->insert("DateTime", returnTimestamp().toString("yy-MM-ddThh:mm:ss.zzz"));
         emit devParamsToJson(*devParams);
-        devParams->clear();
+        devParams->clear();//очищаем, так как может измениться набор параметров (например если поменяем имя параметра, чтоб не осталось старого поля в мапе)
     }
+    else if (!skippedFirstJsonSending) skippedFirstJsonSending = true;
 }
 
 QDateTime Device::returnTimestamp()

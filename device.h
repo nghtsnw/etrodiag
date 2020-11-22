@@ -84,6 +84,7 @@ private:
     QTimer *timer = new QTimer(this);
     QVariantMap *devParams = new QVariantMap;
     QDateTime returnTimestamp();
+    bool skippedFirstJsonSending = false;
 };
 
 #endif // DEVICE_H
