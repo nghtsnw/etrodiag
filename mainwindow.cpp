@@ -66,6 +66,8 @@
 #include <QGestureEvent>
 #include <QSwipeGesture>
 #include <QStandardPaths>
+#include <QJsonDocument>
+#include <QMap>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), statuslbl (new QLabel), m_ui (new Ui::MainWindow)
@@ -116,6 +118,7 @@ void MainWindow::addConnection()
     connect (connection, &newconnect::transmitData, this, &MainWindow::addDeviceToList);
     connect (connection, &newconnect::cleanDevListSig, this, &MainWindow::cleanDevList);
     connect (connection, &newconnect::writeTextLog, this, &MainWindow::setWriteTextLog);
+    connect (connection, &newconnect::writeJsonLog, this, &MainWindow::setWriteJsonLog);
     connect (connection, &newconnect::directly2logArea, this, &MainWindow::logAreaAppendHtml);
     connect (this, &MainWindow::prepareToSaveProfile, connection, &newconnect::prepareToSaveProfile);
     connect (this, &MainWindow::saveProfile, connection, &newconnect::saveProfile);
@@ -197,7 +200,9 @@ void MainWindow::createDevice(int devNum)
     connect (dev, &Device::devStatusMessage, this, &MainWindow::devStatusMsg);
     connect (connection, &newconnect::saveAllMasks, dev, &Device::requestMasks4Saving);
     connect (dev, &Device::allMasksToListTX, connection, &newconnect::saveProfileSlot4Masks);
-
+    connect (this, &MainWindow::toJsonMap, dev, &Device::jsonMap);
+    connect (this, &MainWindow::getJsonMap, dev, &Device::returnDevParams);
+    connect (dev, &Device::devParamsToJson, this, &MainWindow::jsonFileCreator);
     dev->show();
 }
 
@@ -408,6 +413,8 @@ void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QStr
         QString formString(parameterName + "@" + devName + ": " + QString::number(endValue,'g',6));
         logFileCreator(formString, false);
     }
+    emit toJsonMap(devNum, devName, parameterName, endValue);
+    jsonDevCaller(devNum);//маркер для определения начала прихода данных от масок следующего устройства
     updValueArea(parameterName, devNum, devName, endValue, byteNum, maskId, isNewData);
 }
 
@@ -454,6 +461,58 @@ void MainWindow::logFileCreator(QString string, bool redFlag)
                                   + QString("Stop write log file") + "</span></p>");
             newLogFile.close();
             createNewFileNamePermission = true;            
+    }
+}
+
+void MainWindow::jsonDevCaller(int _devNum)
+{
+    static int currentDev = _devNum;    
+    if (currentDev != _devNum)//если пошли данные со следующего устройства, отправляем сигнал устройству с предыдущим номером на отправку данных в json
+    {
+        emit getJsonMap(_devNum);
+        currentDev = _devNum;
+    }
+}
+
+void MainWindow::jsonFileCreator(QVariantMap jsonMap)
+{
+    QFile newJsonFile;
+    if (writeJsonLog)
+    {
+        QDir dir(appHomeDir + "Logs");
+        if (!dir.exists())
+        QDir().mkdir(appHomeDir + "Logs");
+
+        if (!newJsonFile.isOpen())
+        {
+            if (createNewJsonFileNamePermission)
+            {
+                logFileName = (dir.path() + returnTimestamp().toString("\\dd.MM.yy_hh-mm-ss") + ".json");
+                createNewJsonFileNamePermission = false;
+            }
+            newJsonFile.setFileName(logFileName);
+            if (!newJsonFile.exists())
+            {
+                newJsonFile.open(QIODevice::WriteOnly);
+                m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + returnTimestamp().toString("hh:mm:ss:zzz") + " "
+                                          + QString("Start write json file ") + newJsonFile.fileName() + "</span></p>");
+            }
+            else newJsonFile.open(QIODevice::Append);
+        }
+        if (newJsonFile.isOpen())
+        {
+            QJsonObject jsonObj = QJsonObject::fromVariantMap(jsonMap);
+            newJsonFile.write(QJsonDocument(jsonObj).toJson(QJsonDocument::Indented));
+            newJsonFile.close();
+        }
+        else showStatusMessage("Error write json");
+    }
+    else if (!writeJsonLog && !createNewJsonFileNamePermission)
+    {
+            m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + returnTimestamp().toString("hh:mm:ss:zzz") + " "
+                                  + QString("Stop write json file") + "</span></p>");
+            newJsonFile.close();
+            createNewJsonFileNamePermission = true;
     }
 }
 
@@ -515,6 +574,11 @@ void MainWindow::on_tabWidget_currentChanged(int)
 void MainWindow::setWriteTextLog(bool arg)
 {
     writeTextLog = arg;
+}
+
+void MainWindow::setWriteJsonLog(bool arg)
+{
+    writeJsonLog = arg;
 }
 
 void MainWindow::logAreaAppendHtml(QString str)

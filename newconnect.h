@@ -45,6 +45,7 @@ void transmitData(QVector<int> snapshot);
 void saveAllMasks();
 void loadMask(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool _drawGraphFlag, QString _drawGraphColor);
 void writeTextLog(bool);
+void writeJsonLog(bool);
 void directly2logArea(QString);
 void sendRawData(QByteArray);
 

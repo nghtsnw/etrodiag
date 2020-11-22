@@ -42,6 +42,7 @@ newconnect::newconnect(QWidget *parent) :
     connect(m_settings, &SettingsDialog::restoreConsoleAndButtons, this, &newconnect::restoreWindowAfterApplySettings);
     connect (m_settings, &SettingsDialog::writeTextLog, this, &newconnect::writeTextLog);
     connect (m_settings, &SettingsDialog::writeBinLog, this, &newconnect::writeBinLogSlot);
+    connect (m_settings, &SettingsDialog::writeJsonLog, this, &newconnect::writeJsonLog);
     connect (timer, &QTimer::timeout, this, &newconnect::readFromFile);//читаем из файла по таймеру
     connect (this, &newconnect::sendRawData, gstream, &getStream::getRawData);
     connect (this, &newconnect::sendRawData, m_console, &Console::putData);

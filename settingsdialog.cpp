@@ -345,3 +345,8 @@ void SettingsDialog::on_writeTxtChkBox_stateChanged(int)
 {
     emit writeTextLog(m_ui->writeTxtChkBox->isChecked());
 }
+
+void SettingsDialog::on_writeJsonChkBox_stateChanged(int)
+{
+    emit writeJsonLog(m_ui->writeJsonChkBox->isChecked());
+}
