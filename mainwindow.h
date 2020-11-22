@@ -95,8 +95,11 @@ public:
     void loadProfile(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor);
     bool logFlag = false;
     bool createNewFileNamePermission = true;
+    bool createNewJsonFileNamePermission = true;
     QString logFileName;
     void logFileCreator(QString string, bool redFlag);
+    void jsonDevCaller(int _devNum);
+    void jsonFileCreator(QVariantMap &jsonMap);
     void cleanDevList();
     void updValueArea(QString parameterName, int devNum, QString devName, double endValue, int byteNum, int maskId, bool);
 //    void grabGestures(const QVector<Qt::GestureType> &gestures);
@@ -116,6 +119,7 @@ signals:
     void dvsfAfterCloseClear();
     void prepareToSaveProfile();
     void saveProfile();
+    void getJsonMap(int devNum);
 
 public slots:
 
@@ -127,6 +131,7 @@ public slots:
     void setLogFlag(bool _logFlag);
     void devStatusMsg(QString _devName, QString status);
     void setWriteTextLog(bool arg);
+    void setWriteJsonLog(bool arg);
     void logAreaAppendHtml(QString);
 
 private slots:
@@ -138,6 +143,7 @@ private:
     QDateTime returnTimestamp();
     QTimer *timer = new QTimer(this);
     bool writeTextLog = false;
+    bool writeJsonLog = false;
     void swipeTriggered(QString);
     int currentOpenTab = 0;
     void setCurrentOpenTab(int index);

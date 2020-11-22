@@ -6,6 +6,7 @@
 #include <QDataStream>
 #include <QTextStream>
 #include <QTimer>
+#include <QDateTime>
 
 
 Device::Device(QWidget *parent) : QPushButton(parent)
@@ -166,6 +167,30 @@ void Device::allMasksToListRX(int devNum, int byteNum, QString byteName, int id,
 void Device::param2FrontEndRX(int devNum, int byteNum, QString byteName, uint32_t wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor)
 {
     emit param2FrontEndTX(devNum, devName, byteNum, byteName, wordData, id, parameterName, binRawValue, endValue, viewInLogFlag, isNewData, _drawGraphFlag, _drawGraphColor);
+}
+
+void Device::jsonMap(int _devNum, QString _devName, QString _parameterName, double _endValue)
+{
+    devParams->insert("DeviceName", _devName);
+    devParams->insert("NumberBlock", _devNum);
+    devParams->insert(_parameterName, _endValue);
+}
+
+void Device::returnDevParams(int _devNum)
+{
+    if (devNum == _devNum)
+    {
+        devParams->insert("DateTime", returnTimestamp().toString("yy-MM-ddThh:mm:ss.zzz"));
+        emit devParamsToJson(*devParams);
+        devParams->clear();
+    }
+}
+
+QDateTime Device::returnTimestamp()
+{
+    quint64 timestamp = QDateTime::currentMSecsSinceEpoch();
+    QDateTime dt3 = QDateTime::fromMSecsSinceEpoch(timestamp);
+    return dt3;
 }
 
 void Device::hideDevButton(bool trueOrFalse, int _devNum)

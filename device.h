@@ -7,6 +7,7 @@
 #include <QPushButton>
 #include "bytedefinition.h"
 #include <QTimer>
+#include <QVariantMap>
 
 class Device : public QPushButton
 {
@@ -51,6 +52,7 @@ signals:
     void saveByteNameTX(int _devNum, int _byteNum, QString _byteName);
     void byteObjUpdSig(int devNum, QVector<int> data);
     void devStatusMessage(QString _devname, QString status);
+    void devParamsToJson(QVariantMap);
 
 public slots:
     //void getDeviceName(int devNum);
@@ -73,12 +75,15 @@ public slots:
     void hideDevButton(bool trueOrFalse, int _devNum);
     void changeButtonColor(QString _status);
     void setOfflineStatus();
+    void jsonMap(int _devNum, QString _devName, QString _parameterName, double _endValue);
+    void returnDevParams(int devNum);
 
 private:
     QString devStatus = "init";
     Q_DISABLE_COPY(Device)
     QTimer *timer = new QTimer(this);
-
+    QVariantMap *devParams = new QVariantMap;
+    QDateTime returnTimestamp();
 };
 
 #endif // DEVICE_H

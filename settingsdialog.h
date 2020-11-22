@@ -99,6 +99,7 @@ signals:
     void restoreConsoleAndButtons();
     void writeTextLog(bool);
     void writeBinLog(bool);
+    void writeJsonLog(bool);
 
 private slots:
     void showPortInfo(int idx);
@@ -117,6 +118,8 @@ private slots:
     void on_writeBinChkBox_stateChanged(int);
 
     void on_writeTxtChkBox_stateChanged(int);
+
+    void on_writeJsonChkBox_stateChanged(int);
 
 private:
     void fillPortsParameters();
