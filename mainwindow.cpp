@@ -493,16 +493,18 @@ void MainWindow::jsonFileCreator(QVariantMap jsonMap)
             newJsonFile.setFileName(logFileName);
             if (!newJsonFile.exists())
             {
-                newJsonFile.open(QIODevice::WriteOnly);
+                newJsonFile.open(QIODevice::WriteOnly|QIODevice::Text);
                 m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + returnTimestamp().toString("hh:mm:ss:zzz") + " "
                                           + QString("Start write json file ") + newJsonFile.fileName() + "</span></p>");
             }
-            else newJsonFile.open(QIODevice::Append);
+            else newJsonFile.open(QIODevice::Append|QIODevice::Text);
         }
         if (newJsonFile.isOpen())
         {
             QJsonObject jsonObj = QJsonObject::fromVariantMap(jsonMap);
-            newJsonFile.write(QJsonDocument(jsonObj).toJson(QJsonDocument::Indented));
+            newJsonFile.write(QJsonDocument(jsonObj).toJson(QJsonDocument::Compact));
+            QTextStream newLineStream(&newJsonFile);
+            newLineStream << '\n';
             newJsonFile.close();
         }
         else showStatusMessage("Error write json");

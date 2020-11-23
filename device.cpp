@@ -171,9 +171,12 @@ void Device::param2FrontEndRX(int devNum, int byteNum, QString byteName, uint32_
 
 void Device::jsonMap(int _devNum, QString _devName, QString _parameterName, double _endValue)
 {
-    devParams->insert("DeviceName", _devName);
-    devParams->insert("NumberBlock", QString::number(_devNum));
-    devParams->insert(_parameterName, QString::number(_endValue));
+    if (_devNum == devNum)
+    {
+        devParams->insert("DeviceName", _devName);
+        devParams->insert("NumberBlock", QString::number(_devNum));
+        devParams->insert(_parameterName, QString::number(_endValue));
+    }
 }
 
 void Device::returnDevParams(int _devNum)
@@ -184,7 +187,7 @@ void Device::returnDevParams(int _devNum)
         emit devParamsToJson(*devParams);
         devParams->clear();//очищаем, так как может измениться набор параметров (например если поменяем имя параметра, чтоб не осталось старого поля в мапе)
     }
-    else if (!skippedFirstJsonSending) skippedFirstJsonSending = true;
+    else if (devNum == _devNum && !skippedFirstJsonSending) skippedFirstJsonSending = true;
 }
 
 QDateTime Device::returnTimestamp()
