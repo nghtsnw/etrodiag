@@ -25,6 +25,9 @@ void ByteSettingsForm::open(int _devNum, int _byteNum)
     byteNum = _byteNum;
     getWordTypeFromProfile(devNum, byteNum);
     requestAllMasks();
+    if ((40-byteNum) >= 4) ui->bitBox->setMaximum(32);
+    else if ((40-byteNum) >= 2) ui->bitBox->setMaximum(16);
+    else if ((40-byteNum) >= 0) ui->bitBox->setMaximum(8);
     if (ui->masksWidget->rowCount() > 0)
         ui->bitBox->setDisabled(true);
     else ui->bitBox->setEnabled(true);
@@ -80,7 +83,30 @@ void ByteSettingsForm::on_masksWidget_cellClicked(int row, int column)
 
 void ByteSettingsForm::on_bitBox_valueChanged(int arg1)
 {//по изменению битбокса в форме, отправляем значение в byteButton
-    emit setWordBit(devNum, byteNum, arg1);
+
+    if (arg1 == 8)
+    {
+        arg2index = 0;
+    }
+    else if (arg1 == 16)
+    {
+        arg2index = 1;
+    }
+    else if (arg1 == 24)//проскакиваем неиспользуемое значение
+    {
+        if (arg2index == 1)
+        {
+            arg2index = 2;
+            ui->bitBox->setValue(32);
+        }
+        else
+        {
+            arg2index = 1;
+            ui->bitBox->setValue(16);
+        }
+    }
+    else if (arg1 == 32) arg2index = 2;
+    emit setWordBit(devNum, byteNum, arg2index);
 }
 
 void ByteSettingsForm::getWordTypeFromProfile(int _devNum, int _byteNum)
@@ -92,7 +118,11 @@ void ByteSettingsForm::returnWordType(int _devNum, int _byteNum, int wordType)
 {//возврат значения длины слова из bytedefinition в ответ на запрос из bytesettingsform
     //для того что-бы после открытия формы, в битбоксе было корректное значение из профиля
     if (devNum == _devNum && byteNum == _byteNum)
-        this->ui->bitBox->setValue(wordType);
+    {
+        if (wordType == 0) this->ui->bitBox->setValue(8);
+        else if (wordType == 1) this->ui->bitBox->setValue(16);
+        else if (wordType == 2) this->ui->bitBox->setValue(32);
+    }
 }
 
 void ByteSettingsForm::on_pushButton_clicked()
@@ -126,7 +156,19 @@ void ByteSettingsForm::updateHexWordData(int _devNum, int _byteNum, QString _txt
 {
     if (devNum == _devNum && byteNum == _byteNum && this->isVisible())
     {
-        ui->hexNumber->setText("Dev " + QString("%1").arg(devNum,0,16).toUpper() + ", Word " + QString::number(byteNum) + ", Word data " + _txt);
+        QString wordInfoString;
+        if (ui->bitBox->value() == 8) wordInfoString = "Byte num: " + QString::number(byteNum);
+        else if (ui->bitBox->value() == 16)
+        {
+            wordInfoString = "Word bytes: [%1, %2]";
+            wordInfoString = wordInfoString.arg(QString::number(byteNum+1)).arg(QString::number(byteNum));
+        }
+        else if (ui->bitBox->value() == 32)
+        {
+            wordInfoString = "Word bytes: [%1, %2, %3, %4]";
+            wordInfoString = wordInfoString.arg(QString::number(byteNum+3)).arg(QString::number(byteNum+2)).arg(QString::number(byteNum+1)).arg(QString::number(byteNum));
+        }
+        ui->hexNumber->setText("Dev num: " + QString("%1").arg(devNum,0,16).toUpper() + ", " + wordInfoString + ", Word data: " + _txt);
     }
 }
 
@@ -143,6 +185,7 @@ void ByteSettingsForm::setWordName(int _devNum, int _byteNum, QString _byteName)
 
 void ByteSettingsForm::cleanForm()
 {
+    ui->bitBox->setMaximum(32);
     while (ui->masksWidget->rowCount() > 0)
             ui->masksWidget->removeRow(0);
     ui->hexNumber->clear();

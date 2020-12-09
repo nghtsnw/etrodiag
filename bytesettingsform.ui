@@ -29,7 +29,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Word bit: </string>
+      <string>Word size: </string>
      </property>
     </widget>
    </item>
@@ -97,17 +97,44 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <property name="toolTip">
-      <string>0 = 8bit, 1 = 16bit, 2 = 32bit</string>
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
+     <property name="contextMenuPolicy">
+      <enum>Qt::NoContextMenu</enum>
+     </property>
+     <property name="inputMethodHints">
+      <set>Qt::ImhDigitsOnly</set>
+     </property>
+     <property name="frame">
+      <bool>true</bool>
+     </property>
+     <property name="readOnly">
+      <bool>false</bool>
+     </property>
+     <property name="showGroupSeparator" stdset="0">
+      <bool>false</bool>
+     </property>
+     <property name="suffix">
+      <string> bit</string>
+     </property>
+     <property name="prefix">
+      <string/>
+     </property>
+     <property name="minimum">
+      <number>8</number>
      </property>
      <property name="maximum">
-      <number>2</number>
+      <number>32</number>
+     </property>
+     <property name="singleStep">
+      <number>8</number>
      </property>
      <property name="stepType">
       <enum>QAbstractSpinBox::DefaultStepType</enum>
      </property>
      <property name="value">
-      <number>0</number>
+      <number>8</number>
      </property>
      <property name="displayIntegerBase">
       <number>10</number>

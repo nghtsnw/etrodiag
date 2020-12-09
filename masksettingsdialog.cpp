@@ -33,6 +33,19 @@ void maskSettingsDialog::getDataOnId(int _devNum, int _byteNum, int _id, QString
     if (devNum == _devNum && byteNum == _byteNum && id == _id)
     {
         wordType = _wordType;
+        QString wordInfoString;
+        if (wordType == 0) wordInfoString = "Byte num: " + QString::number(byteNum);
+        else if (wordType == 1)
+        {
+            wordInfoString = "Word bytes: [%1, %2]";
+            wordInfoString = wordInfoString.arg(QString::number(byteNum+1)).arg(QString::number(byteNum));
+        }
+        else if (wordType == 2)
+        {
+            wordInfoString = "Word bytes: [%1, %2, %3, %4]";
+            wordInfoString = wordInfoString.arg(QString::number(byteNum+3)).arg(QString::number(byteNum+2)).arg(QString::number(byteNum+1)).arg(QString::number(byteNum));
+        }
+        ui->wordInfo->setText("Dev num: " + QString::number(devNum) + ", " + wordInfoString);
         ui->maskName->setText(_paramName);
         ui->binNum->setText(_paramMask);
         ui->shiftTxt->setText(QString::number(_valueShift));
@@ -51,7 +64,7 @@ void maskSettingsDialog::getDataOnId(int _devNum, int _byteNum, int _id, QString
 
 void maskSettingsDialog::initBitButtonsAndCheckBoxes(int _wordType)
 {//создаём чекбоксы, пронумеровываем, расставляем согласно имеющейся маске
-    killChildren();
+    killChildren();//кек
     wordBit = 8;
     if (_wordType == 0) wordBit = 8;
     else if (_wordType == 1) wordBit = 16;

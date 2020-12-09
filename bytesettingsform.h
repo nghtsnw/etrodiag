@@ -13,16 +13,13 @@ class ByteSettingsForm : public QWidget
 
 public:
     explicit ByteSettingsForm(QWidget *parent = nullptr);
-    //ByteSettingsForm(int _devNum, int _byteNum);
     int devNum;
     int byteNum;
     void open(int _devNum, int _byteNum);
     void getWordTypeFromProfile(int _devNum, int _byteNum);
-    //void cleanMaskList();
     void requestAllMasks();
     void deleteMaskItem(int row);
     void updateMasksList(int _devNum, QString _devName, int _byteNum, QString _byteName, int _wordData, int _id, QString parameterName, int _binRawValue, float _endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor);
-//    virtual void hideEvent(QHideEvent* e);
     void cleanForm();
     ~ByteSettingsForm();
 
@@ -52,6 +49,7 @@ private slots:
 private:
     Ui::ByteSettingsForm *ui;
     QStringList lst = {"Parameter", "Value", "ID", "Delete"};
+    int arg2index;
 };
 
 #endif // BYTESETTINGSFORM_H
