@@ -284,14 +284,13 @@ void SettingsDialog::updateSettings()
 
 void SettingsDialog::on_newProfileButton_clicked()
 {
-    bool ok = false;
     #ifdef Q_OS_WIN32
         QString fileName = QFileDialog::getSaveFileName(this, tr("newprofile"),appHomeDir + "Profiles","Etrodiag devices profile(*.eag)");
     #endif
     #ifdef Q_OS_ANDROID
         QString fileName = appHomeDir + "Profiles" + QDir::separator() + QInputDialog::getText(this, tr("Enter profile name"), tr("Enter profile name"), QLineEdit::Normal, "", &ok);
     #endif
-    if (ok && !fileName.isEmpty())
+    if (!fileName.isEmpty())
     {
         if (!fileName.endsWith("eag"))
            fileName = fileName + ".eag";
