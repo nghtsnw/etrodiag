@@ -49,18 +49,6 @@ void byteDefinition::getWordType(int _devNum, int _byteNum)
     emit returnWordType(_devNum, _byteNum, wordType);    
 }
 
-void byteDefinition::getByteNameRX(int _devNum, int _byteNum)
-{
-    if (devNum == _devNum && th_byteNum == _byteNum)
-        emit returnByteName(_devNum, _byteNum, byteName);
-}
-
-void byteDefinition::saveByteNameRX(int _devNum, int _byteNum, QString _byteName)
-{
-    if (devNum == _devNum && th_byteNum == _byteNum)
-        byteName = _byteName;
-}
-
 void byteDefinition::createNewMask(int _devNum, int _byteNum)
 {//по нажатию кнопки добавления маски в bytesettingsform, отправляем сигнал в bytedefinition на создание маски
     //найти всех детей типа bitMaskObj, что-бы присвоить маске айди

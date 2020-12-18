@@ -47,7 +47,7 @@ void maskSettingsDialog::getDataOnId(int _devNum, int _byteNum, int _id, QString
         }
         ui->wordInfo->setText("Dev num: " + QString::number(devNum) + ", " + wordInfoString);
         ui->maskName->setText(_paramName);
-        ui->binNum->setText(_paramMask);
+        binMaskInTxt = _paramMask;
         ui->shiftTxt->setText(QString::number(_valueShift));
         ui->koeffTxt->setText(QString::number(_valueKoef));
         chkBoxStopSignal = true; //на время инициализации окна глушим переменную, что-бы не сработал сигнал state changed
@@ -72,7 +72,8 @@ void maskSettingsDialog::initBitButtonsAndCheckBoxes(int _wordType)
     else wordBit = 8;
 
     int x = 0, y = 0;
-    for (int var = wordBit; var > 0; --var, ++y) {
+    for (int var = wordBit; var > 0; --var, ++y)
+    {
         if (y > 7) //по 8 бит в одной строке
         {
             y = 0;
@@ -87,10 +88,8 @@ void maskSettingsDialog::initBitButtonsAndCheckBoxes(int _wordType)
         bs->setNumLabel(var-1);
         bs->show();
     }
-    QString mask = ui->binNum->text();
+    QString mask = binMaskInTxt;
     uint32_t one = 1;
-    QListIterator<bitSetForm*> bitSetListIt(bitSetList);
-    bitSetListIt.toBack();
     for (int var = wordBit-1, i = 0; var > -1; var--, i++) {
         bool chk;
         int curmasksym = QString("%1").arg(mask[var],0,10).toInt(0,10);
@@ -112,7 +111,7 @@ void maskSettingsDialog::scanCheckboxesToMask()
         masktmp = bitSetListIt.next()->checkboxStatus();        
         mask = mask + QString::number(masktmp,10);
     }
-    ui->binNum->setText(mask);
+    binMaskInTxt = mask;
     sendMask2Profile();
 }
 
@@ -143,7 +142,7 @@ void maskSettingsDialog::sendMask2Profile()
 {//забор данных из формы masksettingsdialog и отправка в профиль bitmaskobj
     {
         QString _paramName = this->ui->maskName->text();
-        QString _paramMask =  this->ui->binNum->text();
+        QString _paramMask = binMaskInTxt;
         int _paramType = 0;
         int _valueShift = ui->shiftTxt->text().toInt(nullptr,10);
         float _valueKoef = ui->koeffTxt->text().toFloat(nullptr);
@@ -203,4 +202,22 @@ void maskSettingsDialog::on_drawGraphCheckBox_stateChanged(int)
         ui->drawGraphCheckBox->setStyleSheet(style);
         sendMask2Profile();
     }
+}
+
+void maskSettingsDialog::on_checkAllButton_clicked()
+{
+    for (int var = wordBit-1, i = 0; var > -1; var--, i++)
+    {
+        emit setCheckBox(true, i);
+    }
+    scanCheckboxesToMask();
+}
+
+void maskSettingsDialog::on_uncheckAllButton_clicked()
+{
+    for (int var = wordBit-1, i = 0; var > -1; var--, i++)
+    {
+        emit setCheckBox(false, i);
+    }
+    scanCheckboxesToMask();
 }

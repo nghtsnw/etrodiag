@@ -17,7 +17,6 @@ public:
     explicit Device(QWidget *parent = nullptr);
     int devNum;
     QString devName = "Device name";
-    //dynamicBaseProfile *devPrf = new dynamicBaseProfile;
     QVector<int> currState;
     int currStateInt = 0;
     QVector<int> *oldState = new QVector<int>;
@@ -47,15 +46,11 @@ signals:
     void deleteMaskObjTX(int devNum, int byteNum, int id);
     void param2FrontEndTX(int devNum, QString devName, int byteNum, QString byteName, uint32_t wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData, bool drawGraphFlag, QString drawGraphColor);
     void loadMaskTX(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor);
-    void getByteNameTX(int _devNum, int byteNum);
-    void returnByteNameTX(int devNum, int byteNum, QString byteName);
-    void saveByteNameTX(int _devNum, int _byteNum, QString _byteName);
     void byteObjUpdSig(int devNum, QVector<int> data);
     void devStatusMessage(QString _devname, QString status);
     void devParamsToJson(QVariantMap);
 
 public slots:
-    //void getDeviceName(int devNum);
     void updateData(int id, QVector<int> devdata);
     void setDeviceName(int id, QString name);
     void setWordTypeInByteProfile(int _devNum, int _byteNum, int _wordType);
@@ -70,8 +65,6 @@ public slots:
     void param2FrontEndRX(int devNum, int byteNum, QString byteName, uint32_t wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor);
     void requestMasks4Saving();
     void loadMaskRX(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor);
-    void getByteNameRX(int _devNum, int byteNum);
-    void saveByteNameRX(int _devNum, int _byteNum, QString _byteName);
     void hideDevButton(bool trueOrFalse, int _devNum);
     void changeButtonColor(QString _status);
     void setOfflineStatus();

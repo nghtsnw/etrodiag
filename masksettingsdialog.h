@@ -53,10 +53,15 @@ private slots:
 
     void on_drawGraphCheckBox_stateChanged(int);
 
+    void on_checkAllButton_clicked();
+
+    void on_uncheckAllButton_clicked();
+
 private:
     Ui::maskSettingsDialog *ui;
     QColor drawColor;
     bool chkBoxStopSignal;
+    QString binMaskInTxt;
 };
 
 #endif // MASKSETTINGSDIALOG_H

@@ -28,7 +28,7 @@ public:
     int paramMask4calcShift = 0;
     void calculateValue(int _devNum, int _byteNum, uint32_t wordData);
     bool viewInLogFlag = true;
-    bool drawGraphFlag;
+    bool drawGraphFlag = false;
     QString drawGraphColor;
 
 signals:

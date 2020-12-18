@@ -172,17 +172,6 @@ void ByteSettingsForm::updateHexWordData(int _devNum, int _byteNum, QString _txt
     }
 }
 
-void ByteSettingsForm::on_wordNameEdit_editingFinished()
-{
-    emit saveByteName(devNum, byteNum, ui->wordNameEdit->text());
-}
-
-void ByteSettingsForm::setWordName(int _devNum, int _byteNum, QString _byteName)
-{
-    if (devNum == _devNum && byteNum == _byteNum)
-        ui->wordNameEdit->setText(_byteName);
-}
-
 void ByteSettingsForm::cleanForm()
 {
     ui->bitBox->setMaximum(32);

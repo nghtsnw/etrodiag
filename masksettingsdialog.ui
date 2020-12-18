@@ -19,45 +19,32 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
-    <widget class="QLabel" name="wordInfo">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="5" column="0" colspan="3">
+    <layout class="QHBoxLayout" name="typeChangeLayout">
+     <property name="spacing">
+      <number>26</number>
      </property>
-     <property name="text">
-      <string>wordInfoLabel</string>
+     <property name="sizeConstraint">
+      <enum>QLayout::SetMaximumSize</enum>
      </property>
-    </widget>
+     <item>
+      <widget class="QCheckBox" name="logCheckBox">
+       <property name="text">
+        <string>View change to main log</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="drawGraphCheckBox">
+       <property name="text">
+        <string>Draw a graph</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
-   <item>
-    <widget class="QGroupBox" name="dynamicMaskForm">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="title">
-      <string>BitBox</string>
-     </property>
-     <layout class="QGridLayout" name="dynamicMaskFormLay">
-      <property name="sizeConstraint">
-       <enum>QLayout::SetDefaultConstraint</enum>
-      </property>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLineEdit" name="maskName"/>
-   </item>
-   <item>
-    <widget class="QLineEdit" name="binNum"/>
-   </item>
-   <item>
+   <item row="4" column="0" colspan="3">
     <widget class="QGroupBox" name="numberSettingsBox">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -106,29 +93,53 @@
      </layout>
     </widget>
    </item>
-   <item>
-    <layout class="QHBoxLayout" name="typeChangeLayout">
-     <property name="spacing">
-      <number>26</number>
+   <item row="0" column="2">
+    <widget class="QPushButton" name="uncheckAllButton">
+     <property name="text">
+      <string>Uncheck all</string>
      </property>
-     <property name="sizeConstraint">
-      <enum>QLayout::SetMaximumSize</enum>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QPushButton" name="checkAllButton">
+     <property name="text">
+      <string>Check all</string>
      </property>
-     <item>
-      <widget class="QCheckBox" name="logCheckBox">
-       <property name="text">
-        <string>View change to main log</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="drawGraphCheckBox">
-       <property name="text">
-        <string>Draw a graph</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="3">
+    <widget class="QGroupBox" name="dynamicMaskForm">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="title">
+      <string>BitBox</string>
+     </property>
+     <layout class="QGridLayout" name="dynamicMaskFormLay">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetDefaultConstraint</enum>
+      </property>
+     </layout>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="wordInfo">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>wordInfoLabel</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="3">
+    <widget class="QLineEdit" name="maskName"/>
    </item>
   </layout>
  </widget>

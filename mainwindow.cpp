@@ -193,9 +193,6 @@ void MainWindow::createDevice(int devNum)
     connect (dev, &Device::param2FrontEndTX, &dvsf, &devSettingsForm::liveDataSlot);
     connect (dev, &Device::param2FrontEndTX, &graphiq, &liveGraph::incomingDataSlot);
     connect (this, &MainWindow::sendMaskData, dev, &Device::loadMaskRX);
-    connect (this, &MainWindow::getByteName, dev, &Device::getByteNameRX);
-    connect (dev, &Device::returnByteNameTX, &btsf, &ByteSettingsForm::setWordName);
-    connect (&btsf, &ByteSettingsForm::saveByteName, dev, &Device::saveByteNameRX);
     connect (this, &MainWindow::hideOtherDevButtons, dev, &Device::hideDevButton);
     connect (dev, &Device::devStatusMessage, this, &MainWindow::devStatusMsg);
     connect (connection, &newconnect::saveAllMasks, dev, &Device::requestMasks4Saving);

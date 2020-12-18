@@ -64,9 +64,6 @@ void Device::byteObjectsInit(QVector<int> &data) //инициализируем 
         connect (this, &Device::deleteMaskObjTX, bytedef, &byteDefinition::deleteMaskObjTX);
         connect (bytedef, &byteDefinition::param2FrontEndTX, this, &Device::param2FrontEndRX);
         connect (this, &Device::loadMaskTX, bytedef, &byteDefinition::loadMaskRX);
-        connect (this, &Device::getByteNameTX, bytedef, &byteDefinition::getByteNameRX);
-        connect (bytedef, &byteDefinition::returnByteName, this, &Device::returnByteNameTX);
-        connect (this, &Device::saveByteNameTX, bytedef, &byteDefinition::saveByteNameRX);
         connect (this, &Device::byteObjUpdSig, bytedef, &byteDefinition::updateSlot);
         n--;
     }
@@ -82,18 +79,6 @@ void Device::getDeviceName(int id)
 {//при открытии формы devsettingsform, она запрашивает имя устройства, тут устройство отвечает на запрос
     if (id == devNum)
     emit returnDeviceName(devNum, devName);
-}
-
-void Device::getByteNameRX(int _devNum, int byteNum)
-{
-    if (devNum == _devNum)
-        emit getByteNameTX(_devNum, byteNum);
-}
-
-void Device::saveByteNameRX(int _devNum, int _byteNum, QString _byteName)
-{
-    if (devNum == _devNum)
-        emit saveByteNameTX(_devNum, _byteNum, _byteName);
 }
 
 void Device::setDeviceName(int id, QString name)
