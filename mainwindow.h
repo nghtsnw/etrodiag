@@ -97,6 +97,7 @@ public:
     bool createNewFileNamePermission = true;
     bool createNewJsonFileNamePermission = true;
     QString logFileName;
+    QString jsonFileName;
     void logFileCreator(QString string, bool redFlag);
     void jsonDevCaller(int _devNum);
     void jsonFileCreator(QVariantMap jsonMap);

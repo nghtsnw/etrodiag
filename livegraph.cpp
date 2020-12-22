@@ -2,6 +2,7 @@
 #include "ui_livegraph.h"
 #include <newgraph.h>
 #include <QDebug>
+#include <QMouseEvent>
 
 liveGraph::liveGraph(QWidget *parent) :
     QWidget(parent),
@@ -94,6 +95,7 @@ void liveGraph::incomingDataSlot(int devNum, QString devName, int byteNum, QStri
                     else
                     {
                         graphAnnotation.remove(drawGraphColor);
+                        graphAnnotationMinMax.remove(parameterName);
                         graphListIt.next()->~newgraph(); //если флаг снят - удаляем объект графика
                         break;
                     }
@@ -112,11 +114,33 @@ void liveGraph::incomingDataSlot(int devNum, QString devName, int byteNum, QStri
             graph->id = id;
             emit data2graph(devNum, byteNum, id, endValue, steps, drawGraphColor);
             connect (timer, &QTimer::timeout, graph, &newgraph::oscillatorInput);
+            graphAnnotationMinMax.insert(parameterName, {endValue, endValue});
         }
         if (drawGraphFlag)
         {
-            QString annotationString = parameterName+'@'+devName+" - "+QString::number(endValue);
-            graphAnnotation.insert(drawGraphColor, annotationString);
+            if (graphAnnotationMinMax.value(parameterName).at(0) > endValue)
+            {
+                QVector<double> minMax = {endValue, graphAnnotationMinMax.value(parameterName).at(1)};
+                graphAnnotationMinMax.insert(parameterName, minMax);
+            }
+            if (graphAnnotationMinMax.value(parameterName).at(1) < endValue)
+            {
+                QVector<double> minMax = {graphAnnotationMinMax.value(parameterName).at(0), endValue};
+                graphAnnotationMinMax.insert(parameterName, minMax);
+            }
+            if (minMaxOnOff)
+            {
+                QString annotationString = parameterName+'@'+devName+" - "+QString::number(endValue)
+                        + "| Min - " + QString::number(graphAnnotationMinMax.value(parameterName).at(0)) + "| Max - " +
+                                                                 QString::number(graphAnnotationMinMax.value(parameterName).at(1));
+                graphAnnotation.insert(drawGraphColor, annotationString);
+            }
+            else
+            {
+                graphAnnotationMinMax.insert(parameterName, {endValue, endValue});
+                QString annotationString = parameterName+'@'+devName+" - "+QString::number(endValue);
+                graphAnnotation.insert(drawGraphColor, annotationString);
+            }
         }
 }
 
@@ -151,18 +175,18 @@ void liveGraph::paintAnnotation()
     QPainter paintan(this);
     if (paintan.isActive())
     {
-    QColor paintColor;
-    QFont font("Times", 10);
-    paintan.setFont(font);
-    annotationKeys = graphAnnotation.keys();
-    rectXSizePix = maxStringSizePix(font, graphAnnotation.values());//[0] - длина строки, [1] - высота
-    const int oneStringYpix = rectXSizePix.at(1)+2;
-    paintan.setPen(Qt::white);
-    paintan.setBrush(QBrush(Qt::white));
-    paintan.setOpacity(0.5);
-    paintan.drawRect(0, 0, rectXSizePix.at(0)+15, oneStringYpix*graphAnnotation.size()+3);
-    paintan.setOpacity(1.0);
-    for (int i = 0, y = 4; i < graphAnnotation.size(); ++i, y+=oneStringYpix) {
+        QColor paintColor;
+        QFont font("Times", 10);
+        paintan.setFont(font);
+        annotationKeys = graphAnnotation.keys();
+        rectXSizePix = maxStringSizePix(font, graphAnnotation.values());//[0] - длина строки, [1] - высота
+        const int oneStringYpix = rectXSizePix.at(1)+2;
+        paintan.setPen(Qt::white);
+        paintan.setBrush(QBrush(Qt::white));
+        paintan.setOpacity(0.7);
+        paintan.drawRect(0, 0, rectXSizePix.at(0)+15, oneStringYpix*graphAnnotation.size()+3);
+        paintan.setOpacity(1.0);
+        for (int i = 0, y = 4; i < graphAnnotation.size(); ++i, y+=oneStringYpix) {
         paintColor.setNamedColor(annotationKeys.at(i));
         paintan.setPen(paintColor);
         paintan.setBrush(QBrush(paintColor));
@@ -179,7 +203,7 @@ QVector<int> liveGraph::maxStringSizePix(QFont font, QList<QString> str)//счи
 {
     QFontMetrics fm(font);
     int pixelsWideMax = 0;
-    for (QString string : str)
+    for (const QString &string : str)
     {
         int pixelsWide = fm.horizontalAdvance(string);
         if (pixelsWide > pixelsWideMax) pixelsWideMax = pixelsWide;
@@ -230,3 +254,7 @@ double liveGraph::findYScale(const QVector<double>& values)
         return result;
 }
 
+void liveGraph::chngMinMaxVisible()
+{
+    minMaxOnOff = !minMaxOnOff;
+}

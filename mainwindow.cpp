@@ -484,10 +484,10 @@ void MainWindow::jsonFileCreator(QVariantMap jsonMap)
         {
             if (createNewJsonFileNamePermission)
             {
-                logFileName = (dir.path() + returnTimestamp().toString("\\dd.MM.yy_hh-mm-ss") + ".json");
+                jsonFileName = (dir.path() + returnTimestamp().toString("\\dd.MM.yy_hh-mm-ss") + ".json");
                 createNewJsonFileNamePermission = false;
             }
-            newJsonFile.setFileName(logFileName);
+            newJsonFile.setFileName(jsonFileName);
             if (!newJsonFile.exists())
             {
                 newJsonFile.open(QIODevice::WriteOnly|QIODevice::Text);
@@ -611,6 +611,11 @@ bool MainWindow::event(QEvent *event)
           swipeCalc(mouseEvent);
           #endif
     }
+    if ((event->type() == QEvent::MouseButtonDblClick) && graphiq.isVisible())
+    {
+        graphiq.chngMinMaxVisible();
+    }
+
     return QMainWindow::event(event);
 }
 

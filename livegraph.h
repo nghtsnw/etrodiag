@@ -19,7 +19,9 @@ public:
     ~liveGraph();
     void initGraph();
     QMap<QString, QString> graphAnnotation;
+    QMap<QString, QVector<double>> graphAnnotationMinMax;
     void incomingDataSlot(int devNum, QString devName, int byteNum, QString byteName, uint32_t wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData, bool drawGraphFlag, QString drawGraphColor);
+    void chngMinMaxVisible();
 
 private:
     Ui::liveGraph *ui;
@@ -45,11 +47,13 @@ private:
     QList<QString> annotationKeys;
     QVector<int> rectXSizePix;
     int curvesCount = 0;
+    bool minMaxOnOff = true;
 
     const int oneStepTime = 500;//время для таймера сдвига на шаг и перерисовки (мсек)
     const int steps = 120; //ширина графика в шагах
 
 protected:
+    void mouseEvent(QMouseEvent *event);
     void paintEvent(QPaintEvent *event) override;
 
 signals:
