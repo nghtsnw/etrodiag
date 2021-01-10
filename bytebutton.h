@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QPushButton>
 #include <QTimer>
+#include <QLabel>
 
 class byteButton : public QPushButton
 {
@@ -35,6 +36,7 @@ public slots:
 
 private:
     QTimer *timer = new QTimer;
+    QLabel *numLabel = new QLabel;
 };
 
 #endif // BYTEBUTTON_H

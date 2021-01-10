@@ -12,6 +12,10 @@ void byteButton::setByteNum(int _devNum, int _byteNum)
 {
     devNum = _devNum;
     byteNum = _byteNum;
+    QFont numLabelFont("Arial", 5);
+    numLabel->setParent(this);
+    numLabel->setFont(numLabelFont);
+    numLabel->setText(' ' + QString::number(byteNum));
 }
 
 byteButton::~byteButton()
