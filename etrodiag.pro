@@ -3,7 +3,7 @@ requires(qtConfig(combobox))
 
 TARGET = etrodiag
 TEMPLATE = app
-
+TRANSLATIONS = etrodiag_ru.ts
 SOURCES += \
     bitmaskobj.cpp \
     bitsetform.cpp \
