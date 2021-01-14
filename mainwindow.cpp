@@ -40,8 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect (&btsf, &ByteSettingsForm::editMask, &masksd, &maskSettingsDialog::requestDataOnId);
     connect (this, &MainWindow::dvsfAfterCloseClear, &dvsf, &devSettingsForm::afterCloseClearing);
     connect (m_ui->valueArea, &QTabWidget::currentChanged, this, &MainWindow::setCurrentOpenTab);
-    m_ui->tabWidget->setCurrentIndex(0);
-    m_ui->tab_connections->show();
+
 
     m_ui->logArea->viewport()->installEventFilter(this);
 
@@ -51,6 +50,8 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->aboutimg->setScaledContents(true);
     m_ui->aboutimg->show();
     graphiq.setParent(m_ui->graphLabel);
+    m_ui->tabWidget->setCurrentIndex(0);
+    m_ui->tab_connections->show();
 }
 
 MainWindow::~MainWindow()
@@ -414,7 +415,7 @@ void MainWindow::jsonDevCaller(int _devNum)
 {
     static int currentDev = _devNum;    
     if (currentDev != _devNum)//если пошли данные со следующего устройства, отправляем сигнал устройству с предыдущим номером на отправку данных в json
-    {
+    {//FIX ME: Если устройство только одно, json не будет писаться
         emit getJsonMap(_devNum);
         currentDev = _devNum;
     }
@@ -502,12 +503,10 @@ void MainWindow::resizeEvent(QResizeEvent*)
     masksd.resize(m_ui->rightFrame->size());
     graphiq.resize(m_ui->graphLabel->size());
 
+    m_ui->helpText->viewport()->setMinimumWidth(m_ui->tab_about->width()*0.9);
     m_ui->helpText->document()->setTextWidth(m_ui->helpText->viewport()->size().width());
     auto docSize = m_ui->helpText->document()->size().toSize();
-    m_ui->helpText->setMinimumWidth(docSize.width());
     m_ui->helpText->setMinimumHeight(docSize.height() + 10);
-
-    m_ui->aboutimg->move((m_ui->scrollAreaWidgetContents->size().width()/2)-(m_ui->aboutimg->size().width()/2), 0);
 }
 
 
@@ -520,9 +519,8 @@ void MainWindow::cleanDevList()
 }
 
 void MainWindow::on_tabWidget_currentChanged(int)
-{//так как сразу после пуска перемещение виджета не срабатывает, вешаю его на событие
-    m_ui->aboutimg->move((m_ui->scrollAreaWidgetContents->size().width()/2)-(m_ui->aboutimg->size().width()/2), 0);
-    graphiq.resize(m_ui->graphLabel->size().width(), m_ui->graphLabel->size().height());
+{//так как сразу после пуска программы ресайз виджета не срабатывает, вешаю его на событие смены таба
+    graphiq.resize(m_ui->graphLabel->size());
 }
 
 void MainWindow::setWriteTextLog(bool arg)
