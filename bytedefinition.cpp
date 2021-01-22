@@ -72,6 +72,13 @@ void byteDefinition::createNewMask(int _devNum, int _byteNum)
     }
 }
 
+void byteDefinition::countMasks()
+{
+    QList<bitMaskObj*> bytedefChildList = this->findChildren<bitMaskObj*>();
+    if (!bytedefChildList.isEmpty())
+    emit returnMaskCountForThisByte(devNum, th_byteNum, bytedefChildList.count());
+}
+
 void byteDefinition::loadMaskRX(int devNum, QString devName, int byteNum, QString _byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor)
 {
     byteName = _byteName;

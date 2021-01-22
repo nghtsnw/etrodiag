@@ -49,6 +49,7 @@ signals:
     void byteObjUpdSig(int devNum, QVector<int> data);
     void devStatusMessage(QString _devname, QString status);
     void devParamsToJson(QVariantMap);
+    void requestMaskCounting();
 
 public slots:
     void updateData(int id, QVector<int> devdata);
@@ -68,8 +69,8 @@ public slots:
     void hideDevButton(bool trueOrFalse, int _devNum);
     void changeButtonColor(QString _status);
     void setOfflineStatus();
-    void jsonMap(int _devNum, QString _devName, QString _parameterName, double _endValue);
-    void returnDevParams(int devNum);
+    void jsonMap(int _devNum, QString _devName, QString _parameterName, double _endValue, int maskId);
+    void returnMaskCounting(int devNum, int byteNum, int count);
 
 private:
     QString devStatus = "init";
@@ -78,6 +79,10 @@ private:
     QVariantMap *devParams = new QVariantMap;
     QDateTime returnTimestamp();
     bool skippedFirstJsonSending = false;
+    int devParamsCount = 0;
+    int countMasks();
+    QMap<int, int> maskCountMap;
+    int calcMasksInDev();
 };
 
 #endif // DEVICE_H

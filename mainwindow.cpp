@@ -148,7 +148,6 @@ void MainWindow::createDevice(int devNum)
     connect (connection, &newconnect::saveAllMasks, dev, &Device::requestMasks4Saving);
     connect (dev, &Device::allMasksToListTX, connection, &newconnect::saveProfileSlot4Masks);
     connect (this, &MainWindow::toJsonMap, dev, &Device::jsonMap);
-    connect (this, &MainWindow::getJsonMap, dev, &Device::returnDevParams);
     connect (dev, &Device::devParamsToJson, this, &MainWindow::jsonFileCreator);
     dev->show();
 }
@@ -326,7 +325,7 @@ void MainWindow::updValueArea(QString parameterName, int devNum, QString devName
             valueTable->setItem(row, 4, maskIdItem);
             valueTable->resizeColumnsToContents();
             valueTable->resizeRowsToContents();
-        }        
+        }
 }
 
 void MainWindow::setCurrentOpenTab(int index)
@@ -360,8 +359,7 @@ void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QStr
         QString formString(parameterName + "@" + devName + ": " + QString::number(endValue,'g',6));
         logFileCreator(formString, false);
     }
-    emit toJsonMap(devNum, devName, parameterName, endValue);
-    jsonDevCaller(devNum);//маркер для определения начала прихода данных от масок следующего устройства
+    emit toJsonMap(devNum, devName, parameterName, endValue, maskId);
     updValueArea(parameterName, devNum, devName, endValue, byteNum, maskId, isNewData);
 }
 
@@ -400,24 +398,14 @@ void MainWindow::logFileCreator(QString string, bool redFlag)
             logStream << stringWithTime << '\n';
             newLogFile.close();
         }
-        else showStatusMessage("Error write log");
+        else showStatusMessage(tr("Error write log"));
     }
     else if (!writeTextLog && !createNewFileNamePermission)
     {
             m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + returnTimestamp().toString("hh:mm:ss:zzz") + " "
-                                  + QString("Stop write log file") + "</span></p>");
+                                  + QString(tr("Stop write log file")) + "</span></p>");
             newLogFile.close();
             createNewFileNamePermission = true;            
-    }
-}
-
-void MainWindow::jsonDevCaller(int _devNum)
-{
-    static int currentDev = _devNum;    
-    if (currentDev != _devNum)//если пошли данные со следующего устройства, отправляем сигнал устройству с предыдущим номером на отправку данных в json
-    {//FIX ME: Если устройство только одно, json не будет писаться
-        emit getJsonMap(_devNum);
-        currentDev = _devNum;
     }
 }
 
@@ -442,7 +430,7 @@ void MainWindow::jsonFileCreator(QVariantMap jsonMap)
             {
                 newJsonFile.open(QIODevice::WriteOnly|QIODevice::Text);
                 m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + returnTimestamp().toString("hh:mm:ss:zzz") + " "
-                                          + QString("Start write json file ") + newJsonFile.fileName() + "</span></p>");
+                                          + QString(tr("Start write json file ")) + newJsonFile.fileName() + "</span></p>");
             }
             else newJsonFile.open(QIODevice::Append|QIODevice::Text);
         }
@@ -454,12 +442,12 @@ void MainWindow::jsonFileCreator(QVariantMap jsonMap)
             newLineStream << '\n';
             newJsonFile.close();
         }
-        else showStatusMessage("Error write json");
+        else showStatusMessage(tr("Error write json"));
     }
     else if (!writeJsonLog && !createNewJsonFileNamePermission)
     {
             m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + returnTimestamp().toString("hh:mm:ss:zzz") + " "
-                                  + QString("Stop write json file") + "</span></p>");
+                                  + QString(tr("Stop write json file")) + "</span></p>");
             newJsonFile.close();
             createNewJsonFileNamePermission = true;
     }
@@ -493,7 +481,7 @@ void MainWindow::setLogFlag(bool _logFlag)
 
 void MainWindow::devStatusMsg(QString _devName, QString status)
 {
-    logFileCreator("Device " + _devName + " is " + status, true);
+    logFileCreator(tr("Device %1 is %2").arg(_devName).arg(status), true);
 }
 
 void MainWindow::resizeEvent(QResizeEvent*)

@@ -25,6 +25,20 @@
     </message>
 </context>
 <context>
+    <name>Device</name>
+    <message>
+        <location filename="device.cpp" line="222"/>
+        <location filename="device.cpp" line="230"/>
+        <source>offline</source>
+        <translation>не в сети</translation>
+    </message>
+    <message>
+        <location filename="device.cpp" line="234"/>
+        <source>online</source>
+        <translation>в сети</translation>
+    </message>
+</context>
+<context>
     <name>MainWindow</name>
     <message>
         <location filename="mainwindow.ui" line="20"/>
@@ -163,6 +177,36 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Спасибо:&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a href=&quot;https://github.com/gmoximko&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;Максим Бакиров&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Алексей Борзенков&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="401"/>
+        <source>Error write log</source>
+        <translation>Ошибка записи лога</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="406"/>
+        <source>Stop write log file</source>
+        <translation>Стоп записи лог файла</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="433"/>
+        <source>Start write json file </source>
+        <translation>Старт записи JSON файла </translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="445"/>
+        <source>Error write json</source>
+        <translation>Ошибка записи JSON</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="450"/>
+        <source>Stop write json file</source>
+        <translation>Стоп записи JSON файла</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="484"/>
+        <source>Device %1 is %2</source>
+        <translation>Устройство %1 %2</translation>
     </message>
 </context>
 <context>
@@ -508,48 +552,74 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="newconnect.ui" line="62"/>
+        <location filename="newconnect.cpp" line="231"/>
         <source>Connect</source>
         <translation>Соединить</translation>
     </message>
     <message>
-        <location filename="newconnect.cpp" line="82"/>
+        <location filename="newconnect.cpp" line="80"/>
         <source>Bufferisation...</source>
         <translation>Буферизация...</translation>
     </message>
     <message>
-        <location filename="newconnect.cpp" line="96"/>
+        <location filename="newconnect.cpp" line="94"/>
         <source>Read file %1</source>
         <translation>Чтение файла %1</translation>
     </message>
     <message>
-        <location filename="newconnect.cpp" line="111"/>
+        <location filename="newconnect.cpp" line="108"/>
         <source>Connected to %1 : %2, %3, %4, %5, %6, %7</source>
         <translation>Соединено с %1 : %2, %3, %4, %5, %6, %7</translation>
     </message>
     <message>
-        <location filename="newconnect.cpp" line="115"/>
+        <location filename="newconnect.cpp" line="112"/>
         <source>Error</source>
         <translation>Ошибка</translation>
     </message>
     <message>
-        <location filename="newconnect.cpp" line="116"/>
+        <location filename="newconnect.cpp" line="113"/>
         <source>Open error</source>
         <translation>Ошибка открытия</translation>
     </message>
     <message>
-        <location filename="newconnect.cpp" line="131"/>
+        <location filename="newconnect.cpp" line="128"/>
         <source>End of file</source>
         <translation>Конец файла</translation>
     </message>
     <message>
-        <location filename="newconnect.cpp" line="142"/>
+        <location filename="newconnect.cpp" line="139"/>
         <source>Disconnected</source>
         <translation>Соединение закрыто</translation>
     </message>
     <message>
-        <location filename="newconnect.cpp" line="215"/>
+        <location filename="newconnect.cpp" line="187"/>
+        <source>Start write log file </source>
+        <translation>Начата запись лог файла </translation>
+    </message>
+    <message>
+        <location filename="newconnect.cpp" line="197"/>
+        <source>Error write bin</source>
+        <translation>Ошибка записи bin файла</translation>
+    </message>
+    <message>
+        <location filename="newconnect.cpp" line="202"/>
+        <source>Stop write bin file</source>
+        <translation>Стоп записи bin файла</translation>
+    </message>
+    <message>
+        <location filename="newconnect.cpp" line="212"/>
         <source>Critical Error</source>
         <translation>Критическая ошибка</translation>
+    </message>
+    <message>
+        <location filename="newconnect.cpp" line="232"/>
+        <source>Connection closed</source>
+        <translation>Соединение закрыто</translation>
+    </message>
+    <message>
+        <location filename="newconnect.cpp" line="240"/>
+        <source>Disconnect</source>
+        <translation>Разъединить</translation>
     </message>
 </context>
 </TS>

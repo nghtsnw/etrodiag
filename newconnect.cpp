@@ -31,7 +31,6 @@ newconnect::newconnect(QWidget *parent) :
     #ifdef Q_OS_ANDROID
         appHomeDir = QStandardPaths::standardLocations(QStandardPaths::DataLocation)[1] + QDir::separator();
     #endif
-    qDebug() << appHomeDir;
     connect(m_serial, &QSerialPort::errorOccurred, this, &newconnect::handleError);
     connect(m_serial, &QSerialPort::readyRead, this, &newconnect::readData);
     connect(m_console, &Console::getData, this, &newconnect::writeData);
@@ -76,7 +75,6 @@ void newconnect::openSerialPort()
         pos = 0;//задаём позицию для чтения FileSplitted в readFromFile()
         fileSplitted.clear();
         int freq = 1000/((p_local.baudRate/8)/bytesPerOneShot);
-        qDebug() << freq;
         QFile file(p_local.pathToBinFile);
         file.open(QIODevice::ReadOnly);
         showStatusMessage(tr("Bufferisation..."));
@@ -98,19 +96,18 @@ void newconnect::openSerialPort()
     }
     else
     {
-    qDebug() << "Open serial port " << p.name;
-    m_serial->setPortName(p.name);
-    m_serial->setBaudRate(p.baudRate);
-    m_serial->setDataBits(p.dataBits);
-    m_serial->setParity(p.parity);
-    m_serial->setStopBits(p.stopBits);
-    m_serial->setFlowControl(p.flowControl);
-    if (m_serial->open(QIODevice::ReadWrite)) {
-        readProfile();
-        m_console->setEnabled(true);          
-        showStatusMessage(tr("Connected to %1 : %2, %3, %4, %5, %6, %7")
-                          .arg(p.name).arg(p.stringBaudRate).arg(p.stringDataBits)
-                          .arg(p.stringParity).arg(p.stringStopBits).arg(p.stringFlowControl).arg(p.profilePath));
+        m_serial->setPortName(p.name);
+        m_serial->setBaudRate(p.baudRate);
+        m_serial->setDataBits(p.dataBits);
+        m_serial->setParity(p.parity);
+        m_serial->setStopBits(p.stopBits);
+        m_serial->setFlowControl(p.flowControl);
+        if (m_serial->open(QIODevice::ReadWrite)) {
+            readProfile();
+            m_console->setEnabled(true);
+            showStatusMessage(tr("Connected to %1 : %2, %3, %4, %5, %6, %7")
+                              .arg(p.name).arg(p.stringBaudRate).arg(p.stringDataBits)
+                              .arg(p.stringParity).arg(p.stringStopBits).arg(p.stringFlowControl).arg(p.profilePath));
     } else {
                 QMessageBox::critical(this, tr("Error"), m_serial->errorString());
                 showStatusMessage(tr("Open error"));
@@ -187,7 +184,7 @@ void newconnect::readData()
             {
                 newBinFile.open(QIODevice::WriteOnly);
                 emit directly2logArea("<p><span style=color:#ff0000>" + returnTimestamp().toString("hh:mm:ss:zzz") + " "
-                                          + QString("Start write log file ") + newBinFile.fileName() + "</span></p>");
+                                          + QString(tr("Start write log file ")) + newBinFile.fileName() + "</span></p>");
             }
             else newBinFile.open(QIODevice::Append);
         }
@@ -197,12 +194,12 @@ void newconnect::readData()
             binStream.writeRawData(data.constData(), data.size());
             newBinFile.close();
         }
-        else showStatusMessage("Error write bin");
+        else showStatusMessage(tr("Error write bin"));
     }
     else if (!writeBinLog && !createNewFileNamePermission)
     {
             emit directly2logArea("<p><span style=color:#ff0000>" + returnTimestamp().toString("hh:mm:ss:zzz") + " "
-                                  + QString("Stop write bin file") + "</span></p>");
+                                  + QString(tr("Stop write bin file")) + "</span></p>");
             newBinFile.close();
             createNewFileNamePermission = true;
     }
@@ -231,8 +228,8 @@ void newconnect::on_connectButton_clicked()
             p_local.readFromFileFlag = false;
             if (!(m_serial->isOpen()) && !p_local.readFromFileFlag)
             {
-                ui->connectButton->setText("Connect");
-                showStatusMessage("Connection closed");
+                ui->connectButton->setText(tr("Connect"));
+                showStatusMessage(tr("Connection closed"));
             }
         }
     else if (!(m_serial->isOpen()) || !p_local.readFromFileFlag)
@@ -240,7 +237,7 @@ void newconnect::on_connectButton_clicked()
         openSerialPort();
         if (m_serial->isOpen() || p_local.readFromFileFlag)
         {
-            ui->connectButton->setText("Disconnect");
+            ui->connectButton->setText(tr("Disconnect"));
         }
     }
 }
@@ -262,7 +259,6 @@ void newconnect::prepareToSaveProfile()
         while (maskVectorsListIt.hasNext())
         maskVectorsListIt.next()->~txtmaskobj();
         permission2SaveMasks = true;
-        qDebug() << "prepare to save profile";
         emit saveAllMasks();
     }
 }
@@ -272,7 +268,6 @@ void newconnect::saveProfileSlot4Masks(int devNum, QString devName, int byteNum,
                //перед сохранением все маски сигналом отправляются сюда, что-бы образовать перечень масок
                //проверяется что этой маски тут ещё нет, после этого создаётся список с текстовым перечнем всех параметров
                //создаются только описания масок, само сохранение будет в другой функции
-                qDebug() << "create obj to save mask " << paramName;
                if (permission2SaveMasks)
                {
                 maskVectorsList = this->findChildren<txtmaskobj*>();
@@ -303,7 +298,6 @@ void newconnect::saveProfileSlot4Masks(int devNum, QString devName, int byteNum,
                    maskList.append(_drawGraphFlag ?"true":"false");//12
                    maskList.append(_drawGraphColor);//13
                    txtmaskobj *savingMask = new txtmaskobj(maskList);
-                   qDebug() << "create obj to save mask " << maskList[6];
                    savingMask->setParent(this);
                    maskList.clear();
                }
@@ -314,28 +308,26 @@ void newconnect::saveProfile()
 {
     if (permission2SaveMasks)
     {
-    maskVectorsList = this->findChildren<txtmaskobj*>();
-    QListIterator<txtmaskobj*> maskVectorsListIt(maskVectorsList);
-    maskVectorsListIt.toFront();
-    const SettingsDialog::Settings p = m_settings->settings();
-    QFile profile(p.profilePath);
-    QFileInfo info(profile);
-    profile.open(QIODevice::WriteOnly|QIODevice::Text);
-    QTextStream txtStream(&profile);
-    //txtStream.setCodec("UTF-8");
-    txtStream << info.fileName() << "\n";
-    while (maskVectorsListIt.hasNext())
-    {
-        qDebug() << "saving in progress...";
-        QListIterator<QString> lstIt(maskVectorsListIt.peekNext()->lst);
-        while (lstIt.hasNext())
-        txtStream << lstIt.next() << "\t";
-        txtStream << "\n";
-        maskVectorsListIt.next();
+        maskVectorsList = this->findChildren<txtmaskobj*>();
+        QListIterator<txtmaskobj*> maskVectorsListIt(maskVectorsList);
+        maskVectorsListIt.toFront();
+        const SettingsDialog::Settings p = m_settings->settings();
+        QFile profile(p.profilePath);
+        QFileInfo info(profile);
+        profile.open(QIODevice::WriteOnly|QIODevice::Text);
+        QTextStream txtStream(&profile);
+        txtStream << info.fileName() << "\n";
+        while (maskVectorsListIt.hasNext())
+        {
+            QListIterator<QString> lstIt(maskVectorsListIt.peekNext()->lst);
+            while (lstIt.hasNext())
+            txtStream << lstIt.next() << "\t";
+            txtStream << "\n";
+            maskVectorsListIt.next();
+        }
+        permission2SaveMasks = false;
+        emit sendStatusStr("Profile " + info.fileName() + " saved");
     }
-    permission2SaveMasks = false;
-    emit sendStatusStr("Profile " + info.fileName() + " saved");
-}
 }
 
 void newconnect::readProfile()
@@ -345,7 +337,6 @@ void newconnect::readProfile()
     QFile profile(p.profilePath);
     profile.open(QIODevice::ReadOnly|QIODevice::Text);
     QTextStream txtStream(&profile);
-    //txtStream.setCodec("UTF-8");
     while (!txtStream.atEnd())
     {
         QString str = txtStream.readLine();

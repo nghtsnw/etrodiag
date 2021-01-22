@@ -27,18 +27,18 @@ void Device::updateData(int id, QVector<int> devdata) //если устройс�
         if (!byteObjReady)
             byteObjectsInit(currState);
         emit byteObjUpdSig(devNum, devdata);
-        if (devStatus == "offline")
+        if (devStatus == tr("offline"))
         {
-            devStatus = "online";
+            devStatus = tr("online");
             emit devStatusMessage(devName, devStatus);
         }
         if (devStatus == "init")
         {
             setDeviceName(id, QString("%1").arg(devdata.at(2),0,16).toUpper());
-            devStatus = "offline";
+            devStatus = tr("offline");
         }
         changeButtonColor(devStatus);
-        if (devStatus == "online")
+        if (devStatus == tr("online"))
         devOnlineWatchdog(5000);
     }
 }
@@ -65,6 +65,8 @@ void Device::byteObjectsInit(QVector<int> &data) //инициализируем 
         connect (bytedef, &byteDefinition::param2FrontEndTX, this, &Device::param2FrontEndRX);
         connect (this, &Device::loadMaskTX, bytedef, &byteDefinition::loadMaskRX);
         connect (this, &Device::byteObjUpdSig, bytedef, &byteDefinition::updateSlot);
+        connect (this, &Device::requestMaskCounting, bytedef, &byteDefinition::countMasks);
+        connect (bytedef, &byteDefinition::returnMaskCountForThisByte, this, &Device::returnMaskCounting);
         n--;
     }
     byteObjReady = true;
@@ -96,6 +98,30 @@ void Device::requestMasks4Saving()
     for (int i = 0; i <= currState.size(); i++) {
         requestMaskDataRX(devNum, i, 999);
     }
+}
+
+void Device::returnMaskCounting(int _devNum, int _byteNum, int _count)
+{//возврат от каждого байта количества масок
+    if (devNum == _devNum)
+    {
+        maskCountMap.insert(_byteNum, _count);
+    }
+}
+
+int Device::calcMasksInDev()
+{//считаем общее количество масок
+    int result = 0;
+    QList<int> values = maskCountMap.values();
+    QListIterator<int> valuesIt(values);
+    while (valuesIt.hasNext())
+        result += valuesIt.next();
+    return result;
+}
+
+int Device::countMasks()
+{
+    emit requestMaskCounting();
+    return calcMasksInDev();
 }
 
 void Device::loadMaskRX(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor)
@@ -154,25 +180,22 @@ void Device::param2FrontEndRX(int devNum, int byteNum, QString byteName, uint32_
     emit param2FrontEndTX(devNum, devName, byteNum, byteName, wordData, id, parameterName, binRawValue, endValue, viewInLogFlag, isNewData, _drawGraphFlag, _drawGraphColor);
 }
 
-void Device::jsonMap(int _devNum, QString _devName, QString _parameterName, double _endValue)
+void Device::jsonMap(int _devNum, QString _devName, QString _parameterName, double _endValue, int maskId)
 {
     if (_devNum == devNum)
     {
         devParams->insert("DeviceName", _devName);
         devParams->insert("NumberBlock", QString::number(_devNum));
         devParams->insert(_parameterName, QString::number(_endValue));
+        devParamsCount++;
+        if (devParamsCount == countMasks())
+        {
+            devParams->insert("DateTime", returnTimestamp().toString("yy-MM-ddThh:mm:ss.zzz"));
+            emit devParamsToJson(*devParams);
+            devParams->clear();//очищаем, так как может измениться набор параметров (например если поменяем имя параметра, чтоб не осталось старого поля в мапе)
+            devParamsCount = 0;
+        }
     }
-}
-
-void Device::returnDevParams(int _devNum)
-{
-    if (devNum == _devNum && skippedFirstJsonSending)//пропускаем первую отправку данных в джысон считая что данные в этот момент могут быть не полными
-    {
-        devParams->insert("DateTime", returnTimestamp().toString("yy-MM-ddThh:mm:ss.zzz"));
-        emit devParamsToJson(*devParams);
-        devParams->clear();//очищаем, так как может измениться набор параметров (например если поменяем имя параметра, чтоб не осталось старого поля в мапе)
-    }
-    else if (devNum == _devNum && !skippedFirstJsonSending) skippedFirstJsonSending = true;
 }
 
 QDateTime Device::returnTimestamp()
@@ -196,7 +219,7 @@ void Device::devOnlineWatchdog(int msec)
 
 void Device::setOfflineStatus()
 {
-    devStatus = "offline";
+    devStatus = tr("offline");
     emit devStatusMessage(devName, devStatus);
     timer->stop();
     changeButtonColor(devStatus);
@@ -204,11 +227,11 @@ void Device::setOfflineStatus()
 
 void Device::changeButtonColor(QString _status)
 {
-    if (_status == "offline")
+    if (_status == tr("offline"))
     {
         this->setStyleSheet("QPushButton{background:#808080;}");
     }
-    if (_status == "online")
+    if (_status == tr("online"))
     {
         this->setStyleSheet("QPushButton{background:#00FF00;}");
     }

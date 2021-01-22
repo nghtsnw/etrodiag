@@ -33,6 +33,7 @@ signals:
     void param2FrontEndTX(int devNum, int byteNum, QString byteName, uint32_t wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor);
     void loadMaskTX(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor);
     void returnByteName(int devNum, int byteNum, QString byteName);
+    void returnMaskCountForThisByte(int devNum, int th_byteNum, int count);
 
 public slots:
     void setWordBitRX(int _devNum, int _byteNum, int _argBit);
@@ -46,6 +47,7 @@ public slots:
     void param2FrontEndRX(int devNum, int byteNum, uint32_t wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor);
     void loadMaskRX(int devNum, QString devName, int byteNum, QString _byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor);
     void updateSlot(int _devNum, QVector<int> _data);
+    void countMasks();
 
 private:
     int tmpMaskId = 0;

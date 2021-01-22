@@ -99,7 +99,6 @@ public:
     QString logFileName;
     QString jsonFileName;
     void logFileCreator(QString string, bool redFlag);
-    void jsonDevCaller(int _devNum);
     void jsonFileCreator(QVariantMap jsonMap);
     void cleanDevList();
     void updValueArea(QString parameterName, int devNum, QString devName, double endValue, int byteNum, int maskId, bool);
@@ -120,8 +119,9 @@ signals:
     void dvsfAfterCloseClear();
     void prepareToSaveProfile();
     void saveProfile();
-    void toJsonMap(int devNum, QString devName, QString parameterName, double endValue);
+    void toJsonMap(int devNum, QString devName, QString parameterName, double endValue, int maskId);
     void getJsonMap(int devNum);
+    void setDevParamsCount(int devNum, int paramsCount);
 
 public slots:
 
@@ -176,14 +176,11 @@ protected:
     bool event(QEvent *event) override;
     bool eventFilter(QObject *obj, QEvent *ev) override;
 
-
-
 public:
     devSettingsForm dvsf;
     ByteSettingsForm btsf;
     maskSettingsDialog masksd;
     liveGraph graphiq;
-
 };
 
 #endif // MAINWINDOW_H
