@@ -34,20 +34,26 @@ public:
     QString appHomeDir;
     QDateTime returnTimestamp();
     bool permission2SaveMasks = false;
+    QString currentProfileName;
 
     ~newconnect();
 
 signals:
 
 void cleanDevListSig();
+void cleanGraph();
 void sendStatusStr(QString);
 void transmitData(QVector<int> snapshot);
 void saveAllMasks();
 void loadMask(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool _drawGraphFlag, QString _drawGraphColor);
 void writeTextLog(bool);
 void writeJsonLog(bool);
+void writeBinLog(bool);
 void directly2logArea(QString);
 void sendRawData(QByteArray);
+void startLog();
+void stopLog();
+void profileName2log(QString);
 
 public slots:
 
@@ -55,7 +61,7 @@ void saveProfileSlot4Masks(int devNum, QString devName, int byteNum, QString byt
 void restoreWindowAfterApplySettings();
 void prepareToSaveProfile();
 void saveProfile();
-void writeBinLogSlot(bool);
+
 
 private slots:
     void openSerialPort();
@@ -70,7 +76,7 @@ private slots:
 private:
     Ui::newconnect *ui;
     QString message;
-    bool writeBinLog = false;
+    //bool writeBinLog = false;
     bool createNewFileNamePermission = true;
     QString binFileName;
     SettingsDialog::Settings p_local;
@@ -80,6 +86,7 @@ private:
     QList<QByteArray> fileSplitted;
     const int bytesPerOneShot = 20;
     int pos = 0;
+    QString getProfileNameFromInfo(QFileInfo &info);
 
 protected:
     virtual void resizeEvent(QResizeEvent *event);

@@ -63,6 +63,7 @@
 #include <livegraph.h>
 #include <QTableWidget>
 //#include <QGestureEvent>
+#include "logger.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -96,10 +97,7 @@ public:
     bool logFlag = false;
     bool createNewFileNamePermission = true;
     bool createNewJsonFileNamePermission = true;
-    QString logFileName;
-    QString jsonFileName;
-    void logFileCreator(QString string, bool redFlag);
-    void jsonFileCreator(QVariantMap jsonMap);
+    void textLogWindow(QString string, bool redFlag);
     void cleanDevList();
     void updValueArea(QString parameterName, int devNum, QString devName, double endValue, int byteNum, int maskId, bool);
 //    void grabGestures(const QVector<Qt::GestureType> &gestures);
@@ -122,6 +120,7 @@ signals:
     void toJsonMap(int devNum, QString devName, QString parameterName, double endValue, int maskId);
     void getJsonMap(int devNum);
     void setDevParamsCount(int devNum, int paramsCount);
+    void toTxtLogger(QString);
 
 public slots:
 
@@ -132,9 +131,8 @@ public slots:
     void frontendDataSort(int devNum, QString devName, int, QString, int, int, QString parameterName, int, double endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor);
     void setLogFlag(bool _logFlag);
     void devStatusMsg(QString _devName, QString status);
-    void setWriteTextLog(bool arg);
-    void setWriteJsonLog(bool arg);
     void logAreaAppendHtml(QString);
+    void resetLogFileNames();
 
 private slots:
 
@@ -181,6 +179,7 @@ public:
     ByteSettingsForm btsf;
     maskSettingsDialog masksd;
     liveGraph graphiq;
+    Logger logger;
 };
 
 #endif // MAINWINDOW_H

@@ -15,6 +15,7 @@ SOURCES += \
     devsettingsform.cpp \
     getstream.cpp \
     livegraph.cpp \
+    logger.cpp \
     main.cpp \
     mainwindow.cpp \
     masksettingsdialog.cpp \
@@ -35,6 +36,7 @@ HEADERS += \
     devsettingsform.h \
     getstream.h \
     livegraph.h \
+    logger.h \
     mainwindow.h \
     masksettingsdialog.h \
     newconnect.h \

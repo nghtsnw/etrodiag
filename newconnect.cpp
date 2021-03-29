@@ -40,7 +40,7 @@ newconnect::newconnect(QWidget *parent) :
     connect(datapool, &dataprofiler::readNext, gstream, &getStream::readIntByte);
     connect(m_settings, &SettingsDialog::restoreConsoleAndButtons, this, &newconnect::restoreWindowAfterApplySettings);
     connect (m_settings, &SettingsDialog::writeTextLog, this, &newconnect::writeTextLog);
-    connect (m_settings, &SettingsDialog::writeBinLog, this, &newconnect::writeBinLogSlot);
+    connect (m_settings, &SettingsDialog::writeBinLog, this, &newconnect::writeBinLog);
     connect (m_settings, &SettingsDialog::writeJsonLog, this, &newconnect::writeJsonLog);
     connect (timer, &QTimer::timeout, this, &newconnect::readFromFile);//читаем из файла по таймеру
     connect (this, &newconnect::sendRawData, gstream, &getStream::getRawData);
@@ -163,46 +163,6 @@ void newconnect::readData()
         data = m_serial->readAll();//если нет то читаем всё что есть с порта
     }
     emit sendRawData(data);
-
-    //дальше при наличии флага пишем сырые данные в лог-бинарник
-    QFile newBinFile;
-    if (writeBinLog)
-    {
-        QDir dir(appHomeDir + "Logs");
-        if (!dir.exists())
-        QDir().mkdir(appHomeDir + "Logs");
-
-        if (!newBinFile.isOpen())
-        {
-            if (createNewFileNamePermission)
-            {
-                binFileName = (dir.path() + returnTimestamp().toString("\\dd.MM.yy_hh-mm-ss") + ".bin");
-                createNewFileNamePermission = false;
-            }
-            newBinFile.setFileName(binFileName);
-            if (!newBinFile.exists())
-            {
-                newBinFile.open(QIODevice::WriteOnly);
-                emit directly2logArea("<p><span style=color:#ff0000>" + returnTimestamp().toString("hh:mm:ss:zzz") + " "
-                                          + QString(tr("Start write log file ")) + newBinFile.fileName() + "</span></p>");
-            }
-            else newBinFile.open(QIODevice::Append);
-        }
-        if (newBinFile.isOpen())
-        {
-            QDataStream binStream(&newBinFile);
-            binStream.writeRawData(data.constData(), data.size());
-            newBinFile.close();
-        }
-        else showStatusMessage(tr("Error write bin"));
-    }
-    else if (!writeBinLog && !createNewFileNamePermission)
-    {
-            emit directly2logArea("<p><span style=color:#ff0000>" + returnTimestamp().toString("hh:mm:ss:zzz") + " "
-                                  + QString(tr("Stop write bin file")) + "</span></p>");
-            newBinFile.close();
-            createNewFileNamePermission = true;
-    }
     data.clear();
 }
 
@@ -231,12 +191,16 @@ void newconnect::on_connectButton_clicked()
                 ui->connectButton->setText(tr("Connect"));
                 showStatusMessage(tr("Connection closed"));
             }
+            emit stopLog();
         }
     else if (!(m_serial->isOpen()) || !p_local.readFromFileFlag)
     {
         openSerialPort();
         if (m_serial->isOpen() || p_local.readFromFileFlag)
-        {
+        {            
+            emit startLog();
+            emit cleanGraph();
+            createNewFileNamePermission = true;
             ui->connectButton->setText(tr("Disconnect"));
         }
     }
@@ -313,7 +277,7 @@ void newconnect::saveProfile()
         maskVectorsListIt.toFront();
         const SettingsDialog::Settings p = m_settings->settings();
         QFile profile(p.profilePath);
-        QFileInfo info(profile);
+        QFileInfo info(profile);        
         profile.open(QIODevice::WriteOnly|QIODevice::Text);
         QTextStream txtStream(&profile);
         txtStream << info.fileName() << "\n";
@@ -335,6 +299,9 @@ void newconnect::readProfile()
     emit cleanDevListSig();
     const SettingsDialog::Settings p = m_settings->settings();
     QFile profile(p.profilePath);
+    QFileInfo info(profile);
+    currentProfileName = getProfileNameFromInfo(info);
+    emit profileName2log(currentProfileName);
     profile.open(QIODevice::ReadOnly|QIODevice::Text);
     QTextStream txtStream(&profile);
     while (!txtStream.atEnd())
@@ -364,11 +331,6 @@ void newconnect::restoreWindowAfterApplySettings()
     ui->consoleFrame->show();
 }
 
-void newconnect::writeBinLogSlot(bool arg)
-{
-    writeBinLog = arg;
-}
-
 QDateTime newconnect::returnTimestamp()
 {
     quint64 timestamp = QDateTime::currentMSecsSinceEpoch();
@@ -376,3 +338,7 @@ QDateTime newconnect::returnTimestamp()
     return dt3;
 }
 
+QString newconnect::getProfileNameFromInfo(QFileInfo& info)
+{
+    return (info.fileName());
+}

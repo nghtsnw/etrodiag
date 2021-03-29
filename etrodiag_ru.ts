@@ -27,12 +27,16 @@
 <context>
     <name>Device</name>
     <message>
+        <location filename="device.cpp" line="30"/>
+        <location filename="device.cpp" line="38"/>
         <location filename="device.cpp" line="222"/>
         <location filename="device.cpp" line="230"/>
         <source>offline</source>
         <translation>не в сети</translation>
     </message>
     <message>
+        <location filename="device.cpp" line="32"/>
+        <location filename="device.cpp" line="41"/>
         <location filename="device.cpp" line="234"/>
         <source>online</source>
         <translation>в сети</translation>
@@ -179,32 +183,37 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Алексей Борзенков&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="401"/>
+        <location filename="mainwindow.cpp" line="392"/>
+        <source>Start write log file </source>
+        <translation type="unfinished">Начата запись лог файла </translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="402"/>
         <source>Error write log</source>
         <translation>Ошибка записи лога</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="406"/>
+        <location filename="mainwindow.cpp" line="407"/>
         <source>Stop write log file</source>
         <translation>Стоп записи лог файла</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="433"/>
+        <location filename="mainwindow.cpp" line="434"/>
         <source>Start write json file </source>
         <translation>Старт записи JSON файла </translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="445"/>
+        <location filename="mainwindow.cpp" line="446"/>
         <source>Error write json</source>
         <translation>Ошибка записи JSON</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="450"/>
+        <location filename="mainwindow.cpp" line="451"/>
         <source>Stop write json file</source>
         <translation>Стоп записи JSON файла</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="484"/>
+        <location filename="mainwindow.cpp" line="485"/>
         <source>Device %1 is %2</source>
         <translation>Устройство %1 %2</translation>
     </message>
@@ -332,106 +341,106 @@ p, li { white-space: pre-wrap; }
         <translation></translation>
     </message>
     <message>
-        <location filename="settingsdialog.cpp" line="62"/>
+        <location filename="settingsdialog.cpp" line="63"/>
         <source>Description: %1</source>
         <translation>Описание: %1</translation>
     </message>
     <message>
-        <location filename="settingsdialog.cpp" line="63"/>
+        <location filename="settingsdialog.cpp" line="64"/>
         <source>Manufacturer: %1</source>
         <translation>Производитель: %1</translation>
     </message>
     <message>
-        <location filename="settingsdialog.cpp" line="64"/>
+        <location filename="settingsdialog.cpp" line="65"/>
         <source>Serial number: %1</source>
         <translation>Серийный номер: %1</translation>
     </message>
     <message>
-        <location filename="settingsdialog.cpp" line="65"/>
+        <location filename="settingsdialog.cpp" line="66"/>
         <source>Location: %1</source>
         <translation>Местоположение: %1</translation>
     </message>
     <message>
-        <location filename="settingsdialog.cpp" line="66"/>
+        <location filename="settingsdialog.cpp" line="67"/>
         <source>Vendor Identifier: %1</source>
         <translation>ID производителя: %1</translation>
     </message>
     <message>
-        <location filename="settingsdialog.cpp" line="67"/>
+        <location filename="settingsdialog.cpp" line="68"/>
         <source>Product Identifier: %1</source>
         <translation>ID продукта: %1</translation>
     </message>
     <message>
-        <location filename="settingsdialog.cpp" line="99"/>
+        <location filename="settingsdialog.cpp" line="106"/>
         <source>Open binary data file</source>
         <translation>Открыть файл с сырыми данными</translation>
     </message>
     <message>
-        <location filename="settingsdialog.cpp" line="99"/>
+        <location filename="settingsdialog.cpp" line="106"/>
         <source>Binary data (*.bin)</source>
         <translation>Сырые данные (*.bin)</translation>
     </message>
     <message>
-        <location filename="settingsdialog.cpp" line="93"/>
-        <location filename="settingsdialog.cpp" line="116"/>
-        <location filename="settingsdialog.cpp" line="164"/>
+        <location filename="settingsdialog.cpp" line="100"/>
+        <location filename="settingsdialog.cpp" line="123"/>
+        <location filename="settingsdialog.cpp" line="171"/>
         <source>Custom</source>
         <translation>Ручной ввод</translation>
     </message>
     <message>
-        <location filename="settingsdialog.cpp" line="124"/>
-        <location filename="settingsdialog.cpp" line="136"/>
+        <location filename="settingsdialog.cpp" line="131"/>
+        <location filename="settingsdialog.cpp" line="143"/>
         <source>None</source>
         <translation>Нет</translation>
     </message>
     <message>
-        <location filename="settingsdialog.cpp" line="125"/>
+        <location filename="settingsdialog.cpp" line="132"/>
         <source>Even</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="settingsdialog.cpp" line="126"/>
+        <location filename="settingsdialog.cpp" line="133"/>
         <source>Odd</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="settingsdialog.cpp" line="127"/>
+        <location filename="settingsdialog.cpp" line="134"/>
         <source>Mark</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="settingsdialog.cpp" line="128"/>
+        <location filename="settingsdialog.cpp" line="135"/>
         <source>Space</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="settingsdialog.cpp" line="132"/>
+        <location filename="settingsdialog.cpp" line="139"/>
         <source>1.5</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="settingsdialog.cpp" line="137"/>
+        <location filename="settingsdialog.cpp" line="144"/>
         <source>RTS/CTS</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="settingsdialog.cpp" line="138"/>
+        <location filename="settingsdialog.cpp" line="145"/>
         <source>XON/XOFF</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="settingsdialog.cpp" line="96"/>
-        <location filename="settingsdialog.cpp" line="165"/>
+        <location filename="settingsdialog.cpp" line="103"/>
+        <location filename="settingsdialog.cpp" line="172"/>
         <source>Read from file</source>
         <translation>Читать из файла</translation>
     </message>
     <message>
-        <location filename="settingsdialog.cpp" line="237"/>
+        <location filename="settingsdialog.cpp" line="244"/>
         <source>newprofile</source>
         <translation>Новый профиль</translation>
     </message>
     <message>
-        <location filename="settingsdialog.cpp" line="240"/>
+        <location filename="settingsdialog.cpp" line="247"/>
         <source>Enter profile name</source>
         <translation>Введите имя профиля</translation>
     </message>
@@ -617,7 +626,7 @@ p, li { white-space: pre-wrap; }
         <translation>Соединение закрыто</translation>
     </message>
     <message>
-        <location filename="newconnect.cpp" line="240"/>
+        <location filename="newconnect.cpp" line="241"/>
         <source>Disconnect</source>
         <translation>Разъединить</translation>
     </message>

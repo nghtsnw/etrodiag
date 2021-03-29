@@ -126,6 +126,7 @@ private:
     void fillPortsInfo();
     void updateSettings();
     void fillProfileList();
+    void portBoxEvent(int currentText);
 
 private:
     Ui::SettingsDialog *m_ui = nullptr;

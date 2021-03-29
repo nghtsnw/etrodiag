@@ -176,7 +176,7 @@ void liveGraph::paintAnnotation()
     if (paintan.isActive())
     {
         QColor paintColor;
-        QFont font("Times", 10);
+        QFont font("Times", 9);
         paintan.setFont(font);
         annotationKeys = graphAnnotation.keys();
         rectXSizePix = maxStringSizePix(font, graphAnnotation.values());//[0] - длина строки, [1] - высота
@@ -257,4 +257,16 @@ double liveGraph::findYScale(const QVector<double>& values)
 void liveGraph::chngMinMaxVisible()
 {
     minMaxOnOff = !minMaxOnOff;
+}
+
+void liveGraph::cleanGraph()
+{
+    QList<newgraph*> graphList = this->findChildren<newgraph*>();
+    QListIterator<newgraph*> graphListIt(graphList);
+    graphAnnotation.clear();
+    graphAnnotationMinMax.clear();
+    while (graphListIt.hasNext())
+    {
+        graphListIt.next()->~newgraph();
+    }
 }

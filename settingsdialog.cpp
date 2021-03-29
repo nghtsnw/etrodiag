@@ -34,6 +34,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
             this, &SettingsDialog::checkCustomBaudRatePolicy);
     connect(m_ui->serialPortInfoListBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &SettingsDialog::checkCustomDevicePathPolicy);
+    connect(m_ui->serialPortInfoListBox, QOverload<int>::of(&QComboBox::activated), this, &SettingsDialog::portBoxEvent);
 
     fillPortsParameters();
     fillProfileList();
@@ -85,9 +86,15 @@ void SettingsDialog::checkCustomBaudRatePolicy(int idx)
     }
 }
 
+void SettingsDialog::portBoxEvent(int ev)
+{
+    if (m_ui->serialPortInfoListBox->currentText() == tr(("Read from file")))
+        checkCustomDevicePathPolicy(ev);
+}
+
 void SettingsDialog::checkCustomDevicePathPolicy(int idx)
 {
-    const bool isCustomPath = !m_ui->serialPortInfoListBox->itemData(idx).isValid();
+   const bool isCustomPath = !m_ui->serialPortInfoListBox->itemData(idx).isValid();
     m_ui->serialPortInfoListBox->setEditable(isCustomPath);
 
     if (isCustomPath && m_ui->serialPortInfoListBox->currentText() == tr("Custom"))
@@ -96,12 +103,12 @@ void SettingsDialog::checkCustomDevicePathPolicy(int idx)
     if (m_ui->serialPortInfoListBox->currentText() == tr("Read from file"))
         {
             m_ui->serialPortInfoListBox->clearEditText();
-            QString file = QFileDialog::getOpenFileName(this, tr("Open binary data file"), "Logs", tr("Binary data (*.bin)"));
+            QString file = QFileDialog::getOpenFileName(this, tr("Open binary data file"), appHomeDir+"Logs", tr("Binary data (*.bin)"));
             m_ui->serialPortInfoListBox->setCurrentText(file);
             if (!m_ui->serialPortInfoListBox->currentText().isEmpty())
             {
                 m_currentSettings.readFromFileFlag = true;
-                m_currentSettings.pathToBinFile = file;
+                m_currentSettings.pathToBinFile = file;                
             }
         }
         else m_currentSettings.readFromFileFlag = false;

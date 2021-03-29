@@ -14,9 +14,10 @@
 #include "bytebutton.h"
 #include <QGestureEvent>
 #include <QSwipeGesture>
-#include <QStandardPaths>
-#include <QJsonDocument>
+//#include <QStandardPaths>
+//#include <QJsonDocument>
 #include <QMap>
+//#include "logger.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), statuslbl (new QLabel), m_ui (new Ui::MainWindow)
@@ -28,19 +29,15 @@ MainWindow::MainWindow(QWidget *parent) :
 //    grabGesture(gesture);
 //  Надеюсь, что когда в qt починят qswipegesture, я раскомментирую это и удалю тот ужас что сейчас заменяет свайп.
     m_ui->setupUi(this);
-    #ifdef Q_OS_WIN32
-        appHomeDir = qApp->applicationDirPath() + QDir::separator();
-    #endif
-    #ifdef Q_OS_ANDROID
-        appHomeDir = QStandardPaths::standardLocations(QStandardPaths::DataLocation)[1] + QDir::separator();
-    #endif
     statusBar()->addWidget(statuslbl);
     statuslbl->setText("Etrodiag beta");
     addConnection();    
     connect (&btsf, &ByteSettingsForm::editMask, &masksd, &maskSettingsDialog::requestDataOnId);
     connect (this, &MainWindow::dvsfAfterCloseClear, &dvsf, &devSettingsForm::afterCloseClearing);
     connect (m_ui->valueArea, &QTabWidget::currentChanged, this, &MainWindow::setCurrentOpenTab);
-
+    connect (&logger, &Logger::showStatusMessage, this, &MainWindow::showStatusMessage);
+    connect (&logger, &Logger::toTextLog, this, &MainWindow::logAreaAppendHtml);
+    connect (this, &MainWindow::toTxtLogger, &logger, &Logger::incomingTxtData);
 
     m_ui->logArea->viewport()->installEventFilter(this);
 
@@ -67,18 +64,24 @@ void MainWindow::addConnection()
     connect (connection, &newconnect::sendStatusStr, this, &MainWindow::showStatusMessage);
     connect (connection, &newconnect::transmitData, this, &MainWindow::addDeviceToList);
     connect (connection, &newconnect::cleanDevListSig, this, &MainWindow::cleanDevList);
-    connect (connection, &newconnect::writeTextLog, this, &MainWindow::setWriteTextLog);
-    connect (connection, &newconnect::writeJsonLog, this, &MainWindow::setWriteJsonLog);
-    connect (connection, &newconnect::directly2logArea, this, &MainWindow::logAreaAppendHtml);
+    connect (connection, &newconnect::writeTextLog, &logger, &Logger::setTxt);
+    connect (connection, &newconnect::writeJsonLog, &logger, &Logger::setJson);
+    connect (connection, &newconnect::writeBinLog, &logger, &Logger::setBin);
+    connect (connection, &newconnect::cleanGraph, &graphiq, &liveGraph::cleanGraph);
+    connect (connection, &newconnect::cleanGraph, this, &MainWindow::resetLogFileNames);
     connect (this, &MainWindow::prepareToSaveProfile, connection, &newconnect::prepareToSaveProfile);
     connect (this, &MainWindow::saveProfile, connection, &newconnect::saveProfile);
+    connect (connection, &newconnect::sendRawData, &logger, &Logger::incomingBinData);
+    connect (connection, &newconnect::startLog, &logger, &Logger::startLog);
+    connect (connection, &newconnect::stopLog, &logger, &Logger::stopLog);
+    connect (connection, &newconnect::profileName2log, &logger, &Logger::setProfileName);
     connection->show();
 }
 
 void MainWindow::showStatusMessage(QString message)
 {
     statuslbl->setText(message);
-    logFileCreator(message, true);
+    textLogWindow(message, true);
 }
 
 void MainWindow::addDeviceToList(QVector<int> ddata)
@@ -148,7 +151,7 @@ void MainWindow::createDevice(int devNum)
     connect (connection, &newconnect::saveAllMasks, dev, &Device::requestMasks4Saving);
     connect (dev, &Device::allMasksToListTX, connection, &newconnect::saveProfileSlot4Masks);
     connect (this, &MainWindow::toJsonMap, dev, &Device::jsonMap);
-    connect (dev, &Device::devParamsToJson, this, &MainWindow::jsonFileCreator);
+    connect (dev, &Device::devParamsToJson, &logger, &Logger::incomingJsonData);
     dev->show();
 }
 
@@ -357,100 +360,18 @@ void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QStr
     if (viewInLogFlag && isNewData)
     {        
         QString formString(parameterName + "@" + devName + ": " + QString::number(endValue,'g',6));
-        logFileCreator(formString, false);
+        textLogWindow(formString, false);
     }
     emit toJsonMap(devNum, devName, parameterName, endValue, maskId);
     updValueArea(parameterName, devNum, devName, endValue, byteNum, maskId, isNewData);
 }
 
-void MainWindow::logFileCreator(QString string, bool redFlag)
+void MainWindow::textLogWindow(QString string, bool redFlag)
 {
     QString stringWithTime = (returnTimestamp().toString("hh:mm:ss:zzz") + " " + string);
+    emit toTxtLogger(stringWithTime);
     if (!redFlag) m_ui->logArea->appendHtml("<p><span style=color:#000000>" + stringWithTime + "</span></p>");
     else m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + stringWithTime + "</span></p>");
-
-    QFile newLogFile;
-    if (writeTextLog)
-    {
-        QDir dir(appHomeDir + "Logs");
-        if (!dir.exists())
-        QDir().mkdir(appHomeDir + "Logs");
-
-        if (!newLogFile.isOpen())
-        {
-            if (createNewFileNamePermission)
-            {
-                logFileName = (dir.path() + returnTimestamp().toString("\\dd.MM.yy_hh-mm-ss") + ".log");
-                createNewFileNamePermission = false;
-            }
-            newLogFile.setFileName(logFileName);
-            if (!newLogFile.exists())
-            {
-                newLogFile.open(QIODevice::WriteOnly|QIODevice::Text);                
-                m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + returnTimestamp().toString("hh:mm:ss:zzz") + " "
-                                          + QString("Start write log file ") + newLogFile.fileName() + "</span></p>");
-            }
-            else newLogFile.open(QIODevice::Append|QIODevice::Text);
-        }
-        if (newLogFile.isOpen())
-        {
-            QTextStream logStream(&newLogFile);
-            logStream << stringWithTime << '\n';
-            newLogFile.close();
-        }
-        else showStatusMessage(tr("Error write log"));
-    }
-    else if (!writeTextLog && !createNewFileNamePermission)
-    {
-            m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + returnTimestamp().toString("hh:mm:ss:zzz") + " "
-                                  + QString(tr("Stop write log file")) + "</span></p>");
-            newLogFile.close();
-            createNewFileNamePermission = true;            
-    }
-}
-
-void MainWindow::jsonFileCreator(QVariantMap jsonMap)
-{
-    QFile newJsonFile;
-    if (writeJsonLog)
-    {
-        QDir dir(appHomeDir + "Logs");
-        if (!dir.exists())
-        QDir().mkdir(appHomeDir + "Logs");
-
-        if (!newJsonFile.isOpen())
-        {
-            if (createNewJsonFileNamePermission)
-            {
-                jsonFileName = (dir.path() + returnTimestamp().toString("\\dd.MM.yy_hh-mm-ss") + ".json");
-                createNewJsonFileNamePermission = false;
-            }
-            newJsonFile.setFileName(jsonFileName);
-            if (!newJsonFile.exists())
-            {
-                newJsonFile.open(QIODevice::WriteOnly|QIODevice::Text);
-                m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + returnTimestamp().toString("hh:mm:ss:zzz") + " "
-                                          + QString(tr("Start write json file ")) + newJsonFile.fileName() + "</span></p>");
-            }
-            else newJsonFile.open(QIODevice::Append|QIODevice::Text);
-        }
-        if (newJsonFile.isOpen())
-        {
-            QJsonObject jsonObj = QJsonObject::fromVariantMap(jsonMap);
-            newJsonFile.write(QJsonDocument(jsonObj).toJson(QJsonDocument::Compact));
-            QTextStream newLineStream(&newJsonFile);
-            newLineStream << '\n';
-            newJsonFile.close();
-        }
-        else showStatusMessage(tr("Error write json"));
-    }
-    else if (!writeJsonLog && !createNewJsonFileNamePermission)
-    {
-            m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + returnTimestamp().toString("hh:mm:ss:zzz") + " "
-                                  + QString(tr("Stop write json file")) + "</span></p>");
-            newJsonFile.close();
-            createNewJsonFileNamePermission = true;
-    }
 }
 
 void MainWindow::loadProfile(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor)
@@ -479,9 +400,15 @@ void MainWindow::setLogFlag(bool _logFlag)
     logFlag = _logFlag;
 }
 
+void MainWindow::resetLogFileNames()
+{
+    createNewFileNamePermission = true;
+    createNewJsonFileNamePermission = true;
+}
+
 void MainWindow::devStatusMsg(QString _devName, QString status)
 {
-    logFileCreator(tr("Device %1 is %2").arg(_devName).arg(status), true);
+    textLogWindow(tr("Device %1 is %2").arg(_devName).arg(status), true);
 }
 
 void MainWindow::resizeEvent(QResizeEvent*)
@@ -511,19 +438,9 @@ void MainWindow::on_tabWidget_currentChanged(int)
     graphiq.resize(m_ui->graphLabel->size());
 }
 
-void MainWindow::setWriteTextLog(bool arg)
-{
-    writeTextLog = arg;
-}
-
-void MainWindow::setWriteJsonLog(bool arg)
-{
-    writeJsonLog = arg;
-}
-
 void MainWindow::logAreaAppendHtml(QString str)
 {
-    m_ui->logArea->appendHtml(str);
+    textLogWindow(str, true);
 }
 
 //так как не получилось заставить работать SwipeGesture, я напишу свой свайп. Для пролистывания табов его хватит.
