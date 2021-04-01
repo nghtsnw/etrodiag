@@ -24,16 +24,16 @@ void Logger::startLog()
 {
     createNewBinFileNamePermission = true;
     createNewTxtFileNamePermission = true;
-    createNewJsonFileNamePermission = true;
+    createNewJsonFileNamePermission = true;    
     writeLogsPermission = true;
 }
 
 void Logger::stopLog()
 {
+    writeLogsPermission = false;
     newBinFile.close();
     newLogFile.close();
-    newJsonFile.close();
-    writeLogsPermission = false;
+    newJsonFile.close();    
 }
 
 void Logger::incomingBinData(QByteArray data)
@@ -73,36 +73,42 @@ void Logger::incomingBinData(QByteArray data)
 
 void Logger::incomingTxtData(QString string)
 {
-    if (txt && writeLogsPermission)
+    if (txt && writeLogsPermission)//если стоит галка в настройках и есть разрешение на писание логов
     {        
         if (!newLogFile.isOpen())
         {
-            if (createNewTxtFileNamePermission)
+            if (createNewTxtFileNamePermission)//обновляем имя файла, если стоит флаг
             {
                 logFileName = (dir.path() + "\\" + currentProfileName + '_' + returnTimestamp().toString("dd.MM.yy_hh-mm-ss") + ".log");
+                newLogFile.setFileName(logFileName);
                 createNewTxtFileNamePermission = false;
             }
-            newLogFile.setFileName(logFileName);
-            if (!newLogFile.exists())
+            if (!newLogFile.exists() && !logFileName.isEmpty()) //если файла нет - создаём
             {
                 newLogFile.open(QIODevice::WriteOnly|QIODevice::Text);
+                if (newLogFile.isOpen())
                 emit toTextLog(QString(tr("Start write log file ")) + newLogFile.fileName());
+                else emit toTextLog(tr("Error open log file"));
             }
-            else newLogFile.open(QIODevice::Append|QIODevice::Text);
+            else newLogFile.open(QIODevice::Append|QIODevice::Text); //если есть - открываем на дописывание
+            if (newLogFile.isOpen())//если файл открыт - пишем
+            {
+                QTextStream logStream(&newLogFile);
+                while (!txtLogQueue.isEmpty())
+                    logStream << txtLogQueue.dequeue() << '\n';
+                logStream << string << '\n';
+                newLogFile.close();//закрываем после записи
+            }
+            else emit toTextLog(tr("Error open log file"));
         }
-        if (newLogFile.isOpen())
-        {
-            QTextStream logStream(&newLogFile);
-            logStream << string << '\n';
-            newLogFile.close();
-        }
-        else emit showStatusMessage(tr("Error write log"));
+        else txtLogQueue.enqueue(string);
     }
-    else if (!txt && !createNewTxtFileNamePermission)
+    if (!txt && !createNewTxtFileNamePermission)//если сняли галку в настройках при активном соединении, закрываем файл
     {
-            emit toTextLog(QString(tr("Stop write log file")));
-            newLogFile.close();
-            createNewTxtFileNamePermission = true;
+        emit toTextLog(QString(tr("Stop write log file")));
+        newLogFile.close();
+        createNewTxtFileNamePermission = true;
+        txtLogQueue.clear();
     }
 }
 

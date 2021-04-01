@@ -94,9 +94,6 @@ public:
     void openMaskSettingsDialog();
     void createDevice(int devNum);
     void loadProfile(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor);
-    bool logFlag = false;
-    bool createNewFileNamePermission = true;
-    bool createNewJsonFileNamePermission = true;
     void textLogWindow(QString string, bool redFlag);
     void cleanDevList();
     void updValueArea(QString parameterName, int devNum, QString devName, double endValue, int byteNum, int maskId, bool);
@@ -129,10 +126,8 @@ public slots:
     void openDevSett(int devNum, QVector<int> data);
     void openByteSett(int devNum, int byteNum);
     void frontendDataSort(int devNum, QString devName, int, QString, int, int, QString parameterName, int, double endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor);
-    void setLogFlag(bool _logFlag);
     void devStatusMsg(QString _devName, QString status);
     void logAreaAppendHtml(QString);
-    void resetLogFileNames();
 
 private slots:
 
@@ -142,8 +137,6 @@ private:
     void initActionsConnections();
     QDateTime returnTimestamp();
     QTimer *timer = new QTimer(this);
-    bool writeTextLog = false;
-    bool writeJsonLog = false;
     void swipeTriggered(QString);
     int currentOpenTab = 0;
     void setCurrentOpenTab(int index);
@@ -175,9 +168,9 @@ protected:
     bool eventFilter(QObject *obj, QEvent *ev) override;
 
 public:
-    devSettingsForm dvsf;
-    ByteSettingsForm btsf;
-    maskSettingsDialog masksd;
+    devSettingsForm devSettForm;
+    ByteSettingsForm byteSettForm;
+    maskSettingsDialog maskSettForm;
     liveGraph graphiq;
     Logger logger;
 };

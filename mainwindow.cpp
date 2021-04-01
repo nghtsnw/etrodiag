@@ -14,10 +14,7 @@
 #include "bytebutton.h"
 #include <QGestureEvent>
 #include <QSwipeGesture>
-//#include <QStandardPaths>
-//#include <QJsonDocument>
 #include <QMap>
-//#include "logger.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), statuslbl (new QLabel), m_ui (new Ui::MainWindow)
@@ -32,8 +29,8 @@ MainWindow::MainWindow(QWidget *parent) :
     statusBar()->addWidget(statuslbl);
     statuslbl->setText("Etrodiag beta");
     addConnection();    
-    connect (&btsf, &ByteSettingsForm::editMask, &masksd, &maskSettingsDialog::requestDataOnId);
-    connect (this, &MainWindow::dvsfAfterCloseClear, &dvsf, &devSettingsForm::afterCloseClearing);
+    connect (&byteSettForm, &ByteSettingsForm::editMask, &maskSettForm, &maskSettingsDialog::requestDataOnId);
+    connect (this, &MainWindow::dvsfAfterCloseClear, &devSettForm, &devSettingsForm::afterCloseClearing);
     connect (m_ui->valueArea, &QTabWidget::currentChanged, this, &MainWindow::setCurrentOpenTab);
     connect (&logger, &Logger::showStatusMessage, this, &MainWindow::showStatusMessage);
     connect (&logger, &Logger::toTextLog, this, &MainWindow::logAreaAppendHtml);
@@ -68,7 +65,6 @@ void MainWindow::addConnection()
     connect (connection, &newconnect::writeJsonLog, &logger, &Logger::setJson);
     connect (connection, &newconnect::writeBinLog, &logger, &Logger::setBin);
     connect (connection, &newconnect::cleanGraph, &graphiq, &liveGraph::cleanGraph);
-    connect (connection, &newconnect::cleanGraph, this, &MainWindow::resetLogFileNames);
     connect (this, &MainWindow::prepareToSaveProfile, connection, &newconnect::prepareToSaveProfile);
     connect (this, &MainWindow::saveProfile, connection, &newconnect::saveProfile);
     connect (connection, &newconnect::sendRawData, &logger, &Logger::incomingBinData);
@@ -97,14 +93,14 @@ void MainWindow::addDeviceToList(QVector<int> ddata)
         {
            thisDeviceHere = true; //если есть, ставим флаг что оно тут
            emit devUpdate(devNum, ddata); //если есть то пихаем ему обновление через сигнал
-           dvsf.updByteButtons(devNum, ddata); //обновление кнопок в форме настройки
+           devSettForm.updByteButtons(devNum, ddata); //обновление кнопок в форме настройки
         }
     }
     if (!thisDeviceHere) //если устройства нет, то создаём его
     {
         createDevice(devNum);
         emit devUpdate(devNum, ddata);
-        dvsf.updByteButtons(devNum, ddata);        
+        devSettForm.updByteButtons(devNum, ddata);
     }
     vlayChildListIt.toFront();
     m_ui->devArea->update();
@@ -120,30 +116,30 @@ void MainWindow::createDevice(int devNum)
     connect (dev, &Device::openDevSettSig, this, &MainWindow::openDevSett);
     connect (dev, &Device::clicked, dev, &Device::clickedF);
     connect (this, &MainWindow::getDevName, dev, &Device::getDeviceName);
-    connect (&dvsf, &devSettingsForm::returnDevNameAfterEdit, dev, &Device::setDeviceName);
-    connect (dev, &Device::returnDeviceName, &dvsf, &devSettingsForm::setDevName);
-    connect (&dvsf, &devSettingsForm::openByteSettingsFormTX, this, &MainWindow::openByteSett);
-    connect (&btsf, &ByteSettingsForm::setWordBit, dev, &Device::setWordTypeInByteProfile);
-    connect (&btsf, &ByteSettingsForm::setWordBit, &dvsf, &devSettingsForm::wordTypeChangeRX);//изменить
-    connect (&btsf, &ByteSettingsForm::getWordType, dev, &Device::getWordTypeFromProfileRetranslator);
-    connect (&dvsf, &devSettingsForm::initByteButtonsWordLeight, dev, &Device::getWordTypeFromProfileRetranslator);
-    connect (dev, &Device::returnWordTypeTX, &btsf, &ByteSettingsForm::returnWordType);
-    connect (dev, &Device::returnWordTypeTX, &dvsf, &devSettingsForm::wordTypeChangeRX);
-    connect (&btsf, &ByteSettingsForm::createMask, dev, &Device::createNewMaskRX);
-    connect (dev, &Device::mask2FormTX, &masksd, &maskSettingsDialog::requestDataOnId);
-    connect (&masksd, &maskSettingsDialog::requestMaskData, dev, &Device::requestMaskDataRX);
-    connect (&btsf, &ByteSettingsForm::requestAllMaskToList, dev, &Device::requestMaskDataRX);
-    connect (dev, &Device::maskData2FormTX, &masksd, &maskSettingsDialog::getDataOnId);
-    connect (dev, &Device::allMasksToListTX, &btsf, &ByteSettingsForm::addMaskItem);    
-    connect (&masksd, &maskSettingsDialog::sendMaskData, &btsf, &ByteSettingsForm::addMaskItem);
-    connect (&masksd, &maskSettingsDialog::requestMaskData, this, &MainWindow::openMaskSettingsDialog);
-    connect (&masksd, &maskSettingsDialog::sendMaskData, dev, &Device::sendDataToProfileRX);
-    connect (&btsf, &ByteSettingsForm::deleteMaskObj, dev, &Device::deleteMaskObjTX);
-    connect (&dvsf, &devSettingsForm::wordDataFullHex, &btsf, &ByteSettingsForm::updateHexWordData);
+    connect (&devSettForm, &devSettingsForm::returnDevNameAfterEdit, dev, &Device::setDeviceName);
+    connect (dev, &Device::returnDeviceName, &devSettForm, &devSettingsForm::setDevName);
+    connect (&devSettForm, &devSettingsForm::openByteSettingsFormTX, this, &MainWindow::openByteSett);
+    connect (&byteSettForm, &ByteSettingsForm::setWordBit, dev, &Device::setWordTypeInByteProfile);
+    connect (&byteSettForm, &ByteSettingsForm::setWordBit, &devSettForm, &devSettingsForm::wordTypeChangeRX);//изменить
+    connect (&byteSettForm, &ByteSettingsForm::getWordType, dev, &Device::getWordTypeFromProfileRetranslator);
+    connect (&devSettForm, &devSettingsForm::initByteButtonsWordLeight, dev, &Device::getWordTypeFromProfileRetranslator);
+    connect (dev, &Device::returnWordTypeTX, &byteSettForm, &ByteSettingsForm::returnWordType);
+    connect (dev, &Device::returnWordTypeTX, &devSettForm, &devSettingsForm::wordTypeChangeRX);
+    connect (&byteSettForm, &ByteSettingsForm::createMask, dev, &Device::createNewMaskRX);
+    connect (dev, &Device::mask2FormTX, &maskSettForm, &maskSettingsDialog::requestDataOnId);
+    connect (&maskSettForm, &maskSettingsDialog::requestMaskData, dev, &Device::requestMaskDataRX);
+    connect (&byteSettForm, &ByteSettingsForm::requestAllMaskToList, dev, &Device::requestMaskDataRX);
+    connect (dev, &Device::maskData2FormTX, &maskSettForm, &maskSettingsDialog::getDataOnId);
+    connect (dev, &Device::allMasksToListTX, &byteSettForm, &ByteSettingsForm::addMaskItem);
+    connect (&maskSettForm, &maskSettingsDialog::sendMaskData, &byteSettForm, &ByteSettingsForm::addMaskItem);
+    connect (&maskSettForm, &maskSettingsDialog::requestMaskData, this, &MainWindow::openMaskSettingsDialog);
+    connect (&maskSettForm, &maskSettingsDialog::sendMaskData, dev, &Device::sendDataToProfileRX);
+    connect (&byteSettForm, &ByteSettingsForm::deleteMaskObj, dev, &Device::deleteMaskObjTX);
+    connect (&devSettForm, &devSettingsForm::wordDataFullHex, &byteSettForm, &ByteSettingsForm::updateHexWordData);
     connect (dev, &Device::param2FrontEndTX, this, &MainWindow::frontendDataSort);
-    connect (dev, &Device::param2FrontEndTX, &masksd, &maskSettingsDialog::liveDataSlot);
-    connect (dev, &Device::param2FrontEndTX, &btsf, &ByteSettingsForm::updateMasksList);
-    connect (dev, &Device::param2FrontEndTX, &dvsf, &devSettingsForm::liveDataSlot);
+    connect (dev, &Device::param2FrontEndTX, &maskSettForm, &maskSettingsDialog::liveDataSlot);
+    connect (dev, &Device::param2FrontEndTX, &byteSettForm, &ByteSettingsForm::updateMasksList);
+    connect (dev, &Device::param2FrontEndTX, &devSettForm, &devSettingsForm::liveDataSlot);
     connect (dev, &Device::param2FrontEndTX, &graphiq, &liveGraph::incomingDataSlot);
     connect (this, &MainWindow::sendMaskData, dev, &Device::loadMaskRX);
     connect (this, &MainWindow::hideOtherDevButtons, dev, &Device::hideDevButton);
@@ -157,40 +153,40 @@ void MainWindow::createDevice(int devNum)
 
 void MainWindow::openDevSett(int devNum, QVector<int> data)
 {//все реакции на нажатие кнопки устройства в зависимости от состояния окна
-    if (masksd.isVisible())
+    if (maskSettForm.isVisible())
     {            
-            masksd.sendMask2Profile();
-            masksd.hide();
-            masksd.killChildren();
-            if (masksd.openDirectly)
+            maskSettForm.sendMask2Profile();
+            maskSettForm.hide();
+            maskSettForm.killChildren();
+            if (maskSettForm.openDirectly)
             {
                 emit hideOtherDevButtons(false, devNum);
                 emit prepareToSaveProfile();
                 emit saveProfile();
-                masksd.openDirectly = false;
+                maskSettForm.openDirectly = false;
                 m_ui->valueArea->clear();
                 graphiq.graphAnnotation.clear();
                 m_ui->valueArea->show();
             }
             else {
-            btsf.show();
-            btsf.resize(m_ui->rightFrame->size());
+            byteSettForm.show();
+            byteSettForm.resize(m_ui->rightFrame->size());
             }
     }
     else {
-    if (btsf.isVisible())
+    if (byteSettForm.isVisible())
     {
-        btsf.hide();
-        btsf.cleanForm();
-        dvsf.show();
-        dvsf.resize(m_ui->rightFrame->size());
+        byteSettForm.hide();
+        byteSettForm.cleanForm();
+        devSettForm.show();
+        devSettForm.resize(m_ui->rightFrame->size());
     }
     else
     {
-    dvsf.setParent(m_ui->rightFrame);
+    devSettForm.setParent(m_ui->rightFrame);
     if (m_ui->valueArea->isHidden())
     {
-        dvsf.hide();
+        devSettForm.hide();
         emit dvsfAfterCloseClear();
         m_ui->valueArea->clear();
         graphiq.graphAnnotation.clear();
@@ -203,10 +199,10 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
     {
         m_ui->valueArea->hide();       
         emit hideOtherDevButtons(true, devNum);        
-        dvsf.initByteButtons(devNum,data);
+        devSettForm.initByteButtons(devNum,data);
         emit getDevName(devNum);
-        dvsf.show();        
-        dvsf.resize(m_ui->rightFrame->size());        
+        devSettForm.show();
+        devSettForm.resize(m_ui->rightFrame->size());
     }
     }
     }
@@ -214,26 +210,26 @@ void MainWindow::openDevSett(int devNum, QVector<int> data)
 
 void MainWindow::openByteSett(int devNum, int byteNum)
 {
-    if (dvsf.isVisible())
+    if (devSettForm.isVisible())
     {
-        btsf.setParent(m_ui->rightFrame);
-        dvsf.hide();
-        btsf.cleanForm();
-        btsf.open(devNum, byteNum);
-        btsf.resize(m_ui->rightFrame->size());
-        btsf.show();
+        byteSettForm.setParent(m_ui->rightFrame);
+        devSettForm.hide();
+        byteSettForm.cleanForm();
+        byteSettForm.open(devNum, byteNum);
+        byteSettForm.resize(m_ui->rightFrame->size());
+        byteSettForm.show();
         emit getByteName(devNum, byteNum);
     }
 }
 
 void MainWindow::openMaskSettingsDialog()
 {
-    if (btsf.isVisible())
+    if (byteSettForm.isVisible())
     {
-        btsf.hide();
-        masksd.setParent(m_ui->rightFrame);
-        masksd.show();
-        masksd.resize(m_ui->rightFrame->size());
+        byteSettForm.hide();
+        maskSettForm.setParent(m_ui->rightFrame);
+        maskSettForm.show();
+        maskSettForm.resize(m_ui->rightFrame->size());
     }
 }
 
@@ -338,24 +334,24 @@ void MainWindow::setCurrentOpenTab(int index)
 
 void MainWindow::ValueArea_CellClicked(int row, int)
 {
-    masksd.openDirectly = true;
+    maskSettForm.openDirectly = true;
     static QTableWidget *table = nullptr;
     table = (QTableWidget*)m_ui->valueArea->widget(currentOpenTab);
     grabDevNum = table->item(row, 2)->text().toInt();
     grabByteNum = table->item(row, 3)->text().toInt();
     grabMaskId = table->item(row, 4)->text().toInt();
-    masksd.requestDataOnId(grabDevNum, grabByteNum, grabMaskId);
-    masksd.setParent(m_ui->rightFrame);
+    maskSettForm.requestDataOnId(grabDevNum, grabByteNum, grabMaskId);
+    maskSettForm.setParent(m_ui->rightFrame);
     m_ui->valueArea->hide();
-    masksd.show();
-    masksd.resize(m_ui->rightFrame->size());
+    maskSettForm.show();
+    maskSettForm.resize(m_ui->rightFrame->size());
     emit hideOtherDevButtons(true, grabDevNum);
 }
 
 void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QString, int, int maskId, QString parameterName, int, double endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor)
 {    
-    if (dvsf.isVisible() && devNum == dvsf.devNum)
-        dvsf.setDevName(devNum, devName);
+    if (devSettForm.isVisible() && devNum == devSettForm.devNum)
+        devSettForm.setDevName(devNum, devName);
 
     if (viewInLogFlag && isNewData)
     {        
@@ -390,20 +386,9 @@ void MainWindow::loadProfile(int devNum, QString devName, int byteNum, QString b
         QVector<int> devInitArray(40,0);
         devInitArray.replace(2, devNum);
         emit devUpdate(devNum, devInitArray);
-        dvsf.updByteButtons(devNum, devInitArray);
+        devSettForm.updByteButtons(devNum, devInitArray);
         emit sendMaskData(devNum, devName, byteNum, byteName, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType, drawGraphFlag, drawGraphColor);
     }
-}
-
-void MainWindow::setLogFlag(bool _logFlag)
-{
-    logFlag = _logFlag;
-}
-
-void MainWindow::resetLogFileNames()
-{
-    createNewFileNamePermission = true;
-    createNewJsonFileNamePermission = true;
 }
 
 void MainWindow::devStatusMsg(QString _devName, QString status)
@@ -413,9 +398,9 @@ void MainWindow::devStatusMsg(QString _devName, QString status)
 
 void MainWindow::resizeEvent(QResizeEvent*)
 {
-    dvsf.resize(m_ui->rightFrame->size());
-    btsf.resize(m_ui->rightFrame->size());
-    masksd.resize(m_ui->rightFrame->size());
+    devSettForm.resize(m_ui->rightFrame->size());
+    byteSettForm.resize(m_ui->rightFrame->size());
+    maskSettForm.resize(m_ui->rightFrame->size());
     graphiq.resize(m_ui->graphLabel->size());
 
     m_ui->helpText->viewport()->setMinimumWidth(m_ui->tab_about->width()*0.9);
@@ -423,7 +408,6 @@ void MainWindow::resizeEvent(QResizeEvent*)
     auto docSize = m_ui->helpText->document()->size().toSize();
     m_ui->helpText->setMinimumHeight(docSize.height() + 10);
 }
-
 
 void MainWindow::cleanDevList()
 {

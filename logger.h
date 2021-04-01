@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QDir>
 #include <QVariantMap>
+#include <QQueue>
 
 class Logger : public QObject
 {
@@ -38,6 +39,7 @@ private:
     QDir dir;
     QString currentProfileName;
     bool writeLogsPermission = false;
+    QQueue<QString> txtLogQueue;
 
 signals:
     void showStatusMessage(QString);
