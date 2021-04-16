@@ -51,7 +51,7 @@ void Logger::incomingBinData(QByteArray data)
             if (!newBinFile.exists())
             {
                 newBinFile.open(QIODevice::WriteOnly);
-                emit toTextLog(QString(tr("Start write log file ")) + newBinFile.fileName());
+                emit toTextLog(QString(tr("Start write bin file ")) + newBinFile.fileName());
             }
             else newBinFile.open(QIODevice::Append);
         }
@@ -64,10 +64,10 @@ void Logger::incomingBinData(QByteArray data)
         else emit showStatusMessage(tr("Error write bin"));
     }
     else if (!bin && !createNewBinFileNamePermission)
-    {
-            emit toTextLog(QString(tr("Stop write bin file")));
+    {            
             newBinFile.close();
             createNewBinFileNamePermission = true;
+            emit toTextLog(QString(tr("Stop write bin file")));
     }
 }
 
@@ -101,14 +101,16 @@ void Logger::incomingTxtData(QString string)
             }
             else emit toTextLog(tr("Error open log file"));
         }
-        else txtLogQueue.enqueue(string);
+        else {
+                txtLogQueue.enqueue(string);
+        }
     }
     if (!txt && !createNewTxtFileNamePermission)//если сняли галку в настройках при активном соединении, закрываем файл
     {
-        emit toTextLog(QString(tr("Stop write log file")));
         newLogFile.close();
         createNewTxtFileNamePermission = true;
         txtLogQueue.clear();
+        emit toTextLog(QString(tr("Stop write log file")));
     }
 }
 
@@ -142,10 +144,10 @@ void Logger::incomingJsonData(QVariantMap jsonMap)
         else emit showStatusMessage(tr("Error write json"));
     }
     else if (!json && !createNewJsonFileNamePermission)
-    {
-            emit toTextLog(QString(tr("Stop write json file")) + "</span></p>");
+    {            
             newJsonFile.close();
             createNewJsonFileNamePermission = true;
+            emit toTextLog(QString(tr("Stop write json file")));
     }
 }
 

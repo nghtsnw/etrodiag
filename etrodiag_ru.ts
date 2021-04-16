@@ -43,6 +43,55 @@
     </message>
 </context>
 <context>
+    <name>Logger</name>
+    <message>
+        <location filename="logger.cpp" line="90"/>
+        <source>Start write log file </source>
+        <translation>Начата запись log файла </translation>
+    </message>
+    <message>
+        <location filename="logger.cpp" line="64"/>
+        <source>Error write bin</source>
+        <translation>Ошибка записи bin файла</translation>
+    </message>
+    <message>
+        <location filename="logger.cpp" line="54"/>
+        <source>Start write bin file </source>
+        <translation>Начата запись bin файла </translation>
+    </message>
+    <message>
+        <location filename="logger.cpp" line="70"/>
+        <source>Stop write bin file</source>
+        <translation>Стоп записи bin файла</translation>
+    </message>
+    <message>
+        <location filename="logger.cpp" line="91"/>
+        <location filename="logger.cpp" line="102"/>
+        <source>Error open log file</source>
+        <translation>Ошибка открытия log файла</translation>
+    </message>
+    <message>
+        <location filename="logger.cpp" line="111"/>
+        <source>Stop write log file</source>
+        <translation>Стоп записи log файла</translation>
+    </message>
+    <message>
+        <location filename="logger.cpp" line="130"/>
+        <source>Start write json file </source>
+        <translation>Начата запись json файла </translation>
+    </message>
+    <message>
+        <location filename="logger.cpp" line="142"/>
+        <source>Error write json</source>
+        <translation>Ошибка записи json</translation>
+    </message>
+    <message>
+        <location filename="logger.cpp" line="148"/>
+        <source>Stop write json file</source>
+        <translation>Стоп записи json файла</translation>
+    </message>
+</context>
+<context>
     <name>MainWindow</name>
     <message>
         <location filename="mainwindow.ui" line="20"/>
@@ -183,37 +232,31 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Алексей Борзенков&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="392"/>
         <source>Start write log file </source>
-        <translation type="unfinished">Начата запись лог файла </translation>
+        <translation type="obsolete">Начата запись лог файла </translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="402"/>
         <source>Error write log</source>
-        <translation>Ошибка записи лога</translation>
+        <translation type="vanished">Ошибка записи лога</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="407"/>
         <source>Stop write log file</source>
-        <translation>Стоп записи лог файла</translation>
+        <translation type="vanished">Стоп записи лог файла</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="434"/>
         <source>Start write json file </source>
-        <translation>Старт записи JSON файла </translation>
+        <translation type="vanished">Старт записи JSON файла </translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="446"/>
         <source>Error write json</source>
-        <translation>Ошибка записи JSON</translation>
+        <translation type="vanished">Ошибка записи JSON</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="451"/>
         <source>Stop write json file</source>
-        <translation>Стоп записи JSON файла</translation>
+        <translation type="vanished">Стоп записи JSON файла</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="485"/>
+        <location filename="mainwindow.cpp" line="396"/>
         <source>Device %1 is %2</source>
         <translation>Устройство %1 %2</translation>
     </message>
@@ -561,7 +604,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="newconnect.ui" line="62"/>
-        <location filename="newconnect.cpp" line="231"/>
+        <location filename="newconnect.cpp" line="191"/>
         <source>Connect</source>
         <translation>Соединить</translation>
     </message>
@@ -601,32 +644,29 @@ p, li { white-space: pre-wrap; }
         <translation>Соединение закрыто</translation>
     </message>
     <message>
-        <location filename="newconnect.cpp" line="187"/>
         <source>Start write log file </source>
-        <translation>Начата запись лог файла </translation>
+        <translation type="vanished">Начата запись лог файла </translation>
     </message>
     <message>
-        <location filename="newconnect.cpp" line="197"/>
         <source>Error write bin</source>
-        <translation>Ошибка записи bin файла</translation>
+        <translation type="vanished">Ошибка записи bin файла</translation>
     </message>
     <message>
-        <location filename="newconnect.cpp" line="202"/>
         <source>Stop write bin file</source>
-        <translation>Стоп записи bin файла</translation>
+        <translation type="vanished">Стоп записи bin файла</translation>
     </message>
     <message>
-        <location filename="newconnect.cpp" line="212"/>
+        <location filename="newconnect.cpp" line="172"/>
         <source>Critical Error</source>
         <translation>Критическая ошибка</translation>
     </message>
     <message>
-        <location filename="newconnect.cpp" line="232"/>
+        <location filename="newconnect.cpp" line="192"/>
         <source>Connection closed</source>
         <translation>Соединение закрыто</translation>
     </message>
     <message>
-        <location filename="newconnect.cpp" line="241"/>
+        <location filename="newconnect.cpp" line="204"/>
         <source>Disconnect</source>
         <translation>Разъединить</translation>
     </message>

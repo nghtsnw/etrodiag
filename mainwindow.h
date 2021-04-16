@@ -148,6 +148,8 @@ private:
     QString namesUnited;
     QTableWidget *valueTable = nullptr;
     QString tmp;
+    QString stringWithTime;
+
 private:
     QPixmap *pixmap = new QPixmap(":/etrodiag.png");
     QLabel *m_status = nullptr;

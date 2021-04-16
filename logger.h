@@ -31,7 +31,7 @@ private:
     QString binFileName;
     QString logFileName;
     QString jsonFileName;
-    bool bin, txt, json;
+    bool bin = false, txt = false, json = false;
     bool createNewBinFileNamePermission, createNewJsonFileNamePermission, createNewTxtFileNamePermission;
     QDateTime returnTimestamp();
     QString sessionName;    

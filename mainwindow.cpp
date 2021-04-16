@@ -364,10 +364,12 @@ void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QStr
 
 void MainWindow::textLogWindow(QString string, bool redFlag)
 {
-    QString stringWithTime = (returnTimestamp().toString("hh:mm:ss:zzz") + " " + string);
-    emit toTxtLogger(stringWithTime);
+    stringWithTime = (returnTimestamp().toString("hh:mm:ss:zzz") + " " + string);
     if (!redFlag) m_ui->logArea->appendHtml("<p><span style=color:#000000>" + stringWithTime + "</span></p>");
-    else m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + stringWithTime + "</span></p>");
+    else {
+        m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + stringWithTime + "</span></p>");
+    }
+    emit toTxtLogger(stringWithTime);
 }
 
 void MainWindow::loadProfile(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor)
