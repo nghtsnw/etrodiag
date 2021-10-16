@@ -20,9 +20,9 @@ public slots:
     void setTxt(bool);
     void setJson(bool);
     void setProfileName(QString);
-    void incomingBinData(QByteArray data);
-    void incomingTxtData(QString string);
-    void incomingJsonData(QVariantMap jsonMap);
+    void incomingBinData(const QByteArray data);
+    void incomingTxtData(const QString string);
+    void incomingJsonData(const QVariantMap jsonMap);
 
 private:
     QFile newBinFile;
@@ -31,7 +31,7 @@ private:
     QString binFileName;
     QString logFileName;
     QString jsonFileName;
-    bool bin = false, txt = false, json = false;
+    bool bin, txt, json;
     bool createNewBinFileNamePermission, createNewJsonFileNamePermission, createNewTxtFileNamePermission;
     QDateTime returnTimestamp();
     QString sessionName;    
@@ -43,7 +43,7 @@ private:
 
 signals:
     void showStatusMessage(QString);
-    void toTextLog(QString);
+    void toTextLog(QString, bool);
 };
 
 #endif // LOGGER_H

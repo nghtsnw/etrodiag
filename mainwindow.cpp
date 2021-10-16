@@ -33,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect (this, &MainWindow::dvsfAfterCloseClear, &devSettForm, &devSettingsForm::afterCloseClearing);
     connect (m_ui->valueArea, &QTabWidget::currentChanged, this, &MainWindow::setCurrentOpenTab);
     connect (&logger, &Logger::showStatusMessage, this, &MainWindow::showStatusMessage);
-    connect (&logger, &Logger::toTextLog, this, &MainWindow::logAreaAppendHtml);
+    connect (&logger, &Logger::toTextLog, this, &MainWindow::textLogWindow);
     connect (this, &MainWindow::toTxtLogger, &logger, &Logger::incomingTxtData);
 
     m_ui->logArea->viewport()->installEventFilter(this);
@@ -364,12 +364,10 @@ void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QStr
 
 void MainWindow::textLogWindow(QString string, bool redFlag)
 {
-    stringWithTime = (returnTimestamp().toString("hh:mm:ss:zzz") + " " + string);
-    if (!redFlag) m_ui->logArea->appendHtml("<p><span style=color:#000000>" + stringWithTime + "</span></p>");
-    else {
-        m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + stringWithTime + "</span></p>");
-    }
+    static QString stringWithTime = (returnTimestamp().toString("hh:mm:ss:zzz") + " " + string);
     emit toTxtLogger(stringWithTime);
+    if (!redFlag) m_ui->logArea->appendHtml("<p><span style=color:#000000>" + stringWithTime + "</span></p>");
+    else m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + stringWithTime + "</span></p>");
 }
 
 void MainWindow::loadProfile(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor)
@@ -423,12 +421,6 @@ void MainWindow::on_tabWidget_currentChanged(int)
 {//так как сразу после пуска программы ресайз виджета не срабатывает, вешаю его на событие смены таба
     graphiq.resize(m_ui->graphLabel->size());
 }
-
-void MainWindow::logAreaAppendHtml(QString str)
-{
-    textLogWindow(str, true);
-}
-
 //так как не получилось заставить работать SwipeGesture, я напишу свой свайп. Для пролистывания табов его хватит.
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)//взято из документации к QObject::eventFilter
 {//ещё немножко костылей ради того что-бы свайп работал

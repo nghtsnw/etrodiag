@@ -127,7 +127,6 @@ public slots:
     void openByteSett(int devNum, int byteNum);
     void frontendDataSort(int devNum, QString devName, int, QString, int, int, QString parameterName, int, double endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor);
     void devStatusMsg(QString _devName, QString status);
-    void logAreaAppendHtml(QString);
 
 private slots:
 
@@ -148,8 +147,6 @@ private:
     QString namesUnited;
     QTableWidget *valueTable = nullptr;
     QString tmp;
-    QString stringWithTime;
-
 private:
     QPixmap *pixmap = new QPixmap(":/etrodiag.png");
     QLabel *m_status = nullptr;
