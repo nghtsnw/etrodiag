@@ -34,7 +34,7 @@ signals:
 
 public slots:
     void wordTypeChangeRX(int _devNum, int _byteNum, int wordType);
-    void liveDataSlot(int _devNum, QString, int _byteNum, QString, uint32_t, int, QString, int, double, bool, bool, bool _drawGraphFlag, QString _drawGraphColor);
+    void liveDataSlot(bitMaskDataStruct bitMask);
 
 private slots:
     void on_devNameEditLine_editingFinished();

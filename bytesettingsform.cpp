@@ -33,16 +33,16 @@ void ByteSettingsForm::open(int _devNum, int _byteNum)
     else ui->bitBox->setEnabled(true);
 }
 
-void ByteSettingsForm::addMaskItem(int _devNum, QString _devName, int _byteNum, QString _byteName, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag, int _wordType)
+void ByteSettingsForm::addMaskItem(bitMaskDataStruct bitMask)
 {
-    if (devNum == _devNum && byteNum == _byteNum)
+    if (devNum == bitMask.devNum && byteNum == bitMask.byteNum)
     {
         bool findRow = 0;
         if (ui->masksWidget->rowCount() > 0)
         {
             for (int i = 0; i < ui->masksWidget->rowCount(); i++)
             {
-                if (QString::number(_id,10) == ui->masksWidget->item(i,2)->text())
+                if (QString::number(bitMask.id,10) == ui->masksWidget->item(i,2)->text())
                 findRow = true;
             }
         }
@@ -51,13 +51,13 @@ void ByteSettingsForm::addMaskItem(int _devNum, QString _devName, int _byteNum, 
             ui->masksWidget->setRowCount(ui->masksWidget->rowCount()+1); //добавляем новую строку
             int row = ui->masksWidget->rowCount()-1;//определяем индекс строки
             QTableWidgetItem *nameItem = new QTableWidgetItem;
-            nameItem->setText(_paramName);
+            nameItem->setText(bitMask.paramName);
             ui->masksWidget->setItem(row, 0, nameItem);
             QTableWidgetItem *valueItem = new QTableWidgetItem;
             valueItem->setText("waiting new data...");
             ui->masksWidget->setItem(row, 1, valueItem);
             QTableWidgetItem *idItem = new QTableWidgetItem;
-            idItem->setText(QString::number(_id, 10));
+            idItem->setText(QString::number(bitMask.id, 10));
             ui->masksWidget->setItem(row, 2, idItem);
             QTableWidgetItem *deleteItem = new QTableWidgetItem;
             deleteItem->setText("Delete");
@@ -135,17 +135,17 @@ void ByteSettingsForm::requestAllMasks()
     emit requestAllMaskToList(devNum,byteNum,999);
 }
 
-void ByteSettingsForm::updateMasksList(int _devNum, QString _devName, int _byteNum, QString _byteName, int _wordData, int _id, QString parameterName, int _binRawValue, float _endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor)
+void ByteSettingsForm::updateMasksList(bitMaskDataStruct &bitMask)
 {
-    if (devNum == _devNum && byteNum == _byteNum)
+    if (devNum == bitMask.devNum && byteNum == bitMask.byteNum)
     {
 
         for (int i = 0; i < ui->masksWidget->rowCount(); i++) {
-            if (ui->masksWidget->item(i,2)->text() == QString::number(_id, 10))
+            if (ui->masksWidget->item(i,2)->text() == QString::number(bitMask.id, 10))
             {
-                ui->masksWidget->item(i,0)->setText(parameterName);
+                ui->masksWidget->item(i,0)->setText(bitMask.parameterName);
                 QString endValue2String;
-                endValue2String.setNum(_endValue);
+                endValue2String.setNum(bitMask.endValue);
                 ui->masksWidget->item(i,1)->setText(endValue2String);
             }
         }

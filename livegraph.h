@@ -20,7 +20,7 @@ public:
     void initGraph();
     QMap<QString, QString> graphAnnotation;
     QMap<QString, QVector<double>> graphAnnotationMinMax;
-    void incomingDataSlot(int devNum, QString devName, int byteNum, QString byteName, uint32_t wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData, bool drawGraphFlag, QString drawGraphColor);
+    void incomingDataSlot(bitMaskDataStruct bitMask);
     void chngMinMaxVisible();
     void cleanGraph();
 

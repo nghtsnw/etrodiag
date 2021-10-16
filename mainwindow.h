@@ -93,7 +93,7 @@ public:
     QLabel *statuslbl = nullptr;
     void openMaskSettingsDialog();
     void createDevice(int devNum);
-    void loadProfile(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor);
+    void loadProfile(bitMaskDataStruct bitMask);
     void textLogWindow(QString string, bool redFlag);
     void cleanDevList();
     void updValueArea(QString parameterName, int devNum, QString devName, double endValue, int byteNum, int maskId, bool);
@@ -108,7 +108,7 @@ signals:
     void getDevName(int devNum);
     void setDevName(int devNum, QString name);
     void returnDevNameAfterClose(int devNum, QString text);
-    void sendMaskData(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor);
+    void sendMaskData(bitMaskDataStruct bitMask);
     void getByteName(int devNum, int byteNum);
     void hideOtherDevButtons(bool, int _devNum);
     void dvsfAfterCloseClear();
@@ -125,7 +125,7 @@ public slots:
     void addDeviceToList(QVector<int> ddata);
     void openDevSett(int devNum, QVector<int> data);
     void openByteSett(int devNum, int byteNum);
-    void frontendDataSort(int devNum, QString devName, int, QString, int, int, QString parameterName, int, double endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor);
+    void frontendDataSort(bitMaskDataStruct bitMask);
     void devStatusMsg(QString _devName, QString status);
 
 private slots:

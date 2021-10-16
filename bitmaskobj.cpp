@@ -14,29 +14,29 @@ bitMaskObj::~bitMaskObj()
 
 void bitMaskObj::newMaskObj(int _devNum, int _byteNum, int _id)
 {
-    id = _id;
-    devNum = _devNum;
-    byteNum = _byteNum;
-    emit mask2byteSettingsForm(devNum, byteNum, id);
+    bitMask.id = _id;
+    bitMask.devNum = _devNum;
+    bitMask.byteNum = _byteNum;
+    emit mask2byteSettingsForm(bitMask.devNum, bitMask.byteNum, bitMask.id);
     //после создания новой маски сразу посылаем сигнал на открытие формы masksettingsdialog, сообщая ей параметры маски которую нужно редактировать
 }
 
 
 void bitMaskObj::sendMaskToProfile(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogflag, bool _drawGraphFlag, QString _drawGraphColor)
 {//забор данных из формы masksettingsdialog и отправка в профиль bitmaskobj
-    if (_devNum == devNum && _byteNum == byteNum && _id == id)
+    if (_devNum == bitMask.devNum && _byteNum == bitMask.byteNum && _id == bitMask.id)
     {
-        paramName = _paramName;
+        bitMask.paramName = _paramName;
         paramMaskNew = _paramMask;
         recalcMask();
         calculateParamShift();        
 //        calculateParamLeight();
-        paramType = _paramType;
-        valueShift = _valueShift;
-        valueKoef = _valueKoef;
-        viewInLogFlag = _viewInLogflag;
-        drawGraphFlag = _drawGraphFlag;
-        drawGraphColor = _drawGraphColor;
+        bitMask.paramType = _paramType;
+        bitMask.valueShift = _valueShift;
+        bitMask.valueKoef = _valueKoef;
+        bitMask.viewInLogFlag = _viewInLogflag;
+        bitMask.drawGraphFlag = _drawGraphFlag;
+        bitMask.drawGraphColor = _drawGraphColor;
     }
 }
 
@@ -44,19 +44,19 @@ void bitMaskObj::maskToForm(int _devNum, int _byteNum, int _id)
 //ответный сигнал от masksettingsdialog с запросом всех параметров маски bitmaskobject
 //по запросу формы настроек маски сообщаем ей все параметры маски
 {
-    if (_devNum == devNum && _byteNum == byteNum && _id == id)
-    emit maskToFormSIG(devNum, byteNum, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType, drawGraphFlag, drawGraphColor);
-    else if (_devNum == devNum && _byteNum == byteNum && _id == 999)
+    if (_devNum == bitMask.devNum && _byteNum == bitMask.byteNum && _id == bitMask.id)
+    emit maskToFormSIG(bitMask);
+    else if (_devNum == bitMask.devNum && _byteNum == bitMask.byteNum && _id == 999)
         allMasksToList(_devNum, _byteNum); //если пришёл id 999, то вызывается функция на отправку сигнала от всех масок данного байта устройства в лист масок в bytesettingsform
 }
 
 void bitMaskObj::allMasksToList(int _devNum, int _byteNum)
 //сигнал от bytesettingsform с запросом всех масок байта в список (id = 999)
 {
-    if (_devNum == devNum && _byteNum == byteNum)
+    if (_devNum == bitMask.devNum && _byteNum == bitMask.byteNum)
     {
-        qDebug() << "emit mask " << paramName << " to saving";
-        emit maskToListSIG(devNum, byteNum, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType, drawGraphFlag, drawGraphColor);
+        qDebug() << "emit mask " << bitMask.paramName << " to saving";
+        emit maskToListSIG(bitMask);
     }
 }
 
@@ -64,17 +64,17 @@ void bitMaskObj::allMasksToList(int _devNum, int _byteNum)
 void bitMaskObj::calculateParamShift()
 {
     int wordTypeInt;
-    if (wordType == 0) wordTypeInt = 8;
-    else if (wordType == 1) wordTypeInt = 16;
-    else if (wordType == 2) wordTypeInt = 32;
+    if (bitMask.wordType == 0) wordTypeInt = 8;
+    else if (bitMask.wordType == 1) wordTypeInt = 16;
+    else if (bitMask.wordType == 2) wordTypeInt = 32;
     int n = 0;
     bool stopFlag = false;    
-    if (paramMask != paramMaskNew)
+    if (bitMask.paramMask != paramMaskNew)
     {//если маска изменилась - заново её вычисляем
         recalcMask();
-        paramMask = paramMaskNew;
+        bitMask.paramMask = paramMaskNew;
     }
-    paramMask4calcShift = paramMask.toInt(0,10);
+    paramMask4calcShift = bitMask.paramMask.toInt(0,10);
     while(!stopFlag)
     {
 
@@ -127,22 +127,23 @@ void bitMaskObj::calculateParamShift()
 
 void bitMaskObj::calculateValue(int _devNum, int _byteNum, uint32_t wordData)
 {
-    if (devNum == _devNum && byteNum == _byteNum)
+    if (bitMask.devNum == _devNum && bitMask.byteNum == _byteNum)
     {
-        if (paramMask != paramMaskNew)
+        if (bitMask.paramMask != paramMaskNew)
         {//если маска изменилась - заново её вычисляем
             recalcMask();
-            paramMask = paramMaskNew;
+            bitMask.paramMask = paramMaskNew;
         }
         uint32_t value = (wordData & paramMaskInt);
         value = value >> paramShift; //сдвигаем нужные нам биты к началу
-        int binRawValue = value;
-        double endValue = (value+valueShift)*valueKoef;
-        if (endValue == oldEndValue) isNewData = false;
-        else isNewData = true;
+        bitMask.binRawValue = value;
+        bitMask.endValue = (value + bitMask.valueShift) * bitMask.valueKoef;
+        if (bitMask.endValue == oldEndValue) bitMask.isNewData = false;
+        else bitMask.isNewData = true;
         //if (endValue != oldEndValue || oldEndValue == 1234.56)
-        emit param2FrontEnd(devNum, byteNum, wordData, id, paramName, binRawValue, endValue, viewInLogFlag, isNewData, drawGraphFlag, drawGraphColor);
-        oldEndValue = endValue;
+        bitMask.wordData = wordData;
+        emit param2FrontEnd(bitMask);
+        oldEndValue = bitMask.endValue;
     }
 }
 
@@ -158,7 +159,7 @@ void bitMaskObj::recalcMask()
 
 void bitMaskObj::deleteMaskObjectTX(int _devNum, int _byteNum, int _id)
 {
-    if (devNum == _devNum && byteNum == _byteNum && id == _id)
+    if (bitMask.devNum == _devNum && bitMask.byteNum == _byteNum && bitMask.id == _id)
     {
         this->~bitMaskObj();
     }
@@ -166,18 +167,18 @@ void bitMaskObj::deleteMaskObjectTX(int _devNum, int _byteNum, int _id)
 
 void bitMaskObj::loadMaskRX(int _devNum, QString _devName, int _byteNum, QString _byteName, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag, int _wordType, bool _drawGraphFlag, QString _drawGraphColor)
 {
-    if (_devNum == devNum && _byteNum == byteNum && id == _id)
+    if (_devNum == bitMask.devNum && _byteNum == bitMask.byteNum && bitMask.id == _id)
     {
-        paramName = _paramName;
+        bitMask.paramName = _paramName;
         paramMaskNew = _paramMask;
         recalcMask();
         calculateParamShift();
 //        calculateParamLeight();
-        paramType = _paramType;
-        valueShift = _valueShift;
-        valueKoef = _valueKoef;
-        viewInLogFlag = _viewInLogFlag;
-        drawGraphFlag = _drawGraphFlag;
-        drawGraphColor = _drawGraphColor;
+        bitMask.paramType = _paramType;
+        bitMask.valueShift = _valueShift;
+        bitMask.valueKoef = _valueKoef;
+        bitMask.viewInLogFlag = _viewInLogFlag;
+        bitMask.drawGraphFlag = _drawGraphFlag;
+        bitMask.drawGraphColor = _drawGraphColor;
 }
 }

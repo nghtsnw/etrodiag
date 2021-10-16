@@ -19,7 +19,7 @@ public:
     void getWordTypeFromProfile(int _devNum, int _byteNum);
     void requestAllMasks();
     void deleteMaskItem(int row);
-    void updateMasksList(int _devNum, QString _devName, int _byteNum, QString _byteName, int _wordData, int _id, QString parameterName, int _binRawValue, float _endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor);
+    void updateMasksList(bitMaskDataStruct bitMask);
     void cleanForm();
     ~ByteSettingsForm();
 
@@ -33,7 +33,7 @@ signals:
 
 public slots:
     void returnWordType(int _devNum, int _byteNum, int wordType);
-    void addMaskItem(int _devNum, QString _devName, int _byteNum, QString _byteName, int _id, QString _paramName, QString _paramMask, int _paramType, int _valueShift, float _valueKoef, bool _viewInLogFlag, int _wordType);
+    void addMaskItem(bitMaskDataStruct bitMask);
     void updateHexWordData(int _devNum, int _byteNum, QString _txt);
 
 private slots:

@@ -57,7 +57,7 @@ void byteDefinition::createNewMask(int _devNum, int _byteNum)
         int id = calcMaskID();
         tmpMaskId = id;
         bitMaskObj *mask = new bitMaskObj;
-        mask->wordType = wordType;
+        mask->bitMask.wordType = wordType;
         mask->setParent(this);
         connect (mask, &bitMaskObj::mask2byteSettingsForm, this, &byteDefinition::mask2FormRX); //открытие формы
         connect (this, &byteDefinition::requestMaskDataTX, mask, &bitMaskObj::maskToForm);//запрос от формы
@@ -79,12 +79,12 @@ void byteDefinition::countMasks()
     emit returnMaskCountForThisByte(devNum, th_byteNum, bytedefChildList.count());
 }
 
-void byteDefinition::loadMaskRX(int devNum, QString devName, int byteNum, QString _byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor)
+void byteDefinition::loadMaskRX(bitMaskDataStruct &bitMask)
 {
-    byteName = _byteName;
-    setWordBitRX(devNum,byteNum,wordType);
-    createNewMask(devNum, byteNum);
-    emit loadMaskTX(devNum, devName, byteNum, byteName, tmpMaskId, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType, drawGraphFlag, drawGraphColor);
+    byteName = bitMask.paramName;
+    setWordBitRX(bitMask.devNum, bitMask.byteNum, wordType);
+    createNewMask(bitMask.devNum, bitMask.byteNum);
+    emit loadMaskTX(bitMask);
 }
 
 int byteDefinition::calcMaskID()
@@ -101,7 +101,7 @@ int byteDefinition::calcMaskID()
         notFoundFlag = 1;
         while (bytedefChildListIt.hasNext())
         {//прогоняем число n по всем id
-            if (n == bytedefChildListIt.next()->id)
+            if (n == bytedefChildListIt.next()->bitMask.id)
             notFoundFlag = 0;//если маска с таким id хоть раз попалась, то скидываем флаг
         }
         bytedefChildListIt.toFront();
@@ -128,21 +128,21 @@ void byteDefinition::requestMaskDataRX(int _devNum, int _byteNum, int _id)
     emit requestMaskDataTX(_devNum, _byteNum, _id);
 }
 
-void byteDefinition::maskData2FormRX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag, int _wordType, bool _drawGraphFlag, QString _drawGraphColor)
+void byteDefinition::maskData2FormRX(bitMaskDataStruct &bitMask)
 {//ответный сигнал со всеми данными маски bitmaskobj в masksettingsdialog
-    if (devNum == _devNum && th_byteNum == _byteNum)
-    emit maskData2FormTX(_devNum, _byteNum, _id, _paramName, _paramMask, _paramType, _valueShift, _valueKoef, _viewInLogFlag, _wordType, _drawGraphFlag, _drawGraphColor);
+    if (devNum == bitMask.devNum && th_byteNum == bitMask.byteNum)
+    emit maskData2FormTX(bitMask);
 }
 
-void byteDefinition::sendDataToProfileRX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag, bool _drawGraphFlag, QString _drawGraphColor)
+void byteDefinition::sendDataToProfileRX(bitMaskDataStruct &bitMask)
 {//забор данных из формы masksettingsdialog и отправка в профиль bitmaskobj
-    if (devNum == _devNum && th_byteNum == _byteNum)
-    emit sendDataToProfileTX(_devNum, _byteNum, _id, _paramName, _paramMask, _paramType, _valueShift, _valueKoef, _viewInLogFlag, _drawGraphFlag, _drawGraphColor);
+    if (devNum == bitMask.devNum && th_byteNum == bitMask.byteNum)
+    emit sendDataToProfileTX(bitMask);
 }
 
-void byteDefinition::allMasksToListRX(int devNum, int byteNum, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor)
+void byteDefinition::allMasksToListRX(bitMaskDataStruct &bitMask)
 {//сигнал от bitmaskobj предназначенный для bytesettingsform, для наполнения листа масок всеми имеющимися у этого байта
-    emit allMasksToListTX(devNum, byteNum, byteName, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType, drawGraphFlag, drawGraphColor);
+    emit allMasksToListTX(bitMask);
 }
 
 void byteDefinition::calcWordData(int _devNum, QVector<int> data)
@@ -183,7 +183,7 @@ void byteDefinition::calcWordData(int _devNum, QVector<int> data)
     }
 }
 
-void byteDefinition::param2FrontEndRX(int devNum, int byteNum, uint32_t wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor)
+void byteDefinition::param2FrontEndRX(bitMaskDataStruct &bitMask)
 {
-    emit param2FrontEndTX(devNum, byteNum, byteName, wordData, id, parameterName, binRawValue, endValue, viewInLogFlag, isNewData, _drawGraphFlag, _drawGraphColor);
+    emit param2FrontEndTX(bitMask);
 }

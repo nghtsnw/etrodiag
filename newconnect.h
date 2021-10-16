@@ -45,7 +45,7 @@ void cleanGraph();
 void sendStatusStr(QString);
 void transmitData(QVector<int> snapshot);
 void saveAllMasks();
-void loadMask(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool _drawGraphFlag, QString _drawGraphColor);
+void loadMask(bitMaskDataStruct bitMask);
 void writeTextLog(bool);
 void writeJsonLog(bool);
 void writeBinLog(bool);
@@ -57,7 +57,7 @@ void profileName2log(QString);
 
 public slots:
 
-void saveProfileSlot4Masks(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool _drawGraphFlag, QString _drawGraphColor);
+void saveProfileSlot4Masks(bitMaskDataStruct bitMask);
 void restoreWindowAfterApplySettings();
 void prepareToSaveProfile();
 void saveProfile();

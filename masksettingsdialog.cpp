@@ -28,11 +28,11 @@ void maskSettingsDialog::requestDataOnId(int _devNum, int _byteNum, int _id)
     //ответный сигнал от masksettingsdialog с запросом всех параметров маски bitmaskobject
 }
 
-void maskSettingsDialog::getDataOnId(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag, int _wordType, bool _drawGraphFlag, QString _drawGraphColor)
+void maskSettingsDialog::getDataOnId(bitMaskDataStruct &bitMask)
 {//ответный сигнал со всеми данными маски bitmaskobj в masksettingsdialog
-    if (devNum == _devNum && byteNum == _byteNum && id == _id)
+    if (devNum == bitMask.devNum && byteNum == bitMask.byteNum && id == bitMask.id)
     {
-        wordType = _wordType;
+        wordType = bitMask.wordType;
         QString wordInfoString;
         if (wordType == 0) wordInfoString = "Byte num: " + QString::number(byteNum);
         else if (wordType == 1)
@@ -46,18 +46,18 @@ void maskSettingsDialog::getDataOnId(int _devNum, int _byteNum, int _id, QString
             wordInfoString = wordInfoString.arg(QString::number(byteNum+3)).arg(QString::number(byteNum+2)).arg(QString::number(byteNum+1)).arg(QString::number(byteNum));
         }
         ui->wordInfo->setText("Dev num: " + QString::number(devNum) + ", " + wordInfoString);
-        ui->maskName->setText(_paramName);
-        binMaskInTxt = _paramMask;
-        ui->shiftTxt->setText(QString::number(_valueShift));
-        ui->koeffTxt->setText(QString::number(_valueKoef));
+        ui->maskName->setText(bitMask.paramName);
+        binMaskInTxt = bitMask.paramMask;
+        ui->shiftTxt->setText(QString::number(bitMask.valueShift));
+        ui->koeffTxt->setText(QString::number(bitMask.valueKoef));
         chkBoxStopSignal = true; //на время инициализации окна глушим переменную, что-бы не сработал сигнал state changed
-        ui->logCheckBox->setChecked(_viewInLogFlag);
-        ui->drawGraphCheckBox->setChecked(_drawGraphFlag);
+        ui->logCheckBox->setChecked(bitMask.viewInLogFlag);
+        ui->drawGraphCheckBox->setChecked(bitMask.drawGraphFlag);
         chkBoxStopSignal = false;
         QString style = "background: %1;";
-        style = style.arg(_drawGraphColor);
+        style = style.arg(bitMask.drawGraphColor);
         ui->drawGraphCheckBox->setStyleSheet(style);
-        drawColor.setNamedColor(_drawGraphColor);
+        drawColor.setNamedColor(bitMask.drawGraphColor);
         initBitButtonsAndCheckBoxes(wordType);
     }
 }
@@ -115,9 +115,9 @@ void maskSettingsDialog::scanCheckboxesToMask()
     sendMask2Profile();
 }
 
-void maskSettingsDialog::liveDataSlot(int _devNum, QString _devName, int _byteNum, QString _byteName, uint32_t _wordData, int _id, QString parameterName, int _binRawValue, double _endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor)
+void maskSettingsDialog::liveDataSlot(bitMaskDataStruct &bitMask)
 {//устанавливаем текст каждому чекбоксу, 0 или 1
-   if (devNum == _devNum && byteNum == _byteNum)
+   if (devNum == bitMask.devNum && byteNum == bitMask.byteNum)
    {
     bool wordDataBoolBit;
     uint32_t mask = 1;
@@ -126,14 +126,14 @@ void maskSettingsDialog::liveDataSlot(int _devNum, QString _devName, int _byteNu
     //qDebug() << "endvalue = " << _endValue;
     for (i = 0; i < wordBit; i++)
     {
-        if (_wordData & mask)
+        if (bitMask.wordData & mask)
             wordDataBoolBit = true;
         else wordDataBoolBit = false;
         mask = mask << 1;
         emit wordData2bitSetForm(i, wordDataBoolBit);
         //qDebug() << "wordData2bitSetForm("<<i<<", "<<wordDataBoolBit<<");";
     }    
-    endValueToString.setNum(_endValue);
+    endValueToString.setNum(bitMask.endValue);
     ui->decimalInt->setText(endValueToString);
 }
 }

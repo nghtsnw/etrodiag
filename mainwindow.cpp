@@ -348,18 +348,18 @@ void MainWindow::ValueArea_CellClicked(int row, int)
     emit hideOtherDevButtons(true, grabDevNum);
 }
 
-void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QString, int, int maskId, QString parameterName, int, double endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor)
+void MainWindow::frontendDataSort(bitMaskDataStruct &bitMask)
 {    
     if (devSettForm.isVisible() && devNum == devSettForm.devNum)
-        devSettForm.setDevName(devNum, devName);
+        devSettForm.setDevName(bitMask.devNum, bitMask.devName);
 
-    if (viewInLogFlag && isNewData)
+    if (bitMask.viewInLogFlag && bitMask.isNewData)
     {        
-        QString formString(parameterName + "@" + devName + ": " + QString::number(endValue,'g',6));
+        QString formString(bitMask.parameterName + "@" + bitMask.devName + ": " + QString::number(bitMask.endValue,'g',6));
         textLogWindow(formString, false);
     }
-    emit toJsonMap(devNum, devName, parameterName, endValue, maskId);
-    updValueArea(parameterName, devNum, devName, endValue, byteNum, maskId, isNewData);
+    emit toJsonMap(bitMask);
+    updValueArea(bitMask);
 }
 
 void MainWindow::textLogWindow(QString string, bool redFlag)
@@ -370,7 +370,7 @@ void MainWindow::textLogWindow(QString string, bool redFlag)
     else m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + stringWithTime + "</span></p>");
 }
 
-void MainWindow::loadProfile(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor)
+void MainWindow::loadProfile(bitMaskDataStruct &bitMask)
 {//если устройства нет, то создаём, потом посылаем маску
     bool thisDeviceHere = false;
     QList<Device*> vlayChildList = m_ui->devArea->findChildren<Device*>();
@@ -379,7 +379,7 @@ void MainWindow::loadProfile(int devNum, QString devName, int byteNum, QString b
         if (devNum == vlayChildListIt.next()->devNum)
             thisDeviceHere = true;
     if (thisDeviceHere)
-        emit sendMaskData(devNum, devName, byteNum, byteName, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType, drawGraphFlag, drawGraphColor);
+        emit sendMaskData(bitMask);
     else if (!thisDeviceHere)
     {//создаём устройство и инициализируем пустым пакетом в 40 байт, с номером устройства на позиции 2
         createDevice(devNum);
@@ -387,7 +387,7 @@ void MainWindow::loadProfile(int devNum, QString devName, int byteNum, QString b
         devInitArray.replace(2, devNum);
         emit devUpdate(devNum, devInitArray);
         devSettForm.updByteButtons(devNum, devInitArray);
-        emit sendMaskData(devNum, devName, byteNum, byteName, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType, drawGraphFlag, drawGraphColor);
+        emit sendMaskData(bitMask);
     }
 }
 

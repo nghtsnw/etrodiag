@@ -57,10 +57,10 @@ void devSettingsForm::initByteButtons(int id, QVector<int> data)
 
 }
 
-void devSettingsForm::liveDataSlot(int _devNum, QString, int _byteNum, QString, uint32_t, int, QString, int, double, bool, bool, bool _drawGraphFlag, QString _drawGraphColor)
+void devSettingsForm::liveDataSlot(bitMaskDataStruct &bitMask)
 {
     //получаем живые данные, что-бы определить по факту их наличия что в слове есть маски и соответственно установить кнопке фоновый цвет, например жёлтый
-    emit inThisWordLivingMask(_devNum, _byteNum);
+    emit inThisWordLivingMask(bitMask.devNum, bitMask.byteNum);
 }
 
 void devSettingsForm::updByteButtons(int _devNum, QVector<int> data)

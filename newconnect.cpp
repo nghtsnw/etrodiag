@@ -227,7 +227,7 @@ void newconnect::prepareToSaveProfile()
     }
 }
 
-void newconnect::saveProfileSlot4Masks(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool _drawGraphFlag, QString _drawGraphColor)
+void newconnect::saveProfileSlot4Masks(bitMaskDataStruct &bitMask)
      {
                //перед сохранением все маски сигналом отправляются сюда, что-бы образовать перечень масок
                //проверяется что этой маски тут ещё нет, после этого создаётся список с текстовым перечнем всех параметров
@@ -240,7 +240,10 @@ void newconnect::saveProfileSlot4Masks(int devNum, QString devName, int byteNum,
                 maskVectorsListIt.toFront();
                 while (maskVectorsListIt.hasNext())
                {
-                   if ((QString::number(id,10) == maskVectorsListIt.peekNext()->lst.at(1))&&(QString::number(devNum,10) == maskVectorsListIt.peekNext()->lst.at(2))&&(QString::number(byteNum,10)==maskVectorsListIt.peekNext()->lst.at(3))&& (maskVectorsListIt.peekNext()->lst.at(0) == "thisIsMask"))
+                   if ((QString::number(bitMask.id,10) == maskVectorsListIt.peekNext()->lst.at(1))&&
+                           (QString::number(bitMask.devNum,10) == maskVectorsListIt.peekNext()->lst.at(2))&&
+                           (QString::number(bitMask.byteNum,10)==maskVectorsListIt.peekNext()->lst.at(3))&&
+                           (maskVectorsListIt.peekNext()->lst.at(0) == "thisIsMask"))
                       thisMaskHere = true;
                    maskVectorsListIt.next();
                }
@@ -248,19 +251,19 @@ void newconnect::saveProfileSlot4Masks(int devNum, QString devName, int byteNum,
                {
                    QList<QString> maskList;
                    maskList.append("thisIsMask");//0
-                   maskList.append(QString::number(id,10));//1
-                   maskList.append(QString::number(devNum,10));//2
-                   maskList.append(QString::number(byteNum,10));//3
-                   maskList.append(devName);//4
-                   maskList.append(byteName);//5
-                   maskList.append(paramName);//6
-                   maskList.append(paramMask);//7
-                   maskList.append(QString::number(valueShift,'g',6));//8
-                   maskList.append(QString::number(valueKoef,'g',6));//9
-                   maskList.append((viewInLogFlag ?"true":"false"));//10
-                   maskList.append(QString::number(wordType));//11
-                   maskList.append(_drawGraphFlag ?"true":"false");//12
-                   maskList.append(_drawGraphColor);//13
+                   maskList.append(QString::number(bitMask.id,10));//1
+                   maskList.append(QString::number(bitMask.devNum,10));//2
+                   maskList.append(QString::number(bitMask.byteNum,10));//3
+                   maskList.append(bitMask.devName);//4
+                   maskList.append(bitMask.byteName);//5
+                   maskList.append(bitMask.paramName);//6
+                   maskList.append(bitMask.paramMask);//7
+                   maskList.append(QString::number(bitMask.valueShift,'g',6));//8
+                   maskList.append(QString::number(bitMask.valueKoef,'g',6));//9
+                   maskList.append((bitMask.viewInLogFlag ?"true":"false"));//10
+                   maskList.append(QString::number(bitMask.wordType));//11
+                   maskList.append(bitMask.drawGraphFlag ?"true":"false");//12
+                   maskList.append(bitMask.drawGraphColor);//13
                    txtmaskobj *savingMask = new txtmaskobj(maskList);
                    savingMask->setParent(this);
                    maskList.clear();
@@ -309,7 +312,11 @@ void newconnect::readProfile()
         QString str = txtStream.readLine();
         QStringList strLst = str.split('\t');
         if (strLst.at(0)=="thisIsMask")
-            emit loadMask(strLst.at(2).toInt(0,10),strLst.at(4),strLst.at(3).toInt(0,10),strLst.at(5),strLst.at(1).toInt(0,10),strLst.at(6),strLst.at(7),0,strLst.at(8).toDouble(),strLst.at(9).toDouble(),((QString::compare(strLst.at(10), "true") == 0) ? true : false),strLst.at(11).toInt(0,10), ((QString::compare(strLst.at(12), "true") == 0) ? true : false), strLst.at(13));
+            emit loadMask(strLst.at(2).toInt(0,10),strLst.at(4),strLst.at(3).toInt(0,10),strLst.at(5),
+                          strLst.at(1).toInt(0,10),strLst.at(6),strLst.at(7),0,strLst.at(8).toDouble(),
+                          strLst.at(9).toDouble(),((QString::compare(strLst.at(10), "true") == 0) ? true : false),
+                          strLst.at(11).toInt(0,10), ((QString::compare(strLst.at(12), "true") == 0) ? true : false),
+                          strLst.at(13));
         strLst.clear();
     }
 }

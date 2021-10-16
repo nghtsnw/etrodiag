@@ -124,10 +124,10 @@ int Device::countMasks()
     return calcMasksInDev();
 }
 
-void Device::loadMaskRX(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor)
+void Device::loadMaskRX(bitMaskDataStruct bitMask)
 {
-    setDeviceName(devNum,devName);
-    emit loadMaskTX(devNum, devName, byteNum, byteName, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType, drawGraphFlag, drawGraphColor);
+    setDeviceName(bitMask.devNum, bitMask.devName);
+    emit loadMaskTX(bitMask);
 }
 
 void Device::setWordTypeInByteProfile(int _devNum, int _byteNum, int _wordType)
@@ -160,24 +160,24 @@ void Device::requestMaskDataRX(int _devNum, int _byteNum, int _id)
     emit requestMaskDataTX(_devNum, _byteNum, _id);
 }
 
-void Device::maskData2FormRX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag, int wordType, bool _drawGraphFlag, QString _drawGraphColor)
+void Device::maskData2FormRX(bitMaskDataStruct &bitMask)
 {//ответный сигнал со всеми данными маски bitmaskobj в masksettingsdialog
-    emit maskData2FormTX(_devNum, _byteNum, _id, _paramName, _paramMask, _paramType, _valueShift, _valueKoef, _viewInLogFlag, wordType, _drawGraphFlag, _drawGraphColor);
+    emit maskData2FormTX(bitMask);
 }
 
-void Device::sendDataToProfileRX(int _devNum, QString, int _byteNum, QString, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag, int, bool _drawGraphFlag, QString _drawGraphColor)
+void Device::sendDataToProfileRX(bitMaskDataStruct &bitMask)
 {//забор данных из формы masksettingsdialog и отправка в профиль bitmaskobj
-    emit sendDataToProfileTX(_devNum, _byteNum, _id, _paramName, _paramMask, _paramType, _valueShift, _valueKoef, _viewInLogFlag, _drawGraphFlag, _drawGraphColor);
+    emit sendDataToProfileTX(bitMask);
 }
 
-void Device::allMasksToListRX(int devNum, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor)
+void Device::allMasksToListRX(bitMaskDataStruct &bitMask)
 {//сигнал от bitmaskobj предназначенный для bytesettingsform, для наполнения листа масок всеми имеющимися у этого байта
-    emit allMasksToListTX(devNum, devName, byteNum, byteName, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType, drawGraphFlag, drawGraphColor);
+    emit allMasksToListTX(bitMask);
 }
 
-void Device::param2FrontEndRX(int devNum, int byteNum, QString byteName, uint32_t wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor)
+void Device::param2FrontEndRX(bitMaskDataStruct &bitMask)
 {
-    emit param2FrontEndTX(devNum, devName, byteNum, byteName, wordData, id, parameterName, binRawValue, endValue, viewInLogFlag, isNewData, _drawGraphFlag, _drawGraphColor);
+    emit param2FrontEndTX(bitMask);
 }
 
 void Device::jsonMap(int _devNum, QString _devName, QString _parameterName, double _endValue, int maskId)
