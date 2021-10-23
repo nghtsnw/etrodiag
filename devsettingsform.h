@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QLineEdit>
+#include "bitmaskstruct.h"
 
 namespace Ui {
 class devSettingsForm;
@@ -34,7 +35,7 @@ signals:
 
 public slots:
     void wordTypeChangeRX(int _devNum, int _byteNum, int wordType);
-    void liveDataSlot(bitMaskDataStruct bitMask);
+    void liveDataSlot(bitMaskDataStruct &bitMask);
 
 private slots:
     void on_devNameEditLine_editingFinished();

@@ -240,11 +240,11 @@ QDateTime MainWindow::returnTimestamp()
     return dt3;
 }
 
-void MainWindow::updValueArea(QString parameterName, int devNum, QString devName, double endValue, int byteNum, int maskId, bool)
+void MainWindow::updValueArea(bitMaskDataStruct &bitMask)
 {//сначала проверяем есть ли уже вкладка с этим устройством по имени
     static int thisDeviceIndex = -1;
     for (int var = m_ui->valueArea->count(); var >= 0; --var) {
-        if (m_ui->valueArea->tabText(var) == devName)
+        if (m_ui->valueArea->tabText(var) == bitMask.devName)
             {//если есть то сохраняем индекс вкладки и покидаем цикл
                 thisDeviceIndex = var;
                 break;
@@ -266,11 +266,11 @@ void MainWindow::updValueArea(QString parameterName, int devNum, QString devName
         valueTableNew->hideColumn(3);
         valueTableNew->hideColumn(4);
         valueTableNew->horizontalHeader()->hide();
-        m_ui->valueArea->addTab(valueTableNew, devName);
+        m_ui->valueArea->addTab(valueTableNew, bitMask.devName);
 
         //узнаём индекс только что созданной вкладки. Может быть стоит выделить это в отдельную функцию, но пока и так сойдёт
         for (int var = m_ui->valueArea->count(); var >= 0; --var) {
-            if (m_ui->valueArea->tabText(var) == devName){
+            if (m_ui->valueArea->tabText(var) == bitMask.devName){
                     thisDeviceIndex = var;
                     break;
                 }
@@ -283,8 +283,8 @@ void MainWindow::updValueArea(QString parameterName, int devNum, QString devName
     if (tmp == "QTableWidget") valueTable = (QTableWidget*)m_ui->valueArea->widget(thisDeviceIndex);
     //далее работаем со строками таблицы по указателю
         findRow = false;
-        namesUnited = (parameterName+'@'+devName);
-        value2str.setNum(endValue, 'g', 6);
+        namesUnited = (bitMask.paramName+'@'+bitMask.devName);
+        value2str.setNum(bitMask.endValue, 'g', 6);
         if (valueTable->rowCount() > 0)
         {//если строки есть то ищем нужную
             for (int i = 0; i < valueTable->rowCount(); i++)
@@ -308,7 +308,7 @@ void MainWindow::updValueArea(QString parameterName, int devNum, QString devName
             valueTable->setRowCount(valueTable->rowCount()+1); //добавляем новую строку
             int row = valueTable->rowCount()-1;//определяем индекс строки
             QTableWidgetItem *nameItem = new QTableWidgetItem;
-            nameItem->setText(parameterName+'@'+devName);
+            nameItem->setText(bitMask.paramName+'@'+bitMask.devName);
             valueTable->setItem(row, 0, nameItem);
             QTableWidgetItem *valueItem = new QTableWidgetItem;
             valueItem->setText(value2str);
@@ -317,10 +317,10 @@ void MainWindow::updValueArea(QString parameterName, int devNum, QString devName
             devNumItem->setText(QString::number(devNum));
             valueTable->setItem(row, 2, devNumItem);
             QTableWidgetItem *byteNumItem = new QTableWidgetItem;
-            byteNumItem->setText(QString::number(byteNum));
+            byteNumItem->setText(QString::number(bitMask.byteNum));
             valueTable->setItem(row, 3, byteNumItem);
             QTableWidgetItem *maskIdItem = new QTableWidgetItem;
-            maskIdItem->setText(QString::number(maskId));
+            maskIdItem->setText(QString::number(bitMask.id));
             valueTable->setItem(row, 4, maskIdItem);
             valueTable->resizeColumnsToContents();
             valueTable->resizeRowsToContents();
@@ -355,7 +355,8 @@ void MainWindow::frontendDataSort(bitMaskDataStruct &bitMask)
 
     if (bitMask.viewInLogFlag && bitMask.isNewData)
     {        
-        QString formString(bitMask.parameterName + "@" + bitMask.devName + ": " + QString::number(bitMask.endValue,'g',6));
+        QString formString(bitMask.paramName + "@" + bitMask.devName + ": " +
+                           QString::number(bitMask.endValue,'g',6));
         textLogWindow(formString, false);
     }
     emit toJsonMap(bitMask);

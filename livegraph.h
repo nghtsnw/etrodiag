@@ -5,6 +5,7 @@
 #include <QPainter>
 #include <QTimer>
 #include <QMap>
+#include "bitmaskstruct.h"
 
 namespace Ui {
 class liveGraph;
@@ -20,7 +21,7 @@ public:
     void initGraph();
     QMap<QString, QString> graphAnnotation;
     QMap<QString, QVector<double>> graphAnnotationMinMax;
-    void incomingDataSlot(bitMaskDataStruct bitMask);
+    void incomingDataSlot(bitMaskDataStruct &bitMask);
     void chngMinMaxVisible();
     void cleanGraph();
 

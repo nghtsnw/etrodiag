@@ -33,7 +33,7 @@ void ByteSettingsForm::open(int _devNum, int _byteNum)
     else ui->bitBox->setEnabled(true);
 }
 
-void ByteSettingsForm::addMaskItem(bitMaskDataStruct bitMask)
+void ByteSettingsForm::addMaskItem(bitMaskDataStruct &bitMask)
 {
     if (devNum == bitMask.devNum && byteNum == bitMask.byteNum)
     {
@@ -143,7 +143,7 @@ void ByteSettingsForm::updateMasksList(bitMaskDataStruct &bitMask)
         for (int i = 0; i < ui->masksWidget->rowCount(); i++) {
             if (ui->masksWidget->item(i,2)->text() == QString::number(bitMask.id, 10))
             {
-                ui->masksWidget->item(i,0)->setText(bitMask.parameterName);
+                ui->masksWidget->item(i,0)->setText(bitMask.paramName);
                 QString endValue2String;
                 endValue2String.setNum(bitMask.endValue);
                 ui->masksWidget->item(i,1)->setText(endValue2String);
@@ -166,9 +166,13 @@ void ByteSettingsForm::updateHexWordData(int _devNum, int _byteNum, QString _txt
         else if (ui->bitBox->value() == 32)
         {
             wordInfoString = "Word bytes: [%1, %2, %3, %4]";
-            wordInfoString = wordInfoString.arg(QString::number(byteNum+3)).arg(QString::number(byteNum+2)).arg(QString::number(byteNum+1)).arg(QString::number(byteNum));
+            wordInfoString = wordInfoString.arg(QString::number(byteNum+3))
+                    .arg(QString::number(byteNum+2))
+                    .arg(QString::number(byteNum+1))
+                    .arg(QString::number(byteNum));
         }
-        ui->hexNumber->setText("Dev num: " + QString("%1").arg(devNum,0,16).toUpper() + ", " + wordInfoString + ", Word data: " + _txt);
+        ui->hexNumber->setText("Dev num: " + QString("%1").arg(devNum,0,16).toUpper() +
+                               ", " + wordInfoString + ", Word data: " + _txt);
     }
 }
 

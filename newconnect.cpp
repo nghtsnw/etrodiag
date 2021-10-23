@@ -227,7 +227,7 @@ void newconnect::prepareToSaveProfile()
     }
 }
 
-void newconnect::saveProfileSlot4Masks(bitMaskDataStruct &bitMask)
+void newconnect::saveProfileSlot4Masks(bitMaskDataStruct &bitMask)//Переделать сохранение на xml
      {
                //перед сохранением все маски сигналом отправляются сюда, что-бы образовать перечень масок
                //проверяется что этой маски тут ещё нет, после этого создаётся список с текстовым перечнем всех параметров
@@ -249,6 +249,9 @@ void newconnect::saveProfileSlot4Masks(bitMaskDataStruct &bitMask)
                }
                if (!thisMaskHere)
                {
+                   //(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName,
+                   //QString paramMask, int, double valueShift, double valueKoef, bool viewInLogFlag, int wordType,
+                   //bool _drawGraphFlag, QString _drawGraphColor);
                    QList<QString> maskList;
                    maskList.append("thisIsMask");//0
                    maskList.append(QString::number(bitMask.id,10));//1
@@ -317,6 +320,9 @@ void newconnect::readProfile()
                           strLst.at(9).toDouble(),((QString::compare(strLst.at(10), "true") == 0) ? true : false),
                           strLst.at(11).toInt(0,10), ((QString::compare(strLst.at(12), "true") == 0) ? true : false),
                           strLst.at(13));
+        //(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask,
+        //int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool _drawGraphFlag,
+        //QString _drawGraphColor);
         strLst.clear();
     }
 }

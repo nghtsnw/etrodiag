@@ -27,6 +27,7 @@ SOURCES += \
 
 HEADERS += \
     bitmaskobj.h \
+    bitmaskstruct.h \
     bitsetform.h \
     bytebutton.h \
     bytedefinition.h \

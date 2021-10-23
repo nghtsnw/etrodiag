@@ -2,6 +2,7 @@
 #define MASKSETTINGSDIALOG_H
 #include "bitsetform.h"
 #include <QWidget>
+#include "bitmaskstruct.h"
 
 
 namespace Ui {
@@ -32,12 +33,12 @@ public slots:
     void requestDataOnId(int _devNum, int _byteNum, int _id);
     //void sendDataOnId(int _devNum, int _byteNum, int _id);
     void sendMask2Profile();
-    void getDataOnId(bitMaskDataStruct bitMask);
-    void liveDataSlot(bitMaskDataStruct bitMask);
+    void getDataOnId(bitMaskDataStruct &bitMask);
+    void liveDataSlot(bitMaskDataStruct &bitMask);
 
 signals:
     void requestMaskData(int _devNum, int _byteNum, int _id);
-    void sendMaskData(bitMaskDataStruct bitMask);
+    void sendMaskData(bitMaskDataStruct &bitMask);
     void getWordBit(int _devNum, int _byteNum);
     void setCheckBox(bool chk, int var);
     void wordData2bitSetForm(int i, bool wordDataIntArray);

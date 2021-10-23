@@ -39,13 +39,13 @@ signals:
     void returnWordTypeTX(int _devNum, int _byteNum, int wordType);
     void createNewMaskTX(int _devNum, int _byteNum);
     void mask2FormTX(int _devNum, int _byteNum, int _id);
-    void maskData2FormTX(bitMaskDataStruct bitMask);
+    void maskData2FormTX(bitMaskDataStruct &bitMask);
     void requestMaskDataTX(int _devNum, int _byteNum, int _id);
-    void sendDataToProfileTX(bitMaskDataStruct bitMask);
-    void allMasksToListTX(bitMaskDataStruct bitMask);
+    void sendDataToProfileTX(bitMaskDataStruct &bitMask);
+    void allMasksToListTX(bitMaskDataStruct &bitMask);
     void deleteMaskObjTX(int devNum, int byteNum, int id);
-    void param2FrontEndTX(bitMaskDataStruct bitMask);
-    void loadMaskTX(bitMaskDataStruct bitMask);
+    void param2FrontEndTX(bitMaskDataStruct &bitMask);
+    void loadMaskTX(bitMaskDataStruct &bitMask);
     void byteObjUpdSig(int devNum, QVector<int> data);
     void devStatusMessage(QString _devname, QString status);
     void devParamsToJson(QVariantMap);
@@ -59,17 +59,17 @@ public slots:
     void returnWordTypeRX(int _devNum, int _byteNum, int wordType);
     void createNewMaskRX(int _devNum, int _byteNum);
     void mask2FormRX(int _devNum, int _byteNum, int _id);
-    void maskData2FormRX(bitMaskDataStruct bitMask);
+    void maskData2FormRX(bitMaskDataStruct &bitMask);
     void requestMaskDataRX(int _devNum, int _byteNum, int _id);
-    void sendDataToProfileRX(bitMaskDataStruct bitMask);
-    void allMasksToListRX(bitMaskDataStruct bitMask);
-    void param2FrontEndRX(bitMaskDataStruct bitMask);
+    void sendDataToProfileRX(bitMaskDataStruct &bitMask);
+    void allMasksToListRX(bitMaskDataStruct &bitMask);
+    void param2FrontEndRX(bitMaskDataStruct &bitMask);
     void requestMasks4Saving();
-    void loadMaskRX(bitMaskDataStruct bitMask);
+    void loadMaskRX(bitMaskDataStruct &bitMask);
     void hideDevButton(bool trueOrFalse, int _devNum);
     void changeButtonColor(QString _status);
     void setOfflineStatus();
-    void jsonMap(int _devNum, QString _devName, QString _parameterName, double _endValue, int maskId);
+    void jsonMap(bitMaskDataStruct &bitMask);
     void returnMaskCounting(int devNum, int byteNum, int count);
 
 private:

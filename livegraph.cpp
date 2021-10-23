@@ -3,6 +3,7 @@
 #include <newgraph.h>
 #include <QDebug>
 #include <QMouseEvent>
+#include "bitmaskstruct.h"
 
 liveGraph::liveGraph(QWidget *parent) :
     QWidget(parent),
@@ -84,7 +85,9 @@ void liveGraph::incomingDataSlot(bitMaskDataStruct &bitMask)
         {
             for (int i = 0; i < graphList.size(); ++i)
             {
-                if (graphListIt.peekNext()->devNum == bitMask.devNum && graphListIt.peekNext()->byteNum == bitMask.byteNum && graphListIt.peekNext()->id == id)
+                if (graphListIt.peekNext()->devNum == bitMask.devNum &&
+                        graphListIt.peekNext()->byteNum == bitMask.byteNum &&
+                        graphListIt.peekNext()->id == bitMask.id)
                 {//если нашёлся график
                     if (bitMask.drawGraphFlag)
                     {//и в новых данных флаг на разрешение рисования, то обновляем график
@@ -95,7 +98,7 @@ void liveGraph::incomingDataSlot(bitMaskDataStruct &bitMask)
                     else
                     {
                         graphAnnotation.remove(bitMask.drawGraphColor);
-                        graphAnnotationMinMax.remove(bitMask.parameterName);
+                        graphAnnotationMinMax.remove(bitMask.paramName);
                         graphListIt.next()->~newgraph(); //если флаг снят - удаляем объект графика
                         break;
                     }
@@ -114,31 +117,31 @@ void liveGraph::incomingDataSlot(bitMaskDataStruct &bitMask)
             graph->id = bitMask.id;
             emit data2graph(bitMask.devNum, bitMask.byteNum, bitMask.id, bitMask.endValue, steps, bitMask.drawGraphColor);
             connect (timer, &QTimer::timeout, graph, &newgraph::oscillatorInput);
-            graphAnnotationMinMax.insert(bitMask.parameterName, {bitMask.endValue, bitMask.endValue});
+            graphAnnotationMinMax.insert(bitMask.paramName, {bitMask.endValue, bitMask.endValue});
         }
         if (bitMask.drawGraphFlag)
         {
-            if (graphAnnotationMinMax.value(bitMask.parameterName).at(0) > bitMask.endValue)
+            if (graphAnnotationMinMax.value(bitMask.paramName).at(0) > bitMask.endValue)
             {
-                QVector<double> minMax = {bitMask.endValue, graphAnnotationMinMax.value(bitMask.parameterName).at(1)};
-                graphAnnotationMinMax.insert(bitMask.parameterName, minMax);
+                QVector<double> minMax = {bitMask.endValue, graphAnnotationMinMax.value(bitMask.paramName).at(1)};
+                graphAnnotationMinMax.insert(bitMask.paramName, minMax);
             }
-            if (graphAnnotationMinMax.value(bitMask.parameterName).at(1) < bitMask.endValue)
+            if (graphAnnotationMinMax.value(bitMask.paramName).at(1) < bitMask.endValue)
             {
-                QVector<double> minMax = {graphAnnotationMinMax.value(bitMask.parameterName).at(0), bitMask.endValue};
-                graphAnnotationMinMax.insert(bitMask.parameterName, minMax);
+                QVector<double> minMax = {graphAnnotationMinMax.value(bitMask.paramName).at(0), bitMask.endValue};
+                graphAnnotationMinMax.insert(bitMask.paramName, minMax);
             }
             if (minMaxOnOff)
             {
-                QString annotationString = bitMask.parameterName+'@'+bitMask.devName+" - "+QString::number(bitMask.endValue)
-                        + "| Min - " + QString::number(graphAnnotationMinMax.value(bitMask.parameterName).at(0)) + "| Max - " +
-                                                                 QString::number(graphAnnotationMinMax.value(parameterName).at(1));
+                QString annotationString = bitMask.paramName+'@'+bitMask.devName+" - "+QString::number(bitMask.endValue)
+                        + "| Min - " + QString::number(graphAnnotationMinMax.value(bitMask.paramName).at(0)) + "| Max - " +
+                        QString::number(graphAnnotationMinMax.value(bitMask.paramName).at(1));
                 graphAnnotation.insert(bitMask.drawGraphColor, annotationString);
             }
             else
             {
-                graphAnnotationMinMax.insert(bitMask.parameterName, {bitMask.endValue, bitMask.endValue});
-                QString annotationString = bitMask.parameterName+'@'+bitMask.devName+" - "+QString::number(bitMask.endValue);
+                graphAnnotationMinMax.insert(bitMask.paramName, {bitMask.endValue, bitMask.endValue});
+                QString annotationString = bitMask.paramName+'@'+bitMask.devName+" - "+QString::number(bitMask.endValue);
                 graphAnnotation.insert(bitMask.drawGraphColor, annotationString);
             }
         }

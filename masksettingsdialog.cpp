@@ -141,15 +141,19 @@ void maskSettingsDialog::liveDataSlot(bitMaskDataStruct &bitMask)
 void maskSettingsDialog::sendMask2Profile()
 {//забор данных из формы masksettingsdialog и отправка в профиль bitmaskobj
     {
-        QString _paramName = this->ui->maskName->text();
-        QString _paramMask = binMaskInTxt;
-        int _paramType = 0;
-        int _valueShift = ui->shiftTxt->text().toInt(nullptr,10);
-        float _valueKoef = ui->koeffTxt->text().toFloat(nullptr);
-        bool _viewInLogFlag = ui->logCheckBox->isChecked();
-        bool _drawGraphFlag = ui->drawGraphCheckBox->isChecked();
-        QString _drawGraphColor = drawColor.name();
-        emit sendMaskData(devNum, "",byteNum, "", id, _paramName, _paramMask, _paramType, _valueShift, _valueKoef, _viewInLogFlag, wordType, _drawGraphFlag, _drawGraphColor);
+        bitMaskDataStruct bitMaskFromDialog; //= new bitMaskDataStruct;
+        bitMaskFromDialog.devNum = devNum;
+        bitMaskFromDialog.byteNum = byteNum;
+        bitMaskFromDialog.id = id;
+        bitMaskFromDialog.paramName = this->ui->maskName->text();
+        bitMaskFromDialog.paramMask = binMaskInTxt;
+        bitMaskFromDialog.paramType = 0;
+        bitMaskFromDialog.valueShift = ui->shiftTxt->text().toInt(nullptr,10);
+        bitMaskFromDialog.valueKoef = ui->koeffTxt->text().toFloat(nullptr);
+        bitMaskFromDialog.viewInLogFlag = ui->logCheckBox->isChecked();
+        bitMaskFromDialog.drawGraphFlag = ui->drawGraphCheckBox->isChecked();
+        bitMaskFromDialog.drawGraphColor = drawColor.name();
+        emit sendMaskData(bitMaskFromDialog);
     }
 }
 

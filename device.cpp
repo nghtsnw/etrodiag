@@ -124,7 +124,7 @@ int Device::countMasks()
     return calcMasksInDev();
 }
 
-void Device::loadMaskRX(bitMaskDataStruct bitMask)
+void Device::loadMaskRX(bitMaskDataStruct &bitMask)
 {
     setDeviceName(bitMask.devNum, bitMask.devName);
     emit loadMaskTX(bitMask);
@@ -180,13 +180,13 @@ void Device::param2FrontEndRX(bitMaskDataStruct &bitMask)
     emit param2FrontEndTX(bitMask);
 }
 
-void Device::jsonMap(int _devNum, QString _devName, QString _parameterName, double _endValue, int maskId)
+void Device::jsonMap(bitMaskDataStruct &bitMask)
 {
-    if (_devNum == devNum)
+    if (bitMask.devNum == devNum)
     {
-        devParams->insert("DeviceName", _devName);
-        devParams->insert("NumberBlock", QString::number(_devNum));
-        devParams->insert(_parameterName, QString::number(_endValue));
+        devParams->insert("DeviceName", bitMask.devName);
+        devParams->insert("NumberBlock", QString::number(bitMask.devNum));
+        devParams->insert(bitMask.paramName, QString::number(bitMask.endValue));
         devParamsCount++;
         if (devParamsCount == countMasks())
         {

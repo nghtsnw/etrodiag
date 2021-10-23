@@ -1,4 +1,5 @@
 #include "bitmaskobj.h"
+#include "bitmaskstruct.h"
 #include <QDebug>
 #include <cmath>
 
@@ -18,25 +19,28 @@ void bitMaskObj::newMaskObj(int _devNum, int _byteNum, int _id)
     bitMask.devNum = _devNum;
     bitMask.byteNum = _byteNum;
     emit mask2byteSettingsForm(bitMask.devNum, bitMask.byteNum, bitMask.id);
-    //после создания новой маски сразу посылаем сигнал на открытие формы masksettingsdialog, сообщая ей параметры маски которую нужно редактировать
+    //после создания новой маски сразу посылаем сигнал на открытие формы masksettingsdialog,
+    //сообщая ей параметры маски которую нужно редактировать
 }
 
 
-void bitMaskObj::sendMaskToProfile(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogflag, bool _drawGraphFlag, QString _drawGraphColor)
+void bitMaskObj::sendMaskToProfile(bitMaskDataStruct &bitMaskFromSettingsDialog)
 {//забор данных из формы masksettingsdialog и отправка в профиль bitmaskobj
-    if (_devNum == bitMask.devNum && _byteNum == bitMask.byteNum && _id == bitMask.id)
+    if (bitMaskFromSettingsDialog.devNum == bitMask.devNum &&
+            bitMaskFromSettingsDialog.byteNum == bitMask.byteNum
+            && bitMaskFromSettingsDialog.id == bitMask.id)
     {
-        bitMask.paramName = _paramName;
-        paramMaskNew = _paramMask;
+        bitMask.paramName = bitMaskFromSettingsDialog.paramName;
+        paramMaskNew = bitMaskFromSettingsDialog.paramMask;
         recalcMask();
         calculateParamShift();        
 //        calculateParamLeight();
-        bitMask.paramType = _paramType;
-        bitMask.valueShift = _valueShift;
-        bitMask.valueKoef = _valueKoef;
-        bitMask.viewInLogFlag = _viewInLogflag;
-        bitMask.drawGraphFlag = _drawGraphFlag;
-        bitMask.drawGraphColor = _drawGraphColor;
+        bitMask.paramType = bitMaskFromSettingsDialog.paramType;
+        bitMask.valueShift = bitMaskFromSettingsDialog.valueShift;
+        bitMask.valueKoef = bitMaskFromSettingsDialog.valueKoef;
+        bitMask.viewInLogFlag = bitMaskFromSettingsDialog.viewInLogFlag;
+        bitMask.drawGraphFlag = bitMaskFromSettingsDialog.drawGraphFlag;
+        bitMask.drawGraphColor = bitMaskFromSettingsDialog.drawGraphColor;
     }
 }
 
@@ -47,7 +51,8 @@ void bitMaskObj::maskToForm(int _devNum, int _byteNum, int _id)
     if (_devNum == bitMask.devNum && _byteNum == bitMask.byteNum && _id == bitMask.id)
     emit maskToFormSIG(bitMask);
     else if (_devNum == bitMask.devNum && _byteNum == bitMask.byteNum && _id == 999)
-        allMasksToList(_devNum, _byteNum); //если пришёл id 999, то вызывается функция на отправку сигнала от всех масок данного байта устройства в лист масок в bytesettingsform
+        allMasksToList(_devNum, _byteNum); //если пришёл id 999, то вызывается функция
+    //на отправку сигнала от всех масок данного байта устройства в лист масок в bytesettingsform
 }
 
 void bitMaskObj::allMasksToList(int _devNum, int _byteNum)
@@ -165,20 +170,21 @@ void bitMaskObj::deleteMaskObjectTX(int _devNum, int _byteNum, int _id)
     }
 }
 
-void bitMaskObj::loadMaskRX(int _devNum, QString _devName, int _byteNum, QString _byteName, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag, int _wordType, bool _drawGraphFlag, QString _drawGraphColor)
+void bitMaskObj::loadMaskRX(bitMaskDataStruct &bitMaskFromFile)
 {
-    if (_devNum == bitMask.devNum && _byteNum == bitMask.byteNum && bitMask.id == _id)
+    if (bitMaskFromFile.devNum == bitMask.devNum && bitMaskFromFile.byteNum == bitMask.byteNum
+            && bitMask.id == bitMaskFromFile.id)
     {
-        bitMask.paramName = _paramName;
-        paramMaskNew = _paramMask;
+        bitMask.paramName = bitMaskFromFile.paramName;
+        paramMaskNew = bitMaskFromFile.paramMask;
         recalcMask();
         calculateParamShift();
 //        calculateParamLeight();
-        bitMask.paramType = _paramType;
-        bitMask.valueShift = _valueShift;
-        bitMask.valueKoef = _valueKoef;
-        bitMask.viewInLogFlag = _viewInLogFlag;
-        bitMask.drawGraphFlag = _drawGraphFlag;
-        bitMask.drawGraphColor = _drawGraphColor;
+        bitMask.paramType = bitMaskFromFile.paramType;
+        bitMask.valueShift = bitMaskFromFile.valueShift;
+        bitMask.valueKoef = bitMaskFromFile.valueKoef;
+        bitMask.viewInLogFlag = bitMaskFromFile.viewInLogFlag;
+        bitMask.drawGraphFlag = bitMaskFromFile.drawGraphFlag;
+        bitMask.drawGraphColor = bitMaskFromFile.drawGraphColor;
 }
 }

@@ -2,6 +2,7 @@
 #define BYTESETTINGSFORM_H
 
 #include <QWidget>
+#include "bitmaskstruct.h"
 
 namespace Ui {
 class ByteSettingsForm;
@@ -19,7 +20,7 @@ public:
     void getWordTypeFromProfile(int _devNum, int _byteNum);
     void requestAllMasks();
     void deleteMaskItem(int row);
-    void updateMasksList(bitMaskDataStruct bitMask);
+    void updateMasksList(bitMaskDataStruct &bitMask);
     void cleanForm();
     ~ByteSettingsForm();
 
@@ -33,7 +34,7 @@ signals:
 
 public slots:
     void returnWordType(int _devNum, int _byteNum, int wordType);
-    void addMaskItem(bitMaskDataStruct bitMask);
+    void addMaskItem(bitMaskDataStruct &bitMask);
     void updateHexWordData(int _devNum, int _byteNum, QString _txt);
 
 private slots:

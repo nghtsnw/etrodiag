@@ -2,6 +2,7 @@
 #define BYTEDEFINITION_H
 
 #include <QObject>
+#include "bitmaskstruct.h"
 
 class byteDefinition : public QObject
 
@@ -22,36 +23,17 @@ public:
     uint32_t wordData;
     virtual ~byteDefinition();
 
-    struct bitMaskDataStruct{
-        int devNum;
-        int byteNum;
-        int id;
-        int wordType = 0;
-        uint32_t wordData = 0;
-        QString paramName = "Parameter";
-        QString paramMask = "00000000";
-        int paramType = 0;
-        double valueShift = 0;
-        double valueKoef = 1;
-        bool viewInLogFlag = true;
-        bool drawGraphFlag = false;
-        QString drawGraphColor;
-        bool isNewData = true;
-        int binRawValue;
-        double endValue;
-    };
-
 signals:
     void returnWordType(int _devNum, int _byteNum, int wordType);
     void mask2FormTX(int _devNum, int _byteNum, int _id);
-    void maskData2FormTX(bitMaskDataStruct bitMask);
+    void maskData2FormTX(bitMaskDataStruct &bitMask);
     void requestMaskDataTX(int _devNum, int _byteNum, int _id);
-    void sendDataToProfileTX(bitMaskDataStruct bitMask);
+    void sendDataToProfileTX(bitMaskDataStruct &bitMask);
     void wordData2Mask(int devNum, int byteNum, int wordData);
-    void allMasksToListTX(bitMaskDataStruct bitMask);
+    void allMasksToListTX(bitMaskDataStruct &bitMask);
     void deleteMaskObjTX(int devNum, int byteNum, int id);
-    void param2FrontEndTX(bitMaskDataStruct bitMask);
-    void loadMaskTX(bitMaskDataStruct bitMask);
+    void param2FrontEndTX(bitMaskDataStruct &bitMask);
+    void loadMaskTX(bitMaskDataStruct &bitMask);
     void returnByteName(int devNum, int byteNum, QString byteName);
     void returnMaskCountForThisByte(int devNum, int th_byteNum, int count);
 
