@@ -9,10 +9,10 @@
 #include "mainwindow.h"
 #include "getstream.h"
 #include "dataprofiler.h"
-#include "txtmaskobj.h"
+#include <bitmaskstruct.h>
 
 namespace Ui {
-class newconnect;
+    class newconnect;
 }
 
 class newconnect : public QWidget
@@ -28,7 +28,7 @@ public:
     QLabel *m_status = nullptr;
     getStream *gstream = nullptr;
     dataprofiler *datapool = nullptr;
-    QList<txtmaskobj*> maskVectorsList;
+    QList<bitMaskDataStruct*> maskVectorsList;
     void readProfile();
     void readFromFile();
     QString appHomeDir;
@@ -40,33 +40,33 @@ public:
 
 signals:
 
-void cleanDevListSig();
-void cleanGraph();
-void sendStatusStr(QString);
-void transmitData(QVector<int> snapshot);
-void saveAllMasks();
-void loadMask(bitMaskDataStruct &bitMask);
+    void cleanDevListSig();
+    void cleanGraph();
+    void sendStatusStr(QString);
+    void transmitData(QVector<int> snapshot);
+    void saveAllMasks();
+    void loadMask(bitMaskDataStruct &bitMask);
 //(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask,
 //int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool _drawGraphFlag,
 //QString _drawGraphColor);
-void writeTextLog(bool);
-void writeJsonLog(bool);
-void writeBinLog(bool);
-void directly2logArea(QString);
-void sendRawData(QByteArray);
-void startLog();
-void stopLog();
-void profileName2log(QString);
+    void writeTextLog(bool);
+    void writeJsonLog(bool);
+    void writeBinLog(bool);
+    void directly2logArea(QString);
+    void sendRawData(QByteArray);
+    void startLog();
+    void stopLog();
+    void profileName2log(QString);
 
 public slots:
 
-void saveProfileSlot4Masks(bitMaskDataStruct &bitMask);
+    void saveProfileSlot4Masks(bitMaskDataStruct &bitMask);
 //(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName,
 //QString paramMask, int, double valueShift, double valueKoef, bool viewInLogFlag, int wordType,
 //bool _drawGraphFlag, QString _drawGraphColor);
-void restoreWindowAfterApplySettings();
-void prepareToSaveProfile();
-void saveProfile();
+    void restoreWindowAfterApplySettings();
+    void prepareToSaveProfile();
+    void saveProfile();
 
 
 private slots:

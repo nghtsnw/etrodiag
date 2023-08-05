@@ -1,4 +1,4 @@
-QT += widgets serialport
+QT += widgets serialport xml
 requires(qtConfig(combobox))
 
 TARGET = etrodiag

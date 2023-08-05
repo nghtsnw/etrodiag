@@ -11,7 +11,7 @@
 #include "txtmaskobj.h"
 #include <QStandardPaths>
 #include <QtXml/QtXml>
-#include <QtXml/QDomDocument>
+#include <QtXml/QDomNode>
 #include <QFile>
 
 newconnect::newconnect(QWidget *parent) :
@@ -218,12 +218,12 @@ void newconnect::prepareToSaveProfile()
     const SettingsDialog::Settings p = m_settings->settings();
     if (!p.readOnlyProfile)
     {   //очищаем список, выставляем разрешение для дальнейших операций по сохранению, даём сигнал на запрос всех масок
-        maskVectorsList = this->findChildren<txtmaskobj*>();
-        QListIterator<txtmaskobj*> maskVectorsListIt(maskVectorsList);
-        maskVectorsListIt.toFront();
-        while (maskVectorsListIt.hasNext()) {
-            maskVectorsListIt.next()->~txtmaskobj();
-        }
+//        maskVectorsList = this->findChildren<bitMaskDataStruct*>();
+//        QListIterator<bitMaskDataStruct*> maskVectorsListIt(maskVectorsList);
+//        maskVectorsListIt.toFront();
+//        while (maskVectorsListIt.hasNext()) {
+//            maskVectorsListIt.next()->~bitMaskDataStruct();
+//        }
         //тут вкорячить очистку xml от всех масок
         permission2SaveMasks = true;
         emit saveAllMasks();
@@ -237,16 +237,15 @@ void newconnect::saveProfileSlot4Masks(bitMaskDataStruct &bitMask)//Переде
     //создаются только описания масок, само сохранение будет в другой функции
     if (permission2SaveMasks)
     {
-        maskVectorsList = this->findChildren<txtmaskobj*>();
-        QListIterator<txtmaskobj*> maskVectorsListIt(maskVectorsList);
+//        maskVectorsList = this->findChildren<bitMaskDataStruct*>();
+        QListIterator<bitMaskDataStruct*> maskVectorsListIt(maskVectorsList);
         bool thisMaskHere = false;
         maskVectorsListIt.toFront();
         while (maskVectorsListIt.hasNext())
         {
-            if ((QString::number(bitMask.id, 10) == maskVectorsListIt.peekNext()->lst.at(1)) &&
-                    (QString::number(bitMask.devNum, 10) == maskVectorsListIt.peekNext()->lst.at(2)) &&
-                    (QString::number(bitMask.byteNum, 10) == maskVectorsListIt.peekNext()->lst.at(3)) &&
-                    (maskVectorsListIt.peekNext()->lst.at(0) == "thisIsMask")) {
+            if ((QString::number(bitMask.id, 10) == maskVectorsListIt.peekNext()->id) &&
+                    (QString::number(bitMask.devNum, 10) == maskVectorsListIt.peekNext()->devNum) &&
+                    (QString::number(bitMask.byteNum, 10) == maskVectorsListIt.peekNext()->byteNum)) {
                 thisMaskHere = true;
             }
             maskVectorsListIt.next();
@@ -263,142 +262,82 @@ void newconnect::saveProfileSlot4Masks(bitMaskDataStruct &bitMask)//Переде
             QDomDocument doc;
             doc.setContent(&profile);
             QDomProcessingInstruction instruction;
+            instruction = doc.createProcessingInstruction("xml", "version=\"1.0\" encoding=\"UTF-8\"");
+            doc.appendChild(instruction);
             QDomElement root;
             QDomElement strName;
             QDomText strNameNodeText;
             QDomElement strDevices;
             QDomElement strDev;
+            QDomElement strParameter;
             QDomAttr attrDev;
-            if (doc.documentElement().nodeName() != "profile") {
-                instruction = doc.createProcessingInstruction("xml", "version=\"1.0\" encoding=\"UTF-8\"");
-                doc.appendChild(instruction);
-                root = doc.createElement("profile");// Создать корневой узел
-                doc.appendChild(root);// Добавить корневой узел
-                strName = doc.createElement("name");// Создать узел элемента
-                root.appendChild(strName);// Добавить узел элемента в корневой узел
-                strNameNodeText = doc.createTextNode(info.fileName());// Создать текст элемента
-                strName.appendChild(strNameNodeText);// Добавить текст элемента к элементу узла
-                strDevices = doc.createElement("devices");
-                root.appendChild(strName);
-            }
+            root = doc.createElement("profile");// Создать корневой узел
+            doc.appendChild(root);// Добавить корневой узел
+            strName = doc.createElement("name");// Создать узел элемента
+            root.appendChild(strName);// Добавить узел элемента в корневой узел
+            strNameNodeText = doc.createTextNode(info.fileName());// Создать текст элемента
+            strName.appendChild(strNameNodeText);// Добавить текст элемента к элементу узла
+            strDevices = doc.createElement("devices");
+            root.appendChild(strName);
             //перед созданием элемента устройства, проверяем что его нет в профиле по id
-            QVector<QString> devList;
-            int devIndex;
-            for (int i = 0; i < strDevices.childNodes().count(); i++) { //формируем список того что есть в файле
-                devList.append(strDevices.childNodes().at(i).attributes().namedItem("id").nodeValue());
-                if (strDevices.childNodes().at(i).attributes().namedItem("id").nodeValue() == QString::number(bitMask.id, 10)) {
-                    devIndex = i;    //при нахождении запоминаем индекс
-                }
-            }
-            if (!devList.contains(QString::number(bitMask.id, 10))) {
-                strDev = doc.createElement("dev");
-                strDevices.appendChild(strName);
-                attrDev = doc.createAttribute("id");
-                attrDev.setValue(QString::number(bitMask.id, 10));
-                strDev.appendChild(attrDev);
-            }
-            else {
-                strDev = strDevices.childNodes().at(devIndex).toElement();
-            }
-            QDomElement strMasks = doc.createElement("masks");
-            strDev.appendChild(strMasks);//интересно, в какой dev будет писать
-            QDomElement strMask = doc.createElement("mask");
-            strMasks.appendChild(strMask);
-            QDomText strMaskNodeText = doc.createTextNode(bitMask.paramName);
-            strMask.appendChild(strMaskNodeText);
+//            QVector<QString> devList;
+//            int devIndex;
+//            for (int i = 0; i < strDevices.childNodes().count(); i++) { //формируем список того что есть в файле
+//                devList.append(strDevices.childNodes().at(i).attributes().namedItem("id").nodeValue());
+//                if (strDevices.childNodes().at(i).attributes().namedItem("id").nodeValue() == QString::number(bitMask.id, 10)) {
+//                    devIndex = i;    //при нахождении запоминаем индекс
+//                }
+//            }
+//            if (!devList.contains(QString::number(bitMask.id, 10))) {
+//                strDev = doc.createElement("dev");
+//                strDevices.appendChild(strName);
+//                attrDev = doc.createAttribute("id");
+//                attrDev.setValue(QString::number(bitMask.id, 10));
+//                strDev.appendChild(attrDev);
+//            }
+//            else {
+//                strDev = strDevices.childNodes().at(devIndex).toElement();
+//            }
+            strDev = doc.createElement("device");
+            strDevices.appendChild(strDev);
+            strParameter = doc.createElement("parameter");
+            strDev.appendChild(strParameter);
             QDomAttr attrMask = doc.createAttribute("id");
             attrMask.setValue(QString::number(bitMask.id, 10));
-            strMask.appendChild(attrMask);
+            strDev.appendChild(attrMask);
+            QDomText strMaskNodeText = doc.createTextNode(bitMask.paramName);
+            strParameter.appendChild(strMaskNodeText);
             QDomElement strParamMask = doc.createElement("paramMask");
-            strMask.appendChild(strParamMask);
             QDomText strParamMaskNodeText = doc.createTextNode(bitMask.paramMask);
-            strMask.appendChild(strParamMaskNodeText);
+            strParameter.appendChild(strParamMaskNodeText);
+            strParameter.appendChild(strParamMask);
             QDomElement strValueShift = doc.createElement("valueShift");
-            strMask.appendChild(strValueShift);
             QDomText strValueShiftNodeText = doc.createTextNode(QString::number(bitMask.valueShift, '.', 6));
-            strMask.appendChild(strValueShiftNodeText);
+            strParameter.appendChild(strValueShiftNodeText);
+            strParameter.appendChild(strValueShift);
             QDomElement strValueKoef = doc.createElement("valueKoef");
-            strMask.appendChild(strValueKoef);
             QDomText strValueKoefNodeText = doc.createTextNode(QString::number(bitMask.valueKoef, '.', 6));
-            strMask.appendChild(strValueKoefNodeText);
+            strParameter.appendChild(strValueKoefNodeText);
+            strParameter.appendChild(strValueKoef);
             QDomElement strViewInLogFlag = doc.createElement("viewInLogFlag");
-            strMask.appendChild(strViewInLogFlag);
             QDomText strViewInLogFlagNodeText = doc.createTextNode(bitMask.viewInLogFlag ? "true" : "false");
-            strMask.appendChild(strViewInLogFlagNodeText);
+            strParameter.appendChild(strViewInLogFlagNodeText);
+            strParameter.appendChild(strViewInLogFlag);
             QDomElement strWordType = doc.createElement("wordType");
-            strMask.appendChild(strWordType);
             QDomText strWordTypeNodeText = doc.createTextNode(QString::number(bitMask.wordType, 10));
-            strMask.appendChild(strWordTypeNodeText);
+            strParameter.appendChild(strWordTypeNodeText);
+            strParameter.appendChild(strWordType);
             QDomElement strDrawGraph = doc.createElement("drawGraph");
-            strMask.appendChild(strDrawGraph);
             QDomAttr attrDrawGraph = doc.createAttribute("color");
             attrDrawGraph.setValue(bitMask.drawGraphColor);
             strDrawGraph.appendChild(attrDrawGraph);
             QDomText strDrawGraphNodeText = doc.createTextNode(bitMask.drawGraphFlag ? "true" : "false");
             strDrawGraph.appendChild(strDrawGraphNodeText);
+            strParameter.appendChild(strDrawGraph);
 //                   const SettingsDialog::Settings p = m_settings->settings();
 //                   QFile profile(p.profilePath);
 //                   QFileInfo info(profile);
 //                   profile.open(QIODevice::WriteOnly);
-//                   QXmlStreamWriter xmlWriter(&profile);
-//                       xmlWriter.setAutoFormatting(true);  // Устанавливаем автоформатирование текста
-//                       xmlWriter.writeStartDocument();     // Запускаем запись в документ
-//                       xmlWriter.writeStartElement("profile");   // Записываем первый элемент с его именем
-//                       xmlWriter.writeStartElement("name");
-//                       xmlWriter.writeCharacters(info.fileName());
-//                       xmlWriter.writeEndElement();
-//                       xmlWriter.writeStartElement("devices");
-//                       xmlWriter.writeStartElement("dev");
-//                       xmlWriter.writeAttribute("devNum", QString::number(bitMask.devNum, 10));
-//                       xmlWriter.writeCharacters(bitMask.devName);
-//                       xmlWriter.writeStartElement("masks");
-//                       xmlWriter.writeStartElement("mask");
-//                       xmlWriter.writeAttribute("id", QString::number(bitMask.id, 10));
-//                       xmlWriter.writeCharacters(bitMask.paramName);
-//                       xmlWriter.writeStartElement("paramMask");
-//                       xmlWriter.writeCharacters(bitMask.paramMask);
-//                       xmlWriter.writeEndElement();
-//                       xmlWriter.writeStartElement("valueShift");
-//                       xmlWriter.writeCharacters(QString::number(bitMask.valueShift, '.', 6));
-//                       xmlWriter.writeEndElement();
-//                       xmlWriter.writeStartElement("valueKoef");
-//                       xmlWriter.writeCharacters(QString::number(bitMask.valueKoef, '.', 6));
-//                       xmlWriter.writeEndElement();
-//                       xmlWriter.writeStartElement("viewInLogFlag");
-//                       xmlWriter.writeCharacters(bitMask.viewInLogFlag ?"true":"false");
-//                       xmlWriter.writeEndElement();
-//                       xmlWriter.writeStartElement("wordType");
-//                       xmlWriter.writeCharacters(QString::number(bitMask.wordType, 10));
-//                       xmlWriter.writeEndElement();
-//                       xmlWriter.writeStartElement("drawGraph");
-//                       xmlWriter.writeAttribute("color", bitMask.drawGraphColor);
-//                       xmlWriter.writeCharacters(bitMask.drawGraphFlag ?"true":"false");
-//                       xmlWriter.writeEndElement();
-//                       xmlWriter.writeEndElement(); //mask
-//                       xmlWriter.writeEndElement(); //masks
-//                       xmlWriter.writeEndElement(); //dev
-//                       xmlWriter.writeEndElement(); //devices
-//                       xmlWriter.writeEndElement(); //profile
-//                       xmlWriter.writeEndDocument();
-//                       profile.close();
-//                   QList<QString> maskList;
-//                   maskList.append("thisIsMask");//0
-//                   maskList.append(QString::number(bitMask.id,10));//1
-//                   maskList.append(QString::number(bitMask.devNum,10));//2
-//                   maskList.append(QString::number(bitMask.byteNum,10));//3
-//                   maskList.append(bitMask.devName);//4
-//                   maskList.append(bitMask.byteName);//5
-//                   maskList.append(bitMask.paramName);//6
-//                   maskList.append(bitMask.paramMask);//7
-//                   maskList.append(QString::number(bitMask.valueShift,'g',6));//8
-//                   maskList.append(QString::number(bitMask.valueKoef,'g',6));//9
-//                   maskList.append((bitMask.viewInLogFlag ?"true":"false"));//10
-//                   maskList.append(QString::number(bitMask.wordType));//11
-//                   maskList.append(bitMask.drawGraphFlag ?"true":"false");//12
-//                   maskList.append(bitMask.drawGraphColor);//13
-//                   txtmaskobj *savingMask = new txtmaskobj(maskList);
-//                   savingMask->setParent(this);
-//                   maskList.clear();
         }
     }
 }
@@ -408,26 +347,26 @@ void newconnect::saveProfile()
     //тут переписать на запись xml в файл уже после формирования в памяти
     if (permission2SaveMasks)
     {
-        maskVectorsList = this->findChildren<txtmaskobj*>();
-        QListIterator<txtmaskobj*> maskVectorsListIt(maskVectorsList);
-        maskVectorsListIt.toFront();
-        const SettingsDialog::Settings p = m_settings->settings();
-        QFile profile(p.profilePath);
-        QFileInfo info(profile);
-        profile.open(QIODevice::WriteOnly | QIODevice::Text);
-        QTextStream txtStream(&profile);
-        txtStream << info.fileName() << "\n";
-        while (maskVectorsListIt.hasNext())
-        {
-            QListIterator<QString> lstIt(maskVectorsListIt.peekNext()->lst);
-            while (lstIt.hasNext()) {
-                txtStream << lstIt.next() << "\t";
-            }
-            txtStream << "\n";
-            maskVectorsListIt.next();
-        }
-        permission2SaveMasks = false;
-        emit sendStatusStr("Profile " + info.fileName() + " saved");
+//        maskVectorsList = this->findChildren<bitMaskDataStruct*>();
+//        QListIterator<bitMaskDataStruct*> maskVectorsListIt(maskVectorsList);
+//        maskVectorsListIt.toFront();
+//        const SettingsDialog::Settings p = m_settings->settings();
+//        QFile profile(p.profilePath);
+//        QFileInfo info(profile);
+//        profile.open(QIODevice::WriteOnly | QIODevice::Text);
+//        QTextStream txtStream(&profile);
+//        txtStream << info.fileName() << "\n";
+//        while (maskVectorsListIt.hasNext())
+//        {
+//            QListIterator<QString> lstIt(maskVectorsListIt.peekNext()->lst);
+//            while (lstIt.hasNext()) {
+//                txtStream << lstIt.next() << "\t";
+//            }
+//            txtStream << "\n";
+//            maskVectorsListIt.next();
+//        }
+//        permission2SaveMasks = false;
+//        emit sendStatusStr("Profile " + info.fileName() + " saved");
     }
 }
 
@@ -500,17 +439,83 @@ void newconnect::readProfile()
                                 QDomElement devElement = devNode.toElement();
                                 if (!devElement.isNull()) {
                                     if (devElement.tagName() == "device") {
+                                        bitMaskDataStruct loadMaskFromFile;
+                                        QDomNode parameterNode = element.firstChild();
+                                        while (!parameterNode.isNull())
+                                        {
+                                            QDomElement parameterElement = parameterNode.toElement();
+                                            if (!parameterElement.isNull()) {
+                                                const QString parameterName(parameterElement.tagName());
+                                                if (parameterName == "devNum") {
+                                                    loadMaskFromFile.devNum = parameterElement.text().toInt();
+                                                }
+                                                else if (parameterName == "devName") {
+                                                    loadMaskFromFile.devName = parameterElement.text();
+                                                }
+                                                else if (parameterName == "byteNum") {
+                                                    loadMaskFromFile.byteNum = parameterElement.text().toInt();
+                                                }
+                                                else if (parameterName == "byteName") {
+                                                    loadMaskFromFile.byteName = parameterElement.text();
+                                                }
+                                                else if (parameterName == "id") {
+                                                    loadMaskFromFile.id = parameterElement.text().toInt();
+                                                }
+                                                else if (parameterName == "wordType") {
+                                                    loadMaskFromFile.wordType = parameterElement.text().toInt();
+                                                }
+                                                else if (parameterName == "wordData") {
+                                                    loadMaskFromFile.wordData = parameterElement.text().toInt();
+                                                }
+                                                else if (parameterName == "paramName") {
+                                                    loadMaskFromFile.paramName = parameterElement.text();
+                                                }
+                                                else if (parameterName == "paramMask") {
+                                                    loadMaskFromFile.paramMask = parameterElement.text();
+                                                }
+                                                else if (parameterName == "paramType") {
+                                                    loadMaskFromFile.paramType = parameterElement.text().toInt();
+                                                }
+                                                else if (parameterName == "valueShift") {
+                                                    loadMaskFromFile.valueShift = parameterElement.text().toDouble();
+                                                }
+                                                else if (parameterName == "valueKoef") {
+                                                    loadMaskFromFile.valueKoef = parameterElement.text().toDouble();
+                                                }
+                                                else if (parameterName == "viewInLogFlag") {
+                                                    loadMaskFromFile.viewInLogFlag = parameterElement.text().compare("true") ? true : false;
+                                                }
+                                                else if (parameterName == "drawGraphFlag") {
+                                                    loadMaskFromFile.drawGraphFlag = parameterElement.text().compare("true") ? true : false;
+                                                }
+                                                else if (parameterName == "drawGraphColor") {
+                                                    loadMaskFromFile.drawGraphColor = parameterElement.text();
+                                                }
+                                                else if (parameterName == "isNewData") {
+                                                    loadMaskFromFile.isNewData = parameterElement.text().compare("true") ? true : false;
+                                                }
+                                                else if (parameterName == "binRawValue") {
+                                                    loadMaskFromFile.binRawValue = parameterElement.text().toInt();
+                                                }
+                                                else if (parameterName == "endValue") {
+                                                    loadMaskFromFile.endValue = parameterElement.text().toDouble();
+                                                }
+                                            }
+                                        }
+                                        emit loadMask(loadMaskFromFile);
+                                        parameterNode = parameterNode.nextSibling();
                                     }
                                 }
                             }
                             devNode = devNode.nextSibling();
                         }
                     }
-                    node = node.nextSibling();
                 }
+                node = node.nextSibling();
             }
         }
-        domNode = domNode.nextSibling();
+    }
+    domNode = domNode.nextSibling();
 //        QString str = xmlStream.readLine();
 //        QStringList strLst = str.split('\t');
 //        if (strLst.at(0)=="thisIsMask")
@@ -519,12 +524,12 @@ void newconnect::readProfile()
 //                          strLst.at(9).toDouble(),((QString::compare(strLst.at(10), "true") == 0) ? true : false),
 //                          strLst.at(11).toInt(0,10), ((QString::compare(strLst.at(12), "true") == 0) ? true : false),
 //                          strLst.at(13));
-        //(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask,
-        //int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool _drawGraphFlag,
-        //QString _drawGraphColor);
+    //(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask,
+    //int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool _drawGraphFlag,
+    //QString _drawGraphColor);
 //        strLst.clear();
-    }
 }
+
 void newconnect::resizeEvent(QResizeEvent * event)
 {
     if (event)
