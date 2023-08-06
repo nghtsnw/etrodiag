@@ -22,8 +22,7 @@ SOURCES += \
     newconnect.cpp \
     newgraph.cpp \
     settingsdialog.cpp \
-    console.cpp \
-    txtmaskobj.cpp
+    console.cpp
 
 HEADERS += \
     bitmaskobj.h \
@@ -43,8 +42,7 @@ HEADERS += \
     newconnect.h \
     newgraph.h \
     settingsdialog.h \
-    console.h \
-    txtmaskobj.h
+    console.h
 
 FORMS += \
     bitsetform.ui \

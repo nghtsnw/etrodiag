@@ -9,22 +9,23 @@
 
 Logger::Logger()
 {
-    #ifdef Q_OS_WIN32
-       appHomeDir = qApp->applicationDirPath() + QDir::separator();
-    #endif
-    #ifdef Q_OS_ANDROID
-        appHomeDir = QStandardPaths::standardLocations(QStandardPaths::DataLocation)[1] + QDir::separator();
-    #endif
+#ifdef Q_OS_WIN32
+    appHomeDir = qApp->applicationDirPath() + QDir::separator();
+#endif
+#ifdef Q_OS_ANDROID
+    appHomeDir = QStandardPaths::standardLocations(QStandardPaths::DataLocation)[1] + QDir::separator();
+#endif
     dir.setPath(appHomeDir + "Logs");
-    if (!dir.exists())
-    QDir().mkdir(appHomeDir + "Logs");
+    if (!dir.exists()) {
+        QDir().mkdir(appHomeDir + "Logs");
+    }
 }
 
 void Logger::startLog()
 {
     createNewBinFileNamePermission = true;
     createNewTxtFileNamePermission = true;
-    createNewJsonFileNamePermission = true;    
+    createNewJsonFileNamePermission = true;
     writeLogsPermission = true;
 }
 
@@ -37,9 +38,9 @@ void Logger::stopLog()
 }
 
 void Logger::incomingBinData(const QByteArray data)
-{    
+{
     if (bin && writeLogsPermission)
-    {        
+    {
         if (!newBinFile.isOpen())
         {
             if (createNewBinFileNamePermission)
@@ -53,7 +54,9 @@ void Logger::incomingBinData(const QByteArray data)
                 newBinFile.open(QIODevice::WriteOnly);
                 emit toTextLog(QString(tr("Start write log file ")) + newBinFile.fileName(), true);
             }
-            else newBinFile.open(QIODevice::Append);
+            else {
+                newBinFile.open(QIODevice::Append);
+            }
         }
         if (newBinFile.isOpen())
         {
@@ -61,20 +64,22 @@ void Logger::incomingBinData(const QByteArray data)
             binStream.writeRawData(data.constData(), data.size());
             newBinFile.close();
         }
-        else emit showStatusMessage(tr("Error write bin"));
+        else {
+            emit showStatusMessage(tr("Error write bin"));
+        }
     }
     else if (!bin && !createNewBinFileNamePermission)
     {
-            emit toTextLog(QString(tr("Stop write bin file")), true);
-            newBinFile.close();
-            createNewBinFileNamePermission = true;
+        emit toTextLog(QString(tr("Stop write bin file")), true);
+        newBinFile.close();
+        createNewBinFileNamePermission = true;
     }
 }
 
 void Logger::incomingTxtData(const QString string)
 {
     if (txt && writeLogsPermission)//если стоит галка в настройках и есть разрешение на писание логов
-    {        
+    {
         if (!newLogFile.isOpen())
         {
             if (createNewTxtFileNamePermission)//обновляем имя файла, если стоит флаг
@@ -85,25 +90,35 @@ void Logger::incomingTxtData(const QString string)
             }
             if (!newLogFile.exists() && !logFileName.isEmpty()) //если файла нет - создаём
             {
-                newLogFile.open(QIODevice::WriteOnly|QIODevice::Text);
-                if (newLogFile.isOpen())
-                emit toTextLog(QString(tr("Start write log file ")) + newLogFile.fileName(), true);
-                else emit toTextLog(tr("Error open log file"), true);
+                newLogFile.open(QIODevice::WriteOnly | QIODevice::Text);
+                if (newLogFile.isOpen()) {
+                    emit toTextLog(QString(tr("Start write log file ")) + newLogFile.fileName(), true);
+                }
+                else {
+                    emit toTextLog(tr("Error open log file"), true);
+                }
             }
-            else newLogFile.open(QIODevice::Append|QIODevice::Text); //если есть - открываем на дописывание
+            else {
+                newLogFile.open(QIODevice::Append | QIODevice::Text);    //если есть - открываем на дописывание
+            }
             if (newLogFile.isOpen())//если файл открыт - пишем
             {
                 QTextStream logStream(&newLogFile);
-                while (!txtLogQueue.isEmpty())
+                while (!txtLogQueue.isEmpty()) {
                     logStream << txtLogQueue.dequeue() << '\n';
+                }
                 logStream << string << '\n';
                 newLogFile.close();//закрываем после записи
             }
-            else emit toTextLog(tr("Error open log file"), true);
+            else {
+                emit toTextLog(tr("Error open log file"), true);
+            }
         }
-        else txtLogQueue.enqueue(string);
+        else {
+            txtLogQueue.enqueue(string);
+        }
     }
-    if (!txt && !createNewTxtFileNamePermission)//если сняли галку в настройках при активном соединении, закрываем файл
+    if (!txt && !createNewTxtFileNamePermission && newLogFile.isOpen())//если сняли галку в настройках при активном соединении, закрываем файл
     {
         emit toTextLog(QString(tr("Stop write log file")), true);
         newLogFile.close();
@@ -113,7 +128,7 @@ void Logger::incomingTxtData(const QString string)
 }
 
 void Logger::incomingJsonData(const QVariantMap jsonMap)
-{    
+{
     if (json && writeLogsPermission)
     {
         if (!newJsonFile.isOpen())
@@ -126,10 +141,12 @@ void Logger::incomingJsonData(const QVariantMap jsonMap)
             newJsonFile.setFileName(jsonFileName);
             if (!newJsonFile.exists())
             {
-                newJsonFile.open(QIODevice::WriteOnly|QIODevice::Text);
+                newJsonFile.open(QIODevice::WriteOnly | QIODevice::Text);
                 emit toTextLog((QString(tr("Start write json file ")) + newJsonFile.fileName()), true);
             }
-            else newJsonFile.open(QIODevice::Append|QIODevice::Text);
+            else {
+                newJsonFile.open(QIODevice::Append | QIODevice::Text);
+            }
         }
         if (newJsonFile.isOpen())
         {
@@ -139,13 +156,15 @@ void Logger::incomingJsonData(const QVariantMap jsonMap)
             newLineStream << '\n';
             newJsonFile.close();
         }
-        else emit showStatusMessage(tr("Error write json"));
+        else {
+            emit showStatusMessage(tr("Error write json"));
+        }
     }
     else if (!json && !createNewJsonFileNamePermission)
     {
-            emit toTextLog((QString(tr("Stop write json file"))), true);
-            newJsonFile.close();
-            createNewJsonFileNamePermission = true;
+        emit toTextLog((QString(tr("Stop write json file"))), true);
+        newJsonFile.close();
+        createNewJsonFileNamePermission = true;
     }
 }
 
