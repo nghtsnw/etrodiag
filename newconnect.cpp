@@ -12,6 +12,7 @@
 #include <QtXml/QtXml>
 #include <QtXml/QDomNode>
 #include <QFile>
+#include <QDomNodeList>
 
 newconnect::newconnect(QWidget *parent) :
     QWidget(parent),
@@ -214,7 +215,7 @@ void newconnect::transData(QVector<int> snapshot)
 
 void newconnect::prepareToSaveProfile()
 {
-    const SettingsDialog::Settings p = m_settings->settings();
+    p = m_settings->settings();
     if (!p.readOnlyProfile)
     {   //очищаем список, выставляем разрешение для дальнейших операций по сохранению, даём сигнал на запрос всех масок
 //        maskVectorsList = this->findChildren<bitMaskDataStruct*>();
@@ -223,7 +224,21 @@ void newconnect::prepareToSaveProfile()
 //        while (maskVectorsListIt.hasNext()) {
 //            maskVectorsListIt.next()->~bitMaskDataStruct();
 //        }
-        //тут вкорячить очистку xml от всех масок
+        profile.setFileName(p.profilePath);
+        QFileInfo info(profile);
+        //profile.open(QIODevice::ReadWrite);
+        QDomDocument doc;
+        //doc.setContent(&profile);
+        QDomProcessingInstruction instruction;
+        instruction = doc.createProcessingInstruction("xml", "version=\"1.0\" encoding=\"UTF-8\"");
+        doc.appendChild(instruction);
+        QDomElement root = doc.createElement("profile");// Создать корневой узел
+        doc.appendChild(root);// Добавить корневой узел
+        root.setAttribute("name", info.fileName());
+
+        QDomElement strDevices = doc.createElement("devices");
+        root.appendChild(strDevices);
+
         permission2SaveMasks = true;
         emit saveAllMasks();
     }
@@ -236,41 +251,39 @@ void newconnect::saveProfileSlot4Masks(bitMaskDataStruct &bitMask)//Переде
     //создаются только описания масок, само сохранение будет в другой функции
     if (permission2SaveMasks)
     {
-        const SettingsDialog::Settings p = m_settings->settings();
-        QFile profile(p.profilePath);
-        QFileInfo info(profile);
-        //profile.open(QIODevice::ReadWrite);
-        QDomDocument doc;
-        //doc.setContent(&profile);
-        QDomProcessingInstruction instruction;
-        instruction = doc.createProcessingInstruction("xml", "version=\"1.0\" encoding=\"UTF-8\"");
-        doc.appendChild(instruction);
-        QDomText currentText;
-        QDomElement root = doc.createElement("profile");// Создать корневой узел
-        doc.appendChild(root);// Добавить корневой узел
-        root.setAttribute("name", info.fileName());
 
-        QDomElement strDevices = doc.createElement("devices");
-        root.appendChild(strDevices);
+        QDomNodeList devList = strDevices.elementsByTagName("device"); //Список устройств
+        QDomElement strDev = doc.createElementNS("device", QString::number(bitMask.devNum));
 
-        QDomElement strDev = doc.createElement("device");
-        strDevices.appendChild(strDev);
-        strDev.setAttribute("name", bitMask.devName);
-        strDev.setAttribute("num", bitMask.devNum);
+        if (devList.size() < 1) { //Если нет устройств то создаём
+            strDevices.appendChild(strDev);
+            strDev.setAttribute("name", bitMask.devName);
+            strDev.setAttribute("num", bitMask.devNum);
+        }
+        else { //Если устройство есть, то нужно посмотреть его номер и писать потом в него
+            int i;
+            for (i = 0; i < devList.size(); i++)
+            {
+                if (strDevices.elementsByTagNameNS("device", QString::number(bitMask.devNum)).item(i).nodeName())
+                }
+            //                               = doc.elementsByTagNameNS("device", QString::number(bitMask.devNum));
+            QDomElement strParameter = doc.createElementNS("parameter", QString::number(bitMask.id));
+            strDevices.elementsByTagNameNS("device", QString::number(bitMask.devNum)).item(0).toElement().appendChild(strParameter);
+            strDev.appendChild(strParameter);
+            strParameter.setAttribute("startbyte", bitMask.byteNum);
+            strParameter.setAttribute("name", bitMask.paramName);
+            strParameter.setAttribute("id", bitMask.id);
+            strParameter.setAttribute("binarymask", bitMask.paramMask);
+            strParameter.setAttribute("valueshift", bitMask.valueShift);
+            strParameter.setAttribute("valuekoef", bitMask.valueKoef);
+            strParameter.setAttribute("name", bitMask.paramName);
+            strParameter.setAttribute("viewinlog", bitMask.viewInLogFlag ? "true" : "false");
+            strParameter.setAttribute("wordlenght", bitMask.wordType);
+            strParameter.setAttribute("color", bitMask.drawGraphColor);
+            strParameter.setAttribute("drawongraph", bitMask.drawGraphFlag ? "true" : "false");
+        }
 
-        QDomElement strParameter = doc.createElement("parameter");
-        strDev.appendChild(strParameter);
-        strParameter.setAttribute("startbyte", bitMask.byteNum);
-        strParameter.setAttribute("name", bitMask.paramName);
-        strParameter.setAttribute("id", bitMask.id);
-        strParameter.setAttribute("binarymask", bitMask.paramMask);
-        strParameter.setAttribute("valueshift", bitMask.valueShift);
-        strParameter.setAttribute("valuekoef", bitMask.valueKoef);
-        strParameter.setAttribute("name", bitMask.paramName);
-        strParameter.setAttribute("viewinlog", bitMask.viewInLogFlag ? "true" : "false");
-        strParameter.setAttribute("wordlenght", bitMask.wordType);
-        strParameter.setAttribute("color", bitMask.drawGraphColor);
-        strParameter.setAttribute("drawongraph", bitMask.drawGraphFlag ? "true" : "false");
+
 
         if(!profile.open(QIODevice::Truncate | QIODevice::WriteOnly))
         {
@@ -351,7 +364,6 @@ void newconnect::readProfile()
     QFileInfo info(profile);
     currentProfileName = getProfileNameFromInfo(info);
     emit profileName2log(currentProfileName);
-    //profile.open(QIODevice::ReadOnly | QIODevice::Text);
     QDomDocument domDocument;
     domDocument.setContent(&profile);
     QDomElement topElement = domDocument.documentElement();
