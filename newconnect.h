@@ -10,6 +10,8 @@
 #include "getstream.h"
 #include "dataprofiler.h"
 #include <bitmaskstruct.h>
+#include <QTimer>
+#include <QtXml>
 
 namespace Ui {
     class newconnect;
@@ -93,6 +95,11 @@ private:
     const int bytesPerOneShot = 20;
     int pos = 0;
     QString getProfileNameFromInfo(QFileInfo &info);
+
+    QDomDocument doc;
+    QDomElement strDevices;
+    SettingsDialog::Settings p;
+    QFile profile;
 
 protected:
     virtual void resizeEvent(QResizeEvent *event);

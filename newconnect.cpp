@@ -253,36 +253,41 @@ void newconnect::saveProfileSlot4Masks(bitMaskDataStruct &bitMask)//Переде
     {
 
         QDomNodeList devList = strDevices.elementsByTagName("device"); //Список устройств
-        QDomElement strDev = doc.createElementNS("device", QString::number(bitMask.devNum));
+        QDomElement *strDev = new (QDomElement);
+        //new (QDomElement);// = doc.createElementNS("device", QString::number(bitMask.devNum));
 
         if (devList.size() < 1) { //Если нет устройств то создаём
-            strDevices.appendChild(strDev);
-            strDev.setAttribute("name", bitMask.devName);
-            strDev.setAttribute("num", bitMask.devNum);
+            *strDev = doc.createElementNS("device", QString::number(bitMask.devNum));
+            strDevices.appendChild(*strDev);
+            strDev->setAttribute("name", bitMask.devName);
+            strDev->setAttribute("num", bitMask.devNum);
         }
         else { //Если устройство есть, то нужно посмотреть его номер и писать потом в него
-            int i;
-            for (i = 0; i < devList.size(); i++)
+            *strDev = strDevices.firstChildElement("device");
+            for (int i = 0; i < devList.size(); i++)
             {
-                if (strDevices.elementsByTagNameNS("device", QString::number(bitMask.devNum)).item(i).nodeName())
+                if (strDevices.attributeNS("parameter", "devnum") == bitMask.devNum) {
+                    break;
                 }
-            //                               = doc.elementsByTagNameNS("device", QString::number(bitMask.devNum));
-            QDomElement strParameter = doc.createElementNS("parameter", QString::number(bitMask.id));
-            strDevices.elementsByTagNameNS("device", QString::number(bitMask.devNum)).item(0).toElement().appendChild(strParameter);
-            strDev.appendChild(strParameter);
-            strParameter.setAttribute("startbyte", bitMask.byteNum);
-            strParameter.setAttribute("name", bitMask.paramName);
-            strParameter.setAttribute("id", bitMask.id);
-            strParameter.setAttribute("binarymask", bitMask.paramMask);
-            strParameter.setAttribute("valueshift", bitMask.valueShift);
-            strParameter.setAttribute("valuekoef", bitMask.valueKoef);
-            strParameter.setAttribute("name", bitMask.paramName);
-            strParameter.setAttribute("viewinlog", bitMask.viewInLogFlag ? "true" : "false");
-            strParameter.setAttribute("wordlenght", bitMask.wordType);
-            strParameter.setAttribute("color", bitMask.drawGraphColor);
-            strParameter.setAttribute("drawongraph", bitMask.drawGraphFlag ? "true" : "false");
+                *strDev = strDevices.nextSiblingElement();
+            }
         }
 
+        QDomElement strParameter = doc.createElementNS("parameter", QString::number(bitMask.id));
+        strDevices.elementsByTagNameNS("device", QString::number(bitMask.devNum)).item(0).toElement().appendChild(strParameter);
+        strDev->appendChild(strParameter);
+        strParameter.setAttribute("devnum", bitMask.devNum);
+        strParameter.setAttribute("startbyte", bitMask.byteNum);
+        strParameter.setAttribute("name", bitMask.paramName);
+        strParameter.setAttribute("id", bitMask.id);
+        strParameter.setAttribute("binarymask", bitMask.paramMask);
+        strParameter.setAttribute("valueshift", bitMask.valueShift);
+        strParameter.setAttribute("valuekoef", bitMask.valueKoef);
+        strParameter.setAttribute("name", bitMask.paramName);
+        strParameter.setAttribute("viewinlog", bitMask.viewInLogFlag ? "true" : "false");
+        strParameter.setAttribute("wordlenght", bitMask.wordType);
+        strParameter.setAttribute("color", bitMask.drawGraphColor);
+        strParameter.setAttribute("drawongraph", bitMask.drawGraphFlag ? "true" : "false");
 
 
         if(!profile.open(QIODevice::Truncate | QIODevice::WriteOnly))
