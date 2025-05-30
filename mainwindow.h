@@ -91,6 +91,8 @@ public:
     void addConnection();
     newconnect *connection = nullptr;
     QLabel *statuslbl = nullptr;
+    QPushButton *aboutButton = nullptr;
+    const QString BUILDV =  QStringLiteral(__DATE__ " " __TIME__);
     void openMaskSettingsDialog();
     void createDevice(int devNum);
     void loadProfile(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor);
@@ -163,8 +165,8 @@ private:
 protected:
     Ui::MainWindow *m_ui = nullptr;
     virtual void resizeEvent(QResizeEvent *) override;
-    bool event(QEvent *event) override;
-    bool eventFilter(QObject *obj, QEvent *ev) override;
+    //bool event(QEvent *event) override;
+    //bool eventFilter(QObject *obj, QEvent *ev) override;
 
 public:
     devSettingsForm devSettForm;

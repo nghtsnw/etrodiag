@@ -1,23 +1,19 @@
 #include "mainwindow.h"
-#include "console.h"
 #include "ui_mainwindow.h"
-#include "settingsdialog.h"
 #include "newconnect.h"
 #include <QtWidgets>
 #include <QDebug>
 #include <QPushButton>
-#include "dataprofiler.h"
 #include <QList>
 #include "device.h"
 #include "devsettingsform.h"
 #include "bytesettingsform.h"
-#include "bytebutton.h"
 #include <QGestureEvent>
 #include <QSwipeGesture>
 #include <QMap>
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent), statuslbl (new QLabel), m_ui (new Ui::MainWindow)
+    QMainWindow(parent), statuslbl (new QLabel), aboutButton (new QPushButton), m_ui (new Ui::MainWindow)
 
 {
 //    QVector<Qt::GestureType> gestures;
@@ -27,8 +23,11 @@ MainWindow::MainWindow(QWidget *parent) :
 //  Надеюсь, что когда в qt починят qswipegesture, я раскомментирую это и удалю тот ужас что сейчас заменяет свайп.
     m_ui->setupUi(this);
     statusBar()->addWidget(statuslbl);
-    statuslbl->setText("Etrodiag beta");
-    addConnection();    
+    statuslbl->setText(tr("Build from ") + BUILDV);   
+    //m_ui->tabWidget->layout()->addWidget(aboutButton);//, 0, 1, 1, 1, Qt::AlignVCenter | Qt::AlignRight
+    aboutButton->setParent(m_ui->tabWidget);
+    aboutButton->setText("...");
+    addConnection();
     connect (&byteSettForm, &ByteSettingsForm::editMask, &maskSettForm, &maskSettingsDialog::requestDataOnId);
     connect (this, &MainWindow::dvsfAfterCloseClear, &devSettForm, &devSettingsForm::afterCloseClearing);
     connect (m_ui->valueArea, &QTabWidget::currentChanged, this, &MainWindow::setCurrentOpenTab);
@@ -40,7 +39,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //m_ui->textBrowser->viewport()->installEventFilter(this);
 
-    m_ui->aboutimg->setPixmap(pixmap->scaledToWidth(m_ui->tab_about->size().width(), Qt::FastTransformation));
+    m_ui->aboutimg->setPixmap(pixmap->scaledToWidth(m_ui->tab_about->size().width()/2, Qt::FastTransformation));
     m_ui->aboutimg->setScaledContents(true);
     m_ui->aboutimg->show();
     graphiq.setParent(m_ui->graphLabel);
@@ -295,11 +294,10 @@ void MainWindow::updValueArea(QString parameterName, int devNum, QString devName
                     if (value2str != valueTable->item(i,1)->text())
                     {
                         valueTable->item(i,1)->setText(value2str);
-                        valueTable->item(i,1)->setBackgroundColor(Qt::green);
-                       //метод setbackgroundcolor устаревший, по возможности переписать на делегаты
+                        valueTable->item(i,1)->setBackground(Qt::green);
                     }
                     else if (value2str == valueTable->item(i,1)->text())
-                        valueTable->item(i,1)->setBackgroundColor(Qt::white);
+                        valueTable->item(i,1)->setBackground(Qt::white);
                 }
             }
         }
@@ -402,11 +400,6 @@ void MainWindow::resizeEvent(QResizeEvent*)
     byteSettForm.resize(m_ui->rightFrame->size());
     maskSettForm.resize(m_ui->rightFrame->size());
     graphiq.resize(m_ui->graphLabel->size());
-
-    m_ui->helpText->viewport()->setMinimumWidth(m_ui->tab_about->width()*0.9);
-    m_ui->helpText->document()->setTextWidth(m_ui->helpText->viewport()->size().width());
-    auto docSize = m_ui->helpText->document()->size().toSize();
-    m_ui->helpText->setMinimumHeight(docSize.height() + 10);
 }
 
 void MainWindow::cleanDevList()
@@ -422,7 +415,7 @@ void MainWindow::on_tabWidget_currentChanged(int)
     graphiq.resize(m_ui->graphLabel->size());
 }
 //так как не получилось заставить работать SwipeGesture, я напишу свой свайп. Для пролистывания табов его хватит.
-bool MainWindow::eventFilter(QObject *obj, QEvent *event)//взято из документации к QObject::eventFilter
+/*bool MainWindow::eventFilter(QObject *obj, QEvent *event)//взято из документации к QObject::eventFilter
 {//ещё немножко костылей ради того что-бы свайп работал
 
     if (obj == m_ui->logArea || m_ui->valueArea || m_ui->aboutText)
@@ -510,4 +503,4 @@ void MainWindow::swipeTriggered(QString gesture)
             m_ui->tabWidget->setCurrentIndex(m_ui->tabWidget->currentIndex()+1);
         }
         update();
-}
+}*/

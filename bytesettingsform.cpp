@@ -9,7 +9,7 @@ ByteSettingsForm::ByteSettingsForm(QWidget *parent) :
     ui(new Ui::ByteSettingsForm)
 {
     ui->setupUi(this);
-    ui->masksWidget->setEditTriggers(0);
+    ui->masksWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->masksWidget->setHorizontalHeaderLabels(lst);
 }
 

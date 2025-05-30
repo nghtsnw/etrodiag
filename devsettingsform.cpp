@@ -1,10 +1,8 @@
 #include "devsettingsform.h"
 #include "ui_devsettingsform.h"
-#include <QRegExpValidator>
 #include <QDebug>
 #include <QPushButton>
 #include <QGridLayout>
-#include "bytesettingsform.h"
 #include "bytebutton.h"
 
 devSettingsForm::devSettingsForm(QWidget *parent) :
