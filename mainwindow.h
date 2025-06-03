@@ -56,6 +56,7 @@
 #include <QSerialPort>
 #include <QHBoxLayout>
 #include <QPushButton>
+#include "aboutdialog.h"
 #include "devsettingsform.h"
 #include "bytesettingsform.h"
 #include "device.h"
@@ -91,8 +92,7 @@ public:
     void addConnection();
     newconnect *connection = nullptr;
     QLabel *statuslbl = nullptr;
-    QPushButton *aboutButton = nullptr;
-    const QString BUILDV =  QStringLiteral(__DATE__ " " __TIME__);
+    QPushButton *aboutButton = nullptr;    
     void openMaskSettingsDialog();
     void createDevice(int devNum);
     void loadProfile(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor);
@@ -133,6 +133,7 @@ public slots:
 private slots:
 
     void on_tabWidget_currentChanged(int);
+    void onAboutButtonClicked(bool);
 
 private:
     void initActionsConnections();
@@ -150,7 +151,7 @@ private:
     QTableWidget *valueTable = nullptr;
     QString tmp;
 private:
-    QPixmap *pixmap = new QPixmap(":/etrodiag.png");
+    AboutDialog aboutDialog;
     QLabel *m_status = nullptr;
     bool touchTrigger = false;
     int mouseStartX;

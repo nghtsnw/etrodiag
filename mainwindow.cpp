@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "aboutdialog.h"
 #include "ui_mainwindow.h"
 #include "newconnect.h"
 #include <QtWidgets>
@@ -22,11 +23,10 @@ MainWindow::MainWindow(QWidget *parent) :
 //    grabGesture(gesture);
 //  Надеюсь, что когда в qt починят qswipegesture, я раскомментирую это и удалю тот ужас что сейчас заменяет свайп.
     m_ui->setupUi(this);
-    statusBar()->addWidget(statuslbl);
-    statuslbl->setText(tr("Build from ") + BUILDV);   
-    //m_ui->tabWidget->layout()->addWidget(aboutButton);//, 0, 1, 1, 1, Qt::AlignVCenter | Qt::AlignRight
-    aboutButton->setParent(m_ui->tabWidget);
-    aboutButton->setText("...");
+    statusBar()->addWidget(statuslbl, 1);
+    statusBar()->addWidget(aboutButton);
+    statuslbl->setText(tr("Etrodiag"));
+    aboutButton->setText(tr("About"));
     addConnection();
     connect (&byteSettForm, &ByteSettingsForm::editMask, &maskSettForm, &maskSettingsDialog::requestDataOnId);
     connect (this, &MainWindow::dvsfAfterCloseClear, &devSettForm, &devSettingsForm::afterCloseClearing);
@@ -34,14 +34,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect (&logger, &Logger::showStatusMessage, this, &MainWindow::showStatusMessage);
     connect (&logger, &Logger::toTextLog, this, &MainWindow::textLogWindow);
     connect (this, &MainWindow::toTxtLogger, &logger, &Logger::incomingTxtData);
-
+    connect (aboutButton, &QPushButton::clicked, this, &MainWindow::onAboutButtonClicked);
     m_ui->logArea->viewport()->installEventFilter(this);
-
-    //m_ui->textBrowser->viewport()->installEventFilter(this);
-
-    m_ui->aboutimg->setPixmap(pixmap->scaledToWidth(m_ui->tab_about->size().width()/2, Qt::FastTransformation));
-    m_ui->aboutimg->setScaledContents(true);
-    m_ui->aboutimg->show();
     graphiq.setParent(m_ui->graphLabel);
     m_ui->tabWidget->setCurrentIndex(0);
     m_ui->tab_connections->show();
@@ -413,6 +407,11 @@ void MainWindow::cleanDevList()
 void MainWindow::on_tabWidget_currentChanged(int)
 {//так как сразу после пуска программы ресайз виджета не срабатывает, вешаю его на событие смены таба
     graphiq.resize(m_ui->graphLabel->size());
+}
+
+void MainWindow::onAboutButtonClicked(bool)
+{
+    aboutDialog.show();
 }
 //так как не получилось заставить работать SwipeGesture, я напишу свой свайп. Для пролистывания табов его хватит.
 /*bool MainWindow::eventFilter(QObject *obj, QEvent *event)//взято из документации к QObject::eventFilter

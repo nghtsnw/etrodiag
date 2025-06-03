@@ -5,6 +5,7 @@ TARGET = etrodiag
 TEMPLATE = app
 TRANSLATIONS = etrodiag_ru.ts
 SOURCES += \
+    aboutdialog.cpp \
     bitmaskobj.cpp \
     bitsetform.cpp \
     bytebutton.cpp \
@@ -26,6 +27,7 @@ SOURCES += \
     txtmaskobj.cpp
 
 HEADERS += \
+    aboutdialog.h \
     bitmaskobj.h \
     bitsetform.h \
     bytebutton.h \
@@ -46,6 +48,7 @@ HEADERS += \
     txtmaskobj.h
 
 FORMS += \
+    aboutdialog.ui \
     bitsetform.ui \
     bytesettingsform.ui \
     devsettingsform.ui \
