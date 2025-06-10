@@ -2,6 +2,63 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="ru_RU">
 <context>
+    <name>AboutDialog</name>
+    <message>
+        <location filename="aboutdialog.ui" line="23"/>
+        <source>About</source>
+        <translation>О программе</translation>
+    </message>
+    <message>
+        <location filename="aboutdialog.ui" line="29"/>
+        <source>aboutImg</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="aboutdialog.ui" line="51"/>
+        <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Microsoft JhengHei UI&apos;; font-size:8pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:20pt; font-weight:600;&quot;&gt;etrodiag&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-weight:600;&quot;&gt;Tool for monitoring data change between devices&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a href=&quot;https://github.com/nghtsnw/etrodiag&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; text-decoration: underline; color:#0000ff;&quot;&gt;Project page on GitHub&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;Maked on parts Qt &amp;quot;Terminal&amp;quot; example&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a href=&quot;https://github.com/nghtsnw&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; text-decoration: underline; color:#0000ff;&quot;&gt;Ilia Kiiashko&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;Thanks:&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a href=&quot;https://github.com/gmoximko&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; text-decoration: underline; color:#0000ff;&quot;&gt;Max Bakirov&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;Alexey Borzenkov&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Microsoft JhengHei UI&apos;; font-size:8pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:20pt; font-weight:600;&quot;&gt;etrodiag&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-weight:600;&quot;&gt;Инструмент для мониторинга обмена данными между устройствами&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a href=&quot;https://github.com/nghtsnw/etrodiag&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; text-decoration: underline; color:#0000ff;&quot;&gt;Страница на GitHub&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a href=&quot;https://github.com/nghtsnw&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; text-decoration: underline; color:#0000ff;&quot;&gt;Илья Кияшко&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;Спасибо:&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a href=&quot;https://github.com/gmoximko&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; text-decoration: underline; color:#0000ff;&quot;&gt;Максим Бакиров&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;Алексей Борзенков&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="aboutdialog.ui" line="79"/>
+        <source>Ok</source>
+        <translation>Ок</translation>
+    </message>
+    <message>
+        <location filename="aboutdialog.h" line="21"/>
+        <source>Build from </source>
+        <translation>Сборка от </translation>
+    </message>
+</context>
+<context>
     <name>ByteSettingsForm</name>
     <message>
         <location filename="bytesettingsform.ui" line="20"/>
@@ -45,6 +102,7 @@
 <context>
     <name>Logger</name>
     <message>
+        <location filename="logger.cpp" line="54"/>
         <location filename="logger.cpp" line="90"/>
         <source>Start write log file </source>
         <translation>Начата запись log файла </translation>
@@ -55,12 +113,11 @@
         <translation>Ошибка записи bin файла</translation>
     </message>
     <message>
-        <location filename="logger.cpp" line="54"/>
         <source>Start write bin file </source>
-        <translation>Начата запись bin файла </translation>
+        <translation type="vanished">Начата запись bin файла </translation>
     </message>
     <message>
-        <location filename="logger.cpp" line="70"/>
+        <location filename="logger.cpp" line="68"/>
         <source>Stop write bin file</source>
         <translation>Стоп записи bin файла</translation>
     </message>
@@ -71,7 +128,7 @@
         <translation>Ошибка открытия log файла</translation>
     </message>
     <message>
-        <location filename="logger.cpp" line="111"/>
+        <location filename="logger.cpp" line="108"/>
         <source>Stop write log file</source>
         <translation>Стоп записи log файла</translation>
     </message>
@@ -86,7 +143,7 @@
         <translation>Ошибка записи json</translation>
     </message>
     <message>
-        <location filename="logger.cpp" line="148"/>
+        <location filename="logger.cpp" line="146"/>
         <source>Stop write json file</source>
         <translation>Стоп записи json файла</translation>
     </message>
@@ -119,17 +176,16 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="177"/>
+        <location filename="mainwindow.cpp" line="28"/>
+        <source>Etrodiag</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="29"/>
         <source>About</source>
         <translation>О программе</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="222"/>
-        <source>aboutimg</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="358"/>
         <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
@@ -143,7 +199,7 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Thanks:&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a href=&quot;https://github.com/gmoximko&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Max Bakirov&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Alexey Borzenkov&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+        <translation type="vanished">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
@@ -158,7 +214,6 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Алексей Борзенков&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="467"/>
         <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
@@ -169,7 +224,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Separate device data packets are generated from a continuous stream of raw data. Packets start with two bytes containing FF, have a pre-known length of 40 bytes, and after counting the number of bytes in the packet, the next two bytes must be FF, which means the beginning of the next packet. In this case, the data packet is recognized as correct and sent for further processing. In the graphical interface, the button of the device corresponding to the device number from the package appears, in the future, all packets with this device number are processed by data masks of this device, giving changes to parameters and values in text or graphic form.&lt;/p&gt;
 &lt;h4 style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:medium; font-weight:600;&quot;&gt;Getting started&lt;/span&gt;&lt;/h4&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Immediately after starting the program, the connection setup dialog opens on the &amp;quot;Connection&amp;quot; tab. In this dialog, the data source is set-com port or binary file, connection parameters with the data source, in what form to write a log-binary file, json and text, create or select a device network profile. If the &amp;quot;Read-only&amp;quot; checkbox is selected, all mask changes will not be saved in the profile. After clicking the &amp;quot;Apply&amp;quot; button, the dialog closes. The console and the &amp;quot;Setup&amp;quot; and &amp;quot;Connect&amp;quot; buttons are displayed. When you click the Connect button, a connection is made to the data source. If the connection is correct, data in hex format starts appearing in the console.&lt;br /&gt;On the &amp;quot;Profile Settings&amp;quot; tab, a button appears with the device number taken from the second byte of the package.Clicking on the device button opens a dialog that displays the device name input field and 40 buttons that visualize each byte of the package. When a byte is changed, the button is briefly highlighted in green. Since some device variables can be not only 8 bits, but also 16 and 32, bytes can be combined into words. In this case, the high byte button displays all the data of the word in hex form, the low byte buttons of the word are inactive and indicated by the arrow &amp;quot;--&amp;gt;&amp;quot;. If there is at least one mask in the word, then the word size cannot be changed.&lt;br /&gt;Clicking the byte/word button opens a dialog with a list of masks. Masks allow you to correlate changes to specific bytes of a word with a specific parameter or value of a device variable. Masks are also the source of parameter-value data displayed in text form or in the form of a graph.&lt;br /&gt;By adding a new mask, or selecting an existing one, you can set the processed data bytes, the multiplier and shift of the final value, the output of the value in the log or on the graph, the color of the curve on the graph.Pressing the device button returns to the previous dialog. When you exit the device settings dialog, if the &amp;quot;Read-only&amp;quot; option is unchecked in the connection settings, the profile is saved with the corresponding line displayed in the text log.&lt;br /&gt;On the &amp;quot;Profile Settings&amp;quot; tab, devices are displayed on the left side, and on the right side of the tab of each of the devices with the available parameter masks and their current values. When the value is changed, its designation in the line is highlighted in green. The &amp;quot;Monitoring&amp;quot; tab displays a graph of the process of changing the selected parameters and a text log. The graph allows you to record the minima and maxima of values since the beginning of the reference of these values. These values are reset by double-clicking on the chart with the left mouse button.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;h4&gt;Добро пожаловать в etrodiag!&lt;/h4&gt;
+        <translation type="vanished">&lt;h4&gt;Добро пожаловать в etrodiag!&lt;/h4&gt;
 &lt;p&gt;&lt;br /&gt;Программа предназначена для контроля и диагностики сети устройств, протокол обмена данными которых представляет собой поочерёдное вещание в общую линию обмена данными пакетов с фиксированным размером в 40 байт, из которых байты 0 и 1 это FF, байт 2 номер устройства.&lt;br /&gt;Она позволяет в режиме онлайн наблюдать за изменением параметров каждого из устройств на графике и в текстовом виде с отметками времени.&lt;/p&gt;
 &lt;h4&gt;Принцип работы программы&lt;/h4&gt;
 &lt;p&gt;Из непрерывного потока сырых данных формируются отдельные пакеты данных устройства. Начинаются пакеты с двух байт содержащих FF, имеют заранее известную длину в 40 байт, и после отсчёта количества байт в пакете, следующие два байта должны быть FF, что означает начало следующего пакета. В этом случае пакет данных признаётся корректным и отправляется на дальнейшую обработку. В графическом интерфейсе появляется кнопка устройства соответствующего номеру устройства из пакета, в дальнейшем все пакеты с этим номером устройства обрабатываются масками данных этого устройства, выдавая изменения параметров и значений в текстовом или графическом виде.&lt;/p&gt;
@@ -256,7 +311,7 @@ p, li { white-space: pre-wrap; }
         <translation type="vanished">Стоп записи JSON файла</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="396"/>
+        <location filename="mainwindow.cpp" line="389"/>
         <source>Device %1 is %2</source>
         <translation>Устройство %1 %2</translation>
     </message>
@@ -379,11 +434,6 @@ p, li { white-space: pre-wrap; }
         <translation>JSON</translation>
     </message>
     <message>
-        <location filename="settingsdialog.cpp" line="13"/>
-        <source>N/A</source>
-        <translation></translation>
-    </message>
-    <message>
         <location filename="settingsdialog.cpp" line="63"/>
         <source>Description: %1</source>
         <translation>Описание: %1</translation>
@@ -437,6 +487,17 @@ p, li { white-space: pre-wrap; }
         <translation>Нет</translation>
     </message>
     <message>
+        <location filename="settingsdialog.cpp" line="103"/>
+        <location filename="settingsdialog.cpp" line="172"/>
+        <source>Read from file</source>
+        <translation>Читать из файла</translation>
+    </message>
+    <message>
+        <location filename="settingsdialog.cpp" line="13"/>
+        <source>N/A</source>
+        <translation></translation>
+    </message>
+    <message>
         <location filename="settingsdialog.cpp" line="132"/>
         <source>Even</source>
         <translation></translation>
@@ -472,12 +533,6 @@ p, li { white-space: pre-wrap; }
         <translation></translation>
     </message>
     <message>
-        <location filename="settingsdialog.cpp" line="103"/>
-        <location filename="settingsdialog.cpp" line="172"/>
-        <source>Read from file</source>
-        <translation>Читать из файла</translation>
-    </message>
-    <message>
         <location filename="settingsdialog.cpp" line="244"/>
         <source>newprofile</source>
         <translation>Новый профиль</translation>
@@ -493,7 +548,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="bitsetform.ui" line="26"/>
         <source>Form</source>
-        <translation></translation>
+        <translation>Форма</translation>
     </message>
     <message>
         <location filename="bitsetform.ui" line="62"/>
@@ -511,7 +566,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="devsettingsform.ui" line="14"/>
         <source>Form</source>
-        <translation></translation>
+        <translation>Форма</translation>
     </message>
     <message>
         <location filename="devsettingsform.ui" line="29"/>
@@ -524,7 +579,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="livegraph.ui" line="14"/>
         <source>Form</source>
-        <translation></translation>
+        <translation>Форма</translation>
     </message>
 </context>
 <context>
@@ -595,7 +650,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="newconnect.ui" line="26"/>
         <source>Form</source>
-        <translation></translation>
+        <translation>Форма</translation>
     </message>
     <message>
         <location filename="newconnect.ui" line="46"/>
