@@ -103,7 +103,7 @@ void Logger::incomingTxtData(const QString string)
         }
         else txtLogQueue.enqueue(string);
     }
-    if (!txt && !createNewTxtFileNamePermission)//если сняли галку в настройках при активном соединении, закрываем файл
+    if (!txt && !createNewTxtFileNamePermission && newLogFile.isOpen())//если сняли галку в настройках при активном соединении, закрываем файл
     {
         emit toTextLog(QString(tr("Stop write log file")), true);
         newLogFile.close();

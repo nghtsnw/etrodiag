@@ -27,13 +27,14 @@ MainWindow::MainWindow(QWidget *parent) :
     statusBar()->addWidget(aboutButton);
     statuslbl->setText(tr("Etrodiag"));
     aboutButton->setText(tr("About"));
+    logger = new Logger;
     addConnection();
     connect (&byteSettForm, &ByteSettingsForm::editMask, &maskSettForm, &maskSettingsDialog::requestDataOnId);
     connect (this, &MainWindow::dvsfAfterCloseClear, &devSettForm, &devSettingsForm::afterCloseClearing);
     connect (m_ui->valueArea, &QTabWidget::currentChanged, this, &MainWindow::setCurrentOpenTab);
-    connect (&logger, &Logger::showStatusMessage, this, &MainWindow::showStatusMessage);
-    connect (&logger, &Logger::toTextLog, this, &MainWindow::textLogWindow);
-    connect (this, &MainWindow::toTxtLogger, &logger, &Logger::incomingTxtData);
+    connect (logger, &Logger::showStatusMessage, this, &MainWindow::showStatusMessage);
+    connect (logger, &Logger::toTextLog, this, &MainWindow::textLogWindow);
+    connect (this, &MainWindow::toTxtLogger, logger, &Logger::incomingTxtData);
     connect (aboutButton, &QPushButton::clicked, this, &MainWindow::onAboutButtonClicked);
     m_ui->logArea->viewport()->installEventFilter(this);
     graphiq.setParent(m_ui->graphLabel);
@@ -54,16 +55,16 @@ void MainWindow::addConnection()
     connect (connection, &newconnect::sendStatusStr, this, &MainWindow::showStatusMessage);
     connect (connection, &newconnect::transmitData, this, &MainWindow::addDeviceToList);
     connect (connection, &newconnect::cleanDevListSig, this, &MainWindow::cleanDevList);
-    connect (connection, &newconnect::writeTextLog, &logger, &Logger::setTxt);
-    connect (connection, &newconnect::writeJsonLog, &logger, &Logger::setJson);
-    connect (connection, &newconnect::writeBinLog, &logger, &Logger::setBin);
+    connect (connection, &newconnect::writeTextLog, logger, &Logger::setTxt);
+    connect (connection, &newconnect::writeJsonLog, logger, &Logger::setJson);
+    connect (connection, &newconnect::writeBinLog, logger, &Logger::setBin);
     connect (connection, &newconnect::cleanGraph, &graphiq, &liveGraph::cleanGraph);
     connect (this, &MainWindow::prepareToSaveProfile, connection, &newconnect::prepareToSaveProfile);
     connect (this, &MainWindow::saveProfile, connection, &newconnect::saveProfile);
-    connect (connection, &newconnect::sendRawData, &logger, &Logger::incomingBinData);
-    connect (connection, &newconnect::startLog, &logger, &Logger::startLog);
-    connect (connection, &newconnect::stopLog, &logger, &Logger::stopLog);
-    connect (connection, &newconnect::profileName2log, &logger, &Logger::setProfileName);
+    connect (connection, &newconnect::sendRawData, logger, &Logger::incomingBinData);
+    connect (connection, &newconnect::startLog, logger, &Logger::startLog);
+    connect (connection, &newconnect::stopLog, logger, &Logger::stopLog);
+    connect (connection, &newconnect::profileName2log, logger, &Logger::setProfileName);
     connection->show();
 }
 
@@ -140,7 +141,7 @@ void MainWindow::createDevice(int devNum)
     connect (connection, &newconnect::saveAllMasks, dev, &Device::requestMasks4Saving);
     connect (dev, &Device::allMasksToListTX, connection, &newconnect::saveProfileSlot4Masks);
     connect (this, &MainWindow::toJsonMap, dev, &Device::jsonMap);
-    connect (dev, &Device::devParamsToJson, &logger, &Logger::incomingJsonData);
+    connect (dev, &Device::devParamsToJson, logger, &Logger::incomingJsonData);
     dev->show();
 }
 
@@ -356,7 +357,7 @@ void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QStr
 
 void MainWindow::textLogWindow(QString string, bool redFlag)
 {
-    static QString stringWithTime = (returnTimestamp().toString("hh:mm:ss:zzz") + " " + string);
+    QString stringWithTime = (returnTimestamp().toString("hh:mm:ss:zzz") + " " + string);
     emit toTxtLogger(stringWithTime);
     if (!redFlag) m_ui->logArea->appendHtml("<p><span style=color:#000000>" + stringWithTime + "</span></p>");
     else m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + stringWithTime + "</span></p>");

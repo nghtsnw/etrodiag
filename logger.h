@@ -31,8 +31,10 @@ private:
     QString binFileName;
     QString logFileName;
     QString jsonFileName;
-    bool bin, txt, json;
-    bool createNewBinFileNamePermission, createNewJsonFileNamePermission, createNewTxtFileNamePermission;
+    bool bin = false, txt = false, json = false;
+    bool createNewBinFileNamePermission = false,
+        createNewJsonFileNamePermission = false,
+        createNewTxtFileNamePermission = false;
     QDateTime returnTimestamp();
     QString sessionName;    
     QString appHomeDir;
@@ -43,7 +45,7 @@ private:
 
 signals:
     void showStatusMessage(QString);
-    void toTextLog(QString, bool);
+    void toTextLog(QString text, bool redFlag);
 };
 
 #endif // LOGGER_H

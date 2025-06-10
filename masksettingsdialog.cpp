@@ -90,9 +90,11 @@ void maskSettingsDialog::initBitButtonsAndCheckBoxes(int _wordType)
     }
     QString mask = binMaskInTxt;
     uint32_t one = 1;
-    for (int var = wordBit-1, i = 0; var > -1; var--, i++) {
+    for (int var = wordBit, i = 0; var > 0; var--, i++) {
         bool chk;
-        int curmasksym = QString("%1").arg(mask[var]).toInt(0,10);
+        int curmasksym = 0;
+        if (mask.size() >= var)
+            curmasksym = QString("%1").arg(mask[var-1]).toInt(0,10);
         if (curmasksym & one)
             chk = true;
         else chk = false;

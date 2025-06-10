@@ -174,7 +174,7 @@ public:
     ByteSettingsForm byteSettForm;
     maskSettingsDialog maskSettForm;
     liveGraph graphiq;
-    Logger logger;
+    Logger *logger = nullptr;
 };
 
 #endif // MAINWINDOW_H
