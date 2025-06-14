@@ -44,6 +44,7 @@ void cleanDevListSig();
 void cleanGraph();
 void sendStatusStr(QString);
 void transmitData(QVector<int> snapshot);
+void badCRC(uint8_t calculatedCRC, QVector<int> snapshot);
 void saveAllMasks();
 void loadMask(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool _drawGraphFlag, QString _drawGraphColor);
 void writeTextLog(bool);
@@ -69,14 +70,12 @@ private slots:
     void writeData(const QByteArray &data);
     void readData();
     void handleError(QSerialPort::SerialPortError error);
-    void transData(QVector<int> snapshot);
     void on_connectButton_clicked();
     void on_settingsButton_clicked();
 
 private:
     Ui::newconnect *ui;
     QString message;
-    //bool writeBinLog = false;
     bool createNewFileNamePermission = true;
     QString binFileName;
     SettingsDialog::Settings p_local;

@@ -92,6 +92,7 @@ public:
     void addConnection();
     newconnect *connection = nullptr;
     QLabel *statuslbl = nullptr;
+    QLabel *crcerrorlbl = nullptr;
     QPushButton *aboutButton = nullptr;    
     void openMaskSettingsDialog();
     void createDevice(int devNum);
@@ -129,6 +130,7 @@ public slots:
     void openByteSett(int devNum, int byteNum);
     void frontendDataSort(int devNum, QString devName, int, QString, int, int, QString parameterName, int, double endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor);
     void devStatusMsg(QString _devName, QString status);
+    void badCRCEvent(uint8_t calculatedCRC, QVector<int> dataFrame);
 
 private slots:
 
@@ -162,11 +164,12 @@ private:
     int grabDevNum = 0;
     int grabByteNum = 0;
     int grabMaskId = 0;
+    int CRCErrorCount = 0;
 
 protected:
     Ui::MainWindow *m_ui = nullptr;
     virtual void resizeEvent(QResizeEvent *) override;
-    //bool event(QEvent *event) override;
+    bool event(QEvent *event) override;
     //bool eventFilter(QObject *obj, QEvent *ev) override;
 
 public:

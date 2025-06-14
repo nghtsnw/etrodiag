@@ -14,7 +14,7 @@
 #include <QMap>
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent), statuslbl (new QLabel), aboutButton (new QPushButton), m_ui (new Ui::MainWindow)
+    QMainWindow(parent), statuslbl (new QLabel), crcerrorlbl (new QLabel), aboutButton (new QPushButton), m_ui (new Ui::MainWindow)
 
 {
 //    QVector<Qt::GestureType> gestures;
@@ -24,7 +24,9 @@ MainWindow::MainWindow(QWidget *parent) :
 //  Надеюсь, что когда в qt починят qswipegesture, я раскомментирую это и удалю тот ужас что сейчас заменяет свайп.
     m_ui->setupUi(this);
     statusBar()->addWidget(statuslbl, 1);
-    statusBar()->addWidget(aboutButton);
+    statusBar()->addWidget(crcerrorlbl);
+    statusBar()->addWidget(aboutButton);    
+    crcerrorlbl->setText(tr("CRC Errors: ") + QString::number(CRCErrorCount));
     statuslbl->setText(tr("Etrodiag"));
     aboutButton->setText(tr("About"));
     logger = new Logger;
@@ -65,6 +67,7 @@ void MainWindow::addConnection()
     connect (connection, &newconnect::startLog, logger, &Logger::startLog);
     connect (connection, &newconnect::stopLog, logger, &Logger::stopLog);
     connect (connection, &newconnect::profileName2log, logger, &Logger::setProfileName);
+    connect (connection, &newconnect::badCRC, this, &MainWindow::badCRCEvent);
     connection->show();
 }
 
@@ -138,7 +141,7 @@ void MainWindow::createDevice(int devNum)
     connect (this, &MainWindow::sendMaskData, dev, &Device::loadMaskRX);
     connect (this, &MainWindow::hideOtherDevButtons, dev, &Device::hideDevButton);
     connect (dev, &Device::devStatusMessage, this, &MainWindow::devStatusMsg);
-    connect (connection, &newconnect::saveAllMasks, dev, &Device::requestMasks4Saving);
+    connect (connection, &newconnect::saveAllMasks, dev, &Device::requestMasks4Saving);    
     connect (dev, &Device::allMasksToListTX, connection, &newconnect::saveProfileSlot4Masks);
     connect (this, &MainWindow::toJsonMap, dev, &Device::jsonMap);
     connect (dev, &Device::devParamsToJson, logger, &Logger::incomingJsonData);
@@ -403,6 +406,7 @@ void MainWindow::cleanDevList()
     QListIterator<Device*> vlayChildListIt(vlayChildList);
     while(vlayChildListIt.hasNext())
         vlayChildListIt.next()->~Device();
+    CRCErrorCount = 0;
 }
 
 void MainWindow::on_tabWidget_currentChanged(int)
@@ -413,6 +417,24 @@ void MainWindow::on_tabWidget_currentChanged(int)
 void MainWindow::onAboutButtonClicked(bool)
 {
     aboutDialog.show();
+}
+
+void MainWindow::badCRCEvent(uint8_t calculatedCRC, QVector<int> dataFrame)
+{
+    QString str, chr, crcchr;
+    for (int i = 0; i < dataFrame.size(); ++i)
+    {
+        if (i > 0)
+            str += ":";
+        chr = QString::number(dataFrame[i], 16).toUpper();
+        if (chr.size() == 1) chr = '0'+chr;
+        str += chr;
+    }
+    crcchr = QString::number(calculatedCRC, 16).toUpper();
+    if (crcchr.size() == 1) crcchr = '0'+crcchr;
+    textLogWindow(tr("CRC Calc: ") + crcchr + ", Frame: " + str, true);
+    CRCErrorCount++;
+    crcerrorlbl->setText(tr("CRC Errors: ") + QString::number(CRCErrorCount));
 }
 //так как не получилось заставить работать SwipeGesture, я напишу свой свайп. Для пролистывания табов его хватит.
 /*bool MainWindow::eventFilter(QObject *obj, QEvent *event)//взято из документации к QObject::eventFilter
@@ -430,16 +452,16 @@ void MainWindow::onAboutButtonClicked(bool)
     }
     else return QMainWindow::eventFilter(obj, event);
 }
-
+*/
 bool MainWindow::event(QEvent *event)
 {
-    if ((event->type() == QEvent::MouseButtonPress) || (event->type() == QEvent::MouseButtonRelease))
+    /*if ((event->type() == QEvent::MouseButtonPress) || (event->type() == QEvent::MouseButtonRelease))
     {
           QMouseEvent mouseEvent = *static_cast<QMouseEvent*>(event);
           #ifdef Q_OS_ANDROID
           swipeCalc(mouseEvent);
           #endif
-    }
+    }*/
     if ((event->type() == QEvent::MouseButtonDblClick) && graphiq.isVisible())
     {
         graphiq.chngMinMaxVisible();
@@ -447,7 +469,7 @@ bool MainWindow::event(QEvent *event)
 
     return QMainWindow::event(event);
 }
-
+/*
 void MainWindow::swipeCalc(QMouseEvent mouseev)
 {
     if (mouseev.type() == QMouseEvent::MouseButtonPress)

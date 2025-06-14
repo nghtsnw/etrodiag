@@ -35,7 +35,8 @@ newconnect::newconnect(QWidget *parent) :
     connect(m_serial, &QSerialPort::readyRead, this, &newconnect::readData);
     connect(m_console, &Console::getData, this, &newconnect::writeData);
     connect(gstream, &getStream::giveMyByte, datapool, &dataprofiler::getByte);
-    connect(datapool, &dataprofiler::deviceData, this, &newconnect::transData);
+    connect(datapool, &dataprofiler::deviceData, this, &newconnect::transmitData);
+    connect(datapool, &dataprofiler::badCRC, this, &newconnect::badCRC);
     connect(datapool, &dataprofiler::ready4read, gstream, &getStream::readPermission);
     connect(datapool, &dataprofiler::readNext, gstream, &getStream::readIntByte);
     connect(m_settings, &SettingsDialog::restoreConsoleAndButtons, this, &newconnect::restoreWindowAfterApplySettings);
@@ -204,11 +205,6 @@ void newconnect::on_connectButton_clicked()
             ui->connectButton->setText(tr("Disconnect"));
         }
     }
-}
-
-void newconnect::transData(QVector<int> snapshot)
-{
-    emit transmitData(snapshot);
 }
 
 void newconnect::prepareToSaveProfile()
