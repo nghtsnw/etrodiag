@@ -176,14 +176,30 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="28"/>
+        <location filename="mainwindow.cpp" line="29"/>
+        <location filename="mainwindow.cpp" line="437"/>
+        <source>CRC Errors: </source>
+        <translation>Ошибки CRC: </translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="30"/>
         <source>Etrodiag</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="29"/>
+        <location filename="mainwindow.cpp" line="31"/>
         <source>About</source>
         <translation>О программе</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="435"/>
+        <source>CRC Calc: </source>
+        <translation>Битый пакет! Вычисленная CRC: </translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="435"/>
+        <source>Frame: </source>
+        <translation>Для пакета: </translation>
     </message>
     <message>
         <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -311,7 +327,7 @@ p, li { white-space: pre-wrap; }
         <translation type="vanished">Стоп записи JSON файла</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="389"/>
+        <location filename="mainwindow.cpp" line="392"/>
         <source>Device %1 is %2</source>
         <translation>Устройство %1 %2</translation>
     </message>
@@ -659,42 +675,42 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="newconnect.ui" line="62"/>
-        <location filename="newconnect.cpp" line="191"/>
+        <location filename="newconnect.cpp" line="192"/>
         <source>Connect</source>
         <translation>Соединить</translation>
     </message>
     <message>
-        <location filename="newconnect.cpp" line="80"/>
+        <location filename="newconnect.cpp" line="81"/>
         <source>Bufferisation...</source>
         <translation>Буферизация...</translation>
     </message>
     <message>
-        <location filename="newconnect.cpp" line="94"/>
+        <location filename="newconnect.cpp" line="95"/>
         <source>Read file %1</source>
         <translation>Чтение файла %1</translation>
     </message>
     <message>
-        <location filename="newconnect.cpp" line="108"/>
+        <location filename="newconnect.cpp" line="109"/>
         <source>Connected to %1 : %2, %3, %4, %5, %6, %7</source>
         <translation>Соединено с %1 : %2, %3, %4, %5, %6, %7</translation>
     </message>
     <message>
-        <location filename="newconnect.cpp" line="112"/>
+        <location filename="newconnect.cpp" line="113"/>
         <source>Error</source>
         <translation>Ошибка</translation>
     </message>
     <message>
-        <location filename="newconnect.cpp" line="113"/>
+        <location filename="newconnect.cpp" line="114"/>
         <source>Open error</source>
         <translation>Ошибка открытия</translation>
     </message>
     <message>
-        <location filename="newconnect.cpp" line="128"/>
+        <location filename="newconnect.cpp" line="129"/>
         <source>End of file</source>
         <translation>Конец файла</translation>
     </message>
     <message>
-        <location filename="newconnect.cpp" line="139"/>
+        <location filename="newconnect.cpp" line="140"/>
         <source>Disconnected</source>
         <translation>Соединение закрыто</translation>
     </message>
@@ -711,17 +727,17 @@ p, li { white-space: pre-wrap; }
         <translation type="vanished">Стоп записи bin файла</translation>
     </message>
     <message>
-        <location filename="newconnect.cpp" line="172"/>
+        <location filename="newconnect.cpp" line="173"/>
         <source>Critical Error</source>
         <translation>Критическая ошибка</translation>
     </message>
     <message>
-        <location filename="newconnect.cpp" line="192"/>
+        <location filename="newconnect.cpp" line="193"/>
         <source>Connection closed</source>
         <translation>Соединение закрыто</translation>
     </message>
     <message>
-        <location filename="newconnect.cpp" line="204"/>
+        <location filename="newconnect.cpp" line="205"/>
         <source>Disconnect</source>
         <translation>Разъединить</translation>
     </message>

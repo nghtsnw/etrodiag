@@ -432,7 +432,7 @@ void MainWindow::badCRCEvent(uint8_t calculatedCRC, QVector<int> dataFrame)
     }
     crcchr = QString::number(calculatedCRC, 16).toUpper();
     if (crcchr.size() == 1) crcchr = '0'+crcchr;
-    textLogWindow(tr("CRC Calc: ") + crcchr + ", Frame: " + str, true);
+    textLogWindow(tr("CRC Calc: ") + crcchr + ", " + tr("Frame: ") + str, true);
     CRCErrorCount++;
     crcerrorlbl->setText(tr("CRC Errors: ") + QString::number(CRCErrorCount));
 }
