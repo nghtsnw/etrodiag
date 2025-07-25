@@ -62,6 +62,7 @@ void saveProfileSlot4Masks(int devNum, QString devName, int byteNum, QString byt
 void restoreWindowAfterApplySettings();
 void prepareToSaveProfile();
 void saveProfile();
+void receiveCommandFromGui(QVector<quint8> command, bool newcommandflag);
 
 
 private slots:
@@ -72,6 +73,7 @@ private slots:
     void handleError(QSerialPort::SerialPortError error);
     void on_connectButton_clicked();
     void on_settingsButton_clicked();
+    void sendCommand();
 
 private:
     Ui::newconnect *ui;
@@ -86,6 +88,9 @@ private:
     const int bytesPerOneShot = 20;
     int pos = 0;
     QString getProfileNameFromInfo(QFileInfo &info);
+    bool newcommand = false;
+    QVector<quint8> toTransmit;
+    quint8 calcCrc(const QVector<quint8> &arr);
 
 protected:
     virtual void resizeEvent(QResizeEvent *event);

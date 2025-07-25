@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ControlBoard</class>
+ <widget class="QWidget" name="ControlBoard">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>157</width>
+    <height>158</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="1" column="0">
+    <widget class="QPushButton" name="v2Down">
+     <property name="maximumSize">
+      <size>
+       <width>40</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>&lt;</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QPushButton" name="v3Down">
+     <property name="maximumSize">
+      <size>
+       <width>40</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>&lt;</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QLabel" name="v2Label">
+     <property name="maximumSize">
+      <size>
+       <width>60</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>VAR_2</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignmentFlag::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QLabel" name="v1Label">
+     <property name="maximumSize">
+      <size>
+       <width>60</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>VAR_1</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignmentFlag::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QLabel" name="v3Label">
+     <property name="maximumSize">
+      <size>
+       <width>60</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>VAR_3</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignmentFlag::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QLabel" name="v4Label">
+     <property name="maximumSize">
+      <size>
+       <width>60</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>VAR_4</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignmentFlag::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QPushButton" name="v4Down">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>40</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>&lt;</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QPushButton" name="v1Down">
+     <property name="maximumSize">
+      <size>
+       <width>40</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>&lt;</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="2">
+    <widget class="QPushButton" name="v1Up">
+     <property name="maximumSize">
+      <size>
+       <width>40</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>&gt;</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="2">
+    <widget class="QPushButton" name="v2Up">
+     <property name="maximumSize">
+      <size>
+       <width>40</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>&gt;</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2">
+    <widget class="QPushButton" name="v3Up">
+     <property name="maximumSize">
+      <size>
+       <width>40</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>&gt;</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="2">
+    <widget class="QPushButton" name="v4Up">
+     <property name="maximumSize">
+      <size>
+       <width>40</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>&gt;</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

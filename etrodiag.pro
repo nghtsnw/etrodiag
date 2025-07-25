@@ -11,6 +11,7 @@ SOURCES += \
     bytebutton.cpp \
     bytedefinition.cpp \
     bytesettingsform.cpp \
+    controlboard.cpp \
     dataprofiler.cpp \
     device.cpp \
     devsettingsform.cpp \
@@ -33,6 +34,7 @@ HEADERS += \
     bytebutton.h \
     bytedefinition.h \
     bytesettingsform.h \
+    controlboard.h \
     dataprofiler.h \
     device.h \
     devsettingsform.h \
@@ -51,6 +53,7 @@ FORMS += \
     aboutdialog.ui \
     bitsetform.ui \
     bytesettingsform.ui \
+    controlboard.ui \
     devsettingsform.ui \
     livegraph.ui \
     mainwindow.ui \

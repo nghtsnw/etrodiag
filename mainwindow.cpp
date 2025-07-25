@@ -68,6 +68,7 @@ void MainWindow::addConnection()
     connect (connection, &newconnect::stopLog, logger, &Logger::stopLog);
     connect (connection, &newconnect::profileName2log, logger, &Logger::setProfileName);
     connect (connection, &newconnect::badCRC, this, &MainWindow::badCRCEvent);
+    connect(this, &MainWindow::emitCommand, connection, &newconnect::receiveCommandFromGui);
     connection->show();
 }
 
@@ -377,9 +378,9 @@ void MainWindow::loadProfile(int devNum, QString devName, int byteNum, QString b
     if (thisDeviceHere)
         emit sendMaskData(devNum, devName, byteNum, byteName, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType, drawGraphFlag, drawGraphColor);
     else if (!thisDeviceHere)
-    {//создаём устройство и инициализируем пустым пакетом в 40 байт, с номером устройства на позиции 2
+    {//создаём устройство и инициализируем пустым пакетом в oneMsgLeight байт, с номером устройства на позиции 2
         createDevice(devNum);
-        QVector<int> devInitArray(40,0);
+        QVector<int> devInitArray(oneMsgLeight,0);
         devInitArray.replace(2, devNum);
         emit devUpdate(devNum, devInitArray);
         devSettForm.updByteButtons(devNum, devInitArray);
@@ -435,6 +436,21 @@ void MainWindow::badCRCEvent(uint8_t calculatedCRC, QVector<int> dataFrame)
     textLogWindow(tr("CRC Calc: ") + crcchr + ", " + tr("Frame: ") + str, true);
     CRCErrorCount++;
     crcerrorlbl->setText(tr("CRC Errors: ") + QString::number(CRCErrorCount));
+}
+
+void MainWindow::guiCommandHandler(int varNumber, bool action)
+{
+    uint8_t actionChr = action ? 1 : 0;
+    uint8_t varNumberChr = static_cast<unsigned char>(varNumber);
+    QVector<quint8> command = {0xFF, 0x01, varNumberChr, actionChr, 0};
+    /*
+    1 - (FF) начало пакета
+    2 - Тип команды (1 - изменение переменной)
+    3 - Условный номер переменной
+    4 - Воздействие на переменную (0 -, 1 +)
+    5 - контрольная сумма, считается уже при передаче
+    */
+    emit emitCommand(command, true);
 }
 //так как не получилось заставить работать SwipeGesture, я напишу свой свайп. Для пролистывания табов его хватит.
 /*bool MainWindow::eventFilter(QObject *obj, QEvent *event)//взято из документации к QObject::eventFilter

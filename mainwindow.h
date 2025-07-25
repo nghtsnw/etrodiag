@@ -121,6 +121,7 @@ signals:
     void getJsonMap(int devNum);
     void setDevParamsCount(int devNum, int paramsCount);
     void toTxtLogger(QString);
+    void emitCommand(QVector<quint8> command, bool newcommandflag);
 
 public slots:
 
@@ -136,6 +137,7 @@ private slots:
 
     void on_tabWidget_currentChanged(int);
     void onAboutButtonClicked(bool);
+    void guiCommandHandler(int varNumber, bool action);
 
 private:
     void initActionsConnections();
@@ -152,6 +154,7 @@ private:
     QString namesUnited;
     QTableWidget *valueTable = nullptr;
     QString tmp;
+    const int oneMsgLeight = 18; //41 //18 для брнг опытная
 private:
     AboutDialog aboutDialog;
     QLabel *m_status = nullptr;

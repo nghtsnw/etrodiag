@@ -10,9 +10,10 @@ class dataprofiler : public QObject
     Q_OBJECT
 public:
     explicit dataprofiler(QWidget *parent = nullptr);
+    const int oneMsgLeight = 18; //41 //18 для брнг опытная
 
 private:
-    const int oneMsgLeight = 41;
+
     QQueue<int> frameMsg;
     QVector<int> snapshot;
     bool checkCRC(void);

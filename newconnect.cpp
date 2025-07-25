@@ -167,6 +167,25 @@ void newconnect::readData()
     data.clear();
 }
 
+void newconnect::receiveCommandFromGui(QVector<quint8> command, bool newcommandflag)
+{ // Тут принимаем команду сформированную в GUI
+    toTransmit = command;
+    newcommand = newcommandflag;
+}
+
+void newconnect::sendCommand()
+{ // Отправляем команду контроллеру по таймеру после приёма
+    if (m_serial->isOpen()){
+        if (!newcommand) toTransmit = {0xFF, 0xA1, 0, 0, 0};
+        toTransmit.last() = calcCrc(toTransmit);
+        QByteArray ba;
+        for (auto i : qAsConst(toTransmit))
+            ba.append(i);
+        writeData(ba);
+        if (newcommand) newcommand = false;
+    }
+}
+
 void newconnect::handleError(QSerialPort::SerialPortError error)
 {
     if (error == QSerialPort::ResourceError) {
@@ -337,4 +356,11 @@ QDateTime newconnect::returnTimestamp()
 QString newconnect::getProfileNameFromInfo(QFileInfo& info)
 {
     return (info.fileName());
+}
+
+quint8 newconnect::calcCrc(const QVector<quint8> &arr)
+{
+    quint8 crc = 0;
+    for (int i = 0; i < arr.size()-1; i++) crc += arr[i];
+    return crc;
 }
