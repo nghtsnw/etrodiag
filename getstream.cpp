@@ -17,7 +17,7 @@ void getStream::getRawData(QByteArray r_data) //побайтово читаем 
     while (n < (r_data.size()))
     {
         toQue.insert(0, r_data.at(n));
-        intToQue = toQue.toHex().toInt(&ok, 16);
+        intToQue = toQue.toHex().toInt(&ok, 16);        
         if (profilerReadyToReceive && buffer.isEmpty()) giveMyByte(intToQue);
         else buffer.enqueue(intToQue);
         toQue.clear();

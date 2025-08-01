@@ -57,6 +57,7 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include "aboutdialog.h"
+#include "controlboard.h"
 #include "devsettingsform.h"
 #include "bytesettingsform.h"
 #include "device.h"
@@ -93,7 +94,7 @@ public:
     newconnect *connection = nullptr;
     QLabel *statuslbl = nullptr;
     QLabel *crcerrorlbl = nullptr;
-    QPushButton *aboutButton = nullptr;    
+    QPushButton *aboutButton = nullptr;
     void openMaskSettingsDialog();
     void createDevice(int devNum);
     void loadProfile(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor);
@@ -180,6 +181,7 @@ public:
     ByteSettingsForm byteSettForm;
     maskSettingsDialog maskSettForm;
     liveGraph graphiq;
+    ControlBoard cBoard;
     Logger *logger = nullptr;
 };
 

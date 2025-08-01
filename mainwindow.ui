@@ -138,13 +138,6 @@
             </property>
            </widget>
           </item>
-          <item>
-           <layout class="QGridLayout" name="gridLayout_2">
-            <property name="sizeConstraint">
-             <enum>QLayout::SizeConstraint::SetDefaultConstraint</enum>
-            </property>
-           </layout>
-          </item>
          </layout>
         </item>
         <item>

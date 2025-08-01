@@ -84,6 +84,7 @@ private:
     QByteArray fsba;
     QByteArray arr4byteStream;
     QTimer *timer = new QTimer(this);
+    QTimer *timerAboveTxCommand = new QTimer(this);
     QList<QByteArray> fileSplitted;
     const int bytesPerOneShot = 20;
     int pos = 0;

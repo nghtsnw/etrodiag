@@ -36,6 +36,7 @@ newconnect::newconnect(QWidget *parent) :
     connect(m_console, &Console::getData, this, &newconnect::writeData);
     connect(gstream, &getStream::giveMyByte, datapool, &dataprofiler::getByte);
     connect(datapool, &dataprofiler::deviceData, this, &newconnect::transmitData);
+    connect(datapool, &dataprofiler::deviceData, this, [this](){timerAboveTxCommand->start(1);});/*После успешного приёма задержка перед отправкой команды */
     connect(datapool, &dataprofiler::badCRC, this, &newconnect::badCRC);
     connect(datapool, &dataprofiler::ready4read, gstream, &getStream::readPermission);
     connect(datapool, &dataprofiler::readNext, gstream, &getStream::readIntByte);
@@ -44,6 +45,7 @@ newconnect::newconnect(QWidget *parent) :
     connect (m_settings, &SettingsDialog::writeBinLog, this, &newconnect::writeBinLog);
     connect (m_settings, &SettingsDialog::writeJsonLog, this, &newconnect::writeJsonLog);
     connect (timer, &QTimer::timeout, this, &newconnect::readFromFile);//читаем из файла по таймеру
+    connect (timerAboveTxCommand, &QTimer::timeout, this, &newconnect::sendCommand);//отправляем команду после задержки
     connect (this, &newconnect::sendRawData, gstream, &getStream::getRawData);
     connect (this, &newconnect::sendRawData, m_console, &Console::putData);
     on_settingsButton_clicked();
@@ -174,9 +176,9 @@ void newconnect::receiveCommandFromGui(QVector<quint8> command, bool newcommandf
 }
 
 void newconnect::sendCommand()
-{ // Отправляем команду контроллеру по таймеру после приёма
-    if (m_serial->isOpen()){
-        if (!newcommand) toTransmit = {0xFF, 0xA1, 0, 0, 0};
+{ // Отправляем команду контроллеру по сигналу после приёма
+    if (m_serial->isOpen() && newcommand){
+        //if (!newcommand) toTransmit = {0xFF, 0xAB, 0, 0, 0};
         toTransmit.last() = calcCrc(toTransmit);
         QByteArray ba;
         for (auto i : qAsConst(toTransmit))
@@ -361,6 +363,6 @@ QString newconnect::getProfileNameFromInfo(QFileInfo& info)
 quint8 newconnect::calcCrc(const QVector<quint8> &arr)
 {
     quint8 crc = 0;
-    for (int i = 0; i < arr.size()-1; i++) crc += arr[i];
+    for (int i = 2; i < arr.size()-1; i++) crc += arr[i];
     return crc;
 }

@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "aboutdialog.h"
+#include "controlboard.h"
 #include "ui_mainwindow.h"
 #include "newconnect.h"
 #include <QtWidgets>
@@ -40,6 +41,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect (aboutButton, &QPushButton::clicked, this, &MainWindow::onAboutButtonClicked);
     m_ui->logArea->viewport()->installEventFilter(this);
     graphiq.setParent(m_ui->graphLabel);
+    m_ui->graphLayout->addWidget(&cBoard);
+    connect (&cBoard, &ControlBoard::controlCommand, this, &MainWindow::guiCommandHandler);
+    connect (this, &MainWindow::emitCommand, connection, &newconnect::receiveCommandFromGui);
     m_ui->tabWidget->setCurrentIndex(0);
     m_ui->tab_connections->show();
 }
@@ -442,9 +446,9 @@ void MainWindow::guiCommandHandler(int varNumber, bool action)
 {
     uint8_t actionChr = action ? 1 : 0;
     uint8_t varNumberChr = static_cast<unsigned char>(varNumber);
-    QVector<quint8> command = {0xFF, 0x01, varNumberChr, actionChr, 0};
+    QVector<quint8> command = {0xFF, 0xAB, 0x01, varNumberChr, actionChr, 0};
     /*
-    1 - (FF) начало пакета
+    1 - (FF AB) начало пакета
     2 - Тип команды (1 - изменение переменной)
     3 - Условный номер переменной
     4 - Воздействие на переменную (0 -, 1 +)
