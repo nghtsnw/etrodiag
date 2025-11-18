@@ -10,7 +10,7 @@ class dataprofiler : public QObject
     Q_OBJECT
 public:
     explicit dataprofiler(QWidget *parent = nullptr);
-    const int oneMsgLeight = 18; //41 //18 для брнг опытная
+    int oneMsgLeight = 41;
 
 private:
 
@@ -18,6 +18,13 @@ private:
     QVector<int> snapshot;
     bool checkCRC(void);
     uint8_t calculatedCRC;
+
+    //int blockIdentifycatorPosition = 2;
+    int calcCRCFromPosition = 2;
+    int markerPacketBeginSize = 2;
+    uint8_t markerPacketBeginByte1 = 0xFF;
+    uint8_t markerPacketBeginByte2 = 0xFF;
+    int timeoutAfterLastByte = 3;
 
 signals:
     void deviceData(QVector<int> snapshot);
@@ -27,6 +34,12 @@ signals:
 
 public slots:
     void getByte(int byteFromBuf);
+    void setPackerSize(int size);
+    //void setBlockIdentifycatorPosition(int pos);
+    void setCalcCRCFromPosition(int pos);
+    void setMarkerPacketBeginSize(int size);
+    void setMarkerPacketBeginText(QString text);
+    void setTimeoutAfterLastByte(int timeout_ms);
 };
 
 #endif // DATAPROFILER_H

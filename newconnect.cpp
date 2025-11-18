@@ -48,8 +48,12 @@ newconnect::newconnect(QWidget *parent) :
     connect (timerAboveTxCommand, &QTimer::timeout, this, &newconnect::sendCommand);//отправляем команду после задержки
     connect (this, &newconnect::sendRawData, gstream, &getStream::getRawData);
     connect (this, &newconnect::sendRawData, m_console, &Console::putData);
+    connect (this, &newconnect::setPackerSize, )
+    connect (this, &newconnect::setCalcCRCFromPosition, )
+    connect (this, &newconnect::setMarkerPacketBeginSize, )
+    connect (this, &newconnect::setMarkerPacketBeginText, )
+    connect (this, &newconnect::setTimeoutAfterLastByte, )
     on_settingsButton_clicked();
-
 }
 
 newconnect::~newconnect()
@@ -327,6 +331,18 @@ void newconnect::readProfile()
         QStringList strLst = str.split('\t');
         if (strLst.at(0)=="thisIsMask")
             emit loadMask(strLst.at(2).toInt(0,10),strLst.at(4),strLst.at(3).toInt(0,10),strLst.at(5),strLst.at(1).toInt(0,10),strLst.at(6),strLst.at(7),0,strLst.at(8).toDouble(),strLst.at(9).toDouble(),((QString::compare(strLst.at(10), "true") == 0) ? true : false),strLst.at(11).toInt(0,10), ((QString::compare(strLst.at(12), "true") == 0) ? true : false), strLst.at(13));
+        if (strLst.at(0) == "packetSize")
+            emit setPacketSize(strLst.at(1).toInt(0,10));
+        if (strLst.at(0) == "blockIdentifycatorPosition")
+            emit setBlockIdentifycatorPosition(strLst.at(1).toInt(0,10));
+        if (strLst.at(0) == "calcCRCFromPosition")
+            emit setCalcCRCFromPosition(strLst.at(1).toInt(0,10));
+        if (strLst.at(0) == "markerPacketBeginSize")
+            emit setMarkerPacketBeginSize(strLst.at(1).toInt(0,10));
+        if (strLst.at(0) == "markerPacketBeginText")
+            emit setMarkerPacketBeginText(strLst.at(1));
+        if (strLst.at(0) == "timeoutAfterLastByte")
+            emit setTimeoutAfterLastByte(strLst.at(1).toInt(0,10));
         strLst.clear();
     }
 }

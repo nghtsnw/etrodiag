@@ -46,7 +46,15 @@ void sendStatusStr(QString);
 void transmitData(QVector<int> snapshot);
 void badCRC(uint8_t calculatedCRC, QVector<int> snapshot);
 void saveAllMasks();
+
 void loadMask(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool _drawGraphFlag, QString _drawGraphColor);
+void setPackerSize(int size);
+void setBlockIdentifycatorPosition(int pos);
+void setCalcCRCFromPosition(int pos);
+void setMarkerPacketBeginSize(int size);
+void setMarkerPacketBeginText(QString text);
+void setTimeoutAfterLastByte(int timeout_ms);
+
 void writeTextLog(bool);
 void writeJsonLog(bool);
 void writeBinLog(bool);
