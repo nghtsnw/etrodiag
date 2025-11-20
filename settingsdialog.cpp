@@ -18,24 +18,47 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     m_intValidator(new QIntValidator(0, 4000000, this))
 {
     m_ui->setupUi(this);
-
     m_ui->baudRateBox->setInsertPolicy(QComboBox::NoInsert);
-    #ifdef Q_OS_WIN32
-        appHomeDir = qApp->applicationDirPath() + QDir::separator();
-    #endif
-    #ifdef Q_OS_ANDROID
-        appHomeDir = QStandardPaths::standardLocations(QStandardPaths::DataLocation)[1] + QDir::separator();
-    #endif
+#ifdef Q_OS_WIN32
+    appHomeDir = qApp->applicationDirPath() + QDir::separator();
+#endif
+#ifdef Q_OS_ANDROID
+    appHomeDir = QStandardPaths::standardLocations(QStandardPaths::DataLocation)[1] + QDir::separator();
+#endif
     connect(m_ui->applyButton, &QPushButton::clicked,
             this, &SettingsDialog::apply);
     connect(m_ui->serialPortInfoListBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &SettingsDialog::showPortInfo);
-    connect(m_ui->baudRateBox,  QOverload<int>::of(&QComboBox::currentIndexChanged),
+    connect(m_ui->baudRateBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &SettingsDialog::checkCustomBaudRatePolicy);
     connect(m_ui->serialPortInfoListBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &SettingsDialog::checkCustomDevicePathPolicy);
     connect(m_ui->serialPortInfoListBox, QOverload<int>::of(&QComboBox::activated), this, &SettingsDialog::portBoxEvent);
-
+    connect(m_ui->packetSizeSpinBox, &QSpinBox::valueChanged, this, [ = ](int val) {
+        emit packetSizeSpinBox_valueChanged(val);
+    } );
+    connect(m_ui->calcCRCFromSpinBox, &QSpinBox::valueChanged, this, [ = ](int val) {
+        emit calcCRCFromSpinBox_valueChanged(val);
+    } );
+    connect(m_ui->markerSizeSpinBox, &QSpinBox::valueChanged, this, [ = ](int val) {
+        emit markerSizeSpinBox_valueChanged(val);
+    } );
+    connect(m_ui->varConrolCheckBox, &QCheckBox::checkStateChanged, this, [ = ]() {
+        emit varConrolCheckBox_valueChanged(m_ui->varConrolCheckBox->isChecked());
+    } );
+    connect(m_ui->b1MarkerLineEdit, &QLineEdit::textChanged, this, [ = ](QString text) {
+        markerTextNormalisation(1, text);
+    } );
+    connect(m_ui->b2MarkerLineEdit, &QLineEdit::textChanged, this, [ = ](QString text) {
+        markerTextNormalisation(2, text);
+    } );
+    connect(this, &SettingsDialog::setPacketSizeSpinBox, m_ui->packetSizeSpinBox, &QSpinBox::setValue);
+    connect(this, &SettingsDialog::setCalcCRCFromPositionSpinBox, m_ui->calcCRCFromSpinBox, &QSpinBox::setValue);
+    connect(this, &SettingsDialog::setMarkerPacketBeginSizeSpinBox, m_ui->markerSizeSpinBox, &QSpinBox::setValue);
+    connect(this, &SettingsDialog::setTimeoutAfterLastByteSpinBox, m_ui->timeoutSpinBox, &QSpinBox::setValue);
+    connect(this, &SettingsDialog::setMarkerPacketBeginText, this, [ = ](QString text) {
+        splitMarkerText(text);
+    } );
     fillPortsParameters();
     fillProfileList();
     fillPortsInfo();
@@ -56,9 +79,9 @@ SettingsDialog::Settings SettingsDialog::settings() const
 
 void SettingsDialog::showPortInfo(int idx)
 {
-    if (idx == -1)
+    if (idx == -1) {
         return;
-
+    }
     const QStringList list = m_ui->serialPortInfoListBox->itemData(idx).toStringList();
     m_ui->descriptionLabel->setText(tr("Description: %1").arg(list.count() > 1 ? list.at(1) : tr(blankString)));
     m_ui->manufacturerLabel->setText(tr("Manufacturer: %1").arg(list.count() > 2 ? list.at(2) : tr(blankString)));
@@ -88,30 +111,32 @@ void SettingsDialog::checkCustomBaudRatePolicy(int idx)
 
 void SettingsDialog::portBoxEvent(int ev)
 {
-    if (m_ui->serialPortInfoListBox->currentText() == tr(("Read from file")))
+    if (m_ui->serialPortInfoListBox->currentText() == tr(("Read from file"))) {
         checkCustomDevicePathPolicy(ev);
+    }
 }
 
 void SettingsDialog::checkCustomDevicePathPolicy(int idx)
 {
-   const bool isCustomPath = !m_ui->serialPortInfoListBox->itemData(idx).isValid();
+    const bool isCustomPath = !m_ui->serialPortInfoListBox->itemData(idx).isValid();
     m_ui->serialPortInfoListBox->setEditable(isCustomPath);
-
-    if (isCustomPath && m_ui->serialPortInfoListBox->currentText() == tr("Custom"))
+    if (isCustomPath && m_ui->serialPortInfoListBox->currentText() == tr("Custom")) {
         m_ui->serialPortInfoListBox->clearEditText();
-
+    }
     if (m_ui->serialPortInfoListBox->currentText() == tr("Read from file"))
+    {
+        m_ui->serialPortInfoListBox->clearEditText();
+        QString file = QFileDialog::getOpenFileName(this, tr("Open binary data file"), appHomeDir + "Logs", tr("Binary data (*.bin)"));
+        m_ui->serialPortInfoListBox->setCurrentText(file);
+        if (!m_ui->serialPortInfoListBox->currentText().isEmpty())
         {
-            m_ui->serialPortInfoListBox->clearEditText();
-            QString file = QFileDialog::getOpenFileName(this, tr("Open binary data file"), appHomeDir+"Logs", tr("Binary data (*.bin)"));
-            m_ui->serialPortInfoListBox->setCurrentText(file);
-            if (!m_ui->serialPortInfoListBox->currentText().isEmpty())
-            {
-                m_currentSettings.readFromFileFlag = true;
-                m_currentSettings.pathToBinFile = file;                
-            }
+            m_currentSettings.readFromFileFlag = true;
+            m_currentSettings.pathToBinFile = file;
         }
-        else m_currentSettings.readFromFileFlag = false;
+    }
+    else {
+        m_currentSettings.readFromFileFlag = false;
+    }
 }
 
 void SettingsDialog::fillPortsParameters()
@@ -121,25 +146,21 @@ void SettingsDialog::fillPortsParameters()
     m_ui->baudRateBox->addItem(QStringLiteral("38400"), QSerialPort::Baud38400);
     m_ui->baudRateBox->addItem(QStringLiteral("115200"), QSerialPort::Baud115200);
     m_ui->baudRateBox->addItem(tr("Custom"));
-
     m_ui->dataBitsBox->addItem(QStringLiteral("5"), QSerialPort::Data5);
     m_ui->dataBitsBox->addItem(QStringLiteral("6"), QSerialPort::Data6);
     m_ui->dataBitsBox->addItem(QStringLiteral("7"), QSerialPort::Data7);
     m_ui->dataBitsBox->addItem(QStringLiteral("8"), QSerialPort::Data8);
     m_ui->dataBitsBox->setCurrentIndex(3);
-
     m_ui->parityBox->addItem(tr("None"), QSerialPort::NoParity);
     m_ui->parityBox->addItem(tr("Even"), QSerialPort::EvenParity);
     m_ui->parityBox->addItem(tr("Odd"), QSerialPort::OddParity);
     m_ui->parityBox->addItem(tr("Mark"), QSerialPort::MarkParity);
     m_ui->parityBox->addItem(tr("Space"), QSerialPort::SpaceParity);
-
     m_ui->stopBitsBox->addItem(QStringLiteral("1"), QSerialPort::OneStop);
 #ifdef Q_OS_WIN
     m_ui->stopBitsBox->addItem(tr("1.5"), QSerialPort::OneAndHalfStop);
 #endif
     m_ui->stopBitsBox->addItem(QStringLiteral("2"), QSerialPort::TwoStop);
-
     m_ui->flowControlBox->addItem(tr("None"), QSerialPort::NoFlowControl);
     m_ui->flowControlBox->addItem(tr("RTS/CTS"), QSerialPort::HardwareControl);
     m_ui->flowControlBox->addItem(tr("XON/XOFF"), QSerialPort::SoftwareControl);
@@ -164,92 +185,86 @@ void SettingsDialog::fillPortsInfo()
              << info.systemLocation()
              << (info.vendorIdentifier() ? QString::number(info.vendorIdentifier(), 16) : blankString)
              << (info.productIdentifier() ? QString::number(info.productIdentifier(), 16) : blankString);
-
         m_ui->serialPortInfoListBox->addItem(list.first(), list);
     }
-
     m_ui->serialPortInfoListBox->addItem(tr("Custom"));
     m_ui->serialPortInfoListBox->addItem(tr("Read from file"));
 }
 
 void SettingsDialog::fillProfileList()
-{    
-        m_ui->profileSelectBox->clear();
-        QStringList profileList;
-        QDir dir(appHomeDir + "Profiles");
-        if (!dir.exists())
-            QDir().mkdir(appHomeDir + "Profiles");
-        bool ok = dir.exists();
-        if (ok)
+{
+    m_ui->profileSelectBox->clear();
+    QStringList profileList;
+    QDir dir(appHomeDir + "Profiles");
+    if (!dir.exists()) {
+        QDir().mkdir(appHomeDir + "Profiles");
+    }
+    bool ok = dir.exists();
+    if (ok)
+    {
+        dir.setFilter(QDir::Files | QDir::Hidden | QDir::NoSymLinks);
+        dir.setSorting(QDir::Name);
+        QStringList filters;
+        filters << "*.eag";
+        dir.setNameFilters(filters);
+        QFileInfoList list = dir.entryInfoList();
+        for (int i = 0; i < list.size(); ++i)
         {
-            dir.setFilter(QDir::Files | QDir::Hidden | QDir::NoSymLinks);
-            dir.setSorting(QDir::Name);
-            QStringList filters;
-            filters << "*.eag";
-            dir.setNameFilters(filters);
-            QFileInfoList list = dir.entryInfoList();
-
-            for (int i = 0; i < list.size(); ++i)
-            {
-                QFileInfo fileInfo = list.at(i);
-                profileList << fileInfo.fileName();
-            }
-            m_ui->profileSelectBox->addItems(profileList);
-            if (list.size() == 0)
-            {
-                m_ui->applyButton->setDisabled(true);
-
-            }
-            else m_ui->applyButton->setEnabled(true);
+            QFileInfo fileInfo = list.at(i);
+            profileList << fileInfo.fileName();
         }
+        m_ui->profileSelectBox->addItems(profileList);
+        if (list.size() == 0)
+        {
+            m_ui->applyButton->setDisabled(true);
+        }
+        else {
+            m_ui->applyButton->setEnabled(true);
+        }
+    }
 }
 
 void SettingsDialog::updateSettings()
 {
     m_currentSettings.name = m_ui->serialPortInfoListBox->currentText();
-
     if (m_ui->baudRateBox->currentIndex() == 4) {
         m_currentSettings.baudRate = m_ui->baudRateBox->currentText().toInt();
-    } else {
+    }
+    else {
         m_currentSettings.baudRate = static_cast<QSerialPort::BaudRate>(
-                    m_ui->baudRateBox->itemData(m_ui->baudRateBox->currentIndex()).toInt());
+                                         m_ui->baudRateBox->itemData(m_ui->baudRateBox->currentIndex()).toInt());
     }
     m_currentSettings.stringBaudRate = QString::number(m_currentSettings.baudRate);
-
     m_currentSettings.dataBits = static_cast<QSerialPort::DataBits>(
-                m_ui->dataBitsBox->itemData(m_ui->dataBitsBox->currentIndex()).toInt());
+                                     m_ui->dataBitsBox->itemData(m_ui->dataBitsBox->currentIndex()).toInt());
     m_currentSettings.stringDataBits = m_ui->dataBitsBox->currentText();
-
     m_currentSettings.parity = static_cast<QSerialPort::Parity>(
-                m_ui->parityBox->itemData(m_ui->parityBox->currentIndex()).toInt());
+                                   m_ui->parityBox->itemData(m_ui->parityBox->currentIndex()).toInt());
     m_currentSettings.stringParity = m_ui->parityBox->currentText();
-
     m_currentSettings.stopBits = static_cast<QSerialPort::StopBits>(
-                m_ui->stopBitsBox->itemData(m_ui->stopBitsBox->currentIndex()).toInt());
+                                     m_ui->stopBitsBox->itemData(m_ui->stopBitsBox->currentIndex()).toInt());
     m_currentSettings.stringStopBits = m_ui->stopBitsBox->currentText();
-
     m_currentSettings.flowControl = static_cast<QSerialPort::FlowControl>(
-                m_ui->flowControlBox->itemData(m_ui->flowControlBox->currentIndex()).toInt());
+                                        m_ui->flowControlBox->itemData(m_ui->flowControlBox->currentIndex()).toInt());
     m_currentSettings.stringFlowControl = m_ui->flowControlBox->currentText();
-
     m_currentSettings.profilePath = selectedProfile;
-
     m_currentSettings.readOnlyProfile = m_ui->readOnlyCheckBox->isChecked();
 }
 
 
 void SettingsDialog::on_newProfileButton_clicked()
 {
-    #ifdef Q_OS_WIN32
-        QString fileName = QFileDialog::getSaveFileName(this, tr("newprofile"),appHomeDir + "Profiles","Etrodiag devices profile(*.eag)");
-    #endif
-    #ifdef Q_OS_ANDROID
-        QString fileName = appHomeDir + "Profiles" + QDir::separator() + QInputDialog::getText(this, tr("Enter profile name"), tr("Enter profile name"), QLineEdit::Normal, "", &ok);
-    #endif
+#ifdef Q_OS_WIN32
+    QString fileName = QFileDialog::getSaveFileName(this, tr("newprofile"), appHomeDir + "Profiles", "Etrodiag devices profile(*.eag)");
+#endif
+#ifdef Q_OS_ANDROID
+    QString fileName = appHomeDir + "Profiles" + QDir::separator() + QInputDialog::getText(this, tr("Enter profile name"), tr("Enter profile name"), QLineEdit::Normal, "", &ok);
+#endif
     if (!fileName.isEmpty())
     {
-        if (!fileName.endsWith("eag"))
-           fileName = fileName + ".eag";
+        if (!fileName.endsWith("eag")) {
+            fileName = fileName + ".eag";
+        }
         QFile file(fileName);
         file.open(QIODevice::WriteOnly);
         file.close();
@@ -267,11 +282,11 @@ void SettingsDialog::on_profileSelectBox_currentTextChanged(const QString &arg1)
     QFileInfoList infoList(profilesDir.entryInfoList());
     if (infoList.size() > 0)
     {
-    QFileInfo fileInfo(infoList.at(0));
-    QString currentProfile = fileInfo.filePath();
-    selectedProfile = currentProfile;
-    nameFilter.clear();
-    infoList.clear();
+        QFileInfo fileInfo(infoList.at(0));
+        QString currentProfile = fileInfo.filePath();
+        selectedProfile = currentProfile;
+        nameFilter.clear();
+        infoList.clear();
     }
 }
 
@@ -280,10 +295,38 @@ void SettingsDialog::on_deleteProfileButton_clicked()
     if (!(m_ui->readOnlyCheckBox->isChecked()))
     {
         QFile profile(selectedProfile);
-        if (profile.exists())
+        if (profile.exists()) {
             profile.remove();
+        }
         fillProfileList();
     }
+}
+
+void SettingsDialog::markerTextNormalisation(int numberByte, QString text)
+{
+    bool ok;
+    int val = text.toInt(&ok, 16);
+    if (val < 0) {
+        val = 0;
+    }
+    else if (val > 0xFF) {
+        val = 0xFF;
+    }
+    if (numberByte == 1) {
+        m_ui->b1MarkerLineEdit->setText(QString::number(val, 16).toUpper());
+    }
+    else if (numberByte == 2) {
+        m_ui->b2MarkerLineEdit->setText(QString::number(val, 16).toUpper());
+    }
+    markerBeginText = m_ui->b1MarkerLineEdit->text() +
+                      m_ui->b2MarkerLineEdit->text();
+    emit markerBeginText_valueChanged(markerBeginText);
+}
+
+void SettingsDialog::splitMarkerText(QString text) {
+    int val = text.toInt(0, 16);
+    m_ui->b1MarkerLineEdit->setText(QString::number((val >> 8) & 0xFF));
+    m_ui->b2MarkerLineEdit->setText(QString::number((val) & 0xFF));
 }
 
 void SettingsDialog::on_readOnlyCheckBox_stateChanged(int)
@@ -305,3 +348,9 @@ void SettingsDialog::on_writeJsonChkBox_stateChanged(int)
 {
     emit writeJsonLog(m_ui->writeJsonChkBox->isChecked());
 }
+
+void SettingsDialog::on_profileSelectBox_currentIndexChanged(int index)
+{
+    emit loadSelectedProfile();
+}
+

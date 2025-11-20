@@ -59,7 +59,7 @@
 QT_BEGIN_NAMESPACE
 
 namespace Ui {
-class SettingsDialog;
+    class SettingsDialog;
 }
 
 class QIntValidator;
@@ -101,6 +101,20 @@ signals:
     void writeBinLog(bool);
     void writeJsonLog(bool);
 
+    void packetSizeSpinBox_valueChanged(int);
+    void calcCRCFromSpinBox_valueChanged(int);
+    void markerSizeSpinBox_valueChanged(int);
+    void varConrolCheckBox_valueChanged(bool);
+    void markerBeginText_valueChanged(QString);
+
+    void setPacketSizeSpinBox(int size);
+    void setCalcCRCFromPositionSpinBox(int pos);
+    void setMarkerPacketBeginSizeSpinBox(int size);
+    void setMarkerPacketBeginText(QString text);
+    void setTimeoutAfterLastByteSpinBox(int timeout_ms);
+
+    void loadSelectedProfile();
+
 private slots:
     void showPortInfo(int idx);
     void apply();
@@ -121,12 +135,18 @@ private slots:
 
     void on_writeJsonChkBox_stateChanged(int);
 
+    void markerTextNormalisation(int numberByte, QString text);
+
+    void on_profileSelectBox_currentIndexChanged(int index);
+
 private:
     void fillPortsParameters();
     void fillPortsInfo();
     void updateSettings();
     void fillProfileList();
     void portBoxEvent(int currentText);
+    void splitMarkerText(QString text);
+    QString markerBeginText = "FFFF";
 
 private:
     Ui::SettingsDialog *m_ui = nullptr;

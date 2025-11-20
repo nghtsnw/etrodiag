@@ -18,15 +18,15 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), statuslbl (new QLabel), crcerrorlbl (new QLabel), aboutButton (new QPushButton), m_ui (new Ui::MainWindow)
 
 {
-//    QVector<Qt::GestureType> gestures;
-//    gestures << Qt::SwipeGesture << Qt::TapGesture;
-//    for (Qt::GestureType gesture : gestures)
-//    grabGesture(gesture);
-//  Надеюсь, что когда в qt починят qswipegesture, я раскомментирую это и удалю тот ужас что сейчас заменяет свайп.
+// QVector<Qt::GestureType> gestures;
+// gestures << Qt::SwipeGesture << Qt::TapGesture;
+// for (Qt::GestureType gesture : gestures)
+// grabGesture(gesture);
+// Надеюсь, что когда в qt починят qswipegesture, я раскомментирую это и удалю тот ужас что сейчас заменяет свайп.
     m_ui->setupUi(this);
     statusBar()->addWidget(statuslbl, 1);
     statusBar()->addWidget(crcerrorlbl);
-    statusBar()->addWidget(aboutButton);    
+    statusBar()->addWidget(aboutButton);
     crcerrorlbl->setText(tr("CRC Errors: ") + QString::number(CRCErrorCount));
     statuslbl->setText(tr("Etrodiag"));
     aboutButton->setText(tr("About"));
@@ -43,6 +43,7 @@ MainWindow::MainWindow(QWidget *parent) :
     graphiq.setParent(m_ui->graphLabel);
     m_ui->graphLayout->addWidget(&cBoard);
     connect (&cBoard, &ControlBoard::controlCommand, this, &MainWindow::guiCommandHandler);
+    connect (connection, &newconnect::setVisibleControlWindow, &cBoard, &ControlBoard::setVisible);
     connect (this, &MainWindow::emitCommand, connection, &newconnect::receiveCommandFromGui);
     m_ui->tabWidget->setCurrentIndex(0);
     m_ui->tab_connections->show();
@@ -88,14 +89,13 @@ void MainWindow::addDeviceToList(QVector<int> ddata)
     thisDeviceHere = false; //обнуляем флаг
     vlayChildList = m_ui->devArea->findChildren<Device*>();
     QListIterator<Device*> vlayChildListIt(vlayChildList); //смотрим сколько в гуе отображается устройств, создаём перечислитель
-
     while (vlayChildListIt.hasNext())
     {
         if (devNum == vlayChildListIt.next()->devNum) //смотрим, есть ли наше устройство в текущем листе
         {
-           thisDeviceHere = true; //если есть, ставим флаг что оно тут
-           emit devUpdate(devNum, ddata); //если есть то пихаем ему обновление через сигнал
-           devSettForm.updByteButtons(devNum, ddata); //обновление кнопок в форме настройки
+            thisDeviceHere = true; //если есть, ставим флаг что оно тут
+            emit devUpdate(devNum, ddata); //если есть то пихаем ему обновление через сигнал
+            devSettForm.updByteButtons(devNum, ddata); //обновление кнопок в форме настройки
         }
     }
     if (!thisDeviceHere) //если устройства нет, то создаём его
@@ -113,7 +113,7 @@ void MainWindow::createDevice(int devNum)
     Device *dev = new Device(devNum);
     dev->setParent(m_ui->devArea);
     m_ui->devAreaLay->addWidget(dev);
-    dev->setText(QString::number(devNum,16));    
+    dev->setText(QString::number(devNum, 16));
     connect (this, &MainWindow::devUpdate, dev, &Device::updateData);
     connect (dev, &Device::openDevSettSig, this, &MainWindow::openDevSett);
     connect (dev, &Device::clicked, dev, &Device::clickedF);
@@ -146,7 +146,7 @@ void MainWindow::createDevice(int devNum)
     connect (this, &MainWindow::sendMaskData, dev, &Device::loadMaskRX);
     connect (this, &MainWindow::hideOtherDevButtons, dev, &Device::hideDevButton);
     connect (dev, &Device::devStatusMessage, this, &MainWindow::devStatusMsg);
-    connect (connection, &newconnect::saveAllMasks, dev, &Device::requestMasks4Saving);    
+    connect (connection, &newconnect::saveAllMasks, dev, &Device::requestMasks4Saving);
     connect (dev, &Device::allMasksToListTX, connection, &newconnect::saveProfileSlot4Masks);
     connect (this, &MainWindow::toJsonMap, dev, &Device::jsonMap);
     connect (dev, &Device::devParamsToJson, logger, &Logger::incomingJsonData);
@@ -154,59 +154,59 @@ void MainWindow::createDevice(int devNum)
 }
 
 void MainWindow::openDevSett(int devNum, QVector<int> data)
-{//все реакции на нажатие кнопки устройства в зависимости от состояния окна
+{ //все реакции на нажатие кнопки устройства в зависимости от состояния окна
     if (maskSettForm.isVisible())
-    {            
-            maskSettForm.sendMask2Profile();
-            maskSettForm.hide();
-            maskSettForm.killChildren();
-            if (maskSettForm.openDirectly)
+    {
+        maskSettForm.sendMask2Profile();
+        maskSettForm.hide();
+        maskSettForm.killChildren();
+        if (maskSettForm.openDirectly)
+        {
+            emit hideOtherDevButtons(false, devNum);
+            emit prepareToSaveProfile();
+            emit saveProfile();
+            maskSettForm.openDirectly = false;
+            m_ui->valueArea->clear();
+            graphiq.graphAnnotation.clear();
+            m_ui->valueArea->show();
+        }
+        else {
+            byteSettForm.show();
+            byteSettForm.resize(m_ui->rightFrame->size());
+        }
+    }
+    else {
+        if (byteSettForm.isVisible())
+        {
+            byteSettForm.hide();
+            byteSettForm.cleanForm();
+            devSettForm.show();
+            devSettForm.resize(m_ui->rightFrame->size());
+        }
+        else
+        {
+            devSettForm.setParent(m_ui->rightFrame);
+            if (m_ui->valueArea->isHidden())
             {
-                emit hideOtherDevButtons(false, devNum);
-                emit prepareToSaveProfile();
-                emit saveProfile();
-                maskSettForm.openDirectly = false;
+                devSettForm.hide();
+                emit dvsfAfterCloseClear();
                 m_ui->valueArea->clear();
                 graphiq.graphAnnotation.clear();
                 m_ui->valueArea->show();
+                emit hideOtherDevButtons(false, devNum);
+                emit prepareToSaveProfile();
+                emit saveProfile();
             }
-            else {
-            byteSettForm.show();
-            byteSettForm.resize(m_ui->rightFrame->size());
+            else
+            {
+                m_ui->valueArea->hide();
+                emit hideOtherDevButtons(true, devNum);
+                devSettForm.initByteButtons(devNum, data);
+                emit getDevName(devNum);
+                devSettForm.show();
+                devSettForm.resize(m_ui->rightFrame->size());
             }
-    }
-    else {
-    if (byteSettForm.isVisible())
-    {
-        byteSettForm.hide();
-        byteSettForm.cleanForm();
-        devSettForm.show();
-        devSettForm.resize(m_ui->rightFrame->size());
-    }
-    else
-    {
-    devSettForm.setParent(m_ui->rightFrame);
-    if (m_ui->valueArea->isHidden())
-    {
-        devSettForm.hide();
-        emit dvsfAfterCloseClear();
-        m_ui->valueArea->clear();
-        graphiq.graphAnnotation.clear();
-        m_ui->valueArea->show();
-        emit hideOtherDevButtons(false, devNum);
-        emit prepareToSaveProfile();
-        emit saveProfile();
-    }
-    else
-    {
-        m_ui->valueArea->hide();       
-        emit hideOtherDevButtons(true, devNum);        
-        devSettForm.initByteButtons(devNum,data);
-        emit getDevName(devNum);
-        devSettForm.show();
-        devSettForm.resize(m_ui->rightFrame->size());
-    }
-    }
+        }
     }
 }
 
@@ -243,20 +243,21 @@ QDateTime MainWindow::returnTimestamp()
 }
 
 void MainWindow::updValueArea(QString parameterName, int devNum, QString devName, double endValue, int byteNum, int maskId, bool)
-{//сначала проверяем есть ли уже вкладка с этим устройством по имени
+{ //сначала проверяем есть ли уже вкладка с этим устройством по имени
     static int thisDeviceIndex = -1;
     for (int var = m_ui->valueArea->count(); var >= 0; --var) {
         if (m_ui->valueArea->tabText(var) == devName)
-            {//если есть то сохраняем индекс вкладки и покидаем цикл
-                thisDeviceIndex = var;
-                break;
-            }
-        else thisDeviceIndex = -1;
-            //если нет то ставим индекс -1 чтоб триггернуться для последующей обработки
+        { //если есть то сохраняем индекс вкладки и покидаем цикл
+            thisDeviceIndex = var;
+            break;
+        }
+        else {
+            thisDeviceIndex = -1;
+        }
+        //если нет то ставим индекс -1 чтоб триггернуться для последующей обработки
     }
-
     if (thisDeviceIndex == -1)
-    {//создаём и инициализируем таблицу, добавляем виджет таблицы в новую вкладку имени девайса пришедшего в этой посылке
+    { //создаём и инициализируем таблицу, добавляем виджет таблицы в новую вкладку имени девайса пришедшего в этой посылке
         QTableWidget *valueTableNew = new QTableWidget(m_ui->valueArea);
         connect(valueTableNew, &QTableWidget::cellClicked, this, &MainWindow::ValueArea_CellClicked);
         valueTableNew->insertColumn(0);//name
@@ -269,63 +270,66 @@ void MainWindow::updValueArea(QString parameterName, int devNum, QString devName
         valueTableNew->hideColumn(4);
         valueTableNew->horizontalHeader()->hide();
         m_ui->valueArea->addTab(valueTableNew, devName);
-
         //узнаём индекс только что созданной вкладки. Может быть стоит выделить это в отдельную функцию, но пока и так сойдёт
         for (int var = m_ui->valueArea->count(); var >= 0; --var) {
-            if (m_ui->valueArea->tabText(var) == devName){
-                    thisDeviceIndex = var;
-                    break;
-                }
-            else thisDeviceIndex = -1;
+            if (m_ui->valueArea->tabText(var) == devName) {
+                thisDeviceIndex = var;
+                break;
+            }
+            else {
+                thisDeviceIndex = -1;
+            }
         }
     }
-
     tmp = (m_ui->valueArea->widget(thisDeviceIndex)->metaObject()->className());
     //ищем виджет таблицы на вкладке и ссылаем на него статичный указатель
-    if (tmp == "QTableWidget") valueTable = (QTableWidget*)m_ui->valueArea->widget(thisDeviceIndex);
+    if (tmp == "QTableWidget") {
+        valueTable = (QTableWidget*)m_ui->valueArea->widget(thisDeviceIndex);
+    }
     //далее работаем со строками таблицы по указателю
-        findRow = false;
-        namesUnited = (parameterName+'@'+devName);
-        value2str.setNum(endValue, 'g', 6);
-        if (valueTable->rowCount() > 0)
-        {//если строки есть то ищем нужную
-            for (int i = 0; i < valueTable->rowCount(); i++)
-            {
-                if ((namesUnited) == valueTable->item(i,0)->text())
-                {//если найдена строка с именем и значение обновилось, подсвечиваем
-                    findRow = true;
-                    if (value2str != valueTable->item(i,1)->text())
-                    {
-                        valueTable->item(i,1)->setText(value2str);
-                        valueTable->item(i,1)->setBackground(Qt::green);
-                    }
-                    else if (value2str == valueTable->item(i,1)->text())
-                        valueTable->item(i,1)->setBackground(Qt::white);
+    findRow = false;
+    namesUnited = (parameterName + '@' + devName);
+    value2str.setNum(endValue, 'g', 6);
+    if (valueTable->rowCount() > 0)
+    { //если строки есть то ищем нужную
+        for (int i = 0; i < valueTable->rowCount(); i++)
+        {
+            if ((namesUnited) == valueTable->item(i, 0)->text())
+            { //если найдена строка с именем и значение обновилось, подсвечиваем
+                findRow = true;
+                if (value2str != valueTable->item(i, 1)->text())
+                {
+                    valueTable->item(i, 1)->setText(value2str);
+                    valueTable->item(i, 1)->setBackground(Qt::green);
+                }
+                else if (value2str == valueTable->item(i, 1)->text()) {
+                    valueTable->item(i, 1)->setBackground(Qt::white);
                 }
             }
         }
-        if (!findRow)
-        {//если строка не найдена - создаём
-            valueTable->setRowCount(valueTable->rowCount()+1); //добавляем новую строку
-            int row = valueTable->rowCount()-1;//определяем индекс строки
-            QTableWidgetItem *nameItem = new QTableWidgetItem;
-            nameItem->setText(parameterName+'@'+devName);
-            valueTable->setItem(row, 0, nameItem);
-            QTableWidgetItem *valueItem = new QTableWidgetItem;
-            valueItem->setText(value2str);
-            valueTable->setItem(row, 1, valueItem);
-            QTableWidgetItem *devNumItem = new QTableWidgetItem;
-            devNumItem->setText(QString::number(devNum));
-            valueTable->setItem(row, 2, devNumItem);
-            QTableWidgetItem *byteNumItem = new QTableWidgetItem;
-            byteNumItem->setText(QString::number(byteNum));
-            valueTable->setItem(row, 3, byteNumItem);
-            QTableWidgetItem *maskIdItem = new QTableWidgetItem;
-            maskIdItem->setText(QString::number(maskId));
-            valueTable->setItem(row, 4, maskIdItem);
-            valueTable->resizeColumnsToContents();
-            valueTable->resizeRowsToContents();
-        }
+    }
+    if (!findRow)
+    { //если строка не найдена - создаём
+        valueTable->setRowCount(valueTable->rowCount() + 1); //добавляем новую строку
+        int row = valueTable->rowCount() - 1; //определяем индекс строки
+        QTableWidgetItem *nameItem = new QTableWidgetItem;
+        nameItem->setText(parameterName + '@' + devName);
+        valueTable->setItem(row, 0, nameItem);
+        QTableWidgetItem *valueItem = new QTableWidgetItem;
+        valueItem->setText(value2str);
+        valueTable->setItem(row, 1, valueItem);
+        QTableWidgetItem *devNumItem = new QTableWidgetItem;
+        devNumItem->setText(QString::number(devNum));
+        valueTable->setItem(row, 2, devNumItem);
+        QTableWidgetItem *byteNumItem = new QTableWidgetItem;
+        byteNumItem->setText(QString::number(byteNum));
+        valueTable->setItem(row, 3, byteNumItem);
+        QTableWidgetItem *maskIdItem = new QTableWidgetItem;
+        maskIdItem->setText(QString::number(maskId));
+        valueTable->setItem(row, 4, maskIdItem);
+        valueTable->resizeColumnsToContents();
+        valueTable->resizeRowsToContents();
+    }
 }
 
 void MainWindow::setCurrentOpenTab(int index)
@@ -350,13 +354,13 @@ void MainWindow::ValueArea_CellClicked(int row, int)
 }
 
 void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QString, int, int maskId, QString parameterName, int, double endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor)
-{    
-    if (devSettForm.isVisible() && devNum == devSettForm.devNum)
+{
+    if (devSettForm.isVisible() && devNum == devSettForm.devNum) {
         devSettForm.setDevName(devNum, devName);
-
+    }
     if (viewInLogFlag && isNewData)
-    {        
-        QString formString(parameterName + "@" + devName + ": " + QString::number(endValue,'g',6));
+    {
+        QString formString(parameterName + "@" + devName + ": " + QString::number(endValue, 'g', 6));
         textLogWindow(formString, false);
     }
     emit toJsonMap(devNum, devName, parameterName, endValue, maskId);
@@ -367,24 +371,30 @@ void MainWindow::textLogWindow(QString string, bool redFlag)
 {
     QString stringWithTime = (returnTimestamp().toString("hh:mm:ss:zzz") + " " + string);
     emit toTxtLogger(stringWithTime);
-    if (!redFlag) m_ui->logArea->appendHtml("<p><span style=color:#000000>" + stringWithTime + "</span></p>");
-    else m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + stringWithTime + "</span></p>");
+    if (!redFlag) {
+        m_ui->logArea->appendHtml("<p><span style=color:#000000>" + stringWithTime + "</span></p>");
+    }
+    else {
+        m_ui->logArea->appendHtml("<p><span style=color:#ff0000>" + stringWithTime + "</span></p>");
+    }
 }
 
 void MainWindow::loadProfile(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor)
-{//если устройства нет, то создаём, потом посылаем маску
+{ //если устройства нет, то создаём, потом посылаем маску
     bool thisDeviceHere = false;
     QList<Device*> vlayChildList = m_ui->devArea->findChildren<Device*>();
     QListIterator<Device*> vlayChildListIt(vlayChildList);
     while (vlayChildListIt.hasNext())
-        if (devNum == vlayChildListIt.next()->devNum)
+        if (devNum == vlayChildListIt.next()->devNum) {
             thisDeviceHere = true;
-    if (thisDeviceHere)
+        }
+    if (thisDeviceHere) {
         emit sendMaskData(devNum, devName, byteNum, byteName, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType, drawGraphFlag, drawGraphColor);
+    }
     else if (!thisDeviceHere)
-    {//создаём устройство и инициализируем пустым пакетом в oneMsgLeight байт, с номером устройства на позиции 2
+    { //создаём устройство и инициализируем пустым пакетом в oneMsgLeight байт, с номером устройства на позиции 2
         createDevice(devNum);
-        QVector<int> devInitArray(oneMsgLeight,0);
+        QVector<int> devInitArray(oneMsgLeight, 0);
         devInitArray.replace(2, devNum);
         emit devUpdate(devNum, devInitArray);
         devSettForm.updByteButtons(devNum, devInitArray);
@@ -409,13 +419,14 @@ void MainWindow::cleanDevList()
 {
     QList<Device*> vlayChildList = m_ui->devArea->findChildren<Device*>();
     QListIterator<Device*> vlayChildListIt(vlayChildList);
-    while(vlayChildListIt.hasNext())
+    while(vlayChildListIt.hasNext()) {
         vlayChildListIt.next()->~Device();
+    }
     CRCErrorCount = 0;
 }
 
 void MainWindow::on_tabWidget_currentChanged(int)
-{//так как сразу после пуска программы ресайз виджета не срабатывает, вешаю его на событие смены таба
+{ //так как сразу после пуска программы ресайз виджета не срабатывает, вешаю его на событие смены таба
     graphiq.resize(m_ui->graphLabel->size());
 }
 
@@ -429,14 +440,19 @@ void MainWindow::badCRCEvent(uint8_t calculatedCRC, QVector<int> dataFrame)
     QString str, chr, crcchr;
     for (int i = 0; i < dataFrame.size(); ++i)
     {
-        if (i > 0)
+        if (i > 0) {
             str += ":";
+        }
         chr = QString::number(dataFrame[i], 16).toUpper();
-        if (chr.size() == 1) chr = '0'+chr;
+        if (chr.size() == 1) {
+            chr = '0' + chr;
+        }
         str += chr;
     }
     crcchr = QString::number(calculatedCRC, 16).toUpper();
-    if (crcchr.size() == 1) crcchr = '0'+crcchr;
+    if (crcchr.size() == 1) {
+        crcchr = '0' + crcchr;
+    }
     textLogWindow(tr("CRC Calc: ") + crcchr + ", " + tr("Frame: ") + str, true);
     CRCErrorCount++;
     crcerrorlbl->setText(tr("CRC Errors: ") + QString::number(CRCErrorCount));
@@ -464,7 +480,7 @@ void MainWindow::guiCommandHandler(int varNumber, bool action)
     {
         if ((event->type() == QEvent::MouseButtonPress) || (event->type() == QEvent::MouseButtonRelease))
         {
-            QMouseEvent mouseev(*static_cast<QMouseEvent*>(event));            
+            QMouseEvent mouseev(*static_cast<QMouseEvent*>(event));
             swipeCalc(mouseev);
             return true;
         }
@@ -486,7 +502,6 @@ bool MainWindow::event(QEvent *event)
     {
         graphiq.chngMinMaxVisible();
     }
-
     return QMainWindow::event(event);
 }
 /*
@@ -498,10 +513,10 @@ void MainWindow::swipeCalc(QMouseEvent mouseev)
             mouseStartY = mouseev.y();
         }
     if (mouseev.type() == QMouseEvent::MouseButtonRelease)
-        {            
+        {
             touchTrigger = false;
             mouseStopX = mouseev.x();
-            mouseStopY = mouseev.y();            
+            mouseStopY = mouseev.y();
             int calcx = mouseStartX - mouseStopX;
             int calcy = mouseStartY - mouseStopY;
             bool xpositive;
