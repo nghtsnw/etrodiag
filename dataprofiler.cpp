@@ -10,6 +10,9 @@ dataprofiler::dataprofiler(QWidget *parent) : QObject(parent)
     /*connect(this, &dataprofiler::s_returnPacketSize, this, [ = ]() {
         emit returnPacketSize(packetSize)
     });*/
+    connect(this, &dataprofiler::s_returnBlockIdentifycatorPosition, this, [ = ]() {
+        emit returnBlockIdentifycatorPosition(blockIdentifycatorPosition);
+    });
     connect(this, &dataprofiler::s_returnCalcCRCFromPosition, this, [ = ]() {
         emit returnCalcCRCFromPosition(calcCRCFromPosition);
     });
@@ -100,10 +103,10 @@ void dataprofiler::setPacketSize(int size)
 {
     oneMsgLeight = size;
 }
-/*void dataprofiler::setBlockIdentifycatorPosition(int pos)
+void dataprofiler::setBlockIdentifycatorPosition(int pos)
 {
     blockIdentifycatorPosition = pos;
-}*/
+}
 void dataprofiler::setCalcCRCFromPosition(int pos)
 {
     calcCRCFromPosition = pos;

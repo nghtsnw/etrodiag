@@ -21,8 +21,7 @@ private:
     void endOfPacket(void);
     uint8_t calculatedCRC;
     bool readFromFile = false;
-
-    //int blockIdentifycatorPosition = 2;
+    int blockIdentifycatorPosition = 2;
     int calcCRCFromPosition = 2;
     int markerPacketBeginSize = 2;
     uint8_t markerPacketBeginByte1 = 0xFF;
@@ -39,11 +38,13 @@ signals:
     void s_readFromFile(bool val);
 
     void s_returnPacketSize();
+    void s_returnBlockIdentifycatorPosition();
     void s_returnCalcCRCFromPosition();
     void s_returnMarkerPacketBeginSize();
     void s_returnMarkerPacketBeginText();
     void s_returnTimeoutAfterLastByte();
     void returnPacketSize(int size);
+    void returnBlockIdentifycatorPosition(int pos);
     void returnCalcCRCFromPosition(int pos);
     void returnMarkerPacketBeginSize(int size);
     void returnMarkerPacketBeginText(QString text);
@@ -53,7 +54,7 @@ signals:
 public slots:
     void getByte(int byteFromBuf);
     void setPacketSize(int size);
-    //void setBlockIdentifycatorPosition(int pos);
+    void setBlockIdentifycatorPosition(int pos);
     void setCalcCRCFromPosition(int pos);
     void setMarkerPacketBeginSize(int size);
     void setMarkerPacketBeginText(QString text);

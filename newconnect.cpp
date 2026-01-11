@@ -43,12 +43,14 @@ newconnect::newconnect(QWidget *parent) :
     connect(datapool, &dataprofiler::ready4read, gstream, &getStream::readPermission);
     connect(datapool, &dataprofiler::readNext, gstream, &getStream::readIntByte);
     connect(m_settings, &SettingsDialog::restoreConsoleAndButtons, this, &newconnect::restoreWindowAfterApplySettings);
-    connect (m_settings, &SettingsDialog::writeTextLog, this, &newconnect::writeTextLog);
+    connect (m_settings, &SettingsDialog::prepareToSaveProfile, this, &newconnect::prepareToSaveProfile);
+    connect (m_settings, &SettingsDialog::saveProfile, this, &newconnect::saveProfile);
     connect (m_settings, &SettingsDialog::writeBinLog, this, &newconnect::writeBinLog);
     connect (m_settings, &SettingsDialog::writeJsonLog, this, &newconnect::writeJsonLog);
     /*----------------------------------------------------------------------------------------------------------------------------*/
     //При загрузке данных из профиля, они отправляются в окно настроек в UI
     connect (this, &newconnect::setPacketSize, m_settings, &SettingsDialog::setPacketSizeSpinBox);
+    connect (this, &newconnect::setBlockIdentifycatorPosition, m_settings, &SettingsDialog::setBlockIdentifycatorPositionSpinBox);
     connect (this, &newconnect::setCalcCRCFromPosition, m_settings, &SettingsDialog::setCalcCRCFromPositionSpinBox);
     connect (this, &newconnect::setMarkerPacketBeginSize, m_settings, &SettingsDialog::setMarkerPacketBeginSizeSpinBox);
     connect (this, &newconnect::setMarkerPacketBeginText, m_settings, &SettingsDialog::setMarkerPacketBeginText);
@@ -57,6 +59,7 @@ newconnect::newconnect(QWidget *parent) :
     /*----------------------------------------------------------------------------------------------------------------------------*/
     //По изменению настроек в UI, они сразу применяются на датаразборке
     connect (m_settings, &SettingsDialog::packetSizeSpinBox_valueChanged, datapool, &dataprofiler::setPacketSize);
+    connect (m_settings, &SettingsDialog::blockIdentifycatorPositionSpinBox_valueChanged, datapool, &dataprofiler::setBlockIdentifycatorPosition);
     connect (m_settings, &SettingsDialog::calcCRCFromSpinBox_valueChanged, datapool, &dataprofiler::setCalcCRCFromPosition);
     connect (m_settings, &SettingsDialog::markerSizeSpinBox_valueChanged, datapool, &dataprofiler::setMarkerPacketBeginSize);
     connect (m_settings, &SettingsDialog::varConrolCheckBox_valueChanged, this, &newconnect::setVisibleControlWindow);
@@ -65,6 +68,7 @@ newconnect::newconnect(QWidget *parent) :
     /*----------------------------------------------------------------------------------------------------------------------------*/
     //При загрузке данных из профиля, они сразу применяются на датаразборке (возможно лишние связи)
     connect (this, &newconnect::setPacketSize, datapool, &dataprofiler::setPacketSize);
+    connect (this, &newconnect::setBlockIdentifycatorPosition, datapool, &dataprofiler::setBlockIdentifycatorPosition);
     connect (this, &newconnect::setCalcCRCFromPosition, datapool, &dataprofiler::setCalcCRCFromPosition);
     connect (this, &newconnect::setMarkerPacketBeginSize, datapool, &dataprofiler::setMarkerPacketBeginSize);
     connect (this, &newconnect::setMarkerPacketBeginText, datapool, &dataprofiler::setMarkerPacketBeginText);
@@ -73,6 +77,7 @@ newconnect::newconnect(QWidget *parent) :
     /*----------------------------------------------------------------------------------------------------------------------------*/
     //Запрос текущих параметров протокола из датаразборки для сохранения в файле профиля
     connect (this, &newconnect::getPacketSize, datapool, &dataprofiler::s_returnPacketSize);
+    connect (this, &newconnect::getBlockIdentifycatorPosition, datapool, &dataprofiler::s_returnBlockIdentifycatorPosition);
     connect (this, &newconnect::getCalcCRCFromPosition, datapool, &dataprofiler::s_returnCalcCRCFromPosition);
     connect (this, &newconnect::getMarkerPacketBeginSize, datapool, &dataprofiler::s_returnMarkerPacketBeginSize);
     connect (this, &newconnect::getMarkerPacketBeginText, datapool, &dataprofiler::s_returnMarkerPacketBeginText);
@@ -83,8 +88,13 @@ newconnect::newconnect(QWidget *parent) :
     connect (timerAboveTxCommand, &QTimer::timeout, this, &newconnect::sendCommand);//отправляем команду после задержки
     connect (this, &newconnect::sendRawData, gstream, &getStream::getRawData);
     connect (this, &newconnect::sendRawData, m_console, &Console::putData);
+    /*----------------------------------------------------------------------------------------------------------------------------*/
+    //Возврат текущих параметров из датаразборки на сохранение в файл профиля
     connect (datapool, &dataprofiler::returnPacketSize, this, [ = ](int size) {
         toSavePacketSize = size;
+    });
+    connect (datapool, &dataprofiler::returnBlockIdentifycatorPosition, this, [ = ](int pos) {
+        toSaveBlockIdentifycatorPosition = pos;
     });
     connect (datapool, &dataprofiler::returnCalcCRCFromPosition, this, [ = ](int pos) {
         toSaveCalcCRCFromPosition = pos;
@@ -98,6 +108,7 @@ newconnect::newconnect(QWidget *parent) :
     connect (datapool, &dataprofiler::returnTimeoutAfterLastByte, this, [ = ](int timeout_ms) {
         toSaveTimeoutAfterLastByte = timeout_ms;
     });
+    /*----------------------------------------------------------------------------------------------------------------------------*/
     on_settingsButton_clicked();
 }
 
@@ -358,6 +369,12 @@ void newconnect::saveProfile()
         profile.open(QIODevice::WriteOnly | QIODevice::Text);
         QTextStream txtStream(&profile);
         txtStream << info.fileName() << "\n";
+        txtStream << "packetSize" << "\t" << QString::number(toSavePacketSize, 10) << "\n";
+        txtStream << "blockIdentifycatorPosition" << "\t" << QString::number(toSaveBlockIdentifycatorPosition, 10) << "\n";
+        txtStream << "calcCRCFromPosition" << "\t" << QString::number(toSaveCalcCRCFromPosition, 10) << "\n";
+        txtStream << "markerPacketBeginSize" << "\t" << QString::number(toSaveMarkerPacketBeginSize, 10) << "\n";
+        txtStream << "markerPacketBeginText" << "\t" << toSaveMarkerPacketBeginText << "\n";
+        txtStream << "timeoutAfterLastByte" << "\t" << QString::number(toSaveTimeoutAfterLastByte, 10) << "\n";
         while (maskVectorsListIt.hasNext())
         {
             QListIterator<QString> lstIt(maskVectorsListIt.peekNext()->lst);

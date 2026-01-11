@@ -97,17 +97,21 @@ public:
 
 signals:
     void restoreConsoleAndButtons();
+    void prepareToSaveProfile();
+    void saveProfile();
     void writeTextLog(bool);
     void writeBinLog(bool);
     void writeJsonLog(bool);
 
     void packetSizeSpinBox_valueChanged(int);
+    void blockIdentifycatorPositionSpinBox_valueChanged(int);
     void calcCRCFromSpinBox_valueChanged(int);
     void markerSizeSpinBox_valueChanged(int);
     void varConrolCheckBox_valueChanged(bool);
     void markerBeginText_valueChanged(QString);
 
     void setPacketSizeSpinBox(int size);
+    void setBlockIdentifycatorPositionSpinBox(int pos);
     void setCalcCRCFromPositionSpinBox(int pos);
     void setMarkerPacketBeginSizeSpinBox(int size);
     void setMarkerPacketBeginText(QString text);

@@ -111,6 +111,7 @@ private:
     quint8 calcCrc(const QVector<quint8> &arr);
 
     int toSavePacketSize;
+    int toSaveBlockIdentifycatorPosition;
     int toSaveCalcCRCFromPosition;
     int toSaveMarkerPacketBeginSize;
     QString toSaveMarkerPacketBeginText;

@@ -37,6 +37,9 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     connect(m_ui->packetSizeSpinBox, &QSpinBox::valueChanged, this, [ = ](int val) {
         emit packetSizeSpinBox_valueChanged(val);
     } );
+    connect(m_ui->BlockIdentifycatorPositionSpinBox, &QSpinBox::valueChanged, this, [ = ](int val) {
+        emit blockIdentifycatorPositionSpinBox_valueChanged(val);
+    } );
     connect(m_ui->calcCRCFromSpinBox, &QSpinBox::valueChanged, this, [ = ](int val) {
         emit calcCRCFromSpinBox_valueChanged(val);
     } );
@@ -53,6 +56,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
         markerTextNormalisation(2, text);
     } );
     connect(this, &SettingsDialog::setPacketSizeSpinBox, m_ui->packetSizeSpinBox, &QSpinBox::setValue);
+    connect(this, &SettingsDialog::setBlockIdentifycatorPositionSpinBox, m_ui->BlockIdentifycatorPositionSpinBox, &QSpinBox::setValue);
     connect(this, &SettingsDialog::setCalcCRCFromPositionSpinBox, m_ui->calcCRCFromSpinBox, &QSpinBox::setValue);
     connect(this, &SettingsDialog::setMarkerPacketBeginSizeSpinBox, m_ui->markerSizeSpinBox, &QSpinBox::setValue);
     connect(this, &SettingsDialog::setTimeoutAfterLastByteSpinBox, m_ui->timeoutSpinBox, &QSpinBox::setValue);
@@ -63,7 +67,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     fillProfileList();
     fillPortsInfo();
     m_ui->readOnlyCheckBox->setChecked(m_currentSettings.readOnlyProfile);
-    m_ui->deleteProfileButton->setDisabled(m_ui->readOnlyCheckBox->isChecked());
+    on_readOnlyCheckBox_stateChanged(0);
     updateSettings();
 }
 
@@ -95,6 +99,8 @@ void SettingsDialog::apply()
 {
     updateSettings();
     this->hide();
+    emit prepareToSaveProfile();
+    emit saveProfile();
     emit restoreConsoleAndButtons();
 }
 
@@ -285,8 +291,18 @@ void SettingsDialog::on_profileSelectBox_currentTextChanged(const QString &arg1)
         QFileInfo fileInfo(infoList.at(0));
         QString currentProfile = fileInfo.filePath();
         selectedProfile = currentProfile;
+        m_currentSettings.profilePath = selectedProfile;
+        m_ui->packetSizeSpinBox->clear();
+        m_ui->markerSizeSpinBox->clear();
+        m_ui->timeoutSpinBox->clear();
+        m_ui->BlockIdentifycatorPositionSpinBox->clear();
+        m_ui->calcCRCFromSpinBox->clear();
+        m_ui->b1MarkerLineEdit->clear();
+        m_ui->b2MarkerLineEdit->clear();
+        m_ui->varConrolCheckBox->setCheckState(Qt::Unchecked);
         nameFilter.clear();
         infoList.clear();
+        emit loadSelectedProfile();
     }
 }
 
@@ -332,6 +348,8 @@ void SettingsDialog::splitMarkerText(QString text) {
 void SettingsDialog::on_readOnlyCheckBox_stateChanged(int)
 {
     m_ui->deleteProfileButton->setDisabled(m_ui->readOnlyCheckBox->isChecked());
+    m_ui->protocolSetupBox->setDisabled(m_ui->readOnlyCheckBox->isChecked());
+    m_ui->descriptionTextEdit->setReadOnly(m_ui->readOnlyCheckBox->isChecked());
 }
 
 void SettingsDialog::on_writeBinChkBox_stateChanged(int)
@@ -351,6 +369,6 @@ void SettingsDialog::on_writeJsonChkBox_stateChanged(int)
 
 void SettingsDialog::on_profileSelectBox_currentIndexChanged(int index)
 {
-    emit loadSelectedProfile();
+    //m_currentSettings.profilePath = selectedProfile;
+    //emit loadSelectedProfile();
 }
-
