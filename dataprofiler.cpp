@@ -3,30 +3,22 @@
 
 dataprofiler::dataprofiler(QWidget *parent) : QObject(parent)
 {
-    connect(&timeout, &QTimer::timeout, this, &dataprofiler::endOfPacket);
+    timeout.setSingleShot(true);
+    connect(&timeout, &QChronoTimer::timeout, this, &dataprofiler::endOfPacket);
     connect(this, &dataprofiler::s_readFromFile, this, [ = ](bool val) {
         readFromFile = val;
     });
-    /*connect(this, &dataprofiler::s_returnPacketSize, this, [ = ]() {
-        emit returnPacketSize(packetSize)
+    /*connect(this, &dataprofiler::s_returnProtocolDescription, this, [ = ]() { //Запрос протокола снаружи
+        emit returnProtocolDescription(protocol);
     });*/
-    connect(this, &dataprofiler::s_returnBlockIdentifycatorPosition, this, [ = ]() {
-        emit returnBlockIdentifycatorPosition(blockIdentifycatorPosition);
+    connect(this, &dataprofiler::setProtocolDescription, this, [ = ](s_protocolDescription p) { //Установка протокола
+        protocol = p;
     });
-    connect(this, &dataprofiler::s_returnCalcCRCFromPosition, this, [ = ]() {
-        emit returnCalcCRCFromPosition(calcCRCFromPosition);
-    });
-    connect(this, &dataprofiler::s_returnMarkerPacketBeginSize, this, [ = ]() {
-        emit returnMarkerPacketBeginSize(markerPacketBeginSize);
-    });
-    connect(this, &dataprofiler::s_returnMarkerPacketBeginText, this, [ = ]() {
+    /*connect(this, &dataprofiler::s_returnMarkerPacketBeginText, this, [ = ]() {
         QString markerPacketBeginText = QString::number(markerPacketBeginByte1, 16).toUpper()
                                         + QString::number(markerPacketBeginByte2, 16).toUpper();
         emit returnMarkerPacketBeginText(markerPacketBeginText);
-    });
-    connect(this, &dataprofiler::s_returnTimeoutAfterLastByte, this, [ = ]() {
-        emit returnTimeoutAfterLastByte(timeoutAfterLastByte);
-    });
+    });*/
 }
 
 void dataprofiler::getByte(int byteFromBuf)
@@ -34,9 +26,9 @@ void dataprofiler::getByte(int byteFromBuf)
     bool marker = false;
     emit ready4read(false);
     frameMsg.enqueue(byteFromBuf);
-    if ((frameMsg.size() >= markerPacketBeginSize)) //если начало буффера соответствует началу пакета то продолжаем читать
+    if ((frameMsg.size() >= protocol.markerPacketBeginSize)) //если начало буффера соответствует началу пакета то продолжаем читать
     {
-        switch (markerPacketBeginSize) {
+        switch (protocol.markerPacketBeginSize) {
             {
             case 0:
             {
@@ -45,14 +37,14 @@ void dataprofiler::getByte(int byteFromBuf)
             }
             case 1:
             {
-                if (frameMsg[0] == markerPacketBeginByte1) {
+                if (frameMsg[0] == protocol.markerPacketBeginByte1) {
                     marker = true;
                 }
                 break;
             }
             case 2:
             {
-                if ((frameMsg[0] == markerPacketBeginByte1) && (frameMsg[1] == markerPacketBeginByte2)) {
+                if ((frameMsg[0] == protocol.markerPacketBeginByte1) && (frameMsg[1] == protocol.markerPacketBeginByte2)) {
                     marker = true;
                 }
                 break;
@@ -61,7 +53,7 @@ void dataprofiler::getByte(int byteFromBuf)
                 break;
             }
         }
-        if (frameMsg.size() == oneMsgLeight && marker)
+        if (frameMsg.size() == protocol.packetSize && marker)
         {
             if (checkCRC()) {
                 emit deviceData(frameMsg.toVector()); //если пакет сформирован, отправляем пакет в гуй и обнуляем буффер
@@ -76,7 +68,8 @@ void dataprofiler::getByte(int byteFromBuf)
         }
     }
     if (!readFromFile) {
-        timeout.start(timeoutAfterLastByte);
+        timeout.setInterval(std::chrono::nanoseconds(protocol.timeoutAfterLastByte));
+        timeout.start();
     }
     emit ready4read(true);
     emit readNext();

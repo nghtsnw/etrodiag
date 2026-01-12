@@ -103,7 +103,7 @@ signals:
     void writeBinLog(bool);
     void writeJsonLog(bool);
 
-    void packetSizeSpinBox_valueChanged(int);
+    /*void packetSizeSpinBox_valueChanged(int);
     void blockIdentifycatorPositionSpinBox_valueChanged(int);
     void calcCRCFromSpinBox_valueChanged(int);
     void markerSizeSpinBox_valueChanged(int);
@@ -115,7 +115,7 @@ signals:
     void setCalcCRCFromPositionSpinBox(int pos);
     void setMarkerPacketBeginSizeSpinBox(int size);
     void setMarkerPacketBeginText(QString text);
-    void setTimeoutAfterLastByteSpinBox(int timeout_ms);
+    void setTimeoutAfterLastByteSpinBox(int timeout_ms);*/
 
     void loadSelectedProfile();
 
@@ -139,7 +139,7 @@ private slots:
 
     void on_writeJsonChkBox_stateChanged(int);
 
-    void markerTextNormalisation(int numberByte, QString text);
+    //void markerTextNormalisation(int numberByte, QString text);
 
     void on_profileSelectBox_currentIndexChanged(int index);
 
@@ -149,8 +149,8 @@ private:
     void updateSettings();
     void fillProfileList();
     void portBoxEvent(int currentText);
-    void splitMarkerText(QString text);
-    QString markerBeginText = "FFFF";
+    // void splitMarkerText(QString text);
+    //QString markerBeginText = "FFFF";
 
 private:
     Ui::SettingsDialog *m_ui = nullptr;

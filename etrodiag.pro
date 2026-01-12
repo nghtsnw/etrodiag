@@ -39,6 +39,7 @@ HEADERS += \
     device.h \
     devsettingsform.h \
     getstream.h \
+    global.h \
     livegraph.h \
     logger.h \
     mainwindow.h \

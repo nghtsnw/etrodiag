@@ -10,6 +10,7 @@
 #include "dataprofiler.h"
 #include "txtmaskobj.h"
 #include <QStandardPaths>
+#include <global.h>
 
 newconnect::newconnect(QWidget *parent) :
     QWidget(parent),
@@ -49,39 +50,26 @@ newconnect::newconnect(QWidget *parent) :
     connect (m_settings, &SettingsDialog::writeJsonLog, this, &newconnect::writeJsonLog);
     /*----------------------------------------------------------------------------------------------------------------------------*/
     //При загрузке данных из профиля, они отправляются в окно настроек в UI
-    connect (this, &newconnect::setPacketSize, m_settings, &SettingsDialog::setPacketSizeSpinBox);
-    connect (this, &newconnect::setBlockIdentifycatorPosition, m_settings, &SettingsDialog::setBlockIdentifycatorPositionSpinBox);
-    connect (this, &newconnect::setCalcCRCFromPosition, m_settings, &SettingsDialog::setCalcCRCFromPositionSpinBox);
-    connect (this, &newconnect::setMarkerPacketBeginSize, m_settings, &SettingsDialog::setMarkerPacketBeginSizeSpinBox);
-    connect (this, &newconnect::setMarkerPacketBeginText, m_settings, &SettingsDialog::setMarkerPacketBeginText);
-    connect (this, &newconnect::setTimeoutAfterLastByte, m_settings, &SettingsDialog::setTimeoutAfterLastByteSpinBox);
+    connect (this, &newconnect::setProtocolDescription, m_settings, &SettingsDialog::setProtocolDescription);
     /*----------------------------------------------------------------------------------------------------------------------------*/
     /*----------------------------------------------------------------------------------------------------------------------------*/
     //По изменению настроек в UI, они сразу применяются на датаразборке
-    connect (m_settings, &SettingsDialog::packetSizeSpinBox_valueChanged, datapool, &dataprofiler::setPacketSize);
-    connect (m_settings, &SettingsDialog::blockIdentifycatorPositionSpinBox_valueChanged, datapool, &dataprofiler::setBlockIdentifycatorPosition);
-    connect (m_settings, &SettingsDialog::calcCRCFromSpinBox_valueChanged, datapool, &dataprofiler::setCalcCRCFromPosition);
-    connect (m_settings, &SettingsDialog::markerSizeSpinBox_valueChanged, datapool, &dataprofiler::setMarkerPacketBeginSize);
-    connect (m_settings, &SettingsDialog::varConrolCheckBox_valueChanged, this, &newconnect::setVisibleControlWindow);
-    connect (m_settings, &SettingsDialog::markerBeginText_valueChanged, datapool, &dataprofiler::setMarkerPacketBeginText);
+    connect (m_settings, &SettingsDialog::protocolDescription_valueChanged, datapool, &dataprofiler::setProtocolDescription);
     /*----------------------------------------------------------------------------------------------------------------------------*/
     /*----------------------------------------------------------------------------------------------------------------------------*/
-    //При загрузке данных из профиля, они сразу применяются на датаразборке (возможно лишние связи)
-    connect (this, &newconnect::setPacketSize, datapool, &dataprofiler::setPacketSize);
-    connect (this, &newconnect::setBlockIdentifycatorPosition, datapool, &dataprofiler::setBlockIdentifycatorPosition);
-    connect (this, &newconnect::setCalcCRCFromPosition, datapool, &dataprofiler::setCalcCRCFromPosition);
-    connect (this, &newconnect::setMarkerPacketBeginSize, datapool, &dataprofiler::setMarkerPacketBeginSize);
-    connect (this, &newconnect::setMarkerPacketBeginText, datapool, &dataprofiler::setMarkerPacketBeginText);
-    connect (this, &newconnect::setTimeoutAfterLastByte, datapool, &dataprofiler::setTimeoutAfterLastByte);
+    //При загрузке данных из профиля, они сразу применяются на датаразборке
+    connect (this, &newconnect::setProtocolDescription, datapool, &dataprofiler::setProtocolDescription);
     /*----------------------------------------------------------------------------------------------------------------------------*/
     /*----------------------------------------------------------------------------------------------------------------------------*/
     //Запрос текущих параметров протокола из датаразборки для сохранения в файле профиля
-    connect (this, &newconnect::getPacketSize, datapool, &dataprofiler::s_returnPacketSize);
+    /*connect (this, &newconnect::getPacketSize, datapool, &dataprofiler::s_returnPacketSize);
     connect (this, &newconnect::getBlockIdentifycatorPosition, datapool, &dataprofiler::s_returnBlockIdentifycatorPosition);
     connect (this, &newconnect::getCalcCRCFromPosition, datapool, &dataprofiler::s_returnCalcCRCFromPosition);
     connect (this, &newconnect::getMarkerPacketBeginSize, datapool, &dataprofiler::s_returnMarkerPacketBeginSize);
     connect (this, &newconnect::getMarkerPacketBeginText, datapool, &dataprofiler::s_returnMarkerPacketBeginText);
     connect (this, &newconnect::getTimeoutAfterLastByte, datapool, &dataprofiler::s_returnTimeoutAfterLastByte);
+    connect (this, &newconnect::getDescription, datapool, &dataprofiler::s_returnDescription);
+    connect (this, &newconnect::getVarControl, datapool, &dataprofiler::s_returnVarControl);*/
     /*----------------------------------------------------------------------------------------------------------------------------*/
     connect (m_settings, &SettingsDialog::loadSelectedProfile, this, &newconnect::readProfile);
     connect (timer, &QTimer::timeout, this, &newconnect::readFromFile);//читаем из файла по таймеру
@@ -107,6 +95,12 @@ newconnect::newconnect(QWidget *parent) :
     });
     connect (datapool, &dataprofiler::returnTimeoutAfterLastByte, this, [ = ](int timeout_ms) {
         toSaveTimeoutAfterLastByte = timeout_ms;
+    });
+    connect (datapool, &dataprofiler::returnDescription, this, [ = ](QString text) {
+        toSaveDescription = text;
+    });
+    connect (datapool, &dataprofiler::returnVarControl, this, [ = ](bool check) {
+        toSaveVarControl = check;
     });
     /*----------------------------------------------------------------------------------------------------------------------------*/
     on_settingsButton_clicked();

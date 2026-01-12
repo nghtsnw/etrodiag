@@ -4,30 +4,24 @@
 #include <QQueue>
 #include <QObject>
 #include <QMainWindow>
-#include <QTimer>
+#include <QChronoTimer>
+#include "global.h"
 
 class dataprofiler : public QObject
 {
     Q_OBJECT
 public:
     explicit dataprofiler(QWidget *parent = nullptr);
-    int oneMsgLeight = 41;
+    s_protocolDescription protocol;
 
 private:
-
     QQueue<int> frameMsg;
     QVector<int> snapshot;
     bool checkCRC(void);
     void endOfPacket(void);
     uint8_t calculatedCRC;
     bool readFromFile = false;
-    int blockIdentifycatorPosition = 2;
-    int calcCRCFromPosition = 2;
-    int markerPacketBeginSize = 2;
-    uint8_t markerPacketBeginByte1 = 0xFF;
-    uint8_t markerPacketBeginByte2 = 0xFF;
-    int timeoutAfterLastByte = 3;
-    QTimer timeout;
+    QChronoTimer timeout;
 
 signals:
     void deviceData(QVector<int> snapshot);
@@ -36,20 +30,7 @@ signals:
     void readNext();
     void ready4read(bool);
     void s_readFromFile(bool val);
-
-    void s_returnPacketSize();
-    void s_returnBlockIdentifycatorPosition();
-    void s_returnCalcCRCFromPosition();
-    void s_returnMarkerPacketBeginSize();
-    void s_returnMarkerPacketBeginText();
-    void s_returnTimeoutAfterLastByte();
-    void returnPacketSize(int size);
-    void returnBlockIdentifycatorPosition(int pos);
-    void returnCalcCRCFromPosition(int pos);
-    void returnMarkerPacketBeginSize(int size);
-    void returnMarkerPacketBeginText(QString text);
-    void returnTimeoutAfterLastByte(int timeout_ms);
-
+    void setProtocolDescription(s_protocolDescription);
 
 public slots:
     void getByte(int byteFromBuf);

@@ -48,12 +48,12 @@ signals:
     void saveAllMasks();
 
     void loadMask(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool _drawGraphFlag, QString _drawGraphColor);
-    void setPacketSize(int size);
+    /*void setPacketSize(int size);
     void setBlockIdentifycatorPosition(int pos);
     void setCalcCRCFromPosition(int pos);
     void setMarkerPacketBeginSize(int size);
     void setMarkerPacketBeginText(QString text);
-    void setTimeoutAfterLastByte(int timeout_ms);
+    void setTimeoutAfterLastByte(int timeout_ms);*/
 
     void writeTextLog(bool);
     void writeJsonLog(bool);
@@ -64,12 +64,12 @@ signals:
     void stopLog();
     void profileName2log(QString);
 
-    void getPacketSize();
+    /*void getPacketSize();
     void getBlockIdentifycatorPosition();
     void getCalcCRCFromPosition();
     void getMarkerPacketBeginSize();
     void getMarkerPacketBeginText();
-    void getTimeoutAfterLastByte();
+    void getTimeoutAfterLastByte();*/
 
     void setVisibleControlWindow(bool);
 
@@ -110,12 +110,14 @@ private:
     QVector<quint8> toTransmit;
     quint8 calcCrc(const QVector<quint8> &arr);
 
-    int toSavePacketSize;
+    /*int toSavePacketSize;
     int toSaveBlockIdentifycatorPosition;
     int toSaveCalcCRCFromPosition;
     int toSaveMarkerPacketBeginSize;
     QString toSaveMarkerPacketBeginText;
     int toSaveTimeoutAfterLastByte;
+    QString toSaveDescription;
+    bool toSaveVarControl;*/
 
 protected:
     virtual void resizeEvent(QResizeEvent *event);

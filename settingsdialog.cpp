@@ -9,6 +9,7 @@
 #include <QDebug>
 #include <QStandardPaths>
 #include <QInputDialog>
+#include "global.h"
 
 static const char blankString[] = QT_TRANSLATE_NOOP("SettingsDialog", "N/A");
 
@@ -55,13 +56,17 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     connect(m_ui->b2MarkerLineEdit, &QLineEdit::textChanged, this, [ = ](QString text) {
         markerTextNormalisation(2, text);
     } );
-    connect(this, &SettingsDialog::setPacketSizeSpinBox, m_ui->packetSizeSpinBox, &QSpinBox::setValue);
-    connect(this, &SettingsDialog::setBlockIdentifycatorPositionSpinBox, m_ui->BlockIdentifycatorPositionSpinBox, &QSpinBox::setValue);
-    connect(this, &SettingsDialog::setCalcCRCFromPositionSpinBox, m_ui->calcCRCFromSpinBox, &QSpinBox::setValue);
-    connect(this, &SettingsDialog::setMarkerPacketBeginSizeSpinBox, m_ui->markerSizeSpinBox, &QSpinBox::setValue);
-    connect(this, &SettingsDialog::setTimeoutAfterLastByteSpinBox, m_ui->timeoutSpinBox, &QSpinBox::setValue);
-    connect(this, &SettingsDialog::setMarkerPacketBeginText, this, [ = ](QString text) {
-        splitMarkerText(text);
+    connect(this, &SettingsDialog::setProtocolDescription, this, [ = ](s_protocolDescription p) {
+        m_ui->packetSizeSpinBox->setValue(p.packetSize);
+        m_ui->BlockIdentifycatorPositionSpinBox->setValue(p.blockIdentifycatorPosition);
+        m_ui->calcCRCFromSpinBox->setValue(p.calcCRCFromPosition);
+        m_ui->markerSizeSpinBox->setValue(p.markerPacketBeginSize);
+        m_ui->timeoutSpinBox->setValue(p.timeoutAfterLastByte);
+        /*splitMarkerText(text);*/
+        m_ui->b1MarkerLineEdit->setText(QString::number(p.markerPacketBeginByte1));
+        m_ui->b2MarkerLineEdit->setText(QString::number(p.markerPacketBeginByte2));
+        m_ui->descriptionTextEdit->setText(p.description);
+        m_ui->varConrolCheckBox->setChecked(p.varControl);
     } );
     fillPortsParameters();
     fillProfileList();
@@ -257,7 +262,6 @@ void SettingsDialog::updateSettings()
     m_currentSettings.readOnlyProfile = m_ui->readOnlyCheckBox->isChecked();
 }
 
-
 void SettingsDialog::on_newProfileButton_clicked()
 {
 #ifdef Q_OS_WIN32
@@ -277,7 +281,6 @@ void SettingsDialog::on_newProfileButton_clicked()
         fillProfileList();
     }
 }
-
 
 void SettingsDialog::on_profileSelectBox_currentTextChanged(const QString &arg1)
 {
@@ -299,6 +302,7 @@ void SettingsDialog::on_profileSelectBox_currentTextChanged(const QString &arg1)
         m_ui->calcCRCFromSpinBox->clear();
         m_ui->b1MarkerLineEdit->clear();
         m_ui->b2MarkerLineEdit->clear();
+        m_ui->descriptionTextEdit->clear();
         m_ui->varConrolCheckBox->setCheckState(Qt::Unchecked);
         nameFilter.clear();
         infoList.clear();
@@ -318,7 +322,7 @@ void SettingsDialog::on_deleteProfileButton_clicked()
     }
 }
 
-void SettingsDialog::markerTextNormalisation(int numberByte, QString text)
+/*void SettingsDialog::markerTextNormalisation(int numberByte, QString text)
 {
     bool ok;
     int val = text.toInt(&ok, 16);
@@ -343,7 +347,7 @@ void SettingsDialog::splitMarkerText(QString text) {
     int val = text.toInt(0, 16);
     m_ui->b1MarkerLineEdit->setText(QString::number((val >> 8) & 0xFF));
     m_ui->b2MarkerLineEdit->setText(QString::number((val) & 0xFF));
-}
+}*/
 
 void SettingsDialog::on_readOnlyCheckBox_stateChanged(int)
 {
