@@ -55,6 +55,7 @@
 #include <QWidget>
 #include <QSerialPort>
 #include <QLineEdit>
+#include "global.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -102,21 +103,8 @@ signals:
     void writeTextLog(bool);
     void writeBinLog(bool);
     void writeJsonLog(bool);
-
-    /*void packetSizeSpinBox_valueChanged(int);
-    void blockIdentifycatorPositionSpinBox_valueChanged(int);
-    void calcCRCFromSpinBox_valueChanged(int);
-    void markerSizeSpinBox_valueChanged(int);
-    void varConrolCheckBox_valueChanged(bool);
-    void markerBeginText_valueChanged(QString);
-
-    void setPacketSizeSpinBox(int size);
-    void setBlockIdentifycatorPositionSpinBox(int pos);
-    void setCalcCRCFromPositionSpinBox(int pos);
-    void setMarkerPacketBeginSizeSpinBox(int size);
-    void setMarkerPacketBeginText(QString text);
-    void setTimeoutAfterLastByteSpinBox(int timeout_ms);*/
-
+    void loadProtocol(s_protocolDescription); //Загрузка принятых значений в поля
+    void setProtocol(s_protocolDescription); //Применение текущих значений
     void loadSelectedProfile();
 
 private slots:
@@ -139,9 +127,6 @@ private slots:
 
     void on_writeJsonChkBox_stateChanged(int);
 
-    //void markerTextNormalisation(int numberByte, QString text);
-
-    void on_profileSelectBox_currentIndexChanged(int index);
 
 private:
     void fillPortsParameters();
@@ -149,8 +134,8 @@ private:
     void updateSettings();
     void fillProfileList();
     void portBoxEvent(int currentText);
-    // void splitMarkerText(QString text);
-    //QString markerBeginText = "FFFF";
+    s_protocolDescription currentProtocol;
+    void updateProtocol();
 
 private:
     Ui::SettingsDialog *m_ui = nullptr;

@@ -10,6 +10,7 @@
 #include "getstream.h"
 #include "dataprofiler.h"
 #include "txtmaskobj.h"
+#include "global.h"
 
 namespace Ui {
     class newconnect;
@@ -46,15 +47,8 @@ signals:
     void transmitData(QVector<int> snapshot);
     void badCRC(uint8_t calculatedCRC, QVector<int> snapshot);
     void saveAllMasks();
-
     void loadMask(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool _drawGraphFlag, QString _drawGraphColor);
-    /*void setPacketSize(int size);
-    void setBlockIdentifycatorPosition(int pos);
-    void setCalcCRCFromPosition(int pos);
-    void setMarkerPacketBeginSize(int size);
-    void setMarkerPacketBeginText(QString text);
-    void setTimeoutAfterLastByte(int timeout_ms);*/
-
+    void loadProtocol(s_protocolDescription); //Загрузка при чтении протокола из файла
     void writeTextLog(bool);
     void writeJsonLog(bool);
     void writeBinLog(bool);
@@ -63,14 +57,6 @@ signals:
     void startLog();
     void stopLog();
     void profileName2log(QString);
-
-    /*void getPacketSize();
-    void getBlockIdentifycatorPosition();
-    void getCalcCRCFromPosition();
-    void getMarkerPacketBeginSize();
-    void getMarkerPacketBeginText();
-    void getTimeoutAfterLastByte();*/
-
     void setVisibleControlWindow(bool);
 
 public slots:
@@ -80,7 +66,6 @@ public slots:
     void prepareToSaveProfile();
     void saveProfile();
     void receiveCommandFromGui(QVector<quint8> command, bool newcommandflag);
-
 
 private slots:
     void openSerialPort();
@@ -109,15 +94,7 @@ private:
     bool newcommand = false;
     QVector<quint8> toTransmit;
     quint8 calcCrc(const QVector<quint8> &arr);
-
-    /*int toSavePacketSize;
-    int toSaveBlockIdentifycatorPosition;
-    int toSaveCalcCRCFromPosition;
-    int toSaveMarkerPacketBeginSize;
-    QString toSaveMarkerPacketBeginText;
-    int toSaveTimeoutAfterLastByte;
-    QString toSaveDescription;
-    bool toSaveVarControl;*/
+    s_protocolDescription protocol;
 
 protected:
     virtual void resizeEvent(QResizeEvent *event);

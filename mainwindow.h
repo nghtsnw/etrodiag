@@ -74,7 +74,7 @@ class QLabel;
 //class QSwipeGesture;
 
 namespace Ui {
-class MainWindow;
+    class MainWindow;
 }
 
 QT_END_NAMESPACE
@@ -101,7 +101,7 @@ public:
     void textLogWindow(QString string, bool redFlag);
     void cleanDevList();
     void updValueArea(QString parameterName, int devNum, QString devName, double endValue, int byteNum, int maskId, bool);
-//    void grabGestures(const QVector<Qt::GestureType> &gestures);
+// void grabGestures(const QVector<Qt::GestureType> &gestures);
     void ValueArea_CellClicked(int row, int);
     QString appHomeDir;
     ~MainWindow();

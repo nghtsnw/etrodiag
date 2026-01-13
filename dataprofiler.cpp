@@ -8,17 +8,9 @@ dataprofiler::dataprofiler(QWidget *parent) : QObject(parent)
     connect(this, &dataprofiler::s_readFromFile, this, [ = ](bool val) {
         readFromFile = val;
     });
-    /*connect(this, &dataprofiler::s_returnProtocolDescription, this, [ = ]() { //Запрос протокола снаружи
-        emit returnProtocolDescription(protocol);
-    });*/
-    connect(this, &dataprofiler::setProtocolDescription, this, [ = ](s_protocolDescription p) { //Установка протокола
+    connect(this, &dataprofiler::setProtocol, this, [ = ](s_protocolDescription p) { //Установка протокола
         protocol = p;
     });
-    /*connect(this, &dataprofiler::s_returnMarkerPacketBeginText, this, [ = ]() {
-        QString markerPacketBeginText = QString::number(markerPacketBeginByte1, 16).toUpper()
-                                        + QString::number(markerPacketBeginByte2, 16).toUpper();
-        emit returnMarkerPacketBeginText(markerPacketBeginText);
-    });*/
 }
 
 void dataprofiler::getByte(int byteFromBuf)
@@ -86,7 +78,7 @@ void dataprofiler::endOfPacket(void)
 bool dataprofiler::checkCRC(void)
 {
     calculatedCRC = 0;
-    for (int i = calcCRCFromPosition; i < frameMsg.size() - 1; i++) {
+    for (int i = protocol.calcCRCFromPosition; i < frameMsg.size() - 1; i++) {
         calculatedCRC += frameMsg.at(i);
     }
     return (calculatedCRC == frameMsg.at(frameMsg.size() - 1)) ? true : false;
@@ -94,27 +86,27 @@ bool dataprofiler::checkCRC(void)
 
 void dataprofiler::setPacketSize(int size)
 {
-    oneMsgLeight = size;
+    protocol.packetSize = size;
 }
 void dataprofiler::setBlockIdentifycatorPosition(int pos)
 {
-    blockIdentifycatorPosition = pos;
+    protocol.blockIdentifycatorPosition = pos;
 }
 void dataprofiler::setCalcCRCFromPosition(int pos)
 {
-    calcCRCFromPosition = pos;
+    protocol.calcCRCFromPosition = pos;
 }
 void dataprofiler::setMarkerPacketBeginSize(int size)
 {
-    markerPacketBeginSize = size;
+    protocol.markerPacketBeginSize = size;
 }
 void dataprofiler::setMarkerPacketBeginText(QString text)
 {
     int val = text.toInt(0, 16);
-    markerPacketBeginByte1 = (val >> 8) & 0xFF;
-    markerPacketBeginByte1 = (val) & 0xFF;
+    protocol.markerPacketBeginByte1 = (val >> 8) & 0xFF;
+    protocol.markerPacketBeginByte1 = (val) & 0xFF;
 }
 void dataprofiler::setTimeoutAfterLastByte(int timeout_ms)
 {
-    timeoutAfterLastByte = timeout_ms;
+    protocol.timeoutAfterLastByte = timeout_ms;
 }

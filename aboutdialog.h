@@ -4,7 +4,7 @@
 #include <QDialog>
 
 namespace Ui {
-class AboutDialog;
+    class AboutDialog;
 }
 
 class AboutDialog : public QDialog
@@ -18,7 +18,7 @@ public:
 private:
     Ui::AboutDialog *ui;
     QPixmap *pixmap = new QPixmap(":/etrodiag.png");
-    const QString BUILDV =  tr("Build from ") + QStringLiteral(__DATE__ " " __TIME__);
+    QString BUILDV = tr("Build from ") + QStringLiteral(__DATE__ " " __TIME__);
 };
 
 #endif // ABOUTDIALOG_H

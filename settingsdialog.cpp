@@ -35,34 +35,12 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     connect(m_ui->serialPortInfoListBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &SettingsDialog::checkCustomDevicePathPolicy);
     connect(m_ui->serialPortInfoListBox, QOverload<int>::of(&QComboBox::activated), this, &SettingsDialog::portBoxEvent);
-    connect(m_ui->packetSizeSpinBox, &QSpinBox::valueChanged, this, [ = ](int val) {
-        emit packetSizeSpinBox_valueChanged(val);
-    } );
-    connect(m_ui->BlockIdentifycatorPositionSpinBox, &QSpinBox::valueChanged, this, [ = ](int val) {
-        emit blockIdentifycatorPositionSpinBox_valueChanged(val);
-    } );
-    connect(m_ui->calcCRCFromSpinBox, &QSpinBox::valueChanged, this, [ = ](int val) {
-        emit calcCRCFromSpinBox_valueChanged(val);
-    } );
-    connect(m_ui->markerSizeSpinBox, &QSpinBox::valueChanged, this, [ = ](int val) {
-        emit markerSizeSpinBox_valueChanged(val);
-    } );
-    connect(m_ui->varConrolCheckBox, &QCheckBox::checkStateChanged, this, [ = ]() {
-        emit varConrolCheckBox_valueChanged(m_ui->varConrolCheckBox->isChecked());
-    } );
-    connect(m_ui->b1MarkerLineEdit, &QLineEdit::textChanged, this, [ = ](QString text) {
-        markerTextNormalisation(1, text);
-    } );
-    connect(m_ui->b2MarkerLineEdit, &QLineEdit::textChanged, this, [ = ](QString text) {
-        markerTextNormalisation(2, text);
-    } );
-    connect(this, &SettingsDialog::setProtocolDescription, this, [ = ](s_protocolDescription p) {
+    connect(this, &SettingsDialog::loadProtocol, this, [ = ](s_protocolDescription p) { //Заполнение полей выбранным протоколом
         m_ui->packetSizeSpinBox->setValue(p.packetSize);
         m_ui->BlockIdentifycatorPositionSpinBox->setValue(p.blockIdentifycatorPosition);
         m_ui->calcCRCFromSpinBox->setValue(p.calcCRCFromPosition);
         m_ui->markerSizeSpinBox->setValue(p.markerPacketBeginSize);
         m_ui->timeoutSpinBox->setValue(p.timeoutAfterLastByte);
-        /*splitMarkerText(text);*/
         m_ui->b1MarkerLineEdit->setText(QString::number(p.markerPacketBeginByte1));
         m_ui->b2MarkerLineEdit->setText(QString::number(p.markerPacketBeginByte2));
         m_ui->descriptionTextEdit->setText(p.description);
@@ -103,6 +81,8 @@ void SettingsDialog::showPortInfo(int idx)
 void SettingsDialog::apply()
 {
     updateSettings();
+    updateProtocol();
+    emit setProtocol(currentProtocol);
     this->hide();
     emit prepareToSaveProfile();
     emit saveProfile();
@@ -262,6 +242,17 @@ void SettingsDialog::updateSettings()
     m_currentSettings.readOnlyProfile = m_ui->readOnlyCheckBox->isChecked();
 }
 
+void SettingsDialog::updateProtocol()
+{
+    currentProtocol.packetSize = m_ui->packetSizeSpinBox->value();
+    currentProtocol.blockIdentifycatorPosition = m_ui->BlockIdentifycatorPositionSpinBox->value();
+    currentProtocol.calcCRCFromPosition = m_ui->calcCRCFromSpinBox->value();
+    currentProtocol.markerPacketBeginSize = m_ui->markerSizeSpinBox->value();
+    currentProtocol.markerPacketBeginByte1 = QString(m_ui->b1MarkerLineEdit->text()).toInt(0, 16);
+    currentProtocol.markerPacketBeginByte2 = QString(m_ui->b2MarkerLineEdit->text()).toInt(0, 16);
+    currentProtocol.packetSize = m_ui->varConrolCheckBox->checkState() ? true : false;
+}
+
 void SettingsDialog::on_newProfileButton_clicked()
 {
 #ifdef Q_OS_WIN32
@@ -322,33 +313,6 @@ void SettingsDialog::on_deleteProfileButton_clicked()
     }
 }
 
-/*void SettingsDialog::markerTextNormalisation(int numberByte, QString text)
-{
-    bool ok;
-    int val = text.toInt(&ok, 16);
-    if (val < 0) {
-        val = 0;
-    }
-    else if (val > 0xFF) {
-        val = 0xFF;
-    }
-    if (numberByte == 1) {
-        m_ui->b1MarkerLineEdit->setText(QString::number(val, 16).toUpper());
-    }
-    else if (numberByte == 2) {
-        m_ui->b2MarkerLineEdit->setText(QString::number(val, 16).toUpper());
-    }
-    markerBeginText = m_ui->b1MarkerLineEdit->text() +
-                      m_ui->b2MarkerLineEdit->text();
-    emit markerBeginText_valueChanged(markerBeginText);
-}
-
-void SettingsDialog::splitMarkerText(QString text) {
-    int val = text.toInt(0, 16);
-    m_ui->b1MarkerLineEdit->setText(QString::number((val >> 8) & 0xFF));
-    m_ui->b2MarkerLineEdit->setText(QString::number((val) & 0xFF));
-}*/
-
 void SettingsDialog::on_readOnlyCheckBox_stateChanged(int)
 {
     m_ui->deleteProfileButton->setDisabled(m_ui->readOnlyCheckBox->isChecked());
@@ -369,10 +333,4 @@ void SettingsDialog::on_writeTxtChkBox_stateChanged(int)
 void SettingsDialog::on_writeJsonChkBox_stateChanged(int)
 {
     emit writeJsonLog(m_ui->writeJsonChkBox->isChecked());
-}
-
-void SettingsDialog::on_profileSelectBox_currentIndexChanged(int index)
-{
-    //m_currentSettings.profilePath = selectedProfile;
-    //emit loadSelectedProfile();
 }

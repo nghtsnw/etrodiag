@@ -30,7 +30,7 @@ signals:
     void readNext();
     void ready4read(bool);
     void s_readFromFile(bool val);
-    void setProtocolDescription(s_protocolDescription);
+    void setProtocol(s_protocolDescription);
 
 public slots:
     void getByte(int byteFromBuf);
