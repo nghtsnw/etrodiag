@@ -59,9 +59,10 @@ newconnect::newconnect(QWidget *parent) :
     connect (m_settings, &SettingsDialog::setProtocol, datapool, &dataprofiler::setProtocol);
     connect (m_settings, &SettingsDialog::setProtocol, this, [this](s_protocolDescription p) {
         protocol = p;
+        emit s_sendSettings(m_settings->settings());
     });
-    connect (m_settings, &SettingsDialog::setProtocol, this, &newconnect::s_sendSettings); //Вместе с отправкой протокола...
-    connect (this, &newconnect::s_sendSettings, datapool, &dataprofiler::setSettings); //...отправить на датаразбор настройки соединения
+    //Вместе с отправкой протокола отправить на датаразбор настройки соединения
+    connect (this, &newconnect::s_sendSettings, datapool, &dataprofiler::setSettings);
     /*----------------------------------------------------------------------------------------------------------------------------*/
     connect (m_settings, &SettingsDialog::loadSelectedProfile, this, &newconnect::readProfile);
     connect (timer, &QTimer::timeout, this, &newconnect::readFromFile);//читаем из файла по таймеру
@@ -200,7 +201,7 @@ void newconnect::sendCommand()
         //if (!newcommand) toTransmit = {0xFF, 0xAB, 0, 0, 0};
         toTransmit.last() = calcCrc(toTransmit);
         QByteArray ba;
-        for (auto i : qAsConst(toTransmit)) {
+        for (auto i : std::as_const(toTransmit)) {
             ba.append(i);
         }
         writeData(ba);

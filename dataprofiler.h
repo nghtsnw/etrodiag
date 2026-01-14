@@ -32,16 +32,10 @@ signals:
     void ready4read(bool);
     void s_readFromFile(bool val);
     void setProtocol(s_protocolDescription);
+    void setSettings(s_Settings);
 
 public slots:
     void getByte(int byteFromBuf);
-    void setPacketSize(int size);
-    void setBlockIdentifycatorPosition(int pos);
-    void setCalcCRCFromPosition(int pos);
-    void setMarkerPacketBeginSize(int size);
-    void setMarkerPacketBeginText(QString text);
-    void setTimeoutAfterLastByte(int timeout_ms);
-    void setSettings(s_Settings);
 };
 
 #endif // DATAPROFILER_H

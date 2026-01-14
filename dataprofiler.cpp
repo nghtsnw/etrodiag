@@ -13,7 +13,8 @@ dataprofiler::dataprofiler(QWidget *parent) : QObject(parent)
     });
     connect(this, &dataprofiler::setSettings, this, [ = ](s_Settings s) { //Установка протокола
         settings = s;
-        timeout.setInterval(std::chrono::nanoseconds((1 / (settings.baudRate / 8))*protocol.timeoutAfterLastByte));
+        float pause = ((1 / (settings.baudRate / 8))*protocol.timeoutAfterLastByte)*1000000;
+        timeout.setInterval(std::chrono::nanoseconds(static_cast<int>(pause)));
     });
 }
 
@@ -85,32 +86,4 @@ bool dataprofiler::checkCRC(void)
         calculatedCRC += frameMsg.at(i);
     }
     return (calculatedCRC == frameMsg.at(frameMsg.size() - 1)) ? true : false;
-}
-
-void dataprofiler::setPacketSize(int size)
-{
-    protocol.packetSize = size;
-}
-void dataprofiler::setBlockIdentifycatorPosition(int pos)
-{
-    protocol.blockIdentifycatorPosition = pos;
-}
-void dataprofiler::setCalcCRCFromPosition(int pos)
-{
-    protocol.calcCRCFromPosition = pos;
-}
-void dataprofiler::setMarkerPacketBeginSize(int size)
-{
-    protocol.markerPacketBeginSize = size;
-}
-void dataprofiler::setMarkerPacketBeginText(QString text)
-{
-    int val = text.toInt(0, 16);
-    protocol.markerPacketBeginByte1 = (val >> 8) & 0xFF;
-    iiii
-    protocol.markerPacketBeginByte1 = (val) & 0xFF;
-}
-void dataprofiler::setTimeoutAfterLastByte(int timeout_ms)
-{
-    protocol.timeoutAfterLastByte = timeout_ms;
 }

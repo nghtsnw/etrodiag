@@ -65,7 +65,7 @@ SettingsDialog::~SettingsDialog()
     delete m_ui;
 }
 
-SettingsDialog::Settings SettingsDialog::settings() const
+s_Settings SettingsDialog::settings() const
 {
     return m_currentSettings;
 }
