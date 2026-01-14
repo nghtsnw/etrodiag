@@ -51,6 +51,8 @@ newconnect::newconnect(QWidget *parent) :
     /*----------------------------------------------------------------------------------------------------------------------------*/
     //При загрузке данных из профиля, они отправляются в окно настроек в UI
     connect (this, &newconnect::loadProtocol, m_settings, &SettingsDialog::loadProtocol);
+    //При загрузке данных из профиля, они сразу применяются на датаразборке
+    connect (this, &newconnect::loadProtocol, datapool, &dataprofiler::setProtocol);
     /*----------------------------------------------------------------------------------------------------------------------------*/
     /*----------------------------------------------------------------------------------------------------------------------------*/
     //По применению настроек в UI, они сразу применяются на датаразборке, копия в newconnect для сохранения профиля
@@ -58,10 +60,8 @@ newconnect::newconnect(QWidget *parent) :
     connect (m_settings, &SettingsDialog::setProtocol, this, [this](s_protocolDescription p) {
         protocol = p;
     });
-    /*----------------------------------------------------------------------------------------------------------------------------*/
-    /*----------------------------------------------------------------------------------------------------------------------------*/
-    //При загрузке данных из профиля, они сразу применяются на датаразборке
-    connect (this, &newconnect::loadProtocol, datapool, &dataprofiler::setProtocol);
+    connect (m_settings, &SettingsDialog::setProtocol, this, &newconnect::s_sendSettings); //Вместе с отправкой протокола...
+    connect (this, &newconnect::s_sendSettings, datapool, &dataprofiler::setSettings); //...отправить на датаразбор настройки соединения
     /*----------------------------------------------------------------------------------------------------------------------------*/
     connect (m_settings, &SettingsDialog::loadSelectedProfile, this, &newconnect::readProfile);
     connect (timer, &QTimer::timeout, this, &newconnect::readFromFile);//читаем из файла по таймеру
@@ -84,14 +84,14 @@ void newconnect::on_settingsButton_clicked()
     ui->connectButton->hide();
     ui->settingsButton->hide();
     ui->consoleFrame->hide();
+    readProfile();
     m_settings->show();
 }
 
 void newconnect::openSerialPort()
 {
-    const SettingsDialog::Settings p = m_settings->settings();
     p_local = m_settings->settings();
-    if (p.readFromFileFlag)
+    if (p_local.readFromFileFlag)
     {
         readProfile();
         pos = 0;//задаём позицию для чтения FileSplitted в readFromFile()
@@ -113,23 +113,22 @@ void newconnect::openSerialPort()
             ch.clear();
         }
         fileBuffer.clear();
-        showStatusMessage(tr("Read file %1").arg(p.pathToBinFile));
+        showStatusMessage(tr("Read file %1").arg(p_local.pathToBinFile));
         timer->start(freq);//запускаем таймер, по нему читается по порядку FileSplitted функцией readFromFile()
     }
     else
     {
-        m_serial->setPortName(p.name);
-        m_serial->setBaudRate(p.baudRate);
-        m_serial->setDataBits(p.dataBits);
-        m_serial->setParity(p.parity);
-        m_serial->setStopBits(p.stopBits);
-        m_serial->setFlowControl(p.flowControl);
+        m_serial->setPortName(p_local.name);
+        m_serial->setBaudRate(p_local.baudRate);
+        m_serial->setDataBits(p_local.dataBits);
+        m_serial->setParity(p_local.parity);
+        m_serial->setStopBits(p_local.stopBits);
+        m_serial->setFlowControl(p_local.flowControl);
         if (m_serial->open(QIODevice::ReadWrite)) {
-            readProfile();
             m_console->setEnabled(true);
             showStatusMessage(tr("Connected to %1 : %2, %3, %4, %5, %6, %7")
-                              .arg(p.name).arg(p.stringBaudRate).arg(p.stringDataBits)
-                              .arg(p.stringParity).arg(p.stringStopBits).arg(p.stringFlowControl).arg(p.profilePath));
+                              .arg(p_local.name).arg(p_local.stringBaudRate).arg(p_local.stringDataBits)
+                              .arg(p_local.stringParity).arg(p_local.stringStopBits).arg(p_local.stringFlowControl).arg(p_local.profilePath));
         }
         else {
             QMessageBox::critical(this, tr("Error"), m_serial->errorString());
@@ -253,7 +252,7 @@ void newconnect::on_connectButton_clicked()
 
 void newconnect::prepareToSaveProfile()
 {
-    const SettingsDialog::Settings p = m_settings->settings();
+    const s_Settings p = m_settings->settings();
     if (!p.readOnlyProfile)
     { //очищаем список, выставляем разрешение для дальнейших операций по сохранению, даём сигнал на запрос всех масок
         maskVectorsList = this->findChildren<txtmaskobj*>();
@@ -316,7 +315,7 @@ void newconnect::saveProfile()
         maskVectorsList = this->findChildren<txtmaskobj*>();
         QListIterator<txtmaskobj*> maskVectorsListIt(maskVectorsList);
         maskVectorsListIt.toFront();
-        const SettingsDialog::Settings p = m_settings->settings();
+        const s_Settings p = m_settings->settings();
         QFile profile(p.profilePath);
         QFileInfo info(profile);
         profile.open(QIODevice::WriteOnly | QIODevice::Text);
@@ -348,7 +347,7 @@ void newconnect::saveProfile()
 void newconnect::readProfile()
 {
     emit cleanDevListSig();
-    const SettingsDialog::Settings p = m_settings->settings();
+    const s_Settings p = m_settings->settings();
     s_protocolDescription pt;
     QFile profile(p.profilePath);
     QFileInfo info(profile);
@@ -385,7 +384,7 @@ void newconnect::readProfile()
             pt.timeoutAfterLastByte = (strLst.at(1).toInt(0, 10));
         }
         if (strLst.at(0) == "description") {
-            pt.description = str;
+            pt.description = strLst.at(1);
         }
         if (strLst.at(0) == "varControl") {
             pt.varControl = (strLst.at(1) == "true") ? true : false;

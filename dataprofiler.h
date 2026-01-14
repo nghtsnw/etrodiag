@@ -12,7 +12,6 @@ class dataprofiler : public QObject
     Q_OBJECT
 public:
     explicit dataprofiler(QWidget *parent = nullptr);
-    s_protocolDescription protocol;
 
 private:
     QQueue<int> frameMsg;
@@ -22,6 +21,8 @@ private:
     uint8_t calculatedCRC;
     bool readFromFile = false;
     QChronoTimer timeout;
+    s_protocolDescription protocol;
+    s_Settings settings;
 
 signals:
     void deviceData(QVector<int> snapshot);
@@ -40,6 +41,7 @@ public slots:
     void setMarkerPacketBeginSize(int size);
     void setMarkerPacketBeginText(QString text);
     void setTimeoutAfterLastByte(int timeout_ms);
+    void setSettings(s_Settings);
 };
 
 #endif // DATAPROFILER_H

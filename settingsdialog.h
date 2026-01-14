@@ -72,29 +72,11 @@ class SettingsDialog : public QWidget
     Q_OBJECT
 
 public:
-    struct Settings {
-        QString name;
-        qint32 baudRate;
-        QString stringBaudRate;
-        QSerialPort::DataBits dataBits;
-        QString stringDataBits;
-        QSerialPort::Parity parity;
-        QString stringParity;
-        QSerialPort::StopBits stopBits;
-        QString stringStopBits;
-        QSerialPort::FlowControl flowControl;
-        QString stringFlowControl;
-        QString profilePath;
-        bool readOnlyProfile = true;
-        bool readFromFileFlag = false;
-        QString pathToBinFile;
-    };
-
     explicit SettingsDialog(QWidget *parent = nullptr);
     ~SettingsDialog();
     QString selectedProfile;
     QString appHomeDir;
-    Settings settings() const;
+    s_Settings settings() const;
 
 signals:
     void restoreConsoleAndButtons();
@@ -136,10 +118,11 @@ private:
     void portBoxEvent(int currentText);
     s_protocolDescription currentProtocol;
     void updateProtocol();
+    void markerTextNormalisation(int numberByte, QString text);
 
 private:
     Ui::SettingsDialog *m_ui = nullptr;
-    Settings m_currentSettings;
+    s_Settings m_currentSettings;
     QIntValidator *m_intValidator = nullptr;
 };
 

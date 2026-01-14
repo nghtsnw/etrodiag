@@ -41,11 +41,17 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
         m_ui->calcCRCFromSpinBox->setValue(p.calcCRCFromPosition);
         m_ui->markerSizeSpinBox->setValue(p.markerPacketBeginSize);
         m_ui->timeoutSpinBox->setValue(p.timeoutAfterLastByte);
-        m_ui->b1MarkerLineEdit->setText(QString::number(p.markerPacketBeginByte1));
-        m_ui->b2MarkerLineEdit->setText(QString::number(p.markerPacketBeginByte2));
+        m_ui->b1MarkerLineEdit->setText(QString::number(p.markerPacketBeginByte1, 16).toUpper());
+        m_ui->b2MarkerLineEdit->setText(QString::number(p.markerPacketBeginByte2, 16).toUpper());
         m_ui->descriptionTextEdit->setText(p.description);
         m_ui->varConrolCheckBox->setChecked(p.varControl);
     } );
+    connect(m_ui->b1MarkerLineEdit, &QLineEdit::textEdited, this, [ = ](QString text) {
+        markerTextNormalisation(1, text);
+    } );
+    connect(m_ui->b2MarkerLineEdit, &QLineEdit::textEdited, this, [ = ](QString text) {
+        markerTextNormalisation(2, text);
+    });
     fillPortsParameters();
     fillProfileList();
     fillPortsInfo();
@@ -213,6 +219,25 @@ void SettingsDialog::fillProfileList()
             m_ui->applyButton->setEnabled(true);
         }
     }
+    //emit loadSelectedProfile();
+}
+
+void SettingsDialog::markerTextNormalisation(int numberByte, QString text)
+{
+    bool ok;
+    int val = text.toInt(&ok, 16);
+    if (val < 0) {
+        val = 0;
+    }
+    else if (val > 0xFF) {
+        val = 0xFF;
+    }
+    if (numberByte == 1) {
+        m_ui->b1MarkerLineEdit->setText(QString::number(val, 16).toUpper());
+    }
+    else if (numberByte == 2) {
+        m_ui->b2MarkerLineEdit->setText(QString::number(val, 16).toUpper());
+    }
 }
 
 void SettingsDialog::updateSettings()
@@ -250,7 +275,9 @@ void SettingsDialog::updateProtocol()
     currentProtocol.markerPacketBeginSize = m_ui->markerSizeSpinBox->value();
     currentProtocol.markerPacketBeginByte1 = QString(m_ui->b1MarkerLineEdit->text()).toInt(0, 16);
     currentProtocol.markerPacketBeginByte2 = QString(m_ui->b2MarkerLineEdit->text()).toInt(0, 16);
-    currentProtocol.packetSize = m_ui->varConrolCheckBox->checkState() ? true : false;
+    currentProtocol.timeoutAfterLastByte = m_ui->timeoutSpinBox->value();
+    currentProtocol.description = m_ui->descriptionTextEdit->toPlainText();
+    currentProtocol.varControl = m_ui->varConrolCheckBox->checkState() ? true : false;
 }
 
 void SettingsDialog::on_newProfileButton_clicked()
@@ -273,7 +300,7 @@ void SettingsDialog::on_newProfileButton_clicked()
     }
 }
 
-void SettingsDialog::on_profileSelectBox_currentTextChanged(const QString &arg1)
+void SettingsDialog::on_profileSelectBox_currentTextChanged(const QString & arg1)
 {
     QDir profilesDir(appHomeDir + "Profiles");
     QStringList nameFilter;

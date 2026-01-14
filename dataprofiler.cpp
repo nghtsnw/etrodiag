@@ -11,6 +11,10 @@ dataprofiler::dataprofiler(QWidget *parent) : QObject(parent)
     connect(this, &dataprofiler::setProtocol, this, [ = ](s_protocolDescription p) { //Установка протокола
         protocol = p;
     });
+    connect(this, &dataprofiler::setSettings, this, [ = ](s_Settings s) { //Установка протокола
+        settings = s;
+        timeout.setInterval(std::chrono::nanoseconds((1 / (settings.baudRate / 8))*protocol.timeoutAfterLastByte));
+    });
 }
 
 void dataprofiler::getByte(int byteFromBuf)
@@ -60,7 +64,6 @@ void dataprofiler::getByte(int byteFromBuf)
         }
     }
     if (!readFromFile) {
-        timeout.setInterval(std::chrono::nanoseconds(protocol.timeoutAfterLastByte));
         timeout.start();
     }
     emit ready4read(true);
@@ -104,6 +107,7 @@ void dataprofiler::setMarkerPacketBeginText(QString text)
 {
     int val = text.toInt(0, 16);
     protocol.markerPacketBeginByte1 = (val >> 8) & 0xFF;
+    iiii
     protocol.markerPacketBeginByte1 = (val) & 0xFF;
 }
 void dataprofiler::setTimeoutAfterLastByte(int timeout_ms)

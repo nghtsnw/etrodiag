@@ -58,6 +58,7 @@ signals:
     void stopLog();
     void profileName2log(QString);
     void setVisibleControlWindow(bool);
+    void s_sendSettings(s_Settings);
 
 public slots:
 
@@ -82,7 +83,7 @@ private:
     QString message;
     bool createNewFileNamePermission = true;
     QString binFileName;
-    SettingsDialog::Settings p_local;
+    s_Settings p_local;
     QByteArray fsba;
     QByteArray arr4byteStream;
     QTimer *timer = new QTimer(this);
