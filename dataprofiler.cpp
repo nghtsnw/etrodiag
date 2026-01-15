@@ -5,15 +5,12 @@ dataprofiler::dataprofiler(QWidget *parent) : QObject(parent)
 {
     timeout.setSingleShot(true);
     connect(&timeout, &QChronoTimer::timeout, this, &dataprofiler::endOfPacket);
-    connect(this, &dataprofiler::s_readFromFile, this, [ = ](bool val) {
-        readFromFile = val;
-    });
     connect(this, &dataprofiler::setProtocol, this, [ = ](s_protocolDescription p) { //Установка протокола
         protocol = p;
     });
-    connect(this, &dataprofiler::setSettings, this, [ = ](s_Settings s) { //Установка протокола
+    connect(this, &dataprofiler::setSettings, this, [ = ](s_Settings s) { //Установка настроек
         settings = s;
-        float pause = ((1 / (settings.baudRate / 8))*protocol.timeoutAfterLastByte)*1000000;
+        float pause = (((float)1 / (settings.baudRate / 8)) * protocol.timeoutAfterLastByte) * 1000000;
         timeout.setInterval(std::chrono::nanoseconds(static_cast<int>(pause)));
     });
 }
@@ -23,12 +20,12 @@ void dataprofiler::getByte(int byteFromBuf)
     bool marker = false;
     emit ready4read(false);
     frameMsg.enqueue(byteFromBuf);
-    if ((frameMsg.size() >= protocol.markerPacketBeginSize)) //если начало буффера соответствует началу пакета то продолжаем читать
+    if ((frameMsg.size() >= protocol.markerPacketBeginSize)) //если принятые данные уже можно проверять на наличие маркера - начинаем обработку
     {
-        switch (protocol.markerPacketBeginSize) {
+        switch (protocol.markerPacketBeginSize) { //Выявляем что маркер совпал (если он должен быть)
             {
             case 0:
-            {
+            { //Если маркера нет в протоколе, то определить целостность пакета можно будет только по контрольной сумме в конце
                 marker = true;
                 break;
             }
@@ -50,21 +47,21 @@ void dataprofiler::getByte(int byteFromBuf)
                 break;
             }
         }
-        if (frameMsg.size() == protocol.packetSize && marker)
+        if ((frameMsg.size() == protocol.packetSize) && marker) //Когда набрался весь пакет
         {
             if (checkCRC()) {
                 emit deviceData(frameMsg.toVector()); //если пакет сформирован, отправляем пакет в гуй и обнуляем буффер
                 frameMsg.clear();
             }
-            else {
+            else { //Если контрольная сумма не сошлась
                 emit badCRC(calculatedCRC, frameMsg.toVector());
-                if (readFromFile) {
+                if (settings.readFromFileFlag) {
                     frameMsg.dequeue();
                 }
             }
         }
     }
-    if (!readFromFile) {
+    if (!settings.readFromFileFlag) {
         timeout.start();
     }
     emit ready4read(true);

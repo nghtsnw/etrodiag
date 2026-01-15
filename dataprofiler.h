@@ -19,7 +19,6 @@ private:
     bool checkCRC(void);
     void endOfPacket(void);
     uint8_t calculatedCRC;
-    bool readFromFile = false;
     QChronoTimer timeout;
     s_protocolDescription protocol;
     s_Settings settings;
@@ -30,7 +29,6 @@ signals:
     void corruptedData(QVector<int> snapshot);
     void readNext();
     void ready4read(bool);
-    void s_readFromFile(bool val);
     void setProtocol(s_protocolDescription);
     void setSettings(s_Settings);
 

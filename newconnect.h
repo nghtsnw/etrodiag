@@ -46,6 +46,7 @@ signals:
     void sendStatusStr(QString);
     void transmitData(QVector<int> snapshot);
     void badCRC(uint8_t calculatedCRC, QVector<int> snapshot);
+    void corruptedData(QVector<int> data);
     void saveAllMasks();
     void loadMask(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool _drawGraphFlag, QString _drawGraphColor);
     void loadProtocol(s_protocolDescription); //Загрузка при чтении протокола из файла

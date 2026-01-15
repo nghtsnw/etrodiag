@@ -219,7 +219,6 @@ void SettingsDialog::fillProfileList()
             m_ui->applyButton->setEnabled(true);
         }
     }
-    //emit loadSelectedProfile();
 }
 
 void SettingsDialog::markerTextNormalisation(int numberByte, QString text)

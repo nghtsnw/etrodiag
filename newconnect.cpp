@@ -41,6 +41,7 @@ newconnect::newconnect(QWidget *parent) :
         timerAboveTxCommand->start(1);
     });/*После успешного приёма задержка перед отправкой команды */
     connect(datapool, &dataprofiler::badCRC, this, &newconnect::badCRC);
+    connect(datapool, &dataprofiler::corruptedData, this, &newconnect::corruptedData);
     connect(datapool, &dataprofiler::ready4read, gstream, &getStream::readPermission);
     connect(datapool, &dataprofiler::readNext, gstream, &getStream::readIntByte);
     connect(m_settings, &SettingsDialog::restoreConsoleAndButtons, this, &newconnect::restoreWindowAfterApplySettings);

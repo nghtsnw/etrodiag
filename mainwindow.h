@@ -133,6 +133,7 @@ public slots:
     void frontendDataSort(int devNum, QString devName, int, QString, int, int, QString parameterName, int, double endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor);
     void devStatusMsg(QString _devName, QString status);
     void badCRCEvent(uint8_t calculatedCRC, QVector<int> dataFrame);
+    void corruptedDataEvent(QVector<int> data);
 
 private slots:
 
