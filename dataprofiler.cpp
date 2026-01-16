@@ -50,20 +50,15 @@ void dataprofiler::getByte(int byteFromBuf)
         if ((frameMsg.size() == protocol.packetSize) && marker) //Когда набрался весь пакет
         {
             if (checkCRC()) {
-                emit deviceData(frameMsg.toVector()); //если пакет сформирован, отправляем пакет в гуй и обнуляем буффер
-                frameMsg.clear();
+                emit deviceData(frameMsg.toVector()); //Если пакет сформирован, отправляем пакет в гуй и обнуляем буффер
             }
-            else { //Если контрольная сумма не сошлась
-                emit badCRC(calculatedCRC, frameMsg.toVector());
-                if (settings.readFromFileFlag) {
-                    frameMsg.dequeue();
-                }
+            else {
+                emit badCRC(calculatedCRC, frameMsg.toVector()); //Если контрольная сумма не сошлась
             }
+            frameMsg.clear();
         }
     }
-    if (!settings.readFromFileFlag) {
-        timeout.start();
-    }
+    timeout.start(); //После приёма каждого байта таймер перезапускается до срабатывания его прерывания детектирования прекращения приёма
     emit ready4read(true);
     emit readNext();
 }
