@@ -3,8 +3,11 @@ requires(qtConfig(combobox))
 
 TARGET = etrodiag
 TEMPLATE = app
-QTCSV_LOCATION = $$OUT_PWD
-LIBS += -L$$QTCSV_LOCATION -lqtcsv
+
+INCLUDEPATH += ../qtcsv
+DEPENDPATH += ../qtcsv
+include(qtcsv/qtcsv.pri)
+
 TRANSLATIONS = etrodiag_ru.ts
 SOURCES += \
     aboutdialog.cpp \
@@ -25,11 +28,6 @@ SOURCES += \
     masksettingsdialog.cpp \
     newconnect.cpp \
     newgraph.cpp \
-    qtcsv/contentiterator.cpp \
-    qtcsv/reader.cpp \
-    qtcsv/stringdata.cpp \
-    qtcsv/variantdata.cpp \
-    qtcsv/writer.cpp \
     settingsdialog.cpp \
     console.cpp \
     txtmaskobj.cpp
@@ -53,15 +51,6 @@ HEADERS += \
     masksettingsdialog.h \
     newconnect.h \
     newgraph.h \
-    qtcsv/abstractdata.h \
-    qtcsv/contentiterator.h \
-    qtcsv/filechecker.h \
-    qtcsv/qtcsv_global.h \
-    qtcsv/reader.h \
-    qtcsv/stringdata.h \
-    qtcsv/symbols.h \
-    qtcsv/variantdata.h \
-    qtcsv/writer.h \
     settingsdialog.h \
     console.h \
     txtmaskobj.h
