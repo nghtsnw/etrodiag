@@ -1,6 +1,7 @@
 #include "logger.h"
 #include "qtcsv/variantdata.h"
 #include "qtcsv/writer.h"
+#include "qtcsv/reader.h"
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QFile>
@@ -21,6 +22,9 @@ Logger::Logger()
     if (!dir.exists()) {
         QDir().mkdir(appHomeDir + "Logs");
     }
+    connect (this, &Logger::setSettings, [ = ](s_Settings s) {
+        settings = s;
+    });
 }
 
 void Logger::startLog()
@@ -66,6 +70,16 @@ void Logger::incomingBinData(const QByteArray data)
         newBinFile.close();
         createNewBinFileNamePermission = true;
     }
+}
+
+void Logger::binReadFromCsv()
+{
+    const auto readData = QtCSV::Reader::readToList(settings.pathToBinFile);
+    for (auto i : readData)
+    {
+        qDebug() << readData.at(i).join(",");
+    }
+    for
 }
 
 void Logger::incomingTxtData(const QString string)

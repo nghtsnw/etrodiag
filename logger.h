@@ -6,6 +6,7 @@
 #include <QDir>
 #include <QVariantMap>
 #include <QQueue>
+#include "global.h"
 
 class Logger : public QObject
 {
@@ -23,6 +24,7 @@ public slots:
     void incomingBinData(const QByteArray data);
     void incomingTxtData(const QString string);
     void incomingJsonData(const QVariantMap jsonMap);
+    void binReadFromCsv();
 
 private:
     QFile newBinFile;
@@ -33,19 +35,21 @@ private:
     QString jsonFileName;
     bool bin = false, txt = false, json = false;
     bool createNewBinFileNamePermission = false,
-        createNewJsonFileNamePermission = false,
-        createNewTxtFileNamePermission = false;
+         createNewJsonFileNamePermission = false,
+         createNewTxtFileNamePermission = false;
     QDateTime returnTimestamp();
-    QString sessionName;    
+    QString sessionName;
     QString appHomeDir;
     QDir dir;
     QString currentProfileName;
     bool writeLogsPermission = false;
     QQueue<QString> txtLogQueue;
+    s_Settings settings;
 
 signals:
     void showStatusMessage(QString);
     void toTextLog(QString text, bool redFlag);
+    void setSettings(s_Settings);
 };
 
 #endif // LOGGER_H

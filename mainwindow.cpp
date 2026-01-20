@@ -44,6 +44,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->graphLayout->addWidget(&cBoard);
     connect (&cBoard, &ControlBoard::controlCommand, this, &MainWindow::guiCommandHandler);
     connect (connection, &newconnect::setVisibleControlWindow, &cBoard, &ControlBoard::setVisible);
+    connect (connection, &newconnect::s_sendSettings, logger, &Logger::setSettings);
     connect (this, &MainWindow::emitCommand, connection, &newconnect::receiveCommandFromGui);
     m_ui->tabWidget->setCurrentIndex(0);
     m_ui->tab_connections->show();

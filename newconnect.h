@@ -89,9 +89,9 @@ private:
     QByteArray arr4byteStream;
     QTimer *timer = new QTimer(this);
     QTimer *timerAboveTxCommand = new QTimer(this);
-    QList<QByteArray> fileSplitted;
+    /*QList<QByteArray> fileSplitted;
     const int bytesPerOneShot = 20;
-    int pos = 0;
+    int pos = 0;*/
     QString getProfileNameFromInfo(QFileInfo &info);
     bool newcommand = false;
     QVector<quint8> toTransmit;

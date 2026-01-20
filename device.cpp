@@ -1,5 +1,4 @@
 #include "device.h"
-#include "mainwindow.h"
 #include <QDebug>
 #include "bytedefinition.h"
 #include <QBitArray>

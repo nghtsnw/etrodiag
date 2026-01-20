@@ -11,6 +11,8 @@
 #include "txtmaskobj.h"
 #include <QStandardPaths>
 #include <global.h>
+#include "qtcsv/reader.h"
+#include "qtcsv/variantdata.h"
 
 newconnect::newconnect(QWidget *parent) :
     QWidget(parent),

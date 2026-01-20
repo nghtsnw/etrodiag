@@ -1,4 +1,3 @@
-
 #ifndef DATAPROFILER_H
 #define DATAPROFILER_H
 #include <QQueue>
