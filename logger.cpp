@@ -47,7 +47,7 @@ void Logger::incomingBinData(const QByteArray data)
         QtCSV::VariantData varData;
         if (createNewBinFileNamePermission)
         {
-            binFileName = (dir.path() + "\\" + currentProfileName + '_' + returnTimestamp().toString("dd.MM.yy_hh-mm-ss") + ".csv");
+            binFileName = (dir.path() + "\\" + currentProfileName + '_' + returnTimestamp().toString(timeFormat) + ".csv");
             createNewBinFileNamePermission = false;
             QStringList csvHead;
             csvHead << "time" << "data";
@@ -56,7 +56,7 @@ void Logger::incomingBinData(const QByteArray data)
             varData.clear();
         }
         QStringList row;
-        row << returnTimestamp().toString("dd.MM.yy_hh-mm-ss") << data.toHex(':').toUpper();;
+        row << returnTimestamp().toString(timeFormat) << data.toHex(':').toUpper();;
         varData.addRow(row);
         if ( false == QtCSV::Writer::write(binFileName, varData) )
         {
@@ -74,12 +74,11 @@ void Logger::incomingBinData(const QByteArray data)
 
 void Logger::binReadFromCsv()
 {
+    rawDataWithTimeLog = new QMap<QDateTime, QString>;
     const auto readData = QtCSV::Reader::readToList(settings.pathToBinFile);
-    for (auto i : readData)
-    {
-        qDebug() << readData.at(i).join(",");
+    for (const auto &i : readData) {
+        rawDataWithTimeLog->insert(QDateTime::fromString(i.at(0), timeFormat), i.at(1));
     }
-    for
 }
 
 void Logger::incomingTxtData(const QString string)
@@ -90,7 +89,7 @@ void Logger::incomingTxtData(const QString string)
         {
             if (createNewTxtFileNamePermission)//обновляем имя файла, если стоит флаг
             {
-                logFileName = (dir.path() + "\\" + currentProfileName + '_' + returnTimestamp().toString("dd.MM.yy_hh-mm-ss") + ".log");
+                logFileName = (dir.path() + "\\" + currentProfileName + '_' + returnTimestamp().toString(timeFormat) + ".log");
                 newLogFile.setFileName(logFileName);
                 createNewTxtFileNamePermission = false;
             }
@@ -141,7 +140,7 @@ void Logger::incomingJsonData(const QVariantMap jsonMap)
         {
             if (createNewJsonFileNamePermission)
             {
-                jsonFileName = (dir.path() + "\\" + currentProfileName + '_' + returnTimestamp().toString("dd.MM.yy_hh-mm-ss") + ".json");
+                jsonFileName = (dir.path() + "\\" + currentProfileName + '_' + returnTimestamp().toString(timeFormat) + ".json");
                 createNewJsonFileNamePermission = false;
             }
             newJsonFile.setFileName(jsonFileName);

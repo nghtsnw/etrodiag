@@ -37,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect (m_ui->valueArea, &QTabWidget::currentChanged, this, &MainWindow::setCurrentOpenTab);
     connect (logger, &Logger::showStatusMessage, this, &MainWindow::showStatusMessage);
     connect (logger, &Logger::toTextLog, this, &MainWindow::textLogWindow);
+    connect (logger, &Logger::, connection, &newconnect::sendRawData);
     connect (this, &MainWindow::toTxtLogger, logger, &Logger::incomingTxtData);
     connect (aboutButton, &QPushButton::clicked, this, &MainWindow::onAboutButtonClicked);
     m_ui->logArea->viewport()->installEventFilter(this);

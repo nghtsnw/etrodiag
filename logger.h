@@ -38,6 +38,7 @@ private:
          createNewJsonFileNamePermission = false,
          createNewTxtFileNamePermission = false;
     QDateTime returnTimestamp();
+    const QString timeFormat = "dd.MM.yy_hh-mm-ss-zzz";
     QString sessionName;
     QString appHomeDir;
     QDir dir;
@@ -45,11 +46,13 @@ private:
     bool writeLogsPermission = false;
     QQueue<QString> txtLogQueue;
     s_Settings settings;
+    QMap<QDateTime, QString> *rawDataWithTimeLog = nullptr;
 
 signals:
     void showStatusMessage(QString);
     void toTextLog(QString text, bool redFlag);
     void setSettings(s_Settings);
+    void sendRawData(QByteArray);
 };
 
 #endif // LOGGER_H
