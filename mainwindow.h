@@ -15,6 +15,7 @@
 #include <QTableWidget>
 //#include <QGestureEvent>
 #include "logger.h"
+#include "global.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -46,10 +47,10 @@ public:
     QPushButton *aboutButton = nullptr;
     void openMaskSettingsDialog();
     void createDevice(int devNum);
-    void loadProfile(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor);
+    void loadProfile(s_parameterMask mask);
     void textLogWindow(QString string, bool redFlag);
     void cleanDevList();
-    void updValueArea(QString parameterName, int devNum, QString devName, double endValue, int byteNum, int maskId, bool);
+    void updValueArea(s_parameterMask mask);
 // void grabGestures(const QVector<Qt::GestureType> &gestures);
     void ValueArea_CellClicked(int row, int);
     QString appHomeDir;
@@ -61,13 +62,13 @@ signals:
     void getDevName(int devNum);
     void setDevName(int devNum, QString name);
     void returnDevNameAfterClose(int devNum, QString text);
-    void sendMaskData(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor);
+    void sendMaskData(s_parameterMask mask);
     void getByteName(int devNum, int byteNum);
     void hideOtherDevButtons(bool, int _devNum);
     void dvsfAfterCloseClear();
     void prepareToSaveProfile();
     void saveProfile();
-    void toJsonMap(int devNum, QString devName, QString parameterName, double endValue, int maskId);
+    void toJsonMap(s_parameterMask mask);
     void getJsonMap(int devNum);
     void setDevParamsCount(int devNum, int paramsCount);
     void toTxtLogger(QString);
@@ -79,7 +80,7 @@ public slots:
     void addDeviceToList(QVector<int> ddata);
     void openDevSett(int devNum, QVector<int> data);
     void openByteSett(int devNum, int byteNum);
-    void frontendDataSort(int devNum, QString devName, int, QString, int, int, QString parameterName, int, double endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor);
+    void frontendDataSort(s_parameterMask mask);
     void devStatusMsg(QString _devName, QString status);
     void badCRCEvent(uint8_t calculatedCRC, QVector<int> dataFrame);
     void corruptedDataEvent(QVector<int> data);

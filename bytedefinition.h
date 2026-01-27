@@ -2,6 +2,7 @@
 #define BYTEDEFINITION_H
 
 #include <QObject>
+#include "global.h"
 
 class byteDefinition : public QObject
 
@@ -23,15 +24,15 @@ public:
     virtual ~byteDefinition();
 signals:
     void returnWordType(int _devNum, int _byteNum, int wordType);
-    void mask2FormTX(int _devNum, int _byteNum, int _id);
-    void maskData2FormTX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag, int _wordType, bool _drawGraphFlag, QString _drawGraphColor);
-    void requestMaskDataTX(int _devNum, int _byteNum, int _id);
-    void sendDataToProfileTX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag, bool _drawGraphFlag, QString _drawGraphColor);
+    void mask2FormTX(s_parameterMask mask);
+    void maskData2FormTX(s_parameterMask mask);
+    void requestMaskDataTX(s_parameterMask mask);
+    void sendDataToProfileTX(s_parameterMask mask);
     void wordData2Mask(int devNum, int byteNum, int wordData);
-    void allMasksToListTX(int devNum, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, int valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor);
+    void allMasksToListTX(s_parameterMask mask);
     void deleteMaskObjTX(int devNum, int byteNum, int id);
-    void param2FrontEndTX(int devNum, int byteNum, QString byteName, uint32_t wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor);
-    void loadMaskTX(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor);
+    void param2FrontEndTX(s_parameterMask mask);
+    void loadMaskTX(s_parameterMask mask);
     void returnByteName(int devNum, int byteNum, QString byteName);
     void returnMaskCountForThisByte(int devNum, int th_byteNum, int count);
 
@@ -39,13 +40,13 @@ public slots:
     void setWordBitRX(int _devNum, int _byteNum, int _argBit);
     void getWordType(int _devNum, int _byteNum);
     void createNewMask(int _devNum, int _byteNum);
-    void mask2FormRX(int _devNum, int _byteNum, int _id);
-    void maskData2FormRX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag, int _wordType, bool _drawGraphFlag, QString _drawGraphColor);
-    void requestMaskDataRX(int _devNum, int _byteNum, int _id);
-    void sendDataToProfileRX(int _devNum, int _byteNum, int _id, QString _paramName, QString _paramMask, int _paramType, double _valueShift, double _valueKoef, bool _viewInLogFlag, bool _drawGraphFlag, QString _drawGraphColor);
-    void allMasksToListRX(int devNum, int byteNum, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor);
-    void param2FrontEndRX(int devNum, int byteNum, uint32_t wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor);
-    void loadMaskRX(int devNum, QString devName, int byteNum, QString _byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor);
+    void mask2FormRX(s_parameterMask mask);
+    void maskData2FormRX(s_parameterMask mask);
+    void requestMaskDataRX(s_parameterMask mask);
+    void sendDataToProfileRX(s_parameterMask mask);
+    void allMasksToListRX(s_parameterMask maskr);
+    void param2FrontEndRX(s_parameterMask mask);
+    void loadMaskRX(s_parameterMask mask);
     void updateSlot(int _devNum, QVector<int> _data);
     void countMasks();
 

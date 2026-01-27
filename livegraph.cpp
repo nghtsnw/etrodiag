@@ -75,7 +75,7 @@ void liveGraph::shiftCells()
     this->update();
 }
 
-void liveGraph::incomingDataSlot(int devNum, QString devName, int byteNum, QString byteName, uint32_t wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData, bool drawGraphFlag, QString drawGraphColor)
+void liveGraph::incomingDataSlot(s_parameterMask mask)
 {    
         QList<newgraph*> graphList = this->findChildren<newgraph*>();
         QListIterator<newgraph*> graphListIt(graphList);

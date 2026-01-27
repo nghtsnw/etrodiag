@@ -4,7 +4,7 @@
 #include <QString>
 #include <QSerialPort>
 
-typedef struct
+typedef struct s_protocolDescription
 {
     int blockIdentifycatorPosition ;
     int packetSize;
@@ -35,5 +35,28 @@ typedef struct s_Settings
     bool readFromFileFlag = false;
     QString pathToBinFile;
 } s_Settings;
+
+typedef struct s_parameterMask
+{
+    int devNum;
+    QString devName;
+    int byteNum;
+    QString byteName;
+    uint32_t wordData;
+    int wordType;
+    int id;
+    QString parameterName;
+    QString parameterMask;
+    int parameterShift;
+    int parameterLeight;
+    double valueShift;
+    double valueKoef;
+    int binRawValue;
+    double endValue;
+    bool viewInLogFlag;
+    bool isNewData;
+    bool drawGraphFlag;
+    QString drawGraphColor;
+} s_parameterMask;
 
 #endif // GLOBAL_H

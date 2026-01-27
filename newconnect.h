@@ -31,7 +31,7 @@ public:
     dataprofiler *datapool = nullptr;
     QList<txtmaskobj*> maskVectorsList;
     void readProfile();
-    void readFromFile();
+    //void readFromFile();
     QString appHomeDir;
     QDateTime returnTimestamp();
     bool permission2SaveMasks = false;
@@ -48,7 +48,7 @@ signals:
     void badCRC(uint8_t calculatedCRC, QVector<int> snapshot);
     void corruptedData(QVector<int> data);
     void saveAllMasks();
-    void loadMask(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool _drawGraphFlag, QString _drawGraphColor);
+    void loadMask(s_parameterMask mask);
     void loadProtocol(s_protocolDescription); //Загрузка при чтении протокола из файла
     void writeTextLog(bool);
     void writeJsonLog(bool);
@@ -63,7 +63,7 @@ signals:
 
 public slots:
 
-    void saveProfileSlot4Masks(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool _drawGraphFlag, QString _drawGraphColor);
+    void saveProfileSlot4Masks(s_parameterMask mask);
     void restoreWindowAfterApplySettings();
     void prepareToSaveProfile();
     void saveProfile();
@@ -87,7 +87,7 @@ private:
     s_Settings p_local;
     QByteArray fsba;
     QByteArray arr4byteStream;
-    QTimer *timer = new QTimer(this);
+    //QTimer *timer = new QTimer(this);
     QTimer *timerAboveTxCommand = new QTimer(this);
     /*QList<QByteArray> fileSplitted;
     const int bytesPerOneShot = 20;

@@ -3,9 +3,10 @@
 
 #include <QWidget>
 #include <QLineEdit>
+#include "global.h"
 
 namespace Ui {
-class devSettingsForm;
+    class devSettingsForm;
 }
 
 class devSettingsForm : public QWidget
@@ -28,13 +29,13 @@ signals:
     void updateBtnDataSIG(int id, QVector<int> data);
     void wordType2ByteBtn(int _devNum, int _byteNum, int wordType);
     void setByteButtonStatus(int byteNum, bool status);
-    void initByteButtonsWordLeight(int id,int count);
+    void initByteButtonsWordLeight(int id, int count);
     void wordDataFullHex(int devNum, int byteNum, QString);
     void inThisWordLivingMask(int _devNum, int _byteNum);
 
 public slots:
     void wordTypeChangeRX(int _devNum, int _byteNum, int wordType);
-    void liveDataSlot(int _devNum, QString, int _byteNum, QString, uint32_t, int, QString, int, double, bool, bool, bool _drawGraphFlag, QString _drawGraphColor);
+    void liveDataSlot(s_parameterMask mask);
 
 private slots:
     void on_devNameEditLine_editingFinished();

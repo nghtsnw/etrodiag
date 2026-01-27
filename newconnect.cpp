@@ -11,8 +11,6 @@
 #include "txtmaskobj.h"
 #include <QStandardPaths>
 #include <global.h>
-#include "qtcsv/reader.h"
-#include "qtcsv/variantdata.h"
 
 newconnect::newconnect(QWidget *parent) :
     QWidget(parent),
@@ -68,7 +66,7 @@ newconnect::newconnect(QWidget *parent) :
     connect (this, &newconnect::s_sendSettings, datapool, &dataprofiler::setSettings);
     /*----------------------------------------------------------------------------------------------------------------------------*/
     connect (m_settings, &SettingsDialog::loadSelectedProfile, this, &newconnect::readProfile);
-    connect (timer, &QTimer::timeout, this, &newconnect::readFromFile);//читаем из файла по таймеру
+    //connect (timer, &QTimer::timeout, this, &newconnect::readFromFile);//читаем из файла по таймеру
     connect (timerAboveTxCommand, &QTimer::timeout, this, &newconnect::sendCommand);//отправляем команду после задержки
     connect (this, &newconnect::sendRawData, gstream, &getStream::getRawData);
     connect (this, &newconnect::sendRawData, m_console, &Console::putData);
@@ -98,7 +96,7 @@ void newconnect::openSerialPort()
     if (p_local.readFromFileFlag)
     {
         readProfile();
-        pos = 0;//задаём позицию для чтения FileSplitted в readFromFile()
+        /*pos = 0;//задаём позицию для чтения FileSplitted в readFromFile()
         fileSplitted.clear();
         int freq = 1000 / ((p_local.baudRate / 8) / bytesPerOneShot);
         QFile file(p_local.pathToBinFile);
@@ -116,9 +114,9 @@ void newconnect::openSerialPort()
             fileSplitted.push_back(ch);
             ch.clear();
         }
-        fileBuffer.clear();
+        fileBuffer.clear();*/
         showStatusMessage(tr("Read file %1").arg(p_local.pathToBinFile));
-        timer->start(freq);//запускаем таймер, по нему читается по порядку FileSplitted функцией readFromFile()
+        //timer->start(freq);//запускаем таймер, по нему читается по порядку FileSplitted функцией readFromFile()
     }
     else
     {
@@ -141,7 +139,7 @@ void newconnect::openSerialPort()
     }
 }
 
-void newconnect::readFromFile()
+/*void newconnect::readFromFile()
 {
     if (pos < fileSplitted.size())
     { //если текущая позиция не в конце списка (костыль вместо итератора) то кусок по нужному номеру листа добавляем в fsba
@@ -155,7 +153,7 @@ void newconnect::readFromFile()
         timer->stop();
         on_connectButton_clicked();
     }
-}
+}*/
 
 void newconnect::closeSerialPort()
 {
@@ -167,7 +165,7 @@ void newconnect::closeSerialPort()
     if (p_local.readFromFileFlag)
     {
         p_local.readFromFileFlag = false;
-        timer->stop();
+        //timer->stop();
     }
 }
 
@@ -270,7 +268,7 @@ void newconnect::prepareToSaveProfile()
     }
 }
 
-void newconnect::saveProfileSlot4Masks(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool _drawGraphFlag, QString _drawGraphColor)
+void newconnect::saveProfileSlot4Masks(s_parameterMask mask)
 {
     //перед сохранением все маски сигналом отправляются сюда, что-бы образовать перечень масок
     //проверяется что этой маски тут ещё нет, после этого создаётся список с текстовым перечнем всех параметров
@@ -283,7 +281,10 @@ void newconnect::saveProfileSlot4Masks(int devNum, QString devName, int byteNum,
         maskVectorsListIt.toFront();
         while (maskVectorsListIt.hasNext())
         {
-            if ((QString::number(id, 10) == maskVectorsListIt.peekNext()->lst.at(1)) && (QString::number(devNum, 10) == maskVectorsListIt.peekNext()->lst.at(2)) && (QString::number(byteNum, 10) == maskVectorsListIt.peekNext()->lst.at(3)) && (maskVectorsListIt.peekNext()->lst.at(0) == "thisIsMask")) {
+            if ((QString::number(mask.id, 10) == maskVectorsListIt.peekNext()->lst.at(1)) &&
+                    (QString::number(mask.devNum, 10) == maskVectorsListIt.peekNext()->lst.at(2)) &&
+                    (QString::number(mask.byteNum, 10) == maskVectorsListIt.peekNext()->lst.at(3)) &&
+                    (maskVectorsListIt.peekNext()->lst.at(0) == "thisIsMask")) {
                 thisMaskHere = true;
             }
             maskVectorsListIt.next();
@@ -292,19 +293,19 @@ void newconnect::saveProfileSlot4Masks(int devNum, QString devName, int byteNum,
         {
             QList<QString> maskList;
             maskList.append("thisIsMask");//0
-            maskList.append(QString::number(id, 10)); //1
-            maskList.append(QString::number(devNum, 10)); //2
-            maskList.append(QString::number(byteNum, 10)); //3
-            maskList.append(devName);//4
-            maskList.append(byteName);//5
-            maskList.append(paramName);//6
-            maskList.append(paramMask);//7
-            maskList.append(QString::number(valueShift, 'g', 6)); //8
-            maskList.append(QString::number(valueKoef, 'g', 6)); //9
-            maskList.append((viewInLogFlag ? "true" : "false")); //10
-            maskList.append(QString::number(wordType));//11
-            maskList.append(_drawGraphFlag ? "true" : "false"); //12
-            maskList.append(_drawGraphColor);//13
+            maskList.append(QString::number(mask.id, 10)); //1
+            maskList.append(QString::number(mask.devNum, 10)); //2
+            maskList.append(QString::number(mask.byteNum, 10)); //3
+            maskList.append(mask.devName);//4
+            maskList.append(mask.byteName);//5
+            maskList.append(mask.parameterName);//6
+            maskList.append(mask.parameterMask);//7
+            maskList.append(QString::number(mask.valueShift, 'g', 6)); //8
+            maskList.append(QString::number(mask.valueKoef, 'g', 6)); //9
+            maskList.append((mask.viewInLogFlag ? "true" : "false")); //10
+            maskList.append(QString::number(mask.wordType));//11
+            maskList.append(mask.drawGraphFlag ? "true" : "false"); //12
+            maskList.append(mask.drawGraphColor);//13
             txtmaskobj *savingMask = new txtmaskobj(maskList);
             savingMask->setParent(this);
             maskList.clear();
@@ -364,7 +365,21 @@ void newconnect::readProfile()
         QString str = txtStream.readLine();
         QStringList strLst = str.split('\t');
         if (strLst.at(0) == "thisIsMask") {
-            emit loadMask(strLst.at(2).toInt(0, 10), strLst.at(4), strLst.at(3).toInt(0, 10), strLst.at(5), strLst.at(1).toInt(0, 10), strLst.at(6), strLst.at(7), 0, strLst.at(8).toDouble(), strLst.at(9).toDouble(), ((QString::compare(strLst.at(10), "true") == 0) ? true : false), strLst.at(11).toInt(0, 10), ((QString::compare(strLst.at(12), "true") == 0) ? true : false), strLst.at(13));
+            s_parameterMask mask;
+            mask.id = strLst.at(1).toInt(0, 10);
+            mask.devNum = strLst.at(2).toInt(0, 10);
+            mask.byteNum = strLst.at(3).toInt(0, 10);
+            mask.devName = strLst.at(4);
+            mask.byteName = strLst.at(5);
+            mask.parameterName = strLst.at(6);
+            mask.parameterMask = strLst.at(7);
+            mask.valueShift = strLst.at(8).toDouble();
+            mask.valueKoef = strLst.at(9).toDouble();
+            mask.viewInLogFlag = ((QString::compare(strLst.at(10), "true") == 0) ? true : false);
+            mask.wordType = strLst.at(11).toInt(0, 10);
+            mask.drawGraphFlag = ((QString::compare(strLst.at(12), "true") == 0) ? true : false);
+            mask.drawGraphColor = strLst.at(13);
+            emit loadMask(mask);
         }
         if (strLst.at(0) == "packetSize") {
             pt.packetSize = (strLst.at(1).toInt(0, 10));

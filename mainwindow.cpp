@@ -245,11 +245,11 @@ QDateTime MainWindow::returnTimestamp()
     return dt3;
 }
 
-void MainWindow::updValueArea(QString parameterName, int devNum, QString devName, double endValue, int byteNum, int maskId, bool)
+void MainWindow::updValueArea(s_parameterMask mask)
 { //сначала проверяем есть ли уже вкладка с этим устройством по имени
     static int thisDeviceIndex = -1;
     for (int var = m_ui->valueArea->count(); var >= 0; --var) {
-        if (m_ui->valueArea->tabText(var) == devName)
+        if (m_ui->valueArea->tabText(var) == mask.devName)
         { //если есть то сохраняем индекс вкладки и покидаем цикл
             thisDeviceIndex = var;
             break;
@@ -272,10 +272,10 @@ void MainWindow::updValueArea(QString parameterName, int devNum, QString devName
         valueTableNew->hideColumn(3);
         valueTableNew->hideColumn(4);
         valueTableNew->horizontalHeader()->hide();
-        m_ui->valueArea->addTab(valueTableNew, devName);
+        m_ui->valueArea->addTab(valueTableNew, mask.devName);
         //узнаём индекс только что созданной вкладки. Может быть стоит выделить это в отдельную функцию, но пока и так сойдёт
         for (int var = m_ui->valueArea->count(); var >= 0; --var) {
-            if (m_ui->valueArea->tabText(var) == devName) {
+            if (m_ui->valueArea->tabText(var) == mask.devName) {
                 thisDeviceIndex = var;
                 break;
             }
@@ -291,8 +291,8 @@ void MainWindow::updValueArea(QString parameterName, int devNum, QString devName
     }
     //далее работаем со строками таблицы по указателю
     findRow = false;
-    namesUnited = (parameterName + '@' + devName);
-    value2str.setNum(endValue, 'g', 6);
+    namesUnited = (mask.parameterName + '@' + mask.devName);
+    value2str.setNum(mask.endValue, 'g', 6);
     if (valueTable->rowCount() > 0)
     { //если строки есть то ищем нужную
         for (int i = 0; i < valueTable->rowCount(); i++)
@@ -316,19 +316,19 @@ void MainWindow::updValueArea(QString parameterName, int devNum, QString devName
         valueTable->setRowCount(valueTable->rowCount() + 1); //добавляем новую строку
         int row = valueTable->rowCount() - 1; //определяем индекс строки
         QTableWidgetItem *nameItem = new QTableWidgetItem;
-        nameItem->setText(parameterName + '@' + devName);
+        nameItem->setText(mask.parameterName + '@' + mask.devName);
         valueTable->setItem(row, 0, nameItem);
         QTableWidgetItem *valueItem = new QTableWidgetItem;
         valueItem->setText(value2str);
         valueTable->setItem(row, 1, valueItem);
         QTableWidgetItem *devNumItem = new QTableWidgetItem;
-        devNumItem->setText(QString::number(devNum));
+        devNumItem->setText(QString::number(mask.devNum));
         valueTable->setItem(row, 2, devNumItem);
         QTableWidgetItem *byteNumItem = new QTableWidgetItem;
-        byteNumItem->setText(QString::number(byteNum));
+        byteNumItem->setText(QString::number(mask.byteNum));
         valueTable->setItem(row, 3, byteNumItem);
         QTableWidgetItem *maskIdItem = new QTableWidgetItem;
-        maskIdItem->setText(QString::number(maskId));
+        maskIdItem->setText(QString::number(mask.id));
         valueTable->setItem(row, 4, maskIdItem);
         valueTable->resizeColumnsToContents();
         valueTable->resizeRowsToContents();
@@ -356,18 +356,18 @@ void MainWindow::ValueArea_CellClicked(int row, int)
     emit hideOtherDevButtons(true, grabDevNum);
 }
 
-void MainWindow::frontendDataSort(int devNum, QString devName, int byteNum, QString, int, int maskId, QString parameterName, int, double endValue, bool viewInLogFlag, bool isNewData, bool _drawGraphFlag, QString _drawGraphColor)
+void MainWindow::frontendDataSort(s_parameterMask mask)
 {
-    if (devSettForm.isVisible() && devNum == devSettForm.devNum) {
-        devSettForm.setDevName(devNum, devName);
+    if (devSettForm.isVisible() && mask.devNum == devSettForm.devNum) {
+        devSettForm.setDevName(mask.devNum, mask.devName);
     }
-    if (viewInLogFlag && isNewData)
+    if (mask.viewInLogFlag && mask.isNewData)
     {
-        QString formString(parameterName + "@" + devName + ": " + QString::number(endValue, 'g', 6));
+        QString formString(mask.parameterName + "@" + mask.devName + ": " + QString::number(mask.endValue, 'g', 6));
         textLogWindow(formString, false);
     }
-    emit toJsonMap(devNum, devName, parameterName, endValue, maskId);
-    updValueArea(parameterName, devNum, devName, endValue, byteNum, maskId, isNewData);
+    emit toJsonMap(mask);
+    updValueArea(mask);
 }
 
 void MainWindow::textLogWindow(QString string, bool redFlag)
@@ -382,26 +382,26 @@ void MainWindow::textLogWindow(QString string, bool redFlag)
     }
 }
 
-void MainWindow::loadProfile(int devNum, QString devName, int byteNum, QString byteName, int id, QString paramName, QString paramMask, int paramType, double valueShift, double valueKoef, bool viewInLogFlag, int wordType, bool drawGraphFlag, QString drawGraphColor)
+void MainWindow::loadProfile(s_parameterMask mask)
 { //если устройства нет, то создаём, потом посылаем маску
     bool thisDeviceHere = false;
     QList<Device*> vlayChildList = m_ui->devArea->findChildren<Device*>();
     QListIterator<Device*> vlayChildListIt(vlayChildList);
     while (vlayChildListIt.hasNext())
-        if (devNum == vlayChildListIt.next()->devNum) {
+        if (mask.devNum == vlayChildListIt.next()->devNum) {
             thisDeviceHere = true;
         }
     if (thisDeviceHere) {
-        emit sendMaskData(devNum, devName, byteNum, byteName, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType, drawGraphFlag, drawGraphColor);
+        emit sendMaskData(mask);
     }
     else if (!thisDeviceHere)
     { //создаём устройство и инициализируем пустым пакетом в oneMsgLeight байт, с номером устройства на позиции 2
-        createDevice(devNum);
+        createDevice(mask.devNum);
         QVector<int> devInitArray(oneMsgLeight, 0);
-        devInitArray.replace(2, devNum);
-        emit devUpdate(devNum, devInitArray);
-        devSettForm.updByteButtons(devNum, devInitArray);
-        emit sendMaskData(devNum, devName, byteNum, byteName, id, paramName, paramMask, paramType, valueShift, valueKoef, viewInLogFlag, wordType, drawGraphFlag, drawGraphColor);
+        devInitArray.replace(2, mask.devNum);
+        emit devUpdate(mask.devNum, devInitArray);
+        devSettForm.updByteButtons(mask.devNum, devInitArray);
+        emit sendMaskData(mask);
     }
 }
 

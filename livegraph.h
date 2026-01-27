@@ -5,9 +5,10 @@
 #include <QPainter>
 #include <QTimer>
 #include <QMap>
+#include "global.h"
 
 namespace Ui {
-class liveGraph;
+    class liveGraph;
 }
 
 class liveGraph : public QWidget
@@ -19,8 +20,8 @@ public:
     ~liveGraph();
     void initGraph();
     QMap<QString, QString> graphAnnotation;
-    QMap<QString, QVector<double>> graphAnnotationMinMax;
-    void incomingDataSlot(int devNum, QString devName, int byteNum, QString byteName, uint32_t wordData, int id, QString parameterName, int binRawValue, double endValue, bool viewInLogFlag, bool isNewData, bool drawGraphFlag, QString drawGraphColor);
+    QMap<QString, QVector<double >> graphAnnotationMinMax;
+    void incomingDataSlot(s_parameterMask mask);
     void chngMinMaxVisible();
     void cleanGraph();
 
