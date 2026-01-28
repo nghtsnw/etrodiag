@@ -41,15 +41,15 @@ void bitMaskObj::sendMaskToProfile(s_parameterMask mask)
     }
 }
 
-void bitMaskObj::maskToForm(s_parameterMask mask)
+void bitMaskObj::maskToForm(s_parameterMask request)
 //ответный сигнал от masksettingsdialog с запросом всех параметров маски bitmaskobject
 //по запросу формы настроек маски сообщаем ей все параметры маски
 {
-    if (mask.devNum == currentMask.devNum && mask.byteNum == currentMask.byteNum && mask.id == currentMask.id) {
+    if (request.devNum == currentMask.devNum && request.byteNum == currentMask.byteNum && request.id == currentMask.id) {
         emit maskToFormSIG(currentMask);
     }
-    else if (mask.devNum == currentMask.devNum && mask.byteNum == currentMask.byteNum && mask.id == 999) {
-        allMasksToList(mask); //если пришёл id 999, то вызывается функция на отправку сигнала от всех масок данного байта устройства в лист масок в bytesettingsform
+    else if (request.devNum == currentMask.devNum && request.byteNum == currentMask.byteNum && request.id == 999) {
+        allMasksToList(request); //если пришёл id 999, то вызывается функция на отправку сигнала от всех масок данного байта устройства в лист масок в bytesettingsform
     }
 }
 

@@ -24,7 +24,7 @@ signals:
     void maskToListSIG(s_parameterMask mask);
     void param2FrontEnd(s_parameterMask mask);
 public slots:
-    void maskToForm(s_parameterMask mask);
+    void maskToForm(s_parameterMask request);
     void sendMaskToProfile(s_parameterMask mask);
     void allMasksToList(s_parameterMask mask);
     void deleteMaskObjectTX(int devNum, int byteNum, int id);

@@ -54,24 +54,37 @@ void byteDefinition::createNewMask(int _devNum, int _byteNum)
     //найти всех детей типа bitMaskObj, что-бы присвоить маске айди
     if (_devNum == devNum && _byteNum == th_byteNum)
     {
-        int id = calcMaskID();
-        tmpMaskId = id;
         bitMaskObj *mask = new bitMaskObj;
         mask->currentMask.wordType = wordType;
         mask->currentMask.devNum = devNum;
         mask->currentMask.byteNum = _byteNum;
+        mask->currentMask.id = calcMaskID();
         mask->setParent(this);
         //connect (mask, &bitMaskObj::mask2byteSettingsForm, this, &byteDefinition::mask2FormRX); //открытие формы
+        connect (this, &byteDefinition::requestMaskDataRX, this, [ = ](s_parameterMask request) { //ответный сигнал от masksettingsdialog с запросом всех параметров маски bitmaskobject
+            if (devNum == request.devNum && th_byteNum == request.byteNum) {
+                emit requestMaskDataTX(request);
+            }
+        });
         connect (this, &byteDefinition::requestMaskDataTX, mask, &bitMaskObj::maskToForm);//запрос от формы
-        connect (mask, &bitMaskObj::maskToFormSIG, this, &byteDefinition::maskData2FormRX);//ответ форме
+        connect (mask, &bitMaskObj::maskToFormSIG, this, [ = ](s_parameterMask answer) { //ответный сигнал со всеми данными маски bitmaskobj в masksettingsdialog
+            if (devNum == answer.devNum && th_byteNum == answer.byteNum) {
+                emit maskData2FormTX(answer);
+            }
+        });
+        connect (this, &byteDefinition::sendDataToProfileRX, this, [ = ](s_parameterMask mask) { //забор данных из формы masksettingsdialog и отправка в профиль bitmaskobj
+            if (devNum == mask.devNum && th_byteNum == mask.byteNum) {
+                emit sendDataToProfileTX(mask);
+            }
+        });
         connect (this, &byteDefinition::sendDataToProfileTX, mask, &bitMaskObj::sendMaskToProfile);
         connect (this, &byteDefinition::wordData2Mask, mask, &bitMaskObj::calculateValue);
-        connect (mask, &bitMaskObj::maskToListSIG, this, &byteDefinition::allMasksToListRX);
+        connect (mask, &bitMaskObj::maskToListSIG, this, &byteDefinition::allMasksToListTX);
         connect (this, &byteDefinition::deleteMaskObjTX, mask, &bitMaskObj::deleteMaskObjectTX);
-        connect (mask, &bitMaskObj::param2FrontEnd, this, &byteDefinition::param2FrontEndRX);
+        connect (mask, &bitMaskObj::param2FrontEnd, this, &byteDefinition::param2FrontEndTX);
         connect (this, &byteDefinition::loadMaskTX, mask, &bitMaskObj::loadMaskRX);
         //mask->newMaskObj(mask->currentMask);
-        mask2FormRX(mask->currentMask);
+        emit mask2FormTX(mask->currentMask);//mask2FormRX(mask->currentMask);
     }
 }
 
@@ -120,39 +133,6 @@ int byteDefinition::calcMaskID()
     return id;
 }
 
-void byteDefinition::mask2FormRX(s_parameterMask mask)
-{ //после создания новой маски сразу посылаем сигнал на открытие формы masksettingsdialog, сообщая ей параметры маски которую нужно редактировать
-    if (devNum == mask.devNum && th_byteNum == mask.byteNum) {
-        emit mask2FormTX(mask);
-    }
-}
-
-void byteDefinition::requestMaskDataRX(s_parameterMask mask)
-{ //ответный сигнал от masksettingsdialog с запросом всех параметров маски bitmaskobject
-    if (devNum == mask.devNum && th_byteNum == mask.byteNum) {
-        emit requestMaskDataTX(mask) разобраться что за херня
-    }
-}
-
-void byteDefinition::maskData2FormRX(s_parameterMask mask)
-{ //ответный сигнал со всеми данными маски bitmaskobj в masksettingsdialog
-    if (devNum == mask.devNum && th_byteNum == mask.byteNum) {
-        emit maskData2FormTX(mask);
-    }
-}
-
-void byteDefinition::sendDataToProfileRX(s_parameterMask mask)
-{ //забор данных из формы masksettingsdialog и отправка в профиль bitmaskobj
-    if (devNum == mask.devNum && th_byteNum == mask.byteNum) {
-        emit sendDataToProfileTX(mask);
-    }
-}
-
-void byteDefinition::allMasksToListRX(s_parameterMask mask)
-{ //сигнал от bitmaskobj предназначенный для bytesettingsform, для наполнения листа масок всеми имеющимися у этого байта
-    emit allMasksToListTX(mask);
-}
-
 void byteDefinition::calcWordData(int _devNum, QVector<int> data)
 { //формируем слово из полных данных устройства и заданной длины, и рассылаем слово маскам
     wordData = 0;
@@ -191,9 +171,4 @@ void byteDefinition::calcWordData(int _devNum, QVector<int> data)
         }
         emit wordData2Mask(devNum, th_byteNum, wordData);
     }
-}
-
-void byteDefinition::param2FrontEndRX(s_parameterMask mask)
-{
-    emit param2FrontEndTX(mask);
 }

@@ -124,21 +124,21 @@ void MainWindow::createDevice(int devNum)
     connect (&devSettForm, &devSettingsForm::returnDevNameAfterEdit, dev, &Device::setDeviceName);
     connect (dev, &Device::returnDeviceName, &devSettForm, &devSettingsForm::setDevName);
     connect (&devSettForm, &devSettingsForm::openByteSettingsFormTX, this, &MainWindow::openByteSett);
-    connect (&byteSettForm, &ByteSettingsForm::setWordBit, dev, &Device::setWordTypeInByteProfile);
+    connect (&byteSettForm, &ByteSettingsForm::setWordBit, dev, &Device::setWordBitTX);
     connect (&byteSettForm, &ByteSettingsForm::setWordBit, &devSettForm, &devSettingsForm::wordTypeChangeRX);//изменить
-    connect (&byteSettForm, &ByteSettingsForm::getWordType, dev, &Device::getWordTypeFromProfileRetranslator);
-    connect (&devSettForm, &devSettingsForm::initByteButtonsWordLeight, dev, &Device::getWordTypeFromProfileRetranslator);
+    connect (&byteSettForm, &ByteSettingsForm::getWordType, dev, &Device::getWordTypeTX);
+    connect (&devSettForm, &devSettingsForm::initByteButtonsWordLeight, dev, &Device::getWordTypeTX);
     connect (dev, &Device::returnWordTypeTX, &byteSettForm, &ByteSettingsForm::returnWordType);
     connect (dev, &Device::returnWordTypeTX, &devSettForm, &devSettingsForm::wordTypeChangeRX);
-    connect (&byteSettForm, &ByteSettingsForm::createMask, dev, &Device::createNewMaskRX);
+    connect (&byteSettForm, &ByteSettingsForm::createMask, dev, &Device::createNewMaskTX);
     connect (dev, &Device::mask2FormTX, &maskSettForm, &maskSettingsDialog::requestDataOnId);
-    connect (&maskSettForm, &maskSettingsDialog::requestMaskData, dev, &Device::requestMaskDataRX);
-    connect (&byteSettForm, &ByteSettingsForm::requestAllMaskToList, dev, &Device::requestMaskDataRX);
+    connect (&maskSettForm, &maskSettingsDialog::requestMaskData, dev, &Device::requestMaskDataTX);
+    connect (&byteSettForm, &ByteSettingsForm::requestAllMaskToList, dev, &Device::requestMaskDataTX);
     connect (dev, &Device::maskData2FormTX, &maskSettForm, &maskSettingsDialog::getDataOnId);
     connect (dev, &Device::allMasksToListTX, &byteSettForm, &ByteSettingsForm::addMaskItem);
     connect (&maskSettForm, &maskSettingsDialog::sendMaskData, &byteSettForm, &ByteSettingsForm::addMaskItem);
     connect (&maskSettForm, &maskSettingsDialog::requestMaskData, this, &MainWindow::openMaskSettingsDialog);
-    connect (&maskSettForm, &maskSettingsDialog::sendMaskData, dev, &Device::sendDataToProfileRX);
+    connect (&maskSettForm, &maskSettingsDialog::sendMaskData, dev, &Device::sendDataToProfileTX);
     connect (&byteSettForm, &ByteSettingsForm::deleteMaskObj, dev, &Device::deleteMaskObjTX);
     connect (&devSettForm, &devSettingsForm::wordDataFullHex, &byteSettForm, &ByteSettingsForm::updateHexWordData);
     connect (dev, &Device::param2FrontEndTX, this, &MainWindow::frontendDataSort);

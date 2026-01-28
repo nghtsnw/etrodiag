@@ -17,7 +17,6 @@ public:
     int devNum;
     int byteNum;
     void open(int _devNum, int _byteNum);
-    void getWordTypeFromProfile(int _devNum, int _byteNum);
     void requestAllMasks();
     void deleteMaskItem(int row);
     void updateMasksList(s_parameterMask mask);

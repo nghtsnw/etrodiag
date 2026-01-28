@@ -39,7 +39,7 @@ signals:
     void getWordTypeTX(int _devNum, int _byteNum);
     void returnWordTypeTX(int _devNum, int _byteNum, int wordType);
     void createNewMaskTX(int _devNum, int _byteNum);
-    void mask2FormTX(int _devNum, int _byteNum, int _id);
+    void mask2FormTX(s_parameterMask mask);
     void maskData2FormTX(s_parameterMask mask);
     void requestMaskDataTX(int _devNum, int _byteNum, int _id);
     void sendDataToProfileTX(s_parameterMask mask);
@@ -55,22 +55,12 @@ signals:
 public slots:
     void updateData(int id, QVector<int> devdata);
     void setDeviceName(int id, QString name);
-    void setWordTypeInByteProfile(int _devNum, int _byteNum, int _wordType);
-    void getWordTypeFromProfileRetranslator(int _devNum, int _byteNum);
-    void returnWordTypeRX(int _devNum, int _byteNum, int wordType);
-    void createNewMaskRX(int _devNum, int _byteNum);
-    void mask2FormRX(int _devNum, int _byteNum, int _id);
-    void maskData2FormRX(s_parameterMask mask);
-    void requestMaskDataRX(int _devNum, int _byteNum, int _id);
-    void sendDataToProfileRX(s_parameterMask mask);
-    void allMasksToListRX(s_parameterMask mask);
-    void param2FrontEndRX(s_parameterMask mask);
     void requestMasks4Saving();
     void loadMaskRX(s_parameterMask mask);
     void hideDevButton(bool trueOrFalse, int _devNum);
     void changeButtonColor(QString _status);
     void setOfflineStatus();
-    void jsonMap(int _devNum, QString _devName, QString _parameterName, double _endValue, int maskId);
+    void jsonMap(s_parameterMask mask);
     void returnMaskCounting(int devNum, int byteNum, int count);
 
 private:
