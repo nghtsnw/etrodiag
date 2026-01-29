@@ -41,22 +41,22 @@ void bitMaskObj::sendMaskToProfile(s_parameterMask mask)
     }
 }
 
-void bitMaskObj::maskToForm(s_parameterMask request)
+void bitMaskObj::maskToForm(int r_devNum, int r_byteNum, int r_id)
 //ответный сигнал от masksettingsdialog с запросом всех параметров маски bitmaskobject
 //по запросу формы настроек маски сообщаем ей все параметры маски
 {
-    if (request.devNum == currentMask.devNum && request.byteNum == currentMask.byteNum && request.id == currentMask.id) {
+    if (r_devNum == currentMask.devNum && r_byteNum == currentMask.byteNum && r_id == currentMask.id) {
         emit maskToFormSIG(currentMask);
     }
-    else if (request.devNum == currentMask.devNum && request.byteNum == currentMask.byteNum && request.id == 999) {
-        allMasksToList(request); //если пришёл id 999, то вызывается функция на отправку сигнала от всех масок данного байта устройства в лист масок в bytesettingsform
+    else if (r_devNum == currentMask.devNum && r_byteNum == currentMask.byteNum && r_id == 999) {
+        allMasksToList(r_devNum, r_byteNum); //если пришёл id 999, то вызывается функция на отправку сигнала от всех масок данного байта устройства в лист масок в bytesettingsform
     }
 }
 
-void bitMaskObj::allMasksToList(s_parameterMask mask)
+void bitMaskObj::allMasksToList(int r_devNum, int r_byteNum)
 //сигнал от bytesettingsform с запросом всех масок байта в список (id = 999)
 {
-    if (mask.devNum == currentMask.devNum && mask.byteNum == currentMask.byteNum)
+    if (r_devNum == currentMask.devNum && r_byteNum == currentMask.byteNum)
     {
         qDebug() << "emit mask " << currentMask.parameterName << " to saving";
         emit maskToListSIG(currentMask);

@@ -26,7 +26,7 @@ signals:
     void returnWordType(int _devNum, int _byteNum, int wordType);
     void mask2FormTX(s_parameterMask mask);
     void maskData2FormTX(s_parameterMask mask);
-    void requestMaskDataTX(s_parameterMask mask);
+    void requestMaskDataTX(int devNum, int byteNum, int id);
     void sendDataToProfileTX(s_parameterMask mask);
     void wordData2Mask(int devNum, int byteNum, int wordData);
     void allMasksToListTX(s_parameterMask answer);
@@ -36,7 +36,7 @@ signals:
     void returnByteName(int devNum, int byteNum, QString byteName);
     void returnMaskCountForThisByte(int devNum, int th_byteNum, int count);
     void sendDataToProfileRX(s_parameterMask mask);
-    void requestMaskDataRX(s_parameterMask mask);
+    void requestMaskDataRX(int devNum, int byteNum, int id);
 
 public slots:
     void setWordBitRX(int _devNum, int _byteNum, int _argBit);

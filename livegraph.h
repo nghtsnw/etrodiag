@@ -21,7 +21,7 @@ public:
     void initGraph();
     QMap<QString, QString> graphAnnotation;
     QMap<QString, QVector<double >> graphAnnotationMinMax;
-    void incomingDataSlot(s_parameterMask mask);
+    void incomingDataSlot(s_parameterMask data);
     void chngMinMaxVisible();
     void cleanGraph();
 

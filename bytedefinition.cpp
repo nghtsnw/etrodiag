@@ -61,9 +61,9 @@ void byteDefinition::createNewMask(int _devNum, int _byteNum)
         mask->currentMask.id = calcMaskID();
         mask->setParent(this);
         //connect (mask, &bitMaskObj::mask2byteSettingsForm, this, &byteDefinition::mask2FormRX); //открытие формы
-        connect (this, &byteDefinition::requestMaskDataRX, this, [ = ](s_parameterMask request) { //ответный сигнал от masksettingsdialog с запросом всех параметров маски bitmaskobject
-            if (devNum == request.devNum && th_byteNum == request.byteNum) {
-                emit requestMaskDataTX(request);
+        connect (this, &byteDefinition::requestMaskDataRX, this, [ = ](int r_devNum, int r_byteNum, int r_id) { //ответный сигнал от masksettingsdialog с запросом всех параметров маски bitmaskobject
+            if (devNum == r_devNum && th_byteNum == r_byteNum) {
+                emit requestMaskDataTX(r_devNum, r_byteNum, r_id);
             }
         });
         connect (this, &byteDefinition::requestMaskDataTX, mask, &bitMaskObj::maskToForm);//запрос от формы
