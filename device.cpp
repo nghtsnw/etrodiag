@@ -18,13 +18,14 @@ Device::Device(int id) //инициализация нового устройс�
     devNum = id;
 }
 
-void Device::updateData(int id, QVector<int> devdata) //если устройство в списке уже есть, этой функцией оно обновляется
+void Device::updateData(QDateTime currTime, int id, QVector<int> devdata) //если устройство в списке уже есть, этой функцией оно обновляется
 {
     if (id == devNum)
     {
-        currState = devdata;
+        currentState = devdata;
+        currentTime = currTime;
         if (!byteObjReady) {
-            byteObjectsInit(currState);
+            byteObjectsInit(currentState);
         }
         emit byteObjUpdSig(devNum, devdata);
         if (devStatus == tr("offline"))
@@ -74,7 +75,7 @@ void Device::byteObjectsInit(QVector<int> &data) //инициализируем 
 
 void Device::clickedF()
 {
-    emit openDevSettSig(devNum, currState);
+    emit openDevSettSig(devNum, currentState);
 }
 
 void Device::getDeviceName(int id)
@@ -95,7 +96,7 @@ void Device::setDeviceName(int id, QString name)
 
 void Device::requestMasks4Saving()
 { //каждому байту устройства отправляем сигнал на выдачу всех масок
-    for (int i = 0; i <= currState.size(); i++) {
+    for (int i = 0; i <= currentState.size(); i++) {
         emit requestMaskDataTX(devNum, i, 999);
     }
 }
@@ -144,19 +145,12 @@ void Device::jsonMap(s_parameterMask mask)
         devParamsCount++;
         if (devParamsCount == countMasks())
         {
-            devParams->insert("DateTime", returnTimestamp().toString("yy-MM-ddThh:mm:ss.zzz"));
+            devParams->insert("DateTime", currentTime.toString("yy-MM-ddThh:mm:ss.zzz"));
             emit devParamsToJson(*devParams);
             devParams->clear();//очищаем, так как может измениться набор параметров (например если поменяем имя параметра, чтоб не осталось старого поля в мапе)
             devParamsCount = 0;
         }
     }
-}
-
-QDateTime Device::returnTimestamp()
-{
-    quint64 timestamp = QDateTime::currentMSecsSinceEpoch();
-    QDateTime dt3 = QDateTime::fromMSecsSinceEpoch(timestamp);
-    return dt3;
 }
 
 void Device::hideDevButton(bool trueOrFalse, int _devNum)

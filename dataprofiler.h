@@ -5,6 +5,7 @@
 #include <QMainWindow>
 #include <QChronoTimer>
 #include "global.h"
+#include "qdatetime.h"
 
 class dataprofiler : public QObject
 {
@@ -21,9 +22,12 @@ private:
     QChronoTimer timeout;
     s_protocolDescription protocol;
     s_Settings settings;
+    QDateTime nextTime;
+    QDateTime currentTime;
+    QDateTime previousTime;
 
 signals:
-    void deviceData(QVector<int> snapshot);
+    void deviceData(QDateTime currentTime, QVector<int> snapshot);
     void badCRC(uint8_t calculatedCRC, QVector<int> snapshot);
     void corruptedData(QVector<int> snapshot);
     void readNext();
@@ -33,6 +37,7 @@ signals:
 
 public slots:
     void getByte(int byteFromBuf);
+    void readFromFile(QMap<QDateTime, QVector<uint8_t >> &);
 };
 
 #endif // DATAPROFILER_H

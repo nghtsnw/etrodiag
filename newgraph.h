@@ -15,7 +15,7 @@ public:
     int id;
 
 public slots:
-    void dataPool(int _devNum, int _byteNum, int _id, double _endValue, int pointsOnGraph, QString _drawGraphColor);//приём живых данных
+    void dataPool(int _devNum, int _byteNum, int _id, double _endValue, int pointsOnGraph, QString _drawGraphColor, QDateTime currentTime);//приём живых данных
     void oscillatorInput();//по внешнему таймеру сдвиг массива с точками на один шаг и отправка на рисование
     void repaintThis();
 private:

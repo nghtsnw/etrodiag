@@ -48,7 +48,7 @@ public:
     void openMaskSettingsDialog();
     void createDevice(int devNum);
     void loadProfile(s_parameterMask mask);
-    void textLogWindow(QString string, bool redFlag);
+    void textLogWindow(QDateTime currentTime, QString string, bool redFlag);
     void cleanDevList();
     void updValueArea(s_parameterMask mask);
 // void grabGestures(const QVector<Qt::GestureType> &gestures);
@@ -58,7 +58,7 @@ public:
 
 
 signals:
-    void devUpdate(int devNum, QVector<int> ddata);
+    void devUpdate(QDateTime currentTime, int devNum, QVector<int> ddata);
     void getDevName(int devNum);
     void setDevName(int devNum, QString name);
     void returnDevNameAfterClose(int devNum, QString text);
@@ -77,10 +77,10 @@ signals:
 public slots:
 
     void showStatusMessage(QString message);
-    void addDeviceToList(QVector<int> ddata);
+    void addDeviceToList(QDateTime currentTime, QVector<int> ddata);
     void openDevSett(int devNum, QVector<int> data);
     void openByteSett(int devNum, int byteNum);
-    void frontendDataSort(s_parameterMask mask);
+    void frontendDataSort(QDateTime currentTime, s_parameterMask mask);
     void devStatusMsg(QString _devName, QString status);
     void badCRCEvent(uint8_t calculatedCRC, QVector<int> dataFrame);
     void corruptedDataEvent(QVector<int> data);
@@ -93,7 +93,7 @@ private slots:
 
 private:
     void initActionsConnections();
-    QDateTime returnTimestamp();
+    //QDateTime returnTimestamp();
     QTimer *timer = new QTimer(this);
     void swipeTriggered(QString);
     int currentOpenTab = 0;

@@ -74,11 +74,17 @@ void Logger::incomingBinData(const QByteArray data)
 
 void Logger::binReadFromCsv()
 {
-    rawDataWithTimeLog = new QMap<QDateTime, QString>;
+    rawDataWithTimeLog = new QMap<QDateTime, QVector<uint8_t >>;
     const auto readData = QtCSV::Reader::readToList(settings.pathToBinFile);
-    for (const auto &i : readData) {
-        rawDataWithTimeLog->insert(QDateTime::fromString(i.at(0), timeFormat), i.at(1));
+    for (const auto &i : readData) { //Чтение всего csv в QMap
+        QStringList splittedText = i.at(1).split(':');
+        QVector<uint8_t> convertedDataFromText;
+        for (const QString &s : std::as_const(splittedText)) {
+            convertedDataFromText.append(s.toInt(0, 16));
+        }
+        rawDataWithTimeLog->insert(QDateTime::fromString(i.at(0), timeFormat), convertedDataFromText);
     }
+    emit readFromCsv(*rawDataWithTimeLog);
 }
 
 void Logger::incomingTxtData(const QString string)

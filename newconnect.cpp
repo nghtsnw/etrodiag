@@ -93,10 +93,10 @@ void newconnect::on_settingsButton_clicked()
 void newconnect::openSerialPort()
 {
     p_local = m_settings->settings();
-    if (p_local.readFromFileFlag)
+    /*if (p_local.readFromFileFlag)
     {
         readProfile();
-        /*pos = 0;//задаём позицию для чтения FileSplitted в readFromFile()
+        pos = 0;//задаём позицию для чтения FileSplitted в readFromFile()
         fileSplitted.clear();
         int freq = 1000 / ((p_local.baudRate / 8) / bytesPerOneShot);
         QFile file(p_local.pathToBinFile);
@@ -114,11 +114,11 @@ void newconnect::openSerialPort()
             fileSplitted.push_back(ch);
             ch.clear();
         }
-        fileBuffer.clear();*/
+        fileBuffer.clear();
         showStatusMessage(tr("Read file %1").arg(p_local.pathToBinFile));
         //timer->start(freq);//запускаем таймер, по нему читается по порядку FileSplitted функцией readFromFile()
     }
-    else
+    else*/
     {
         m_serial->setPortName(p_local.name);
         m_serial->setBaudRate(p_local.baudRate);
@@ -162,11 +162,11 @@ void newconnect::closeSerialPort()
         m_serial->close();
         showStatusMessage(tr("Disconnected"));
     }
-    if (p_local.readFromFileFlag)
+    /*if (p_local.readFromFileFlag)
     {
         p_local.readFromFileFlag = false;
         //timer->stop();
-    }
+    }*/
 }
 
 void newconnect::writeData(const QByteArray &data)
@@ -177,7 +177,7 @@ void newconnect::writeData(const QByteArray &data)
 void newconnect::readData()
 {
     static QByteArray data;
-    if (p_local.readFromFileFlag)
+    /*if (p_local.readFromFileFlag)
     {
         data = fsba;//если есть флаг чтения из файла, то читаем из fsba
         fsba.clear();
@@ -185,7 +185,8 @@ void newconnect::readData()
     else
     {
         data = m_serial->readAll();//если нет то читаем всё что есть с порта
-    }
+    }*/
+    data = m_serial->readAll();
     emit sendRawData(data);
     data.clear();
 }

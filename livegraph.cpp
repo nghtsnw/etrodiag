@@ -1,4 +1,5 @@
 #include "livegraph.h"
+#include "qdatetime.h"
 #include "ui_livegraph.h"
 #include <newgraph.h>
 #include <QDebug>
@@ -85,7 +86,7 @@ void liveGraph::shiftCells()
     this->update();
 }
 
-void liveGraph::incomingDataSlot(s_parameterMask data)
+void liveGraph::incomingDataSlot(QDateTime currentTime, s_parameterMask data)
 {
     QList<newgraph*> graphList = this->findChildren<newgraph*>();
     QListIterator<newgraph*> graphListIt(graphList);
@@ -99,7 +100,7 @@ void liveGraph::incomingDataSlot(s_parameterMask data)
                 if (data.drawGraphFlag)
                 { //и в новых данных флаг на разрешение рисования, то обновляем график
                     foundFlag = true;
-                    emit data2graph(data.devNum, data.byteNum, data.id, data.endValue, steps, data.drawGraphColor);
+                    emit data2graph(data.devNum, data.byteNum, data.id, data.endValue, steps, data.drawGraphColor, currentTime);
                     break;
                 }
                 else
@@ -122,7 +123,7 @@ void liveGraph::incomingDataSlot(s_parameterMask data)
         graph->devNum = data.devNum;
         graph->byteNum = data.byteNum;
         graph->id = data.id;
-        emit data2graph(data.devNum, data.byteNum, data.id, data.endValue, steps, data.drawGraphColor);
+        emit data2graph(data.devNum, data.byteNum, data.id, data.endValue, steps, data.drawGraphColor, currentTime);
         connect (timer, &QTimer::timeout, graph, &newgraph::oscillatorInput);
         graphAnnotationMinMax.insert(data.parameterName, {data.endValue, data.endValue});
     }

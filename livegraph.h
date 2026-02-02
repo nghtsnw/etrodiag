@@ -21,7 +21,7 @@ public:
     void initGraph();
     QMap<QString, QString> graphAnnotation;
     QMap<QString, QVector<double >> graphAnnotationMinMax;
-    void incomingDataSlot(s_parameterMask data);
+    void incomingDataSlot(QDateTime currentTime, s_parameterMask data);
     void chngMinMaxVisible();
     void cleanGraph();
 
@@ -60,7 +60,7 @@ protected:
 
 signals:
     void repaintCurves();
-    void data2graph(int devNum, int byteNum, int id, double endValue, int steps, QString drawGraphColor);
+    void data2graph(int devNum, int byteNum, int id, double endValue, int steps, QString drawGraphColor, QDateTime currentTime);
 };
 
 #endif // LIVEGRAPH_H

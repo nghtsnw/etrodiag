@@ -9,6 +9,7 @@
 #include <QTimer>
 #include <QVariantMap>
 #include "global.h"
+#include "qdatetime.h"
 
 class Device : public QPushButton
 {
@@ -18,7 +19,7 @@ public:
     explicit Device(QWidget *parent = nullptr);
     int devNum;
     QString devName = "Device name";
-    QVector<int> currState;
+    QVector<int> currentState;
     int currStateInt = 0;
     QVector<int> *oldState = new QVector<int>;
     Device(int id);
@@ -45,7 +46,7 @@ signals:
     void sendDataToProfileTX(s_parameterMask mask);
     void allMasksToListTX(s_parameterMask mask);
     void deleteMaskObjTX(int devNum, int byteNum, int id);
-    void param2FrontEndTX(s_parameterMask mask);
+    void param2FrontEndTX(QDateTime currentTime, s_parameterMask mask);
     void loadMaskTX(s_parameterMask mask);
     void byteObjUpdSig(int devNum, QVector<int> data);
     void devStatusMessage(QString _devname, QString status);
@@ -53,7 +54,7 @@ signals:
     void requestMaskCounting();
 
 public slots:
-    void updateData(int id, QVector<int> devdata);
+    void updateData(QDateTime currentTime, int id, QVector<int> devdata);
     void setDeviceName(int id, QString name);
     void requestMasks4Saving();
     void loadMaskRX(s_parameterMask mask);
@@ -68,7 +69,8 @@ private:
     Q_DISABLE_COPY(Device)
     QTimer *timer = new QTimer(this);
     QVariantMap *devParams = new QVariantMap;
-    QDateTime returnTimestamp();
+    //QDateTime returnTimestamp();
+    QDateTime currentTime;
     bool skippedFirstJsonSending = false;
     int devParamsCount = 0;
     int countMasks();

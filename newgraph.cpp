@@ -1,4 +1,5 @@
 #include "newgraph.h"
+#include "qdatetime.h"
 
 newgraph::newgraph(QObject *parent) : QObject(parent)
 {
@@ -7,18 +8,21 @@ newgraph::newgraph(QObject *parent) : QObject(parent)
 
 newgraph::~newgraph()
 {
-
 }
 
-void newgraph::dataPool(int _devNum, int _byteNum, int _id, double _endValue, int _pointsOnGraph, QString _drawGraphColor)
+void newgraph::dataPool(int _devNum, int _byteNum, int _id, double _endValue, int _pointsOnGraph, QString _drawGraphColor, QDateTime currentTime)
 {
     if (devNum == _devNum && byteNum == _byteNum && id == _id)
     {
         bufferForMidValue.push_back(_endValue);
         watchDogFlag = false;
         watchDogTimer.start(3000);
-        if (graphColor!=_drawGraphColor) graphColor = _drawGraphColor;
-        if (pointsWithValues.size() != _pointsOnGraph+1) pointsWithValues.resize(_pointsOnGraph+1);
+        if (graphColor != _drawGraphColor) {
+            graphColor = _drawGraphColor;
+        }
+        if (pointsWithValues.size() != _pointsOnGraph + 1) {
+            pointsWithValues.resize(_pointsOnGraph + 1);
+        }
     }
 }
 
@@ -27,10 +31,11 @@ void newgraph::oscillatorInput()//формирование массива чис
     if (!pointsWithValues.isEmpty() && !bufferForMidValue.isEmpty())
     {
         pointsWithValues.pop_back();
-        for (double num : bufferForMidValue) //если за время паузы успело прийти несколько значений, вычисляется среднее
+        for (double num : bufferForMidValue) { //если за время паузы успело прийти несколько значений, вычисляется среднее
             value += num;
-        value = value/bufferForMidValue.size();
-        pointsWithValues.push_front(value);        
+        }
+        value = value / bufferForMidValue.size();
+        pointsWithValues.push_front(value);
         bufferForMidValue.clear();
         lastValue = value,
         value = 0;
@@ -38,17 +43,21 @@ void newgraph::oscillatorInput()//формирование массива чис
     else if (bufferForMidValue.isEmpty())
     {
         pointsWithValues.pop_back();
-        if (!watchDogFlag) pointsWithValues.push_front(lastValue);
-        else if (watchDogFlag) pointsWithValues.push_front(0);
+        if (!watchDogFlag) {
+            pointsWithValues.push_front(lastValue);
+        }
+        else if (watchDogFlag) {
+            pointsWithValues.push_front(0);
+        }
     }
 }
 
 void newgraph::repaintThis()
 {
-     emit graph2Painter(pointsWithValues, graphColor);
+    emit graph2Painter(pointsWithValues, graphColor);
 }
 
 void newgraph::watchDog()
-{//если данных нет в течении времени таймера (например нет связи с устройством), шлём на отрисовку нули
+{ //если данных нет в течении времени таймера (например нет связи с устройством), шлём на отрисовку нули
     watchDogFlag = true;
 }

@@ -46,13 +46,14 @@ private:
     bool writeLogsPermission = false;
     QQueue<QString> txtLogQueue;
     s_Settings settings;
-    QMap<QDateTime, QString> *rawDataWithTimeLog = nullptr;
+    QMap<QDateTime, QVector<uint8_t >> *rawDataWithTimeLog = nullptr;
 
 signals:
     void showStatusMessage(QString);
     void toTextLog(QString text, bool redFlag);
     void setSettings(s_Settings);
-    void sendRawData(QByteArray);
+    void readFromCsv(QMap<QDateTime, QVector<uint8_t >> );
+
 };
 
 #endif // LOGGER_H

@@ -87,7 +87,7 @@ void MainWindow::showStatusMessage(QString message)
     textLogWindow(message, true);
 }
 
-void MainWindow::addDeviceToList(QVector<int> ddata)
+void MainWindow::addDeviceToList(QDateTime currentTime, QVector<int> ddata)
 {
     devNum = ddata.at(2);//узнаём номер устройства в посылке
     thisDeviceHere = false; //обнуляем флаг
@@ -98,14 +98,14 @@ void MainWindow::addDeviceToList(QVector<int> ddata)
         if (devNum == vlayChildListIt.next()->devNum) //смотрим, есть ли наше устройство в текущем листе
         {
             thisDeviceHere = true; //если есть, ставим флаг что оно тут
-            emit devUpdate(devNum, ddata); //если есть то пихаем ему обновление через сигнал
+            emit devUpdate(currentTime, devNum, ddata); //если есть то пихаем ему обновление через сигнал
             devSettForm.updByteButtons(devNum, ddata); //обновление кнопок в форме настройки
         }
     }
     if (!thisDeviceHere) //если устройства нет, то создаём его
     {
         createDevice(devNum);
-        emit devUpdate(devNum, ddata);
+        emit devUpdate(currentTime, devNum, ddata);
         devSettForm.updByteButtons(devNum, ddata);
     }
     vlayChildListIt.toFront();
@@ -239,12 +239,12 @@ void MainWindow::openMaskSettingsDialog()
     }
 }
 
-QDateTime MainWindow::returnTimestamp()
+/*QDateTime MainWindow::returnTimestamp()
 {
     quint64 timestamp = QDateTime::currentMSecsSinceEpoch();
     QDateTime dt3 = QDateTime::fromMSecsSinceEpoch(timestamp);
     return dt3;
-}
+}*/
 
 void MainWindow::updValueArea(s_parameterMask mask)
 { //сначала проверяем есть ли уже вкладка с этим устройством по имени
@@ -357,7 +357,7 @@ void MainWindow::ValueArea_CellClicked(int row, int)
     emit hideOtherDevButtons(true, grabDevNum);
 }
 
-void MainWindow::frontendDataSort(s_parameterMask mask)
+void MainWindow::frontendDataSort(QDateTime currentTime, s_parameterMask mask)
 {
     if (devSettForm.isVisible() && mask.devNum == devSettForm.devNum) {
         devSettForm.setDevName(mask.devNum, mask.devName);
@@ -365,15 +365,15 @@ void MainWindow::frontendDataSort(s_parameterMask mask)
     if (mask.viewInLogFlag && mask.isNewData)
     {
         QString formString(mask.parameterName + "@" + mask.devName + ": " + QString::number(mask.endValue, 'g', 6));
-        textLogWindow(formString, false);
+        textLogWindow(currentTime, formString, false);
     }
     emit toJsonMap(mask);
     updValueArea(mask);
 }
 
-void MainWindow::textLogWindow(QString string, bool redFlag)
+void MainWindow::textLogWindow(QDateTime currentTime, QString string, bool redFlag)
 {
-    QString stringWithTime = (returnTimestamp().toString("hh:mm:ss:zzz") + " " + string);
+    QString stringWithTime = (currentTime.toString("hh:mm:ss:zzz") + " " + string);
     emit toTxtLogger(stringWithTime);
     if (!redFlag) {
         m_ui->logArea->appendHtml("<p><span style=color:#000000>" + stringWithTime + "</span></p>");
@@ -400,7 +400,7 @@ void MainWindow::loadProfile(s_parameterMask mask)
         createDevice(mask.devNum);
         QVector<int> devInitArray(oneMsgLeight, 0);
         devInitArray.replace(2, mask.devNum);
-        emit devUpdate(mask.devNum, devInitArray);
+        emit devUpdate(QDateTime::currentDateTime(), mask.devNum, devInitArray);
         devSettForm.updByteButtons(mask.devNum, devInitArray);
         emit sendMaskData(mask);
     }
@@ -408,7 +408,7 @@ void MainWindow::loadProfile(s_parameterMask mask)
 
 void MainWindow::devStatusMsg(QString _devName, QString status)
 {
-    textLogWindow(tr("Device %1 is %2").arg(_devName).arg(status), true);
+    textLogWindow(QDateTime::currentDateTime(), tr("Device %1 is %2").arg(_devName).arg(status), true);
 }
 
 void MainWindow::resizeEvent(QResizeEvent*)
@@ -457,7 +457,7 @@ void MainWindow::badCRCEvent(uint8_t calculatedCRC, QVector<int> dataFrame)
     if (crcchr.size() == 1) {
         crcchr = '0' + crcchr;
     }
-    textLogWindow(tr("CRC Calc: ") + crcchr + ", " + tr("Frame: ") + str, true);
+    textLogWindow(QDateTime::currentDateTime(), tr("CRC Calc: ") + crcchr + ", " + tr("Frame: ") + str, true);
     CRCErrorCount++;
     crcerrorlbl->setText(tr("CRC Errors: ") + QString::number(CRCErrorCount));
 }
@@ -476,7 +476,7 @@ void MainWindow::corruptedDataEvent(QVector<int> data)
         }
         str += chr;
     }
-    textLogWindow(tr("Corrupted data: ") + str, true);
+    textLogWindow(QDateTime::currentDateTime(), tr("Corrupted data: ") + str, true);
 }
 
 void MainWindow::guiCommandHandler(int varNumber, bool action)

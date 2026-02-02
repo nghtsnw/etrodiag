@@ -44,7 +44,7 @@ signals:
     void cleanDevListSig();
     void cleanGraph();
     void sendStatusStr(QString);
-    void transmitData(QVector<int> snapshot);
+    void transmitData(QDateTime currentTime, QVector<int> snapshot);
     void badCRC(uint8_t calculatedCRC, QVector<int> snapshot);
     void corruptedData(QVector<int> data);
     void saveAllMasks();
@@ -85,7 +85,7 @@ private:
     bool createNewFileNamePermission = true;
     QString binFileName;
     s_Settings p_local;
-    QByteArray fsba;
+    //QByteArray fsba;
     QByteArray arr4byteStream;
     //QTimer *timer = new QTimer(this);
     QTimer *timerAboveTxCommand = new QTimer(this);
