@@ -25,6 +25,7 @@ public:
     void incomingDataSlot(QDateTime currentTime, s_parameterMask data);
     void chngMinMaxVisible();
     void cleanGraph();
+    void timeNavigationSliderPositionChanged(int);
 
 private:
     Ui::liveGraph *ui;
@@ -55,6 +56,7 @@ private:
     QMap<QDateTime, double> pointsForTimeFrames(QMap<QDateTime, double>& points); //буфер для точек в отрезке времени размере кадра
     int timeFrames = 60; // ширина графика в секундах (менять для увеличения и уменьшения общего масштаба)
     QDateTime frameFront; // передний край графика (либо сдвигается таймером по времени в live режиме, либо последняя запись из файла лога)
+    QDateTime calculatedEndTime; // время конца нарисованного графика пропорционально положению слайдера навигации
 
     const int oneStepTime = 500;//время для таймера сдвига на шаг и перерисовки (мсек)
     const int steps = 120; //ширина графика в шагах

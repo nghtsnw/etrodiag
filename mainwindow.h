@@ -73,6 +73,7 @@ signals:
     void setDevParamsCount(int devNum, int paramsCount);
     void toTxtLogger(QString);
     void emitCommand(QVector<quint8> command, bool newcommandflag);
+    void timeNavigationSliderPositionChanged(int);
 
 public slots:
 

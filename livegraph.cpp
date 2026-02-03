@@ -158,12 +158,12 @@ void liveGraph::incomingDataSlot(QDateTime currentTime, s_parameterMask data)
     }
 }
 
-void liveGraph::paintCurve(QMap<QDateTime, double> allPoints, QString color)
+void liveGraph::paintCurve(QMap<QDateTime, double> allPoints, QDateTime endTime, QString color)
 { //сюда каждый объект графика отдаёт массив данных и цвет на рисование
     QPainter paintcv(this);
     if (paintcv.isActive())
     {
-        QMap<QDateTime, double> points = pointsForTimeFrames(allPoints); //TODO Добавить маркер времени начала для возможности навигации по графику
+        QMap<QDateTime, double> points = pointsForTimeFrames(allPoints, endTime); //TODO Добавить маркер времени начала для возможности навигации по графику
         QColor paintColor;
         paintColor.fromString(color);
         QPen pen(paintColor, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
@@ -184,6 +184,11 @@ void liveGraph::paintCurve(QMap<QDateTime, double> allPoints, QString color)
         }
         curvesCount++;
     }
+}
+
+void liveGraph::timeNavigationSliderPositionChanged(int pos)
+{
+
 }
 
 void liveGraph::paintAnnotation()

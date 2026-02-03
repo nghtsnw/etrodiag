@@ -48,6 +48,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect (connection, &newconnect::setVisibleControlWindow, &cBoard, &ControlBoard::setVisible);
     connect (connection, &newconnect::s_sendSettings, logger, &Logger::setSettings);
     connect (this, &MainWindow::emitCommand, connection, &newconnect::receiveCommandFromGui);
+    connect (m_ui->timeNavigationSlider, &QSlider::sliderReleased, this, [=](){
+        emit timeNavigationSliderPositionChanged(m_ui->timeNavigationSlider->value());
+    });
+    connect (this, &MainWindow::timeNavigationSliderPositionChanged, graphiq, &liveGraph::timeNavigationSliderPositionChanged);
     m_ui->tabWidget->setCurrentIndex(0);
     m_ui->tab_connections->show();
 }
