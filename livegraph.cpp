@@ -11,6 +11,9 @@ liveGraph::liveGraph(QWidget *parent) :
 {
     ui->setupUi(this);
     connect (timer, &QTimer::timeout, this, &liveGraph::shiftCells);
+    connect (timer, &QTimer::timeout, this, [ = ]() {
+        frameFront = QDateTime::currentDateTime(); //В режиме чтения из лога отключить / переделать
+    });
     timer->start(oneStepTime);
 }
 
@@ -124,7 +127,7 @@ void liveGraph::incomingDataSlot(QDateTime currentTime, s_parameterMask data)
         graph->byteNum = data.byteNum;
         graph->id = data.id;
         emit data2graph(data.devNum, data.byteNum, data.id, data.endValue, steps, data.drawGraphColor, currentTime);
-        connect (timer, &QTimer::timeout, graph, &newgraph::oscillatorInput);
+        //connect (timer, &QTimer::timeout, graph, &newgraph::oscillatorInput);
         graphAnnotationMinMax.insert(data.parameterName, {data.endValue, data.endValue});
     }
     if (data.drawGraphFlag)
@@ -155,13 +158,14 @@ void liveGraph::incomingDataSlot(QDateTime currentTime, s_parameterMask data)
     }
 }
 
-void liveGraph::paintCurve(QVector<double> points, QString color)
+void liveGraph::paintCurve(QMap<QDateTime, double> allPoints, QString color)
 { //сюда каждый объект графика отдаёт массив данных и цвет на рисование
     QPainter paintcv(this);
     if (paintcv.isActive())
     {
+        QMap<QDateTime, double> points = pointsForTimeFrames(allPoints); //TODO Добавить маркер времени начала для возможности навигации по графику
         QColor paintColor;
-        paintColor.setNamedColor(color);
+        paintColor.fromString(color);
         QPen pen(paintColor, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
         paintcv.setBrush(QBrush(paintColor));
         paintcv.setPen(pen);
@@ -226,7 +230,28 @@ QVector<int> liveGraph::maxStringSizePix(QFont font, QList<QString> str)//счи
     return maxSizePix;
 }
 
-QVector<double> liveGraph::findDeltaValue(QVector<double>& points)
+QMap<QDateTime, double> liveGraph::pointsForTimeFrames(QMap<QDateTime, double>& points)
+{
+    QList<QDateTime> keysForPoints = points.keys();
+    QListIterator<QDateTime> keysForPointsIt(keysForPoints);
+    //Вычисляем время начала отрисовки, отнимая ширину фрейма в секундах от последнего времени в массиве точек
+    QDateTime firstPointForDraw = QDateTime::fromMSecsSinceEpoch((keysForPoints.last().toMSecsSinceEpoch()) - (timeFrames * 1000));
+    //Теперь надо собрать массив точек для данного конкретного временного отрезка
+    QList<QDateTime> splittedForFramesKeys;
+    keysForPointsIt.toFront();
+    do {
+        splittedForFramesKeys.push_back(keysForPointsIt.previous());
+    }
+    while (keysForPointsIt.peekPrevious() >= firstPointForDraw);
+    //По собранным ключам добавляются значения из большого массива
+    QMap<QDateTime, double> splittedPoints;
+    for (auto key : keysForPoints) {
+        splittedPoints.insert(key, points.value(key));
+    }
+    return splittedPoints;
+}
+
+QVector<double> liveGraph::findDeltaValue(QMap<QDateTime, double>& points)
 {
     double lastMinValue = points.at(0);
     double lastMaxValue = points.at(0);

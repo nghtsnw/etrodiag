@@ -6,6 +6,7 @@
 #include <QTimer>
 #include <QMap>
 #include "global.h"
+#include "qdatetime.h"
 
 namespace Ui {
     class liveGraph;
@@ -30,7 +31,7 @@ private:
     QTimer *timer = new QTimer(this); //таймер сек для сдвига ячеек и перерисовки графика
     int xShift = 0; //индекс сдвига ячеек разметки поля
     void shiftCells();
-    void paintCurve(QVector<double> points, QString color);
+    void paintCurve(QMap<QDateTime, double> points, QString color);
     void paintAnnotation();
     QVector<int> maxStringSizePix(QFont font, QList<QString> str);
     double xShiftPix = 0;
@@ -43,13 +44,17 @@ private:
     double oneStepXpix = 0;
     double vZeroLevel = 0;
     double scaleErrorPix = 0.0;
-    QVector<double> findDeltaValue(QVector<double> &points);
+    QVector<double> findDeltaValue(QMap<QDateTime, double> &points);
     double findYScale(const QVector<double> &values);
     bool foundFlag = false;
     QList<QString> annotationKeys;
     QVector<int> rectXSizePix;
     int curvesCount = 0;
     bool minMaxOnOff = true;
+
+    QMap<QDateTime, double> pointsForTimeFrames(QMap<QDateTime, double>& points); //буфер для точек в отрезке времени размере кадра
+    int timeFrames = 60; // ширина графика в секундах (менять для увеличения и уменьшения общего масштаба)
+    QDateTime frameFront; // передний край графика (либо сдвигается таймером по времени в live режиме, либо последняя запись из файла лога)
 
     const int oneStepTime = 500;//время для таймера сдвига на шаг и перерисовки (мсек)
     const int steps = 120; //ширина графика в шагах

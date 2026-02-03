@@ -4,6 +4,7 @@
 newgraph::newgraph(QObject *parent) : QObject(parent)
 {
     connect (&watchDogTimer, &QTimer::timeout, this, &newgraph::watchDog);
+    pointsWithValues = new QMap<QDateTime, double>;
 }
 
 newgraph::~newgraph()
@@ -14,19 +15,20 @@ void newgraph::dataPool(int _devNum, int _byteNum, int _id, double _endValue, in
 {
     if (devNum == _devNum && byteNum == _byteNum && id == _id)
     {
-        bufferForMidValue.push_back(_endValue);
+        //bufferForMidValue.push_back(_endValue);
+        pointsWithValues->insert(currentTime, _endValue);
         watchDogFlag = false;
         watchDogTimer.start(3000);
         if (graphColor != _drawGraphColor) {
             graphColor = _drawGraphColor;
         }
-        if (pointsWithValues.size() != _pointsOnGraph + 1) {
-            pointsWithValues.resize(_pointsOnGraph + 1);
-        }
+        //if (pointsWithValues.size() != _pointsOnGraph + 1) {
+        // pointsWithValues.resize(_pointsOnGraph + 1);
+        //}
     }
 }
 
-void newgraph::oscillatorInput()//формирование массива чисел для отрисовки графика по тактовому сигналу
+/*void newgraph::oscillatorInput()//формирование массива чисел для отрисовки графика по тактовому сигналу
 {
     if (!pointsWithValues.isEmpty() && !bufferForMidValue.isEmpty())
     {
@@ -50,11 +52,11 @@ void newgraph::oscillatorInput()//формирование массива чис
             pointsWithValues.push_front(0);
         }
     }
-}
+}*/
 
 void newgraph::repaintThis()
 {
-    emit graph2Painter(pointsWithValues, graphColor);
+    emit graph2Painter(*pointsWithValues, graphColor);
 }
 
 void newgraph::watchDog()

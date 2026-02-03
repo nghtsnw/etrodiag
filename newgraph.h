@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QTimer>
+#include <QMap>
 
 class newgraph : public QObject
 {
@@ -16,11 +17,11 @@ public:
 
 public slots:
     void dataPool(int _devNum, int _byteNum, int _id, double _endValue, int pointsOnGraph, QString _drawGraphColor, QDateTime currentTime);//приём живых данных
-    void oscillatorInput();//по внешнему таймеру сдвиг массива с точками на один шаг и отправка на рисование
+    //void oscillatorInput();//по внешнему таймеру сдвиг массива с точками на один шаг и отправка на рисование
     void repaintThis();
 private:
-    QVector<double> pointsWithValues;
-    QVector<double> bufferForMidValue;
+    QMap<QDateTime, double> *pointsWithValues;
+    //QVector<double> bufferForMidValue;
     QString graphColor;
     double value = 0.0;
     double lastValue = 0.0;
@@ -30,7 +31,7 @@ private:
     bool watchDogFlag = false;
 
 signals:
-    void graph2Painter(QVector<double> data, QString color);
+    void graph2Painter(QMap<QDateTime, double> pointsWithValues, QString color);
 
 };
 
