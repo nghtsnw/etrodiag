@@ -147,19 +147,6 @@
          </layout>
         </item>
         <item>
-         <widget class="QSlider" name="timeNavigationSlider">
-          <property name="maximum">
-           <number>10000</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Orientation::Horizontal</enum>
-          </property>
-          <property name="invertedControls">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
          <widget class="QPlainTextEdit" name="logArea">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -196,7 +183,7 @@
      <x>0</x>
      <y>0</y>
      <width>1000</width>
-     <height>25</height>
+     <height>19</height>
     </rect>
    </property>
   </widget>

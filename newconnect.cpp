@@ -70,6 +70,7 @@ newconnect::newconnect(QWidget *parent) :
     connect (timerAboveTxCommand, &QTimer::timeout, this, &newconnect::sendCommand);//отправляем команду после задержки
     connect (this, &newconnect::sendRawData, gstream, &getStream::getRawData);
     connect (this, &newconnect::sendRawData, m_console, &Console::putData);
+    connect (this, &newconnect::sendRawDataWithTime, datapool, &dataprofiler::readFromFile);
     on_settingsButton_clicked();
 }
 
@@ -237,16 +238,15 @@ void newconnect::on_connectButton_clicked()
         {
             ui->connectButton->setText(tr("Connect"));
             showStatusMessage(tr("Connection closed"));
+            emit disconnected();
         }
-        emit stopLog();
     }
     else if (!(m_serial->isOpen()) || !p_local.readFromFileFlag)
     {
         openSerialPort();
         if (m_serial->isOpen() || p_local.readFromFileFlag)
         {
-            emit startLog();
-            emit cleanGraph();
+            emit connected();
             createNewFileNamePermission = true;
             ui->connectButton->setText(tr("Disconnect"));
         }

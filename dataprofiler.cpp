@@ -91,9 +91,9 @@ void dataprofiler::readFromFile(QMap<QDateTime, QVector<uint8_t >> &dataWithTime
     while (i.hasNext()) {
         QDateTime time = i.next();
         QVector<uint8_t> data = dataWithTime.value(time);
-        previousTime = currentTime;
+        //previousTime = currentTime;
         currentTime = time;
-        nextTime = i.peekNext();
+        nextTime = i.peekNext(); //!!! Возможен косяк с обращением  за массив
         for (const uint8_t byte : data) {
             getByte(byte);
         }

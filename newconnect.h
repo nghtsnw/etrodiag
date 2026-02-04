@@ -42,7 +42,7 @@ public:
 signals:
 
     void cleanDevListSig();
-    void cleanGraph();
+    void connected();
     void sendStatusStr(QString);
     void transmitData(QDateTime currentTime, QVector<int> snapshot);
     void badCRC(uint8_t calculatedCRC, QVector<int> snapshot);
@@ -55,8 +55,9 @@ signals:
     void writeBinLog(bool);
     void directly2logArea(QString);
     void sendRawData(QByteArray);
+    void sendRawDataWithTime(QMap<QDateTime, QVector<uint8_t >> );
     void startLog();
-    void stopLog();
+    void disconnected();
     void profileName2log(QString);
     void setVisibleControlWindow(bool);
     void s_sendSettings(s_Settings);

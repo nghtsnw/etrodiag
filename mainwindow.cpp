@@ -37,8 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect (m_ui->valueArea, &QTabWidget::currentChanged, this, &MainWindow::setCurrentOpenTab);
     connect (logger, &Logger::showStatusMessage, this, &MainWindow::showStatusMessage);
     connect (logger, &Logger::toTextLog, this, &MainWindow::textLogWindow);
-    //connect (logger, &Logger::, connection, &newconnect::sendRawData); //TODO: Доделать загрузку лога - переработку через профиль в графики
-    connect (logger, &Logger::, connection, &newconnect::sendRawData);
+    connect (logger, &Logger::readFromCsv, connection, &newconnect::sendRawDataWithTime);
     connect (this, &MainWindow::toTxtLogger, logger, &Logger::incomingTxtData);
     connect (aboutButton, &QPushButton::clicked, this, &MainWindow::onAboutButtonClicked);
     m_ui->logArea->viewport()->installEventFilter(this);
@@ -48,10 +47,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect (connection, &newconnect::setVisibleControlWindow, &cBoard, &ControlBoard::setVisible);
     connect (connection, &newconnect::s_sendSettings, logger, &Logger::setSettings);
     connect (this, &MainWindow::emitCommand, connection, &newconnect::receiveCommandFromGui);
-    connect (m_ui->timeNavigationSlider, &QSlider::sliderReleased, this, [=](){
-        emit timeNavigationSliderPositionChanged(m_ui->timeNavigationSlider->value());
-    });
-    connect (this, &MainWindow::timeNavigationSliderPositionChanged, graphiq, &liveGraph::timeNavigationSliderPositionChanged);
     m_ui->tabWidget->setCurrentIndex(0);
     m_ui->tab_connections->show();
 }
@@ -72,12 +67,14 @@ void MainWindow::addConnection()
     connect (connection, &newconnect::writeTextLog, logger, &Logger::setTxt);
     connect (connection, &newconnect::writeJsonLog, logger, &Logger::setJson);
     connect (connection, &newconnect::writeBinLog, logger, &Logger::setBin);
-    connect (connection, &newconnect::cleanGraph, &graphiq, &liveGraph::cleanGraph);
+    connect (connection, &newconnect::connected, &graphiq, &liveGraph::cleanGraph);
+    connect (connection, &newconnect::connected, &graphiq, &liveGraph::startOscillator);
+    connect (connection, &newconnect::disconnected, &graphiq, &liveGraph::stopOscillator);
     connect (this, &MainWindow::prepareToSaveProfile, connection, &newconnect::prepareToSaveProfile);
     connect (this, &MainWindow::saveProfile, connection, &newconnect::saveProfile);
     connect (connection, &newconnect::sendRawData, logger, &Logger::incomingBinData);
-    connect (connection, &newconnect::startLog, logger, &Logger::startLog);
-    connect (connection, &newconnect::stopLog, logger, &Logger::stopLog);
+    connect (connection, &newconnect::connected, logger, &Logger::startLog);
+    connect (connection, &newconnect::disconnected, logger, &Logger::stopLog);
     connect (connection, &newconnect::profileName2log, logger, &Logger::setProfileName);
     connect (connection, &newconnect::badCRC, this, &MainWindow::badCRCEvent);
     connect (connection, &newconnect::corruptedData, this, &MainWindow::corruptedDataEvent);

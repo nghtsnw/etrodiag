@@ -12,9 +12,15 @@ liveGraph::liveGraph(QWidget *parent) :
     ui->setupUi(this);
     connect (timer, &QTimer::timeout, this, &liveGraph::shiftCells);
     connect (timer, &QTimer::timeout, this, [ = ]() {
-        frameFront = QDateTime::currentDateTime(); //В режиме чтения из лога отключить / переделать
+        betweenTime = beginTime.msecsTo(realTime);
+        realTime = QDateTime::currentDateTime(); //В режиме чтения из лога отключить / переделать
     });
-    timer->start(oneStepTime);
+    connect (this, &liveGraph::startOscillator, this, [this]() {
+        timer->start(oneStepTime);
+    });
+    connect (this, &liveGraph::stopOscillator, this, [this]() {
+        timer->stop();
+    });
 }
 
 liveGraph::~liveGraph()
@@ -42,13 +48,14 @@ void liveGraph::initGraph()
         paint.drawRect(0, 0, pictWidth, pictHeight);
         paint.setPen(Qt::lightGray);
         paint.setOpacity(0.5);
-        verticalLineCount = steps / 3; //кол-во вертикальных линий рассчитывается по количеству шагов на кадр делённому на три, что-бы три шага соответствовало одной ячейке (для возможного масштабирования)
+        verticalLineCount = steps / 15; //кол-во вертикальных линий рассчитывается по количеству шагов на кадр делённому на три, что-бы три шага соответствовало одной ячейке (для возможного масштабирования)
         horizontalLineCount = 10;
         oneCellXpix = pictWidth / verticalLineCount; //определяем габариты ячеек
         oneCellYpix = pictHeight / horizontalLineCount;
         scaleErrorPix = pictHeight - (oneCellYpix * horizontalLineCount); //погрешность от деления высоты окна на количество ячеек, для коррекции масштаба графика
         oneStepXpix = pictWidth / steps; //один шаг это ширина кадра делённая на количество шагов
         vZeroLevel = oneCellYpix * horizontalLineCount; //вертикальный уровень нуля
+        //TODO Переделать на 15 шагов
         if (xShift == 1) {
             xShiftPix = oneStepXpix; //xShiftPix = oneCellXpix/3; //для текущего вызова функции определяем горизонтальный сдвиг в пикселях, с которым рисуем вертикальные линии
         }
@@ -58,6 +65,7 @@ void liveGraph::initGraph()
         else {
             xShiftPix = 0;
         }
+        /*---------------------------*/
         for (int i = horizontalLineCount + 1, vCoord = pictHeight; i > 0; --i) //рисуем горизонтальные линии
         {
             paint.drawLine(0, vCoord, pictWidth, vCoord);
@@ -80,7 +88,7 @@ void liveGraph::initGraph()
 
 void liveGraph::shiftCells()
 { //так как условно одна ячейка это три шага, переменная xShift используется для определения сдвига при отрисовке вертикальных линий
-    if (xShift != 2) {
+    if (xShift != 14) {
         xShift++;
     }
     else {
@@ -186,10 +194,21 @@ void liveGraph::paintCurve(QMap<QDateTime, double> allPoints, QDateTime endTime,
     }
 }
 
-void liveGraph::timeNavigationSliderPositionChanged(int pos)
+void liveGraph::timeNavigationScrollbarPositionChanged(int pos) // Пропорционально положению слайдера, нужно выбрать временные рамки для отрисовки
 {
-
+    double proportion_slider = (pos / 10000/*slider maximum*/);
+    qint64 proportion_time = between * proportion_slider;
+    QDateTime markerTimePosition = beginTime.addMSecs(proportion_time);
+    if (proportion_slider < 1.0) {
+        calculatedEndTime = markerTimePosition;
+    }
 }
+
+void liveGraph::timeNavigationScrollbarNewMaxLevel(int max)
+{
+    ui->timeScrollBar->setMaximum(max);
+}
+
 
 void liveGraph::paintAnnotation()
 {
@@ -327,4 +346,5 @@ void liveGraph::cleanGraph()
     {
         graphListIt.next()->~newgraph();
     }
+    beginTime = QDateTime::currentDateTime();
 }

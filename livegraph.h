@@ -57,8 +57,11 @@ private:
     int timeFrames = 60; // ширина графика в секундах (менять для увеличения и уменьшения общего масштаба)
     QDateTime frameFront; // передний край графика (либо сдвигается таймером по времени в live режиме, либо последняя запись из файла лога)
     QDateTime calculatedEndTime; // время конца нарисованного графика пропорционально положению слайдера навигации
+    QDateTime beginTime; // начало отсчёта для нового графика
+    QDateTime realTime;
+    qint64 betweenTime; // разница между begin и real
 
-    const int oneStepTime = 500;//время для таймера сдвига на шаг и перерисовки (мсек)
+    const int oneStepTime = 100;//время для таймера сдвига на шаг и перерисовки (мсек)
     const int steps = 120; //ширина графика в шагах
 
 protected:
@@ -68,6 +71,8 @@ protected:
 signals:
     void repaintCurves();
     void data2graph(int devNum, int byteNum, int id, double endValue, int steps, QString drawGraphColor, QDateTime currentTime);
+    void startOscillator();
+    void stopOscillator();
 };
 
 #endif // LIVEGRAPH_H
