@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QLineEdit>
 #include "global.h"
+#include <QDateTime>
 
 namespace Ui {
     class devSettingsForm;
@@ -35,7 +36,7 @@ signals:
 
 public slots:
     void wordTypeChangeRX(int _devNum, int _byteNum, int wordType);
-    void liveDataSlot(s_parameterMask mask);
+    void liveDataSlot(QDateTime, s_parameterMask mask);
 
 private slots:
     void on_devNameEditLine_editingFinished();

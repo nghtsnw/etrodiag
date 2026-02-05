@@ -6,6 +6,7 @@
 #include <QDir>
 #include <QVariantMap>
 #include <QQueue>
+#include <QDateTime>
 #include "global.h"
 
 class Logger : public QObject

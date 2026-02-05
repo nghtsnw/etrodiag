@@ -84,7 +84,7 @@ void dataprofiler::endOfPacket(void)
     frameMsg.clear();
 }
 
-void dataprofiler::readFromFile(QMap<QDateTime, QVector<uint8_t >> &dataWithTime)
+void dataprofiler::readFromFile(QMap<QDateTime, QVector<uint8_t> > dataWithTime)
 {
     QList<QDateTime> timeKeys = dataWithTime.keys();
     QListIterator<QDateTime> i(timeKeys);

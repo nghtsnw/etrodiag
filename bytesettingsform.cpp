@@ -1,4 +1,5 @@
 #include "bytesettingsform.h"
+#include "qdatetime.h"
 #include "ui_bytesettingsform.h"
 #include <QDebug>
 #include <QTableWidgetItem>
@@ -152,7 +153,7 @@ void ByteSettingsForm::requestAllMasks()
     emit requestAllMaskToList(devNum, byteNum, 999);
 }
 
-void ByteSettingsForm::updateMasksList(s_parameterMask mask)
+void ByteSettingsForm::updateMasksList(QDateTime, s_parameterMask mask)
 {
     if (devNum == mask.devNum && byteNum == mask.byteNum)
     {

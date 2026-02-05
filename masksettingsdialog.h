@@ -3,6 +3,7 @@
 #include "bitsetform.h"
 #include <QWidget>
 #include "global.h"
+#include <QDateTime>
 
 namespace Ui {
     class maskSettingsDialog;
@@ -33,7 +34,7 @@ public slots:
     //void sendDataOnId(int _devNum, int _byteNum, int _id);
     void sendMask2Profile();
     void getDataOnId(s_parameterMask mask);
-    void liveDataSlot(s_parameterMask mask);
+    void liveDataSlot(QDateTime currentTime, s_parameterMask mask);
 
 signals:
     void requestMaskData(int _devNum, int _byteNum, int _id);

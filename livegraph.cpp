@@ -7,7 +7,7 @@
 
 liveGraph::liveGraph(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::liveGraph)
+    ui(new Ui::liveGraphWidget)
 {
     ui->setupUi(this);
     connect (timer, &QTimer::timeout, this, &liveGraph::shiftCells);
@@ -129,7 +129,9 @@ void liveGraph::incomingDataSlot(QDateTime currentTime, s_parameterMask data)
     { //если график не найден то создаём, инициализируем и сразу отправляем данные
         newgraph *graph = new newgraph(this);
         connect (this, &liveGraph::repaintCurves, graph, &newgraph::repaintThis);
-        connect (graph, &newgraph::graph2Painter, this, &liveGraph::paintCurve);
+        connect (graph, &newgraph::graph2Painter, this, [ = ](QMap<QDateTime, double> points, QString color) {
+            paintCurve(points, calculatedEndTime, color);
+        });
         connect (this, &liveGraph::data2graph, graph, &newgraph::dataPool);
         graph->devNum = data.devNum;
         graph->byteNum = data.byteNum;
@@ -186,9 +188,9 @@ void liveGraph::paintCurve(QMap<QDateTime, double> allPoints, QDateTime endTime,
         double oneUnitPix = vZeroLevel / yScale; //цена одного деления в пикселях
         //рисуем линии с учётом всех смещений и поправок на масштабирование
         for (double i = 0, x = oneCellXpix * verticalLineCount; i < points.size() - 1; ++i, x = x - oneStepXpix) {
-            paintcv.drawLine(x, (((points.at(i) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix) * -1,
-                             x - oneStepXpix, (((points.at(i + 1) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix) * -1);
-            paintcv.drawEllipse(x - 2, (((points.at(i) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix + 2) * -1, 4, 4);
+            paintcv.drawLine(x, (((points.values().at(i) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix) * -1,
+                             x - oneStepXpix, (((points.values().at(i + 1) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix) * -1);
+            paintcv.drawEllipse(x - 2, (((points.values().at(i) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix + 2) * -1, 4, 4);
         }
         curvesCount++;
     }
@@ -197,7 +199,7 @@ void liveGraph::paintCurve(QMap<QDateTime, double> allPoints, QDateTime endTime,
 void liveGraph::timeNavigationScrollbarPositionChanged(int pos) // Пропорционально положению слайдера, нужно выбрать временные рамки для отрисовки
 {
     double proportion_slider = (pos / 10000/*slider maximum*/);
-    qint64 proportion_time = between * proportion_slider;
+    qint64 proportion_time = betweenTime * proportion_slider;
     QDateTime markerTimePosition = beginTime.addMSecs(proportion_time);
     if (proportion_slider < 1.0) {
         calculatedEndTime = markerTimePosition;
@@ -227,7 +229,7 @@ void liveGraph::paintAnnotation()
         paintan.drawRect(0, 0, rectXSizePix.at(0) +15, oneStringYpix * graphAnnotation.size() + 3);
         paintan.setOpacity(1.0);
         for (int i = 0, y = 4; i < graphAnnotation.size(); ++i, y += oneStringYpix) {
-            paintColor.setNamedColor(annotationKeys.at(i));
+            paintColor.fromString(annotationKeys.at(i));
             paintan.setPen(paintColor);
             paintan.setBrush(QBrush(paintColor));
             paintan.drawEllipse(2, y, 8, 8);
@@ -254,12 +256,12 @@ QVector<int> liveGraph::maxStringSizePix(QFont font, QList<QString> str)//счи
     return maxSizePix;
 }
 
-QMap<QDateTime, double> liveGraph::pointsForTimeFrames(QMap<QDateTime, double>& points)
+QMap<QDateTime, double> liveGraph::pointsForTimeFrames(QMap<QDateTime, double>& points, QDateTime timeMarker)
 {
     QList<QDateTime> keysForPoints = points.keys();
     QListIterator<QDateTime> keysForPointsIt(keysForPoints);
     //Вычисляем время начала отрисовки, отнимая ширину фрейма в секундах от последнего времени в массиве точек
-    QDateTime firstPointForDraw = QDateTime::fromMSecsSinceEpoch((keysForPoints.last().toMSecsSinceEpoch()) - (timeFrames * 1000));
+    QDateTime firstPointForDraw = QDateTime::fromMSecsSinceEpoch((timeMarker.toMSecsSinceEpoch()) - (timeFrames * 1000));
     //Теперь надо собрать массив точек для данного конкретного временного отрезка
     QList<QDateTime> splittedForFramesKeys;
     keysForPointsIt.toFront();
@@ -275,11 +277,12 @@ QMap<QDateTime, double> liveGraph::pointsForTimeFrames(QMap<QDateTime, double>& 
     return splittedPoints;
 }
 
-QVector<double> liveGraph::findDeltaValue(QMap<QDateTime, double>& points)
+QVector<double> liveGraph::findDeltaValue(QMap<QDateTime, double>& _points)
 {
+    QVector<double> points = _points.values();
     double lastMinValue = points.at(0);
     double lastMaxValue = points.at(0);
-    for (int num : points) {
+    for (int num : std::as_const(points)) {
         if (num > lastMaxValue) {
             lastMaxValue = num;
         }

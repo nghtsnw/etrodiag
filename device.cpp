@@ -63,7 +63,9 @@ void Device::byteObjectsInit(QVector<int> &data) //инициализируем 
         connect (bytedef, &byteDefinition::allMasksToListTX, this, &Device::allMasksToListTX);
         connect (this, &Device::sendDataToProfileTX, bytedef, &byteDefinition::sendDataToProfileRX);
         connect (this, &Device::deleteMaskObjTX, bytedef, &byteDefinition::deleteMaskObjTX);
-        connect (bytedef, &byteDefinition::param2FrontEndTX, this, &Device::param2FrontEndTX);
+        connect (bytedef, &byteDefinition::param2FrontEndTX, this, [ = ](s_parameterMask mask) {
+            emit param2FrontEndTX(currentTime, mask);
+        });
         connect (this, &Device::loadMaskTX, bytedef, &byteDefinition::loadMaskRX);
         connect (this, &Device::byteObjUpdSig, bytedef, &byteDefinition::updateSlot);
         connect (this, &Device::requestMaskCounting, bytedef, &byteDefinition::countMasks);

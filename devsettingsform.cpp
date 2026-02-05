@@ -4,6 +4,7 @@
 #include <QPushButton>
 #include <QGridLayout>
 #include "bytebutton.h"
+#include <QDateTime>
 
 devSettingsForm::devSettingsForm(QWidget *parent) :
     QWidget(parent),
@@ -55,7 +56,7 @@ void devSettingsForm::initByteButtons(int id, QVector<int> data)
     }
 }
 
-void devSettingsForm::liveDataSlot(s_parameterMask mask)
+void devSettingsForm::liveDataSlot(QDateTime, s_parameterMask mask)
 {
     //получаем живые данные, что-бы определить по факту их наличия что в слове есть маски и соответственно установить кнопке фоновый цвет, например жёлтый
     emit inThisWordLivingMask(mask.devNum, mask.byteNum);

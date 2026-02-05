@@ -19,7 +19,7 @@ public:
     void open(int _devNum, int _byteNum);
     void requestAllMasks();
     void deleteMaskItem(int row);
-    void updateMasksList(s_parameterMask mask);
+    void updateMasksList(QDateTime, s_parameterMask mask);
     void cleanForm();
     ~ByteSettingsForm();
 

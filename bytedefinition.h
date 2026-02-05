@@ -24,7 +24,7 @@ public:
     virtual ~byteDefinition();
 signals:
     void returnWordType(int _devNum, int _byteNum, int wordType);
-    void mask2FormTX(s_parameterMask mask);
+    void mask2FormTX(int _devNum, int _byteNum, int _id);
     void maskData2FormTX(s_parameterMask mask);
     void requestMaskDataTX(int devNum, int byteNum, int id);
     void sendDataToProfileTX(s_parameterMask mask);

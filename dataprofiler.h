@@ -37,7 +37,7 @@ signals:
 
 public slots:
     void getByte(int byteFromBuf);
-    void readFromFile(QMap<QDateTime, QVector<uint8_t >> &);
+    void readFromFile(QMap<QDateTime, QVector<uint8_t >> );
 };
 
 #endif // DATAPROFILER_H

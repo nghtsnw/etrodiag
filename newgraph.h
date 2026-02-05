@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QTimer>
 #include <QMap>
+#include <QDateTime>
 
 class newgraph : public QObject
 {

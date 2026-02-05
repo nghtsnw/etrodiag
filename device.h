@@ -40,7 +40,7 @@ signals:
     void getWordTypeTX(int _devNum, int _byteNum);
     void returnWordTypeTX(int _devNum, int _byteNum, int wordType);
     void createNewMaskTX(int _devNum, int _byteNum);
-    void mask2FormTX(s_parameterMask mask);
+    void mask2FormTX(int _devNum, int _byteNum, int _id);
     void maskData2FormTX(s_parameterMask mask);
     void requestMaskDataTX(int _devNum, int _byteNum, int _id);
     void sendDataToProfileTX(s_parameterMask mask);

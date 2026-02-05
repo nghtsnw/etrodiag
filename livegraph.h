@@ -6,10 +6,10 @@
 #include <QTimer>
 #include <QMap>
 #include "global.h"
-#include "qdatetime.h"
+#include <QDateTime>
 
 namespace Ui {
-    class liveGraph;
+    class liveGraphWidget;
 }
 
 class liveGraph : public QWidget
@@ -25,14 +25,13 @@ public:
     void incomingDataSlot(QDateTime currentTime, s_parameterMask data);
     void chngMinMaxVisible();
     void cleanGraph();
-    void timeNavigationSliderPositionChanged(int);
 
 private:
-    Ui::liveGraph *ui;
+    Ui::liveGraphWidget *ui;
     QTimer *timer = new QTimer(this); //таймер сек для сдвига ячеек и перерисовки графика
     int xShift = 0; //индекс сдвига ячеек разметки поля
     void shiftCells();
-    void paintCurve(QMap<QDateTime, double> points, QString color);
+    void paintCurve(QMap<QDateTime, double> points, QDateTime endTime, QString color);
     void paintAnnotation();
     QVector<int> maxStringSizePix(QFont font, QList<QString> str);
     double xShiftPix = 0;
@@ -53,7 +52,10 @@ private:
     int curvesCount = 0;
     bool minMaxOnOff = true;
 
-    QMap<QDateTime, double> pointsForTimeFrames(QMap<QDateTime, double>& points); //буфер для точек в отрезке времени размере кадра
+    void timeNavigationScrollbarPositionChanged(int pos);
+    void timeNavigationScrollbarNewMaxLevel(int max);
+
+    QMap<QDateTime, double> pointsForTimeFrames(QMap<QDateTime, double>& points, QDateTime timeMarker); //буфер для точек в отрезке времени размере кадра
     int timeFrames = 60; // ширина графика в секундах (менять для увеличения и уменьшения общего масштаба)
     QDateTime frameFront; // передний край графика (либо сдвигается таймером по времени в live режиме, либо последняя запись из файла лога)
     QDateTime calculatedEndTime; // время конца нарисованного графика пропорционально положению слайдера навигации

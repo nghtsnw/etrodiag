@@ -36,7 +36,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect (this, &MainWindow::dvsfAfterCloseClear, &devSettForm, &devSettingsForm::afterCloseClearing);
     connect (m_ui->valueArea, &QTabWidget::currentChanged, this, &MainWindow::setCurrentOpenTab);
     connect (logger, &Logger::showStatusMessage, this, &MainWindow::showStatusMessage);
-    connect (logger, &Logger::toTextLog, this, &MainWindow::textLogWindow);
+    connect (logger, &Logger::toTextLog, this, [ = ](QString text, bool redflag) {
+        textLogWindow(QDateTime::currentDateTime(), text, redflag);
+    });
     connect (logger, &Logger::readFromCsv, connection, &newconnect::sendRawDataWithTime);
     connect (this, &MainWindow::toTxtLogger, logger, &Logger::incomingTxtData);
     connect (aboutButton, &QPushButton::clicked, this, &MainWindow::onAboutButtonClicked);
@@ -85,7 +87,7 @@ void MainWindow::addConnection()
 void MainWindow::showStatusMessage(QString message)
 {
     statuslbl->setText(message);
-    textLogWindow(message, true);
+    textLogWindow(QDateTime::currentDateTime(), message, true);
 }
 
 void MainWindow::addDeviceToList(QDateTime currentTime, QVector<int> ddata)

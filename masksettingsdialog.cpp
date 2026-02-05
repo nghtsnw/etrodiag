@@ -1,4 +1,5 @@
 #include "masksettingsdialog.h"
+#include "qdatetime.h"
 #include "ui_masksettingsdialog.h"
 #include <QList>
 #include "bitsetform.h"
@@ -131,7 +132,7 @@ void maskSettingsDialog::scanCheckboxesToMask()
     sendMask2Profile();
 }
 
-void maskSettingsDialog::liveDataSlot(s_parameterMask mask)
+void maskSettingsDialog::liveDataSlot(QDateTime, s_parameterMask mask)
 { //устанавливаем текст каждому чекбоксу, 0 или 1
     if (devNum == mask.devNum && byteNum == mask.byteNum)
     {
