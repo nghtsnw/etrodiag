@@ -47,18 +47,18 @@ void Logger::incomingBinData(const QByteArray data)
         QtCSV::VariantData varData;
         if (createNewBinFileNamePermission)
         {
-            binFileName = (dir.path() + "\\" + currentProfileName + '_' + returnTimestamp().toString(timeFormat) + ".csv");
+            binFileName = (dir.path() + "\\" + currentProfileName + '_' + returnTimestamp().toString(timeFormatForFile) + ".csv");
             createNewBinFileNamePermission = false;
             QStringList csvHead;
             csvHead << "time" << "data";
             varData.addRow(csvHead);
-            QtCSV::Writer::write(binFileName, varData);
+            QtCSV::Writer::write(binFileName, varData, ",", QString(""));
             varData.clear();
         }
         QStringList row;
         row << returnTimestamp().toString(timeFormat) << data.toHex(':').toUpper();;
         varData.addRow(row);
-        if ( false == QtCSV::Writer::write(binFileName, varData) )
+        if ( false == QtCSV::Writer::write(binFileName, varData, ",", QString(""), QtCSV::Writer::WriteMode::APPEND))
         {
             qDebug() << "Failed to write to a csv file";
             emit showStatusMessage(tr("Error write csv"));
@@ -95,7 +95,7 @@ void Logger::incomingTxtData(const QString string)
         {
             if (createNewTxtFileNamePermission)//обновляем имя файла, если стоит флаг
             {
-                logFileName = (dir.path() + "\\" + currentProfileName + '_' + returnTimestamp().toString(timeFormat) + ".log");
+                logFileName = (dir.path() + "\\" + currentProfileName + '_' + returnTimestamp().toString(timeFormatForFile) + ".log");
                 newLogFile.setFileName(logFileName);
                 createNewTxtFileNamePermission = false;
             }
@@ -146,7 +146,7 @@ void Logger::incomingJsonData(const QVariantMap jsonMap)
         {
             if (createNewJsonFileNamePermission)
             {
-                jsonFileName = (dir.path() + "\\" + currentProfileName + '_' + returnTimestamp().toString(timeFormat) + ".json");
+                jsonFileName = (dir.path() + "\\" + currentProfileName + '_' + returnTimestamp().toString(timeFormatForFile) + ".json");
                 createNewJsonFileNamePermission = false;
             }
             newJsonFile.setFileName(jsonFileName);

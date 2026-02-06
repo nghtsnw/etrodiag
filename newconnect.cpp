@@ -60,6 +60,12 @@ newconnect::newconnect(QWidget *parent) :
     connect (m_settings, &SettingsDialog::setProtocol, datapool, &dataprofiler::setProtocol);
     connect (m_settings, &SettingsDialog::setProtocol, this, [this](s_protocolDescription p) {
         protocol = p;
+        if (m_settings->settings().readFromFileFlag) {
+            ui->connectButton->setText(tr("Read log"));
+        }
+        else {
+            ui->connectButton->setText(tr("Connect"));
+        }
         emit s_sendSettings(m_settings->settings());
     });
     //Вместе с отправкой протокола отправить на датаразбор настройки соединения
@@ -118,8 +124,9 @@ void newconnect::openSerialPort()
         fileBuffer.clear();
         showStatusMessage(tr("Read file %1").arg(p_local.pathToBinFile));
         //timer->start(freq);//запускаем таймер, по нему читается по порядку FileSplitted функцией readFromFile()
-    }
-    else*/
+    }*/
+    if (!p_local.readFromFileFlag)
+        //else
     {
         m_serial->setPortName(p_local.name);
         m_serial->setBaudRate(p_local.baudRate);
@@ -230,26 +237,32 @@ void newconnect::showStatusMessage(QString message)
 
 void newconnect::on_connectButton_clicked()
 {
-    if (m_serial->isOpen() || p_local.readFromFileFlag)
+    if (!p_local.readFromFileFlag)
     {
-        this->closeSerialPort();
-        p_local.readFromFileFlag = false;
-        if (!(m_serial->isOpen()) && !p_local.readFromFileFlag)
+        if (m_serial->isOpen())
         {
-            ui->connectButton->setText(tr("Connect"));
-            showStatusMessage(tr("Connection closed"));
-            emit disconnected();
+            this->closeSerialPort();
+            if (!(m_serial->isOpen()))
+            {
+                ui->connectButton->setText(tr("Connect"));
+                showStatusMessage(tr("Connection closed"));
+                emit disconnected();
+            }
+        }
+        else if (!(m_serial->isOpen()))
+        {
+            openSerialPort();
+            if (m_serial->isOpen())
+            {
+                emit connected();
+                createNewFileNamePermission = true;
+                ui->connectButton->setText(tr("Disconnect"));
+            }
         }
     }
-    else if (!(m_serial->isOpen()) || !p_local.readFromFileFlag)
-    {
-        openSerialPort();
-        if (m_serial->isOpen() || p_local.readFromFileFlag)
-        {
-            emit connected();
-            createNewFileNamePermission = true;
-            ui->connectButton->setText(tr("Disconnect"));
-        }
+    else {
+        emit readFromFile();
+        showStatusMessage(tr("Read data log from file..."));
     }
 }
 

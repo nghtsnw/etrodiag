@@ -66,10 +66,17 @@ void dataprofiler::getByte(int byteFromBuf)
         timeout.start(); //После приёма каждого байта таймер перезапускается до срабатывания его прерывания детектирования прекращения приёма
     }
     else {
+        quint64 tmp_currentTime = currentTime.toMSecsSinceEpoch();
+        quint64 tmp_nextTime = nextTime.toMSecsSinceEpoch();
         quint64 differenceTime = currentTime.msecsTo(nextTime);
         //В QDateTime нет возможности оперировать наносекундами, да и вроде нет надобности. Константной паузы 1 мсек должно хватить.
-        if (differenceTime > 1) {
-            endOfPacket();
+        if (differenceTime > 20) { //1 не хватает
+            endOfPacket(); //!!!Надо перепридумать способ детекции окончания пакета
+            //При чтении из файла и нет никакой паузы реальной, она может быть в таймшампах
+            //По таймштампам не выходит высчитать перерыв между данными
+            /* При первом шаге текущее время имеет 0, надо сделать чтоб оно подтягивалось заранее
+             * Первое нажатие на ReadLog не срабатывает
+             * */
         }
     }
     emit ready4read(true);

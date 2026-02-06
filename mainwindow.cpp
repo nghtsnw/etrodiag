@@ -71,6 +71,8 @@ void MainWindow::addConnection()
     connect (connection, &newconnect::writeBinLog, logger, &Logger::setBin);
     connect (connection, &newconnect::connected, &graphiq, &liveGraph::cleanGraph);
     connect (connection, &newconnect::connected, &graphiq, &liveGraph::startOscillator);
+    connect (connection, &newconnect::readFromFile, &graphiq, &liveGraph::cleanGraph);
+    connect (connection, &newconnect::readFromFile, logger, &Logger::binReadFromCsv);
     connect (connection, &newconnect::disconnected, &graphiq, &liveGraph::stopOscillator);
     connect (this, &MainWindow::prepareToSaveProfile, connection, &newconnect::prepareToSaveProfile);
     connect (this, &MainWindow::saveProfile, connection, &newconnect::saveProfile);

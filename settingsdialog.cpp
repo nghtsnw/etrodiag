@@ -122,7 +122,7 @@ void SettingsDialog::checkCustomDevicePathPolicy(int idx)
     if (m_ui->serialPortInfoListBox->currentText() == tr("Read from file"))
     {
         m_ui->serialPortInfoListBox->clearEditText();
-        QString file = QFileDialog::getOpenFileName(this, tr("Open binary data file"), appHomeDir + "Logs", tr("Binary data (*.bin)"));
+        QString file = QFileDialog::getOpenFileName(this, tr("Open csv data file"), appHomeDir + "Logs", tr("csv data (*.csv)"));
         m_ui->serialPortInfoListBox->setCurrentText(file);
         if (!m_ui->serialPortInfoListBox->currentText().isEmpty())
         {

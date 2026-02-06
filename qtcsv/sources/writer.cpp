@@ -66,17 +66,14 @@ bool WriterPrivate::appendToFile(
         qDebug() << __FUNCTION__ << "Error - invalid arguments";
         return false;
     }
-
     QFile csvFile(filePath);
     if (!csvFile.open(QIODevice::Append | QIODevice::Text)) {
         qDebug() << __FUNCTION__ << "Error - can't open file:" <<
-            csvFile.fileName();
+                 csvFile.fileName();
         return false;
     }
-
     const auto result = writeToIODevice(csvFile, content, codec);
     csvFile.close();
-
     return result;
 }
 
@@ -96,29 +93,26 @@ bool WriterPrivate::overwriteFile(
     const auto tempFileName = getTempFileName();
     if (tempFileName.isEmpty()) {
         qDebug() << __FUNCTION__ <<
-            "Error - failed to create unique name for temp file";
+        "Error - failed to create unique name for temp file";
         return false;
     }
-
     TempFileHandler handler(tempFileName);
-
     // Write information to the temporary file
-    if (!appendToFile(tempFileName, content, codec)) { return false; }
-
+    if (!appendToFile(tempFileName, content, codec)) {
+        return false;
+    }
     // Remove "old" file if it exists
     if (QFile::exists(filePath) && !QFile::remove(filePath)) {
         qDebug() << __FUNCTION__ << "Error - failed to remove file" << filePath;
         return false;
     }
-
     // Copy "new" file (temporary file) to the destination path (replace
     // "old" file)
     if (!QFile::copy(tempFileName, filePath)) {
         qDebug() << __FUNCTION__ <<
-            "Error - failed to copy temp file to" << filePath;
+        "Error - failed to copy temp file to" << filePath;
         return false;
     }
-
     return true;
 }
 
@@ -138,19 +132,18 @@ bool WriterPrivate::writeToIODevice(
         qDebug() << __FUNCTION__ << "Error - invalid arguments";
         return false;
     }
-
     // Open IO Device if it was not opened
     if (!ioDevice.isOpen() &&
-        !ioDevice.open(QIODevice::Append | QIODevice::Text))
+            !ioDevice.open(QIODevice::Append | QIODevice::Text))
     {
         qDebug() << __FUNCTION__ << "Error - failed to open IO Device";
         return false;
     }
-
     QTextStream stream(&ioDevice);
     stream.setEncoding(codec);
-    while (content.hasNext()) { stream << content.getNext(); }
-
+    while (content.hasNext()) {
+        stream << content.getNext();
+    }
     stream.flush();
     return stream.status() == QTextStream::Ok;
 }
@@ -163,16 +156,15 @@ bool WriterPrivate::writeToIODevice(
 QString WriterPrivate::getTempFileName()
 {
     const auto nameTemplate = QDir::tempPath() + "/qtcsv_" +
-        QString::number(QCoreApplication::applicationPid()) + "_%1.csv";
-
+                              QString::number(QCoreApplication::applicationPid()) + "_%1.csv";
     for (auto counter = 0; counter < std::numeric_limits<int>::max(); ++counter)
     {
         QString name = nameTemplate.arg(
-            QString::number(QRandomGenerator::global()->generate()));
-
-        if (!QFile::exists(name)) { return name; }
+                           QString::number(QRandomGenerator::global()->generate()));
+        if (!QFile::exists(name)) {
+            return name;
+        }
     }
-
     return QString();
 }
 
@@ -206,17 +198,14 @@ bool Writer::write(
         qDebug() << __FUNCTION__ << "Error - empty path to file";
         return false;
     }
-
     if (data.isEmpty()) {
         qDebug() << __FUNCTION__ << "Error - empty data";
         return false;
     }
-
     if (false == CheckFile(filePath)) {
         qDebug() << __FUNCTION__ << "Error - wrong file path/name:" << filePath;
         return false;
     }
-
     ContentIterator content(data, separator, textDelimiter, header, footer);
     switch (mode)
     {
@@ -227,7 +216,6 @@ bool Writer::write(
     default:
         return WriterPrivate::overwriteFile(filePath, content, codec);
     }
-
     return false;
 }
 
@@ -258,7 +246,6 @@ bool Writer::write(
         qDebug() << __FUNCTION__ << "Error - empty data";
         return false;
     }
-
     ContentIterator content(data, separator, textDelimiter, header, footer);
     return WriterPrivate::writeToIODevice(ioDevice, content, codec);
 }

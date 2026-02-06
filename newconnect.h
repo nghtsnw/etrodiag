@@ -43,6 +43,7 @@ signals:
 
     void cleanDevListSig();
     void connected();
+    void readFromFile();
     void sendStatusStr(QString);
     void transmitData(QDateTime currentTime, QVector<int> snapshot);
     void badCRC(uint8_t calculatedCRC, QVector<int> snapshot);
