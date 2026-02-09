@@ -4,7 +4,7 @@
 Console::Console(QWidget *parent) :
     QPlainTextEdit(parent)
 {
-    document()->setMaximumBlockCount(100);
+    document()->setMaximumBlockCount(1000);
     QPalette p = palette();
     p.setColor(QPalette::Base, Qt::darkBlue);
     p.setColor(QPalette::Text, Qt::gray);
@@ -13,10 +13,27 @@ Console::Console(QWidget *parent) :
 
 void Console::putData(const QByteArray &data)
 {
-    if (data.size() > 1) insertPlainText((data.toHex(':'))+('\n'));
-    else if (data.size() == 1) insertPlainText((data.toHex())+(':'));
-    QScrollBar *bar = verticalScrollBar();
-    bar->setValue(bar->maximum());
+    if (data.size() > 1) {
+        insertPlainText((data.toHex(':')) + ('\n'));
+    }
+    else if (data.size() == 1) {
+        insertPlainText((data.toHex()) + (':'));
+    }
+    // QScrollBar *bar = verticalScrollBar();
+    // bar->setValue(bar->maximum());
+}
+
+void Console::putIntData(const QVector<uint8_t> data)
+{
+    QString string;
+    for (auto i : data)
+    {
+        string += QString::number(i, 16).toUpper() + ':';
+    }
+    string += '\n';
+    insertPlainText(string);
+    // QScrollBar *bar = verticalScrollBar();
+    // bar->setValue(bar->maximum());
 }
 
 void Console::setLocalEchoEnabled(bool set)
@@ -34,8 +51,9 @@ void Console::keyPressEvent(QKeyEvent *e)
     case Qt::Key_Down:
         break;
     default:
-        if (m_localEchoEnabled)
+        if (m_localEchoEnabled) {
             QPlainTextEdit::keyPressEvent(e);
+        }
     }
 }
 

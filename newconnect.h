@@ -11,6 +11,7 @@
 #include "dataprofiler.h"
 #include "txtmaskobj.h"
 #include "global.h"
+#include <QDateTime>
 
 namespace Ui {
     class newconnect;
@@ -31,7 +32,7 @@ public:
     dataprofiler *datapool = nullptr;
     QList<txtmaskobj*> maskVectorsList;
     void readProfile();
-    //void readFromFile();
+
     QString appHomeDir;
     QDateTime returnTimestamp();
     bool permission2SaveMasks = false;
@@ -43,11 +44,12 @@ signals:
 
     void cleanDevListSig();
     void connected();
-    void readFromFile();
+    //void readFromFile();
+    void readFromFileSignal();
     void sendStatusStr(QString);
     void transmitData(QDateTime currentTime, QVector<int> snapshot);
     void badCRC(uint8_t calculatedCRC, QVector<int> snapshot);
-    void corruptedData(QVector<int> data);
+    // void corruptedData(QVector<int> data);
     void saveAllMasks();
     void loadMask(s_parameterMask mask);
     void loadProtocol(s_protocolDescription); //Загрузка при чтении протокола из файла
@@ -62,6 +64,9 @@ signals:
     void profileName2log(QString);
     void setVisibleControlWindow(bool);
     void s_sendSettings(s_Settings);
+    void setTime(QDateTime);
+    void pushByteToProfiler(uint8_t);
+    void putIntDataToConsole(QVector<uint8_t>);
 
 public slots:
 
@@ -70,6 +75,7 @@ public slots:
     void prepareToSaveProfile();
     void saveProfile();
     void receiveCommandFromGui(QVector<quint8> command, bool newcommandflag);
+    void readFromFile(QMap<QDateTime, QVector<uint8_t >> );
 
 private slots:
     void openSerialPort();
@@ -80,6 +86,7 @@ private slots:
     void on_connectButton_clicked();
     void on_settingsButton_clicked();
     void sendCommand();
+    void readFromFilePortions();
 
 private:
     Ui::newconnect *ui;
@@ -89,7 +96,7 @@ private:
     s_Settings p_local;
     //QByteArray fsba;
     QByteArray arr4byteStream;
-    //QTimer *timer = new QTimer(this);
+    QTimer *timer = new QTimer(this);
     QTimer *timerAboveTxCommand = new QTimer(this);
     /*QList<QByteArray> fileSplitted;
     const int bytesPerOneShot = 20;
@@ -99,6 +106,10 @@ private:
     QVector<quint8> toTransmit;
     quint8 calcCrc(const QVector<quint8> &arr);
     s_protocolDescription protocol;
+
+    QList<QDateTime> timeKeys;
+    QListIterator<QDateTime> *p_timeKeysIterator = nullptr;
+    QMap<QDateTime, QVector<uint8_t> > *p_dataWithTime = nullptr;
 
 protected:
     virtual void resizeEvent(QResizeEvent *event);

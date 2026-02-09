@@ -12,7 +12,7 @@ typedef struct s_protocolDescription
     int markerPacketBeginSize;
     uint8_t markerPacketBeginByte1;
     uint8_t markerPacketBeginByte2;
-    int timeoutAfterLastByte;
+    //int timeoutAfterLastByte;
     QString description;
     bool varControl;
 } s_protocolDescription;

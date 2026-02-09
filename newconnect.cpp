@@ -36,12 +36,14 @@ newconnect::newconnect(QWidget *parent) :
     connect(m_serial, &QSerialPort::readyRead, this, &newconnect::readData);
     connect(m_console, &Console::getData, this, &newconnect::writeData);
     connect(gstream, &getStream::giveMyByte, datapool, &dataprofiler::getByte);
+    connect(this, &newconnect::pushByteToProfiler, datapool, &dataprofiler::getByte);
+    connect(this, &newconnect::setTime, datapool, &dataprofiler::setTime);
     connect(datapool, &dataprofiler::deviceData, this, &newconnect::transmitData);
     connect(datapool, &dataprofiler::deviceData, this, [this]() {
         timerAboveTxCommand->start(1);
     });/*После успешного приёма задержка перед отправкой команды */
     connect(datapool, &dataprofiler::badCRC, this, &newconnect::badCRC);
-    connect(datapool, &dataprofiler::corruptedData, this, &newconnect::corruptedData);
+    //connect(datapool, &dataprofiler::corruptedData, this, &newconnect::corruptedData);
     connect(datapool, &dataprofiler::ready4read, gstream, &getStream::readPermission);
     connect(datapool, &dataprofiler::readNext, gstream, &getStream::readIntByte);
     connect(m_settings, &SettingsDialog::restoreConsoleAndButtons, this, &newconnect::restoreWindowAfterApplySettings);
@@ -72,11 +74,12 @@ newconnect::newconnect(QWidget *parent) :
     connect (this, &newconnect::s_sendSettings, datapool, &dataprofiler::setSettings);
     /*----------------------------------------------------------------------------------------------------------------------------*/
     connect (m_settings, &SettingsDialog::loadSelectedProfile, this, &newconnect::readProfile);
-    //connect (timer, &QTimer::timeout, this, &newconnect::readFromFile);//читаем из файла по таймеру
+    connect (timer, &QTimer::timeout, this, &newconnect::readFromFilePortions);//читаем из файла по таймеру
     connect (timerAboveTxCommand, &QTimer::timeout, this, &newconnect::sendCommand);//отправляем команду после задержки
     connect (this, &newconnect::sendRawData, gstream, &getStream::getRawData);
     connect (this, &newconnect::sendRawData, m_console, &Console::putData);
-    connect (this, &newconnect::sendRawDataWithTime, datapool, &dataprofiler::readFromFile);
+    connect (this, &newconnect::putIntDataToConsole, m_console, &Console::putIntData);
+    connect (this, &newconnect::sendRawDataWithTime, this, &newconnect::readFromFile);
     on_settingsButton_clicked();
 }
 
@@ -99,7 +102,6 @@ void newconnect::on_settingsButton_clicked()
 
 void newconnect::openSerialPort()
 {
-    p_local = m_settings->settings();
     /*if (p_local.readFromFileFlag)
     {
         readProfile();
@@ -162,6 +164,35 @@ void newconnect::openSerialPort()
         on_connectButton_clicked();
     }
 }*/
+
+void newconnect::readFromFile(QMap<QDateTime, QVector<uint8_t> > dataWithTime)
+{ // Подготовка данных
+    p_dataWithTime = &dataWithTime;
+    QList<QDateTime> timeKeys = p_dataWithTime->keys();
+    p_timeKeysIterator = new QListIterator<QDateTime>(timeKeys);
+    readFromFilePortions(); //Запуск процесса чтения из файла
+}
+
+void newconnect::readFromFilePortions()
+{
+    if (p_timeKeysIterator->hasNext()) {
+        //QDateTime time = timeKeysIterator.next();
+        qint64 currentTime = p_timeKeysIterator->next().toMSecsSinceEpoch();
+        qint64 nextTime = p_timeKeysIterator->peekNext().toMSecsSinceEpoch();
+        qint64 betweenTime = nextTime - currentTime;
+        QVector<uint8_t> data = p_dataWithTime->value(QDateTime::fromMSecsSinceEpoch(currentTime)) /; // Тут сыпется
+        emit setTime(QDateTime::fromMSecsSinceEpoch(currentTime));
+        emit putIntDataToConsole(data);
+        for (const uint8_t byte : data) {
+            emit pushByteToProfiler(byte);
+        }
+        timer->start(betweenTime);
+    }
+    else {
+        timer->stop();
+        showStatusMessage(tr("End of file"));
+    }
+}
 
 void newconnect::closeSerialPort()
 {
@@ -237,6 +268,7 @@ void newconnect::showStatusMessage(QString message)
 
 void newconnect::on_connectButton_clicked()
 {
+    p_local = m_settings->settings();
     if (!p_local.readFromFileFlag)
     {
         if (m_serial->isOpen())
@@ -261,8 +293,8 @@ void newconnect::on_connectButton_clicked()
         }
     }
     else {
-        emit readFromFile();
         showStatusMessage(tr("Read data log from file..."));
+        emit readFromFileSignal();
     }
 }
 
@@ -346,7 +378,7 @@ void newconnect::saveProfile()
         txtStream << "markerPacketBeginSize" << "\t" << QString::number(protocol.markerPacketBeginSize, 10) << "\n";
         txtStream << "markerPacketBeginTextB1" << "\t" << QString::number(protocol.markerPacketBeginByte1, 16) << "\n";
         txtStream << "markerPacketBeginTextB2" << "\t" << QString::number(protocol.markerPacketBeginByte2, 16) << "\n";
-        txtStream << "timeoutAfterLastByte" << "\t" << QString::number(protocol.timeoutAfterLastByte, 10) << "\n";
+        //txtStream << "timeoutAfterLastByte" << "\t" << QString::number(protocol.timeoutAfterLastByte, 10) << "\n";
         txtStream << "description" << "\t" << protocol.description << "\n";
         txtStream << "varControl" << "\t" << (protocol.varControl ? "true" : "false") << "\n";
         while (maskVectorsListIt.hasNext())
@@ -413,9 +445,9 @@ void newconnect::readProfile()
         if (strLst.at(0) == "markerPacketBeginTextB2") {
             pt.markerPacketBeginByte2 = (strLst.at(1).toInt(0, 16));
         }
-        if (strLst.at(0) == "timeoutAfterLastByte") {
-            pt.timeoutAfterLastByte = (strLst.at(1).toInt(0, 10));
-        }
+        // if (strLst.at(0) == "timeoutAfterLastByte") {
+        // pt.timeoutAfterLastByte = (strLst.at(1).toInt(0, 10));
+        // }
         if (strLst.at(0) == "description") {
             pt.description = strLst.at(1);
         }

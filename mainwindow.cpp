@@ -71,8 +71,8 @@ void MainWindow::addConnection()
     connect (connection, &newconnect::writeBinLog, logger, &Logger::setBin);
     connect (connection, &newconnect::connected, &graphiq, &liveGraph::cleanGraph);
     connect (connection, &newconnect::connected, &graphiq, &liveGraph::startOscillator);
-    connect (connection, &newconnect::readFromFile, &graphiq, &liveGraph::cleanGraph);
-    connect (connection, &newconnect::readFromFile, logger, &Logger::binReadFromCsv);
+    connect (connection, &newconnect::readFromFileSignal, &graphiq, &liveGraph::cleanGraph);
+    connect (connection, &newconnect::readFromFileSignal, logger, &Logger::binReadFromCsv);
     connect (connection, &newconnect::disconnected, &graphiq, &liveGraph::stopOscillator);
     connect (this, &MainWindow::prepareToSaveProfile, connection, &newconnect::prepareToSaveProfile);
     connect (this, &MainWindow::saveProfile, connection, &newconnect::saveProfile);
@@ -81,7 +81,7 @@ void MainWindow::addConnection()
     connect (connection, &newconnect::disconnected, logger, &Logger::stopLog);
     connect (connection, &newconnect::profileName2log, logger, &Logger::setProfileName);
     connect (connection, &newconnect::badCRC, this, &MainWindow::badCRCEvent);
-    connect (connection, &newconnect::corruptedData, this, &MainWindow::corruptedDataEvent);
+    //connect (connection, &newconnect::corruptedData, this, &MainWindow::corruptedDataEvent);
     connect(this, &MainWindow::emitCommand, connection, &newconnect::receiveCommandFromGui);
     connection->show();
 }
@@ -467,22 +467,22 @@ void MainWindow::badCRCEvent(uint8_t calculatedCRC, QVector<int> dataFrame)
     crcerrorlbl->setText(tr("CRC Errors: ") + QString::number(CRCErrorCount));
 }
 
-void MainWindow::corruptedDataEvent(QVector<int> data)
-{
-    QString str, chr;
-    for (int i = 0; i < data.size(); ++i)
-    {
-        if (i > 0) {
-            str += ":";
-        }
-        chr = QString::number(data[i], 16).toUpper();
-        if (chr.size() == 1) {
-            chr = '0' + chr;
-        }
-        str += chr;
-    }
-    textLogWindow(QDateTime::currentDateTime(), tr("Corrupted data: ") + str, true);
-}
+// void MainWindow::corruptedDataEvent(QVector<int> data)
+// {
+// QString str, chr;
+// for (int i = 0; i < data.size(); ++i)
+// {
+// if (i > 0) {
+// str += ":";
+// }
+// chr = QString::number(data[i], 16).toUpper();
+// if (chr.size() == 1) {
+// chr = '0' + chr;
+// }
+// str += chr;
+// }
+// textLogWindow(QDateTime::currentDateTime(), tr("Corrupted data: ") + str, true);
+// }
 
 void MainWindow::guiCommandHandler(int varNumber, bool action)
 {

@@ -12,6 +12,7 @@ signals:
 
 public slots:
     void putData(const QByteArray &data);
+    void putIntData (const QVector<uint8_t>);
 
 public:
     explicit Console(QWidget *parent = nullptr);

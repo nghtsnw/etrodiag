@@ -39,7 +39,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
         m_ui->BlockIdentifycatorPositionSpinBox->setValue(p.blockIdentifycatorPosition);
         m_ui->calcCRCFromSpinBox->setValue(p.calcCRCFromPosition);
         m_ui->markerSizeSpinBox->setValue(p.markerPacketBeginSize);
-        m_ui->timeoutSpinBox->setValue(p.timeoutAfterLastByte);
+        //m_ui->timeoutSpinBox->setValue(p.timeoutAfterLastByte);
         m_ui->b1MarkerLineEdit->setText(QString::number(p.markerPacketBeginByte1, 16).toUpper());
         m_ui->b2MarkerLineEdit->setText(QString::number(p.markerPacketBeginByte2, 16).toUpper());
         m_ui->descriptionTextEdit->setText(p.description);
@@ -273,7 +273,7 @@ void SettingsDialog::updateProtocol()
     currentProtocol.markerPacketBeginSize = m_ui->markerSizeSpinBox->value();
     currentProtocol.markerPacketBeginByte1 = QString(m_ui->b1MarkerLineEdit->text()).toInt(0, 16);
     currentProtocol.markerPacketBeginByte2 = QString(m_ui->b2MarkerLineEdit->text()).toInt(0, 16);
-    currentProtocol.timeoutAfterLastByte = m_ui->timeoutSpinBox->value();
+    //currentProtocol.timeoutAfterLastByte = m_ui->timeoutSpinBox->value();
     currentProtocol.description = m_ui->descriptionTextEdit->toPlainText();
     currentProtocol.varControl = m_ui->varConrolCheckBox->checkState() ? true : false;
 }
@@ -313,7 +313,7 @@ void SettingsDialog::on_profileSelectBox_currentTextChanged(const QString & arg1
         m_currentSettings.profilePath = selectedProfile;
         m_ui->packetSizeSpinBox->clear();
         m_ui->markerSizeSpinBox->clear();
-        m_ui->timeoutSpinBox->clear();
+        //m_ui->timeoutSpinBox->clear();
         m_ui->BlockIdentifycatorPositionSpinBox->clear();
         m_ui->calcCRCFromSpinBox->clear();
         m_ui->b1MarkerLineEdit->clear();

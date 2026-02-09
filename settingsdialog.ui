@@ -131,80 +131,6 @@
          <string>Protocol setup</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_6">
-         <item row="4" column="2">
-          <widget class="QLineEdit" name="b2MarkerLineEdit">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>40</width>
-             <height>16777215</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="0">
-          <widget class="QLabel" name="varControlLabel">
-           <property name="text">
-            <string>Variables control:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1" colspan="2">
-          <widget class="QSpinBox" name="markerSizeSpinBox">
-           <property name="maximum">
-            <number>2</number>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="1" colspan="2">
-          <widget class="QCheckBox" name="varConrolCheckBox">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1" colspan="2">
-          <widget class="QSpinBox" name="calcCRCFromSpinBox"/>
-         </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="packerSizeLabel">
-           <property name="text">
-            <string>Packet size:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="0">
-          <widget class="QLabel" name="timeoutLabel">
-           <property name="text">
-            <string>Min pause between packets, byte:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="calcCRCFromLabel">
-           <property name="text">
-            <string>Calc CRC from position:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="1" colspan="2">
-          <widget class="QSpinBox" name="timeoutSpinBox"/>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="markerSizeLabel">
-           <property name="text">
-            <string>Marker of begin - size:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1" colspan="2">
-          <widget class="QSpinBox" name="packetSizeSpinBox"/>
-         </item>
          <item row="4" column="1">
           <widget class="QLineEdit" name="b1MarkerLineEdit">
            <property name="sizePolicy">
@@ -228,15 +154,79 @@
            </property>
           </widget>
          </item>
+         <item row="3" column="1" colspan="2">
+          <widget class="QSpinBox" name="markerSizeSpinBox">
+           <property name="maximum">
+            <number>2</number>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1" colspan="2">
+          <widget class="QSpinBox" name="BlockIdentifycatorPositionSpinBox"/>
+         </item>
+         <item row="0" column="1" colspan="2">
+          <widget class="QSpinBox" name="packetSizeSpinBox"/>
+         </item>
+         <item row="5" column="1" colspan="2">
+          <widget class="QCheckBox" name="varConrolCheckBox">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="calcCRCFromLabel">
+           <property name="text">
+            <string>Calc CRC from position:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1" colspan="2">
+          <widget class="QSpinBox" name="calcCRCFromSpinBox"/>
+         </item>
+         <item row="5" column="0">
+          <widget class="QLabel" name="varControlLabel">
+           <property name="text">
+            <string>Variables control:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="packerSizeLabel">
+           <property name="text">
+            <string>Packet size:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="markerSizeLabel">
+           <property name="text">
+            <string>Marker of begin - size:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="2">
+          <widget class="QLineEdit" name="b2MarkerLineEdit">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>40</width>
+             <height>16777215</height>
+            </size>
+           </property>
+          </widget>
+         </item>
          <item row="1" column="0">
           <widget class="QLabel" name="blockIdentifycatorPositionLabel">
            <property name="text">
             <string>Block identifycator position:</string>
            </property>
           </widget>
-         </item>
-         <item row="1" column="1" colspan="2">
-          <widget class="QSpinBox" name="BlockIdentifycatorPositionSpinBox"/>
          </item>
         </layout>
        </widget>

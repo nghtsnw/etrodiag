@@ -84,7 +84,7 @@ public slots:
     void frontendDataSort(QDateTime currentTime, s_parameterMask mask);
     void devStatusMsg(QString _devName, QString status);
     void badCRCEvent(uint8_t calculatedCRC, QVector<int> dataFrame);
-    void corruptedDataEvent(QVector<int> data);
+    //void corruptedDataEvent(QVector<int> data);
 
 private slots:
 
