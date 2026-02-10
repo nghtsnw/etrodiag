@@ -51,17 +51,21 @@ void dataprofiler::getByte(int byteFromBuf)
                 break;
             }
         }
-        if ((frameMsg.size() == protocol.packetSize) && marker) //Когда набрался весь пакет
+        if ((frameMsg.size() == protocol.packetSize)) //Когда набрался весь пакет
         {
-            if (checkCRC()) {
-                if (!settings.readFromFileFlag) {
-                    currentTime = QDateTime::currentDateTime();
+            if (marker) {
+                if (checkCRC()) {
+                    if (!settings.readFromFileFlag) {
+                        currentTime = QDateTime::currentDateTime();
+                    }
+                    emit deviceData(currentTime, frameMsg.toVector()); //Если пакет сформирован, отправляем пакет в гуй и обнуляем буффер
+                    frameMsg.clear();
                 }
-                emit deviceData(currentTime, frameMsg.toVector()); //Если пакет сформирован, отправляем пакет в гуй и обнуляем буффер
-                frameMsg.clear();
+                else {
+                    emit badCRC(calculatedCRC, frameMsg.toVector());
+                }
             }
-            else {
-                emit badCRC(calculatedCRC, frameMsg.toVector()); //Если контрольная сумма не сошлась
+            if (!frameMsg.empty()) {
                 frameMsg.dequeue(); // Выкидываем байт каждый раз, пока не сойдётся контрольная сумма
             }
         }

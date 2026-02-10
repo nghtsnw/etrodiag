@@ -167,8 +167,8 @@ void newconnect::openSerialPort()
 
 void newconnect::readFromFile(QMap<QDateTime, QVector<uint8_t> > dataWithTime)
 { // Подготовка данных
-    p_dataWithTime = &dataWithTime;
-    QList<QDateTime> timeKeys = p_dataWithTime->keys();
+    p_dataWithTime = dataWithTime; //p_dataWithTime = &dataWithTime;
+    QList<QDateTime> timeKeys = p_dataWithTime.keys();
     p_timeKeysIterator = new QListIterator<QDateTime>(timeKeys);
     readFromFilePortions(); //Запуск процесса чтения из файла
 }
@@ -180,7 +180,7 @@ void newconnect::readFromFilePortions()
         qint64 currentTime = p_timeKeysIterator->next().toMSecsSinceEpoch();
         qint64 nextTime = p_timeKeysIterator->peekNext().toMSecsSinceEpoch();
         qint64 betweenTime = nextTime - currentTime;
-        QVector<uint8_t> data = p_dataWithTime->value(QDateTime::fromMSecsSinceEpoch(currentTime)) /; // Тут сыпется
+        QVector<uint8_t> data = p_dataWithTime.value(QDateTime::fromMSecsSinceEpoch(currentTime));
         emit setTime(QDateTime::fromMSecsSinceEpoch(currentTime));
         emit putIntDataToConsole(data);
         for (const uint8_t byte : data) {

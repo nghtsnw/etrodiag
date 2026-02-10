@@ -109,7 +109,7 @@ private:
 
     QList<QDateTime> timeKeys;
     QListIterator<QDateTime> *p_timeKeysIterator = nullptr;
-    QMap<QDateTime, QVector<uint8_t> > *p_dataWithTime = nullptr;
+    QMap<QDateTime, QVector<uint8_t> > p_dataWithTime;
 
 protected:
     virtual void resizeEvent(QResizeEvent *event);

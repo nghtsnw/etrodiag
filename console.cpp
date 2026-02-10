@@ -19,8 +19,8 @@ void Console::putData(const QByteArray &data)
     else if (data.size() == 1) {
         insertPlainText((data.toHex()) + (':'));
     }
-    // QScrollBar *bar = verticalScrollBar();
-    // bar->setValue(bar->maximum());
+    QScrollBar *bar = verticalScrollBar();
+    bar->setValue(bar->maximum());
 }
 
 void Console::putIntData(const QVector<uint8_t> data)
@@ -28,12 +28,15 @@ void Console::putIntData(const QVector<uint8_t> data)
     QString string;
     for (auto i : data)
     {
+        if (i < 0x10) {
+            string += '0';
+        }
         string += QString::number(i, 16).toUpper() + ':';
     }
     string += '\n';
     insertPlainText(string);
-    // QScrollBar *bar = verticalScrollBar();
-    // bar->setValue(bar->maximum());
+    QScrollBar *bar = verticalScrollBar();
+    bar->setValue(bar->maximum());
 }
 
 void Console::setLocalEchoEnabled(bool set)
