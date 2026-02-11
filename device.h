@@ -53,6 +53,7 @@ signals:
     void devParamsToJson(QVariantMap);
     void requestMaskCounting();
 
+
 public slots:
     void updateData(QDateTime currentTime, int id, QVector<int> devdata);
     void setDeviceName(int id, QString name);
@@ -63,6 +64,7 @@ public slots:
     void setOfflineStatus();
     void jsonMap(s_parameterMask mask);
     void returnMaskCounting(int devNum, int byteNum, int count);
+    void setProtocol(s_protocolDescription);
 
 private:
     QString devStatus = "init";
@@ -76,6 +78,7 @@ private:
     int countMasks();
     QMap<int, int> maskCountMap;
     int calcMasksInDev();
+    s_protocolDescription protocol;
 };
 
 #endif // DEVICE_H

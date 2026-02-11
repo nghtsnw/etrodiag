@@ -48,6 +48,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect (&cBoard, &ControlBoard::controlCommand, this, &MainWindow::guiCommandHandler);
     connect (connection, &newconnect::setVisibleControlWindow, &cBoard, &ControlBoard::setVisible);
     connect (connection, &newconnect::s_sendSettings, logger, &Logger::setSettings);
+    connect (connection, &newconnect::setProtocol, this, [ = ](s_protocolDescription p) {
+        protocol = p;
+    });
     connect (this, &MainWindow::emitCommand, connection, &newconnect::receiveCommandFromGui);
     m_ui->tabWidget->setCurrentIndex(0);
     m_ui->tab_connections->show();
@@ -94,7 +97,7 @@ void MainWindow::showStatusMessage(QString message)
 
 void MainWindow::addDeviceToList(QDateTime currentTime, QVector<int> ddata)
 {
-    devNum = ddata.at(2);//узнаём номер устройства в посылке
+    devNum = ddata.at(protocol.blockIdentifycatorPosition);//узнаём номер устройства в посылке
     thisDeviceHere = false; //обнуляем флаг
     vlayChildList = m_ui->devArea->findChildren<Device*>();
     QListIterator<Device*> vlayChildListIt(vlayChildList); //смотрим сколько в гуе отображается устройств, создаём перечислитель
@@ -122,6 +125,7 @@ void MainWindow::createDevice(int devNum)
     Device *dev = new Device(devNum);
     dev->setParent(m_ui->devArea);
     m_ui->devAreaLay->addWidget(dev);
+    dev->setProtocol(protocol);
     dev->setText(QString::number(devNum, 16));
     connect (this, &MainWindow::devUpdate, dev, &Device::updateData);
     connect (dev, &Device::openDevSettSig, this, &MainWindow::openDevSett);
@@ -403,7 +407,7 @@ void MainWindow::loadProfile(s_parameterMask mask)
     else if (!thisDeviceHere)
     { //создаём устройство и инициализируем пустым пакетом в oneMsgLeight байт, с номером устройства на позиции 2
         createDevice(mask.devNum);
-        QVector<int> devInitArray(oneMsgLeight, 0);
+        QVector<int> devInitArray(protocol.packetSize, 0);
         devInitArray.replace(2, mask.devNum);
         emit devUpdate(QDateTime::currentDateTime(), mask.devNum, devInitArray);
         devSettForm.updByteButtons(mask.devNum, devInitArray);

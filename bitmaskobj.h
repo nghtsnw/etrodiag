@@ -11,7 +11,8 @@ public:
     bitMaskObj();
     ~bitMaskObj();
     s_parameterMask currentMask;
-    //void newMaskObj(s_parameterMask mask);
+    s_parameterMask oldMask;
+    void newMaskObj(s_parameterMask mask);
     QString paramMaskNew;
     int paramMask4calcShift = 0;
     void calculateParamShift();

@@ -21,20 +21,21 @@ bitMaskObj::~bitMaskObj()
 {
 }
 
-/*void bitMaskObj::newMaskObj(s_parameterMask mask)
+void bitMaskObj::newMaskObj(s_parameterMask mask)
 {
     currentMask.id = mask.id;
     currentMask.devNum = mask.devNum;
     currentMask.byteNum = mask.byteNum;
-    emit mask2byteSettingsForm(mask);
+    //emit mask2byteSettingsForm(mask);
     //после создания новой маски сразу посылаем сигнал на открытие формы masksettingsdialog, сообщая ей параметры маски которую нужно редактировать
-}*/
+}
 
 
 void bitMaskObj::sendMaskToProfile(s_parameterMask mask)
 { //забор данных из формы masksettingsdialog и отправка в профиль bitmaskobj
     if (mask.devNum == currentMask.devNum && mask.byteNum == currentMask.byteNum && mask.id == currentMask.id)
     {
+        oldMask = currentMask;
         currentMask = mask;
         recalcMask();
         calculateParamShift();
@@ -81,10 +82,10 @@ void bitMaskObj::calculateParamShift()
     }
     int n = 0;
     bool stopFlag = false;
-    if (currentMask.parameterMask != paramMaskNew)
+    if (currentMask.parameterMask != oldMask.parameterMask)
     { //если маска изменилась - заново её вычисляем
         recalcMask();
-        currentMask.parameterMask = paramMaskNew;
+        //currentMask.parameterMask = oldMask.parameterMask;
     }
     paramMask4calcShift = currentMask.parameterMask.toInt(0, 10);
     while(!stopFlag)
@@ -139,10 +140,10 @@ void bitMaskObj::calculateValue(int _devNum, int _byteNum, uint32_t wordData)
 {
     if (currentMask.devNum == _devNum && currentMask.byteNum == _byteNum)
     {
-        if (currentMask.parameterMask != paramMaskNew)
+        if (currentMask.parameterMask != oldMask.parameterMask)
         { //если маска изменилась - заново её вычисляем
             recalcMask();
-            currentMask.parameterMask = paramMaskNew;
+            currentMask.parameterMask = oldMask.parameterMask;
         }
         uint32_t value = (wordData & paramMaskInt);
         value = value >> currentMask.parameterShift; //сдвигаем нужные нам биты к началу
@@ -155,17 +156,18 @@ void bitMaskObj::calculateValue(int _devNum, int _byteNum, uint32_t wordData)
             isNewData = true;
         }
         //if (endValue != oldEndValue || oldEndValue == 1234.56)
-        emit param2FrontEnd(currentMask);
         oldEndValue = endValue;
+        currentMask.endValue = endValue;
+        emit param2FrontEnd(currentMask);
     }
 }
 
 void bitMaskObj::recalcMask()
 {
     paramMaskInt = 0;
-    for (int i = paramMaskNew.size() - 1, y = 0; i > -1; i--, y++) //переводим маску из строки нулей и единиц в число int
+    for (int i = currentMask.parameterMask.size() - 1, y = 0; i > -1; i--, y++) //переводим маску из строки нулей и единиц в число int
     {
-        if (paramMaskNew.at(i) == '1') {
+        if (currentMask.parameterMask.at(i) == '1') {
             paramMaskInt += pow(2, y);
         }
     }

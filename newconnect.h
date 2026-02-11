@@ -53,6 +53,7 @@ signals:
     void saveAllMasks();
     void loadMask(s_parameterMask mask);
     void loadProtocol(s_protocolDescription); //Загрузка при чтении протокола из файла
+    void setProtocol(s_protocolDescription);
     void writeTextLog(bool);
     void writeJsonLog(bool);
     void writeBinLog(bool);

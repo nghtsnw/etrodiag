@@ -60,6 +60,7 @@ newconnect::newconnect(QWidget *parent) :
     /*----------------------------------------------------------------------------------------------------------------------------*/
     //По применению настроек в UI, они сразу применяются на датаразборке, копия в newconnect для сохранения профиля
     connect (m_settings, &SettingsDialog::setProtocol, datapool, &dataprofiler::setProtocol);
+    connect (m_settings, &SettingsDialog::setProtocol, this, &newconnect::setProtocol);
     connect (m_settings, &SettingsDialog::setProtocol, this, [this](s_protocolDescription p) {
         protocol = p;
         if (m_settings->settings().readFromFileFlag) {

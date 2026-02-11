@@ -83,7 +83,7 @@ void byteDefinition::createNewMask(int _devNum, int _byteNum)
         connect (this, &byteDefinition::deleteMaskObjTX, mask, &bitMaskObj::deleteMaskObjectTX);
         connect (mask, &bitMaskObj::param2FrontEnd, this, &byteDefinition::param2FrontEndTX);
         connect (this, &byteDefinition::loadMaskTX, mask, &bitMaskObj::loadMaskRX);
-        //mask->newMaskObj(mask->currentMask);
+        mask->newMaskObj(mask->currentMask);
         emit mask2FormTX(mask->currentMask.devNum, mask->currentMask.byteNum, mask->currentMask.id);//mask2FormRX(mask->currentMask);
     }
 }

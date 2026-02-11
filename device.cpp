@@ -35,7 +35,7 @@ void Device::updateData(QDateTime currTime, int id, QVector<int> devdata) //ес
         }
         if (devStatus == "init")
         {
-            setDeviceName(id, QString("%1").arg(devdata.at(2), 0, 16).toUpper());
+            setDeviceName(id, QString("%1").arg(devdata.at(protocol.blockIdentifycatorPosition), 0, 16).toUpper());
             devStatus = tr("offline");
         }
         changeButtonColor(devStatus);
@@ -64,6 +64,7 @@ void Device::byteObjectsInit(QVector<int> &data) //инициализируем 
         connect (this, &Device::sendDataToProfileTX, bytedef, &byteDefinition::sendDataToProfileRX);
         connect (this, &Device::deleteMaskObjTX, bytedef, &byteDefinition::deleteMaskObjTX);
         connect (bytedef, &byteDefinition::param2FrontEndTX, this, [ = ](s_parameterMask mask) {
+            mask.devName = devName;
             emit param2FrontEndTX(currentTime, mask);
         });
         connect (this, &Device::loadMaskTX, bytedef, &byteDefinition::loadMaskRX);
@@ -85,6 +86,11 @@ void Device::getDeviceName(int id)
     if (id == devNum) {
         emit returnDeviceName(devNum, devName);
     }
+}
+
+void Device::setProtocol(s_protocolDescription p)
+{
+    protocol = p;
 }
 
 void Device::setDeviceName(int id, QString name)

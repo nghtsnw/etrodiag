@@ -107,7 +107,7 @@ private:
     QString namesUnited;
     QTableWidget *valueTable = nullptr;
     QString tmp;
-    const int oneMsgLeight = 18; //41 //18 для брнг опытная
+    s_protocolDescription protocol;
 private:
     AboutDialog aboutDialog;
     QLabel *m_status = nullptr;

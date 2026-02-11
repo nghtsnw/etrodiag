@@ -142,7 +142,7 @@ void liveGraph::incomingDataSlot(QDateTime currentTime, s_parameterMask data)
     }
     if (data.drawGraphFlag)
     {
-        if (graphAnnotationMinMax.value(data.parameterName).at(0) > data.endValue)
+        if (graphAnnotationMinMax.value(data.parameterName).at(0) > data.endValue) //Тут сыпется при попытке рисования
         {
             QVector<double> minMax = {data.endValue, graphAnnotationMinMax.value(data.parameterName).at(1)};
             graphAnnotationMinMax.insert(data.parameterName, minMax);
@@ -268,9 +268,9 @@ QMap<QDateTime, double> liveGraph::pointsForTimeFrames(QMap<QDateTime, double>& 
     do {
         splittedForFramesKeys.push_back(keysForPointsIt.previous());
     }
-    while (keysForPointsIt.peekPrevious() >= firstPointForDraw);
-    //По собранным ключам добавляются значения из большого массива
-    QMap<QDateTime, double> splittedPoints;
+    while (keysForPointsIt.peekPrevious() >= firstPointForDraw) //Тут сыпется //;
+        //По собранным ключам добавляются значения из большого массива
+        QMap<QDateTime, double> splittedPoints;
     for (auto key : keysForPoints) {
         splittedPoints.insert(key, points.value(key));
     }
