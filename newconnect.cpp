@@ -54,7 +54,7 @@ newconnect::newconnect(QWidget *parent) :
     /*----------------------------------------------------------------------------------------------------------------------------*/
     //При загрузке данных из профиля, они отправляются в окно настроек в UI
     connect (this, &newconnect::loadProtocol, m_settings, &SettingsDialog::loadProtocol);
-    //При загрузке данных из профиля, они сразу применяются на датаразборке
+    connect (this, &newconnect::loadProtocol, this, &newconnect::setProtocol);
     connect (this, &newconnect::loadProtocol, datapool, &dataprofiler::setProtocol);
     /*----------------------------------------------------------------------------------------------------------------------------*/
     /*----------------------------------------------------------------------------------------------------------------------------*/
@@ -379,7 +379,6 @@ void newconnect::saveProfile()
         txtStream << "markerPacketBeginSize" << "\t" << QString::number(protocol.markerPacketBeginSize, 10) << "\n";
         txtStream << "markerPacketBeginTextB1" << "\t" << QString::number(protocol.markerPacketBeginByte1, 16) << "\n";
         txtStream << "markerPacketBeginTextB2" << "\t" << QString::number(protocol.markerPacketBeginByte2, 16) << "\n";
-        //txtStream << "timeoutAfterLastByte" << "\t" << QString::number(protocol.timeoutAfterLastByte, 10) << "\n";
         txtStream << "description" << "\t" << protocol.description << "\n";
         txtStream << "varControl" << "\t" << (protocol.varControl ? "true" : "false") << "\n";
         while (maskVectorsListIt.hasNext())
@@ -407,27 +406,11 @@ void newconnect::readProfile()
     emit profileName2log(currentProfileName);
     profile.open(QIODevice::ReadOnly | QIODevice::Text);
     QTextStream txtStream(&profile);
+    QStringList maskList;
     while (!txtStream.atEnd())
     {
         QString str = txtStream.readLine();
         QStringList strLst = str.split('\t');
-        if (strLst.at(0) == "thisIsMask") {
-            s_parameterMask mask;
-            mask.id = strLst.at(1).toInt(0, 10);
-            mask.devNum = strLst.at(2).toInt(0, 10);
-            mask.byteNum = strLst.at(3).toInt(0, 10);
-            mask.devName = strLst.at(4);
-            mask.byteName = strLst.at(5);
-            mask.parameterName = strLst.at(6);
-            mask.parameterMask = strLst.at(7);
-            mask.valueShift = strLst.at(8).toDouble();
-            mask.valueKoef = strLst.at(9).toDouble();
-            mask.viewInLogFlag = ((QString::compare(strLst.at(10), "true") == 0) ? true : false);
-            mask.wordType = strLst.at(11).toInt(0, 10);
-            mask.drawGraphFlag = ((QString::compare(strLst.at(12), "true") == 0) ? true : false);
-            mask.drawGraphColor = strLst.at(13);
-            emit loadMask(mask);
-        }
         if (strLst.at(0) == "packetSize") {
             pt.packetSize = (strLst.at(1).toInt(0, 10));
         }
@@ -446,18 +429,41 @@ void newconnect::readProfile()
         if (strLst.at(0) == "markerPacketBeginTextB2") {
             pt.markerPacketBeginByte2 = (strLst.at(1).toInt(0, 16));
         }
-        // if (strLst.at(0) == "timeoutAfterLastByte") {
-        // pt.timeoutAfterLastByte = (strLst.at(1).toInt(0, 10));
-        // }
         if (strLst.at(0) == "description") {
             pt.description = strLst.at(1);
         }
         if (strLst.at(0) == "varControl") {
             pt.varControl = (strLst.at(1) == "true") ? true : false;
         }
+        if (strLst.at(0) == "thisIsMask") {
+            maskList.append(str);
+        }
         strLst.clear();
     }
     emit loadProtocol(pt);
+    // Два раза читаю файл, потому что сначала нужно применить протокол, только потом читать маски
+    for (QString m : maskList)
+    {
+        QStringList strLst = m.split('\t');
+        if (strLst.at(0) == "thisIsMask") {
+            s_parameterMask mask;
+            mask.id = strLst.at(1).toInt(0, 10);
+            mask.devNum = strLst.at(2).toInt(0, 10);
+            mask.byteNum = strLst.at(3).toInt(0, 10);
+            mask.devName = strLst.at(4);
+            mask.byteName = strLst.at(5);
+            mask.parameterName = strLst.at(6);
+            mask.parameterMask = strLst.at(7);
+            mask.valueShift = strLst.at(8).toDouble();
+            mask.valueKoef = strLst.at(9).toDouble();
+            mask.viewInLogFlag = ((QString::compare(strLst.at(10), "true") == 0) ? true : false);
+            mask.wordType = strLst.at(11).toInt(0, 10);
+            mask.drawGraphFlag = ((QString::compare(strLst.at(12), "true") == 0) ? true : false);
+            mask.drawGraphColor = strLst.at(13);
+            emit loadMask(mask);
+        }
+        strLst.clear();
+    }
 }
 
 void newconnect::resizeEvent(QResizeEvent *event)

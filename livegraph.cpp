@@ -130,7 +130,7 @@ void liveGraph::incomingDataSlot(QDateTime currentTime, s_parameterMask data)
         newgraph *graph = new newgraph(this);
         connect (this, &liveGraph::repaintCurves, graph, &newgraph::repaintThis);
         connect (graph, &newgraph::graph2Painter, this, [ = ](QMap<QDateTime, double> points, QString color) {
-            paintCurve(points, calculatedEndTime, color);
+            paintCurve(points, calculatedEndTime, color)//; //Подаётся невалидное время
         });
         connect (this, &liveGraph::data2graph, graph, &newgraph::dataPool);
         graph->devNum = data.devNum;
@@ -268,9 +268,9 @@ QMap<QDateTime, double> liveGraph::pointsForTimeFrames(QMap<QDateTime, double>& 
     do {
         splittedForFramesKeys.push_back(keysForPointsIt.previous());
     }
-    while (keysForPointsIt.peekPrevious() >= firstPointForDraw) //Тут сыпется //;
-        //По собранным ключам добавляются значения из большого массива
-        QMap<QDateTime, double> splittedPoints;
+    while (keysForPointsIt.peekPrevious() >= firstPointForDraw); // Тут сыпется
+    //По собранным ключам добавляются значения из большого массива
+    QMap<QDateTime, double> splittedPoints;
     for (auto key : keysForPoints) {
         splittedPoints.insert(key, points.value(key));
     }

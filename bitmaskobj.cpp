@@ -143,7 +143,7 @@ void bitMaskObj::calculateValue(int _devNum, int _byteNum, uint32_t wordData)
         if (currentMask.parameterMask != oldMask.parameterMask)
         { //если маска изменилась - заново её вычисляем
             recalcMask();
-            currentMask.parameterMask = oldMask.parameterMask;
+            //currentMask.parameterMask = oldMask.parameterMask;
         }
         uint32_t value = (wordData & paramMaskInt);
         value = value >> currentMask.parameterShift; //сдвигаем нужные нам биты к началу

@@ -405,10 +405,10 @@ void MainWindow::loadProfile(s_parameterMask mask)
         emit sendMaskData(mask);
     }
     else if (!thisDeviceHere)
-    { //создаём устройство и инициализируем пустым пакетом в oneMsgLeight байт, с номером устройства на позиции 2
+    { //создаём устройство и инициализируем пустым пакетом в oneMsgLeight байт
         createDevice(mask.devNum);
         QVector<int> devInitArray(protocol.packetSize, 0);
-        devInitArray.replace(2, mask.devNum);
+        devInitArray.replace(protocol.blockIdentifycatorPosition, mask.devNum);
         emit devUpdate(QDateTime::currentDateTime(), mask.devNum, devInitArray);
         devSettForm.updByteButtons(mask.devNum, devInitArray);
         emit sendMaskData(mask);
