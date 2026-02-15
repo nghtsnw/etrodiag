@@ -130,8 +130,11 @@ void liveGraph::incomingDataSlot(QDateTime currentTime, s_parameterMask data)
         newgraph *graph = new newgraph(this);
         connect (this, &liveGraph::repaintCurves, graph, &newgraph::repaintThis);
         connect (graph, &newgraph::graph2Painter, this, [ = ](QMap<QDateTime, double> points, QString color) {
-            paintCurve(points, calculatedEndTime, color)//; //Подаётся невалидное время
-        });
+            paintCurve(points, calculatedEndTime, color); //Подаётся невалидное время
+        }); //calculatedEndTime либо реальное время - и до него ищется ближайшая временная метка в графике
+        //либо вычисленное по положению слайдера, и так же ищется ближайшая метка в графике
+        //graph2Painter отдаёт указатель на весь массив графика, и цвет рисования
+        //на paintCurve нужно выдать уже время конца, к котрому привязывается график
         connect (this, &liveGraph::data2graph, graph, &newgraph::dataPool);
         graph->devNum = data.devNum;
         graph->byteNum = data.byteNum;
