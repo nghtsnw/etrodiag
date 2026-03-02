@@ -12,8 +12,21 @@ liveGraph::liveGraph(QWidget *parent) :
     ui->setupUi(this);
     connect (timer, &QTimer::timeout, this, &liveGraph::shiftCells);
     connect (timer, &QTimer::timeout, this, [ = ]() {
-        betweenTime = beginTime.msecsTo(realTime);
-        realTime = QDateTime::currentDateTime(); //В режиме чтения из лога отключить / переделать
+        if (!readFromFile) {
+            realTime = QDateTime::currentDateTime(); //При чтении в реальном времени
+        }
+        else
+        {
+            realTime = QDateTime::fromMSecsSinceEpoch(beginTime->toMSecsSinceEpoch() + (startTime.toMSecsSinceEpoch() - QDateTime::currentDateTime().toMSecsSinceEpoch()));
+        }
+        betweenTime = beginTime->msecsTo(realTime);
+        /*
+         realTime - "реальное" время для текущего режима работы. Если читаем данные с порта, то подставляем системное время на момент чтения.
+            Если читаем из файла, то высчитываем "реальное" время, беря за ноль первую временную метку из файла, прибавляя к ней время от начала чтения.
+         startTime - системное время на начало чтения из файла.
+         betweenTime - время между начальной временной меткой и "реальным" временем
+        */
+        //В режиме чтения из лога отключить / переделать
     });
     connect (this, &liveGraph::startOscillator, this, [this]() {
         timer->start(oneStepTime);
@@ -21,6 +34,7 @@ liveGraph::liveGraph(QWidget *parent) :
     connect (this, &liveGraph::stopOscillator, this, [this]() {
         timer->stop();
     });
+    waitFirstData = true;
 }
 
 liveGraph::~liveGraph()
@@ -99,6 +113,12 @@ void liveGraph::shiftCells()
 
 void liveGraph::incomingDataSlot(QDateTime currentTime, s_parameterMask data)
 {
+    if (waitFirstData)
+    {
+        waitFirstData = false;
+        beginTime = &currentTime;
+        startTime = QDateTime::currentDateTime();
+    }
     QList<newgraph*> graphList = this->findChildren<newgraph*>();
     QListIterator<newgraph*> graphListIt(graphList);
     foundFlag = false;
@@ -130,6 +150,7 @@ void liveGraph::incomingDataSlot(QDateTime currentTime, s_parameterMask data)
         newgraph *graph = new newgraph(this);
         connect (this, &liveGraph::repaintCurves, graph, &newgraph::repaintThis);
         connect (graph, &newgraph::graph2Painter, this, [ = ](QMap<QDateTime, double> points, QString color) {
+            //Тут надо врезать подстановку calculatedEndTime
             paintCurve(points, calculatedEndTime, color); //Подаётся невалидное время
         }); //calculatedEndTime либо реальное время - и до него ищется ближайшая временная метка в графике
         //либо вычисленное по положению слайдера, и так же ищется ближайшая метка в графике
@@ -203,7 +224,7 @@ void liveGraph::timeNavigationScrollbarPositionChanged(int pos) // Пропор�
 {
     double proportion_slider = (pos / 10000/*slider maximum*/);
     qint64 proportion_time = betweenTime * proportion_slider;
-    QDateTime markerTimePosition = beginTime.addMSecs(proportion_time);
+    QDateTime markerTimePosition = beginTime->addMSecs(proportion_time);
     if (proportion_slider < 1.0) {
         calculatedEndTime = markerTimePosition;
     }
@@ -266,12 +287,12 @@ QMap<QDateTime, double> liveGraph::pointsForTimeFrames(QMap<QDateTime, double>& 
     //Вычисляем время начала отрисовки, отнимая ширину фрейма в секундах от последнего времени в массиве точек
     QDateTime firstPointForDraw = QDateTime::fromMSecsSinceEpoch((timeMarker.toMSecsSinceEpoch()) - (timeFrames * 1000));
     //Теперь надо собрать массив точек для данного конкретного временного отрезка
-    QList<QDateTime> splittedForFramesKeys;
+    /*QList<QDateTime> splittedForFramesKeys;
     keysForPointsIt.toFront();
     do {
         splittedForFramesKeys.push_back(keysForPointsIt.previous());
     }
-    while (keysForPointsIt.peekPrevious() >= firstPointForDraw); // Тут сыпется
+    while (keysForPointsIt.peekPrevious() >= firstPointForDraw); // Тут сыпется*/
     //По собранным ключам добавляются значения из большого массива
     QMap<QDateTime, double> splittedPoints;
     for (auto key : keysForPoints) {
@@ -352,5 +373,5 @@ void liveGraph::cleanGraph()
     {
         graphListIt.next()->~newgraph();
     }
-    beginTime = QDateTime::currentDateTime();
+    waitFirstData = true;
 }

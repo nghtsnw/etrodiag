@@ -59,9 +59,12 @@ private:
     int timeFrames = 60; // ширина графика в секундах (менять для увеличения и уменьшения общего масштаба)
     QDateTime frameFront; // передний край графика (либо сдвигается таймером по времени в live режиме, либо последняя запись из файла лога)
     QDateTime calculatedEndTime; // время конца нарисованного графика пропорционально положению слайдера навигации
-    QDateTime beginTime; // начало отсчёта для нового графика
+    QDateTime *beginTime = nullptr; // начало отсчёта для нового соединения или начальная метка из файла
     QDateTime realTime;
+    QDateTime startTime;
     qint64 betweenTime; // разница между begin и real
+
+    bool waitFirstData = false;
 
     const int oneStepTime = 100;//время для таймера сдвига на шаг и перерисовки (мсек)
     const int steps = 120; //ширина графика в шагах
