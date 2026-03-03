@@ -25,7 +25,7 @@ public slots:
     void incomingBinData(const QByteArray data);
     void incomingTxtData(const QString string);
     void incomingJsonData(const QVariantMap jsonMap);
-    void binReadFromCsv();
+    void binReadFromCsv(bool r);
 
 private:
     QFile newBinFile;

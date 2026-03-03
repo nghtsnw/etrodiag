@@ -11,15 +11,27 @@ liveGraph::liveGraph(QWidget *parent) :
 {
     ui->setupUi(this);
     connect (timer, &QTimer::timeout, this, &liveGraph::shiftCells);
+    connect (this, &liveGraph::readFromFileSignal, [ = ](bool r) {
+        readFromFile = r;
+        if (r) {
+            emit startOscillator();
+        }
+        else {
+            emit stopOscillator();
+        }
+    });
     connect (timer, &QTimer::timeout, this, [ = ]() {
         if (!readFromFile) {
             realTime = QDateTime::currentDateTime(); //При чтении в реальном времени
         }
         else
         {
-            realTime = QDateTime::fromMSecsSinceEpoch(beginTime->toMSecsSinceEpoch() + (startTime.toMSecsSinceEpoch() - QDateTime::currentDateTime().toMSecsSinceEpoch()));
+            qint64 bt = beginTime.toMSecsSinceEpoch();
+            qint64 st = startTime.toMSecsSinceEpoch();
+            qint64 ct = QDateTime::currentDateTime().toMSecsSinceEpoch();
+            realTime = QDateTime::fromMSecsSinceEpoch(bt + (st - ct));
         }
-        betweenTime = beginTime->msecsTo(realTime);
+        betweenTime = beginTime.msecsTo(realTime);
         /*
          realTime - "реальное" время для текущего режима работы. Если читаем данные с порта, то подставляем системное время на момент чтения.
             Если читаем из файла, то высчитываем "реальное" время, беря за ноль первую временную метку из файла, прибавляя к ней время от начала чтения.
@@ -70,8 +82,9 @@ void liveGraph::initGraph()
         oneStepXpix = pictWidth / steps; //один шаг это ширина кадра делённая на количество шагов
         vZeroLevel = oneCellYpix * horizontalLineCount; //вертикальный уровень нуля
         //TODO Переделать на 15 шагов
-        if (xShift == 1) {
-            xShiftPix = oneStepXpix; //xShiftPix = oneCellXpix/3; //для текущего вызова функции определяем горизонтальный сдвиг в пикселях, с которым рисуем вертикальные линии
+        xShiftPix = oneStepXpix * xShift;//для текущего вызова функции определяем горизонтальный сдвиг в пикселях, с которым рисуем вертикальные линии
+        /*if (xShift == 1) {
+            xShiftPix = oneStepXpix; //xShiftPix = oneCellXpix/3;
         }
         else if (xShift == 2) {
             xShiftPix = oneStepXpix * 2; //(oneCellXpix/3)*2;
@@ -102,7 +115,7 @@ void liveGraph::initGraph()
 
 void liveGraph::shiftCells()
 { //так как условно одна ячейка это три шага, переменная xShift используется для определения сдвига при отрисовке вертикальных линий
-    if (xShift != 14) {
+    if (xShift <= 14) {
         xShift++;
     }
     else {
@@ -116,7 +129,7 @@ void liveGraph::incomingDataSlot(QDateTime currentTime, s_parameterMask data)
     if (waitFirstData)
     {
         waitFirstData = false;
-        beginTime = &currentTime;
+        beginTime = currentTime;
         startTime = QDateTime::currentDateTime();
     }
     QList<newgraph*> graphList = this->findChildren<newgraph*>();
@@ -211,6 +224,13 @@ void liveGraph::paintCurve(QMap<QDateTime, double> allPoints, QDateTime endTime,
         }
         double oneUnitPix = vZeroLevel / yScale; //цена одного деления в пикселях
         //рисуем линии с учётом всех смещений и поправок на масштабирование
+        /*
+         oneCellXPix - количество пикселей в одной ячейке по x
+        verticalLineCount - количество вертикальных линий
+        oneStepXPix - количество пикселей за один шаг отрисовки (тут вероятно надо переделать
+        на количество пикселей между временными отрезками)
+        добавить в уравнение текущее время, чтоб последняя имеющаяся точка уплывала от границы
+        */
         for (double i = 0, x = oneCellXpix * verticalLineCount; i < points.size() - 1; ++i, x = x - oneStepXpix) {
             paintcv.drawLine(x, (((points.values().at(i) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix) * -1,
                              x - oneStepXpix, (((points.values().at(i + 1) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix) * -1);
@@ -224,7 +244,7 @@ void liveGraph::timeNavigationScrollbarPositionChanged(int pos) // Пропор�
 {
     double proportion_slider = (pos / 10000/*slider maximum*/);
     qint64 proportion_time = betweenTime * proportion_slider;
-    QDateTime markerTimePosition = beginTime->addMSecs(proportion_time);
+    QDateTime markerTimePosition = beginTime.addMSecs(proportion_time);
     if (proportion_slider < 1.0) {
         calculatedEndTime = markerTimePosition;
     }

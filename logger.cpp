@@ -72,22 +72,24 @@ void Logger::incomingBinData(const QByteArray data)
     }
 }
 
-void Logger::binReadFromCsv()
+void Logger::binReadFromCsv(bool r)
 {
-    emit showStatusMessage(tr("Bufferisation..."));
-    rawDataWithTimeLog = new QMap<QDateTime, QVector<uint8_t >>;
-    const auto readData = QtCSV::Reader::readToList(settings.pathToBinFile);
-    for (const auto &i : readData) { //Чтение всего csv в QMap
-        if (i.at(0) != "time") { // Проверка что это не текст с первой строки файла
-            QStringList splittedText = i.at(1).split(':');
-            QVector<uint8_t> convertedDataFromText;
-            for (const QString &s : std::as_const(splittedText)) {
-                convertedDataFromText.append(s.toInt(0, 16));
+    if (r) {
+        emit showStatusMessage(tr("Bufferisation..."));
+        rawDataWithTimeLog = new QMap<QDateTime, QVector<uint8_t >>;
+        const auto readData = QtCSV::Reader::readToList(settings.pathToBinFile);
+        for (const auto &i : readData) { //Чтение всего csv в QMap
+            if (i.at(0) != "time") { // Проверка что это не текст с первой строки файла
+                QStringList splittedText = i.at(1).split(':');
+                QVector<uint8_t> convertedDataFromText;
+                for (const QString &s : std::as_const(splittedText)) {
+                    convertedDataFromText.append(s.toInt(0, 16));
+                }
+                rawDataWithTimeLog->insert(QDateTime::fromString(i.at(0), timeFormat), convertedDataFromText);
             }
-            rawDataWithTimeLog->insert(QDateTime::fromString(i.at(0), timeFormat), convertedDataFromText);
         }
+        emit readFromCsv(*rawDataWithTimeLog);
     }
-    emit readFromCsv(*rawDataWithTimeLog);
 }
 
 void Logger::incomingTxtData(const QString string)

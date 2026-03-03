@@ -295,8 +295,8 @@ void newconnect::on_connectButton_clicked()
     }
     else {
         showStatusMessage(tr("Read data log from file..."));
-        emit readFromFileSignal();
     }
+    emit readFromFileSignal(p_local.readFromFileFlag);
 }
 
 void newconnect::prepareToSaveProfile()
