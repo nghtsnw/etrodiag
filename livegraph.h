@@ -39,6 +39,7 @@ private:
     double pictHeight = 0;
     int verticalLineCount = 0;
     int horizontalLineCount = 0;
+    qint64 onePixelTime = 0;
     double oneCellXpix = 0;
     double oneCellYpix = 0.0;
     double oneStepXpix = 0;

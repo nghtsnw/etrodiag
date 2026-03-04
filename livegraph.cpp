@@ -76,6 +76,7 @@ void liveGraph::initGraph()
         paint.setOpacity(0.5);
         verticalLineCount = steps / 15; //кол-во вертикальных линий рассчитывается по количеству шагов на кадр делённому на три, что-бы три шага соответствовало одной ячейке (для возможного масштабирования)
         horizontalLineCount = 10;
+        onePixelTime = (timeFrames * 1000) / pictWidth;
         oneCellXpix = pictWidth / verticalLineCount; //определяем габариты ячеек
         oneCellYpix = pictHeight / horizontalLineCount;
         scaleErrorPix = pictHeight - (oneCellYpix * horizontalLineCount); //погрешность от деления высоты окна на количество ячеек, для коррекции масштаба графика
@@ -205,12 +206,20 @@ void liveGraph::incomingDataSlot(QDateTime currentTime, s_parameterMask data)
     }
 }
 
-void liveGraph::paintCurve(QMap<QDateTime, double> allPoints, QDateTime endTime, QString color)
+void liveGraph::paintCurve(QMap<QDateTime, double> allPoints, QDateTime endTime, QString color) //приходит кривой endTime
 { //сюда каждый объект графика отдаёт массив данных и цвет на рисование
     QPainter paintcv(this);
     if (paintcv.isActive())
     {
-        QMap<QDateTime, double> points = pointsForTimeFrames(allPoints, endTime); //TODO Добавить маркер времени начала для возможности навигации по графику
+        QMap<QDateTime, double> points = pointsForTimeFrames(allPoints, endTime);
+        /*-----------------------------------------------------------------------------------------*/
+        QMap<qint64, double> pointsPixelMap; //Делаем карту позиций времени по шкале х кадра в пикселях
+        for (const auto &i : points.keys())
+        {
+            qint64 ms = i.toMSecsSinceEpoch() - points.firstKey().toMSecsSinceEpoch();
+            pointsPixelMap.insert(ms / onePixelTime, points.value(i));
+        }
+        /*-----------------------------------------------------------------------------------------*/
         QColor paintColor;
         paintColor.fromString(color);
         QPen pen(paintColor, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
@@ -231,11 +240,24 @@ void liveGraph::paintCurve(QMap<QDateTime, double> allPoints, QDateTime endTime,
         на количество пикселей между временными отрезками)
         добавить в уравнение текущее время, чтоб последняя имеющаяся точка уплывала от границы
         */
-        for (double i = 0, x = oneCellXpix * verticalLineCount; i < points.size() - 1; ++i, x = x - oneStepXpix) {
-            paintcv.drawLine(x, (((points.values().at(i) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix) * -1,
-                             x - oneStepXpix, (((points.values().at(i + 1) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix) * -1);
-            paintcv.drawEllipse(x - 2, (((points.values().at(i) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix + 2) * -1, 4, 4);
+        /* pictWidth - ширина всего графика в пикселях
+         *
+         */
+        qint64 prevPixels = 0;
+        double x0 = oneCellXpix * verticalLineCount;
+        double x = 0.0;
+        for (const auto &pixels : pointsPixelMap.keys()) {
+            x = x0 - pixels;
+            paintcv.drawLine(x, (((pointsPixelMap.value(prevPixels) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix) * -1,
+                             x - oneStepXpix, (((pointsPixelMap.value(pixels) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix) * -1);
+            paintcv.drawEllipse(x - 2, (((pointsPixelMap.value(prevPixels) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix + 2) * -1, 4, 4);
+            prevPixels = pixels;
         }
+        /*    for (int i = 0, x = oneCellXpix * verticalLineCount; i < points.size() - 1; ++i, x = x - oneStepXpix) {
+                paintcv.drawLine(x, (((points.values().at(i) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix) * -1,
+                                 x - oneStepXpix, (((points.values().at(i + 1) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix) * -1);
+                paintcv.drawEllipse(x - 2, (((points.values().at(i) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix + 2) * -1, 4, 4);
+            }*/
         curvesCount++;
     }
 }
@@ -302,22 +324,29 @@ QVector<int> liveGraph::maxStringSizePix(QFont font, QList<QString> str)//счи
 
 QMap<QDateTime, double> liveGraph::pointsForTimeFrames(QMap<QDateTime, double>& points, QDateTime timeMarker)
 {
-    QList<QDateTime> keysForPoints = points.keys();
-    QListIterator<QDateTime> keysForPointsIt(keysForPoints);
+    //Приходит invalid timeMarker, или цикл for не отрабатывает по итераторам
+    QMap<QDateTime, double> splittedPoints;
+    QMapIterator<QDateTime, double> pointsIt(points);
     //Вычисляем время начала отрисовки, отнимая ширину фрейма в секундах от последнего времени в массиве точек
     QDateTime firstPointForDraw = QDateTime::fromMSecsSinceEpoch((timeMarker.toMSecsSinceEpoch()) - (timeFrames * 1000));
     //Теперь надо собрать массив точек для данного конкретного временного отрезка
-    /*QList<QDateTime> splittedForFramesKeys;
-    keysForPointsIt.toFront();
-    do {
-        splittedForFramesKeys.push_back(keysForPointsIt.previous());
+    /*------------------------------------------------------*/
+    auto it_lower = points.find(firstPointForDraw);
+    auto it_upper = points.find(timeMarker);
+    for (auto it = it_lower; it != it_upper; ++it) {
+        splittedPoints.insert(it.key(), it.value());
     }
-    while (keysForPointsIt.peekPrevious() >= firstPointForDraw); // Тут сыпется*/
-    //По собранным ключам добавляются значения из большого массива
-    QMap<QDateTime, double> splittedPoints;
-    for (auto key : keysForPoints) {
-        splittedPoints.insert(key, points.value(key));
+    /*------------------------------------------------------*/
+    /*pointsIt.toFront(); //переводим итератор в конец большого массива всех точек кривой
+    while (pointsIt.peekPrevious().key() >= firstPointForDraw)
+    { //двигаем итератор к точке ближайшей к началу требуемого временного промежутка
+        pointsIt.previous();
     }
+    while (pointsIt.hasNext())
+    { //заполняем массив точками в временных рамках от firstPointForDraw до timeMarker
+        auto item = pointsIt.next();
+        splittedPoints.insert(item.key(), item.value());
+    }*/
     return splittedPoints;
 }
 
