@@ -28,7 +28,7 @@ liveGraph::liveGraph(QWidget *parent) :
         {
             qint64 bt = beginTime.toMSecsSinceEpoch();
             qint64 st = startTime.toMSecsSinceEpoch();
-            qint64 ct = QDateTime::currentDateTime().toMSecsSinceEpoch();
+            qint64 ct = QDateTime::currentMSecsSinceEpoch();
             realTime = QDateTime::fromMSecsSinceEpoch(bt + (st - ct));
         }
         betweenTime = beginTime.msecsTo(realTime);
@@ -165,7 +165,8 @@ void liveGraph::incomingDataSlot(QDateTime currentTime, s_parameterMask data)
         connect (this, &liveGraph::repaintCurves, graph, &newgraph::repaintThis);
         connect (graph, &newgraph::graph2Painter, this, [ = ](QMap<QDateTime, double> points, QString color) {
             //Тут надо врезать подстановку calculatedEndTime
-            paintCurve(points, calculatedEndTime, color); //Подаётся невалидное время
+            calculatedEndTime = realTime;
+            paintCurve(points, calculatedEndTime, color);
         }); //calculatedEndTime либо реальное время - и до него ищется ближайшая временная метка в графике
         //либо вычисленное по положению слайдера, и так же ищется ближайшая метка в графике
         //graph2Painter отдаёт указатель на весь массив графика, и цвет рисования
@@ -326,7 +327,7 @@ QMap<QDateTime, double> liveGraph::pointsForTimeFrames(QMap<QDateTime, double>& 
 {
     //Приходит invalid timeMarker, или цикл for не отрабатывает по итераторам
     QMap<QDateTime, double> splittedPoints;
-    QMapIterator<QDateTime, double> pointsIt(points);
+    //QMapIterator<QDateTime, double> pointsIt(points);
     //Вычисляем время начала отрисовки, отнимая ширину фрейма в секундах от последнего времени в массиве точек
     QDateTime firstPointForDraw = QDateTime::fromMSecsSinceEpoch((timeMarker.toMSecsSinceEpoch()) - (timeFrames * 1000));
     //Теперь надо собрать массив точек для данного конкретного временного отрезка

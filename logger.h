@@ -39,8 +39,8 @@ private:
          createNewJsonFileNamePermission = false,
          createNewTxtFileNamePermission = false;
     QDateTime returnTimestamp();
-    const QString timeFormat = "dd.MM.yy_hh:mm:ss::zzz";
-    const QString timeFormatForFile = "dd.MM.yy_hh-mm-ss";
+    const QString timeFormat = "dd.MM.yyyy_HH:mm:ss.zzz";
+    const QString timeFormatForFile = "dd.MM.yy_HH-mm-ss";
     QString sessionName;
     QString appHomeDir;
     QDir dir;
