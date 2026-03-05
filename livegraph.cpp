@@ -29,7 +29,7 @@ liveGraph::liveGraph(QWidget *parent) :
             qint64 bt = beginTime.toMSecsSinceEpoch();
             qint64 st = startTime.toMSecsSinceEpoch();
             qint64 ct = QDateTime::currentMSecsSinceEpoch();
-            realTime = QDateTime::fromMSecsSinceEpoch(bt + (st - ct));
+            realTime = QDateTime::fromMSecsSinceEpoch(bt + (ct - st));
         }
         betweenTime = beginTime.msecsTo(realTime);
         /*
@@ -125,12 +125,12 @@ void liveGraph::shiftCells()
     this->update();
 }
 
-void liveGraph::incomingDataSlot(QDateTime currentTime, s_parameterMask data)
+void liveGraph::incomingDataSlot(QDateTime currentTimeForData, s_parameterMask data)
 {
     if (waitFirstData)
     {
         waitFirstData = false;
-        beginTime = currentTime;
+        beginTime = currentTimeForData;
         startTime = QDateTime::currentDateTime();
     }
     QList<newgraph*> graphList = this->findChildren<newgraph*>();
@@ -145,7 +145,7 @@ void liveGraph::incomingDataSlot(QDateTime currentTime, s_parameterMask data)
                 if (data.drawGraphFlag)
                 { //и в новых данных флаг на разрешение рисования, то обновляем график
                     foundFlag = true;
-                    emit data2graph(data.devNum, data.byteNum, data.id, data.endValue, steps, data.drawGraphColor, currentTime);
+                    emit data2graph(data.devNum, data.byteNum, data.id, data.endValue, steps, data.drawGraphColor, currentTimeForData);
                     break;
                 }
                 else
@@ -175,7 +175,7 @@ void liveGraph::incomingDataSlot(QDateTime currentTime, s_parameterMask data)
         graph->devNum = data.devNum;
         graph->byteNum = data.byteNum;
         graph->id = data.id;
-        emit data2graph(data.devNum, data.byteNum, data.id, data.endValue, steps, data.drawGraphColor, currentTime);
+        emit data2graph(data.devNum, data.byteNum, data.id, data.endValue, steps, data.drawGraphColor, currentTimeForData);
         //connect (timer, &QTimer::timeout, graph, &newgraph::oscillatorInput);
         graphAnnotationMinMax.insert(data.parameterName, {data.endValue, data.endValue});
     }
@@ -325,15 +325,20 @@ QVector<int> liveGraph::maxStringSizePix(QFont font, QList<QString> str)//счи
 
 QMap<QDateTime, double> liveGraph::pointsForTimeFrames(QMap<QDateTime, double>& points, QDateTime timeMarker)
 {
-    //Приходит invalid timeMarker, или цикл for не отрабатывает по итераторам
     QMap<QDateTime, double> splittedPoints;
     //QMapIterator<QDateTime, double> pointsIt(points);
     //Вычисляем время начала отрисовки, отнимая ширину фрейма в секундах от последнего времени в массиве точек
     QDateTime firstPointForDraw = QDateTime::fromMSecsSinceEpoch((timeMarker.toMSecsSinceEpoch()) - (timeFrames * 1000));
     //Теперь надо собрать массив точек для данного конкретного временного отрезка
     /*------------------------------------------------------*/
-    auto it_lower = points.find(firstPointForDraw);
-    auto it_upper = points.find(timeMarker);
+    QMap<QDateTime, double>::iterator it_lower = points.lowerBound(firstPointForDraw);
+    QMap<QDateTime, double>::iterator it_upper = it_lower;
+    while (it_upper != points.end()) {
+        it_upper++;
+    }
+    --it_upper; //Видимо я что-то не понимаю в итераторах, поэтому тут костыль, чтоб итератор был на последнем элементе
+    qDebug() << it_lower.key();
+    qDebug() << it_upper.key();
     for (auto it = it_lower; it != it_upper; ++it) {
         splittedPoints.insert(it.key(), it.value());
     }
