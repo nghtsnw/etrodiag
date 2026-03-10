@@ -245,13 +245,20 @@ void liveGraph::paintCurve(QMap<QDateTime, double> allPoints, QDateTime endTime,
          *
          */
         qint64 prevPixels = 0;
-        double x0 = oneCellXpix * verticalLineCount;
-        double x = 0.0;
+        int x0 = oneCellXpix * verticalLineCount; //Начало координат
+        int x = 0.0;
         for (const auto &pixels : pointsPixelMap.keys()) {
-            x = x0 - pixels;
-            paintcv.drawLine(x, (((pointsPixelMap.value(prevPixels) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix) * -1,
-                             x - oneStepXpix, (((pointsPixelMap.value(pixels) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix) * -1);
-            paintcv.drawEllipse(x - 2, (((pointsPixelMap.value(prevPixels) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix + 2) * -1, 4, 4);
+            x = x0 - pixels;/*
+*Дописать: текущее время конца графика в сравнении с последней точкой из pixels, пересчитать в пиксели и тоже отнять
+*
+*/
+            paintcv.drawLine(x, //x1
+                             (((pointsPixelMap.value(prevPixels) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix) * -1, //y1
+                             x - oneStepXpix, //x2
+                             (((pointsPixelMap.value(pixels) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix) * -1); //y2
+            paintcv.drawEllipse(x - 2,
+                                (((pointsPixelMap.value(prevPixels) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix + 2) * -1,
+                                4, 4);
             prevPixels = pixels;
         }
         /*    for (int i = 0, x = oneCellXpix * verticalLineCount; i < points.size() - 1; ++i, x = x - oneStepXpix) {
