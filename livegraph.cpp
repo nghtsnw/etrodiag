@@ -222,7 +222,7 @@ void liveGraph::paintCurve(QMap<QDateTime, double> allPoints, QDateTime endTime,
         }
         /*-----------------------------------------------------------------------------------------*/
         QColor paintColor;
-        paintColor.fromString(color);
+        paintColor.setNamedColor(color);
         QPen pen(paintColor, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
         paintcv.setBrush(QBrush(paintColor));
         paintcv.setPen(pen);
@@ -246,19 +246,26 @@ void liveGraph::paintCurve(QMap<QDateTime, double> allPoints, QDateTime endTime,
          */
         qint64 prevPixels = 0;
         int x0 = oneCellXpix * verticalLineCount; //Начало координат
-        int x = 0.0;
+        int x = 0, old_x = 0;
+        qint64 shift_ms = realTime.toMSecsSinceEpoch() - points.lastKey().toMSecsSinceEpoch();
+        int shift_pix = shift_ms/onePixelTime;
+
         for (const auto &pixels : pointsPixelMap.keys()) {
+            old_x = x;
             x = x0 - pixels;/*
 *Дописать: текущее время конца графика в сравнении с последней точкой из pixels, пересчитать в пиксели и тоже отнять
 *
 */
-            paintcv.drawLine(x, //x1
+            if (old_x>0 && ((x-old_x)*onePixelTime)<3000) { //Чтоб не было лишней линии к концу графика, и при паузе больше 3с линия не рисуется
+            paintcv.drawLine(old_x - shift_pix, //x1
                              (((pointsPixelMap.value(prevPixels) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix) * -1, //y1
-                             x - oneStepXpix, //x2
+                             x - shift_pix - oneStepXpix, //x2
                              (((pointsPixelMap.value(pixels) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix) * -1); //y2
-            paintcv.drawEllipse(x - 2,
+
+            paintcv.drawEllipse(x - shift_pix - 2,
                                 (((pointsPixelMap.value(prevPixels) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix + 2) * -1,
                                 4, 4);
+            }
             prevPixels = pixels;
         }
         /*    for (int i = 0, x = oneCellXpix * verticalLineCount; i < points.size() - 1; ++i, x = x - oneStepXpix) {
@@ -303,7 +310,7 @@ void liveGraph::paintAnnotation()
         paintan.drawRect(0, 0, rectXSizePix.at(0) +15, oneStringYpix * graphAnnotation.size() + 3);
         paintan.setOpacity(1.0);
         for (int i = 0, y = 4; i < graphAnnotation.size(); ++i, y += oneStringYpix) {
-            paintColor.fromString(annotationKeys.at(i));
+            paintColor.setNamedColor(annotationKeys.at(i));
             paintan.setPen(paintColor);
             paintan.setBrush(QBrush(paintColor));
             paintan.drawEllipse(2, y, 8, 8);
