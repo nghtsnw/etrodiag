@@ -167,6 +167,11 @@ void newconnect::openSerialPort()
 }*/
 
 void newconnect::readFromFile(QMap<QDateTime, QVector<uint8_t> > dataWithTime)
+/*
+* Функция принимает адрес на кэшированные временные метки с данными от логгера,
+* создаёт отдельный массив с временными метками для последующего поочерёдного
+* опроса основного массива по этим ключам.
+*/
 { // Подготовка данных
     p_dataWithTime = dataWithTime; //p_dataWithTime = &dataWithTime;
     QList<QDateTime> timeKeys = p_dataWithTime.keys();
@@ -176,6 +181,13 @@ void newconnect::readFromFile(QMap<QDateTime, QVector<uint8_t> > dataWithTime)
 
 void newconnect::readFromFilePortions()
 {
+/*
+* Функция использует массив ключей с метками времени и итератором на него
+* для вычисления дельты между текущей меткой и предыдущей, и соответственно
+* получением значения из основного массива по ключу и выдачу пары ключ-значение
+* на обработку значения в нужный момент времени по истечению таймера,
+* имитируя получение данных как при работе устройства
+*/
     if (p_timeKeysIterator->hasNext()) {
         //QDateTime time = timeKeysIterator.next();
         qint64 currentTime = p_timeKeysIterator->next().toMSecsSinceEpoch();

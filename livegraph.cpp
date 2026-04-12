@@ -10,7 +10,6 @@ liveGraph::liveGraph(QWidget *parent) :
     ui(new Ui::liveGraphWidget)
 {
     ui->setupUi(this);
-    connect (timer, &QTimer::timeout, this, &liveGraph::shiftCells);
     connect (this, &liveGraph::readFromFileSignal, [ = ](bool r) {
         readFromFile = r;
         if (r) {
@@ -20,16 +19,24 @@ liveGraph::liveGraph(QWidget *parent) :
             emit stopOscillator();
         }
     });
+    connect (this, &liveGraph::startOscillator, this, [this]() {
+        timer->start(oneStepTime);
+    });
+    connect (this, &liveGraph::stopOscillator, this, [this]() {
+        timer->stop();
+    });
+    connect (timer, &QTimer::timeout, this, &liveGraph::shiftCells);
     connect (timer, &QTimer::timeout, this, [ = ]() {
         if (!readFromFile) {
             realTime = QDateTime::currentDateTime(); //При чтении в реальном времени
         }
         else
         {
-            qint64 bt = beginTime.toMSecsSinceEpoch();
+            /*qint64 bt = beginTime.toMSecsSinceEpoch();
             qint64 st = startTime.toMSecsSinceEpoch();
             qint64 ct = QDateTime::currentMSecsSinceEpoch();
-            realTime = QDateTime::fromMSecsSinceEpoch(bt + (ct - st));
+            qint64 lt = lastTime.toMSecsSinceEpoch();*/
+            realTime = lastTime;/*QDateTime::fromMSecsSinceEpoch(bt + (ct - st));*/
         }
         betweenTime = beginTime.msecsTo(realTime);
         /*
@@ -39,12 +46,6 @@ liveGraph::liveGraph(QWidget *parent) :
          betweenTime - время между начальной временной меткой и "реальным" временем
         */
         //В режиме чтения из лога отключить / переделать
-    });
-    connect (this, &liveGraph::startOscillator, this, [this]() {
-        timer->start(oneStepTime);
-    });
-    connect (this, &liveGraph::stopOscillator, this, [this]() {
-        timer->stop();
     });
     waitFirstData = true;
 }
@@ -74,15 +75,15 @@ void liveGraph::initGraph()
         paint.drawRect(0, 0, pictWidth, pictHeight);
         paint.setPen(Qt::lightGray);
         paint.setOpacity(0.5);
-        verticalLineCount = steps / 15; //кол-во вертикальных линий рассчитывается по количеству шагов на кадр делённому на три, что-бы три шага соответствовало одной ячейке (для возможного масштабирования)
+        verticalLineCount = steps / 25; //кол-во вертикальных линий рассчитывается по количеству шагов на кадр делённому на три, что-бы три шага соответствовало одной ячейке (для возможного масштабирования)
         horizontalLineCount = 10;
         onePixelTime = (timeFrames * 1000) / pictWidth;
         oneCellXpix = pictWidth / verticalLineCount; //определяем габариты ячеек
         oneCellYpix = pictHeight / horizontalLineCount;
         scaleErrorPix = pictHeight - (oneCellYpix * horizontalLineCount); //погрешность от деления высоты окна на количество ячеек, для коррекции масштаба графика
-        oneStepXpix = pictWidth / steps; //один шаг это ширина кадра делённая на количество шагов
         vZeroLevel = oneCellYpix * horizontalLineCount; //вертикальный уровень нуля
-        //TODO Переделать на 15 шагов
+
+        oneStepXpix = pictWidth / steps; //один шаг это ширина кадра делённая на количество шагов
         xShiftPix = oneStepXpix * xShift;//для текущего вызова функции определяем горизонтальный сдвиг в пикселях, с которым рисуем вертикальные линии
         /*if (xShift == 1) {
             xShiftPix = oneStepXpix; //xShiftPix = oneCellXpix/3;
@@ -92,7 +93,7 @@ void liveGraph::initGraph()
         }
         else {
             xShiftPix = 0;
-        }
+        }*/
         /*---------------------------*/
         for (int i = horizontalLineCount + 1, vCoord = pictHeight; i > 0; --i) //рисуем горизонтальные линии
         {
@@ -115,13 +116,13 @@ void liveGraph::initGraph()
 }
 
 void liveGraph::shiftCells()
-{ //так как условно одна ячейка это три шага, переменная xShift используется для определения сдвига при отрисовке вертикальных линий
-    if (xShift <= 14) {
+{ //переменная xShift используется для определения сдвига при отрисовке вертикальных линий
+    /*if (xShift <= 25) {
         xShift++;
     }
     else {
         xShift = 0;
-    }
+    }*/
     this->update();
 }
 
@@ -133,6 +134,7 @@ void liveGraph::incomingDataSlot(QDateTime currentTimeForData, s_parameterMask d
         beginTime = currentTimeForData;
         startTime = QDateTime::currentDateTime();
     }
+    lastTime = currentTimeForData;
     QList<newgraph*> graphList = this->findChildren<newgraph*>();
     QListIterator<newgraph*> graphListIt(graphList);
     foundFlag = false;
@@ -164,8 +166,18 @@ void liveGraph::incomingDataSlot(QDateTime currentTimeForData, s_parameterMask d
         newgraph *graph = new newgraph(this);
         connect (this, &liveGraph::repaintCurves, graph, &newgraph::repaintThis);
         connect (graph, &newgraph::graph2Painter, this, [ = ](QMap<QDateTime, double> points, QString color) {
-            //Тут надо врезать подстановку calculatedEndTime
             calculatedEndTime = realTime;
+            /*
+             * TODO: Разобраться с рассинхроном конца реального времени графика и
+             * конца точек самих графиков при отрисовке.
+             * - realTime это первая точка времени пришедших данных, к которой прибавляется
+             * дельта времени между временем старта и текущим системным временем.
+             * - последнее прочитанное время уплывает постепенно влево от рассчётного конца графика
+             * из за того что дельта между временем старта и текущим системным временем,
+             * используемая для расчёта конца графика, становится больше чем дельта между первой временной меткой
+             * и последней принятой временной меткой из за накладных расходов программы.
+             * - calculatedEndTime при чтении лога должен рассчитываться не от системного времени, а от последнего принятого.
+             */
             paintCurve(points, calculatedEndTime, color);
         }); //calculatedEndTime либо реальное время - и до него ищется ближайшая временная метка в графике
         //либо вычисленное по положению слайдера, и так же ищется ближайшая метка в графике

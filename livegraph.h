@@ -62,6 +62,7 @@ private:
     QDateTime calculatedEndTime; // время конца нарисованного графика пропорционально положению слайдера навигации
     QDateTime beginTime; // начало отсчёта для нового соединения или начальная метка из файла
     QDateTime realTime;
+    QDateTime lastTime; // последняя принятая временная метка
     QDateTime startTime;
     qint64 betweenTime; // разница между begin и real
 
