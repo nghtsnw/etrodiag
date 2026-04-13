@@ -66,7 +66,7 @@ void liveGraph::paintEvent(QPaintEvent *event)
 void liveGraph::initGraph()
 {
     pictWidth = this->size().width();//ширина
-    pictHeight = this->size().height();//высота
+    pictHeight = this->size().height() - ui->timeScrollBar->size().height();//высота
     QPainter paint(this);
     if (paint.isActive())
     {
@@ -82,7 +82,6 @@ void liveGraph::initGraph()
         oneCellYpix = pictHeight / horizontalLineCount;
         scaleErrorPix = pictHeight - (oneCellYpix * horizontalLineCount); //погрешность от деления высоты окна на количество ячеек, для коррекции масштаба графика
         vZeroLevel = oneCellYpix * horizontalLineCount; //вертикальный уровень нуля
-
         oneStepXpix = pictWidth / steps; //один шаг это ширина кадра делённая на количество шагов
         xShiftPix = oneStepXpix * xShift;//для текущего вызова функции определяем горизонтальный сдвиг в пикселях, с которым рисуем вертикальные линии
         /*if (xShift == 1) {
@@ -106,7 +105,7 @@ void liveGraph::initGraph()
             hCoord += oneCellXpix;
         }
         paint.setOpacity(1.0);
-        paint.setPen(Qt::white);//рисуем рамки белым цветом, создавая безрамочный эффект
+        paint.setPen(Qt::white);//рисуем рамки
         paint.drawLine(0, 0, 0, pictHeight);
         paint.drawLine(0, pictHeight - 1, pictWidth, pictHeight - 1);
         paint.drawLine(pictWidth - 1, pictHeight, pictWidth - 1, 0);
@@ -133,8 +132,10 @@ void liveGraph::incomingDataSlot(QDateTime currentTimeForData, s_parameterMask d
         waitFirstData = false;
         beginTime = currentTimeForData;
         startTime = QDateTime::currentDateTime();
+        ui->leftTimeLabel->setText(beginTime.toString("hh:mm:ss"));
     }
     lastTime = currentTimeForData;
+    ui->rightTimeLabel->setText(lastTime.toString("hh:mm:ss"));
     QList<newgraph*> graphList = this->findChildren<newgraph*>();
     QListIterator<newgraph*> graphListIt(graphList);
     foundFlag = false;
@@ -260,23 +261,21 @@ void liveGraph::paintCurve(QMap<QDateTime, double> allPoints, QDateTime endTime,
         int x0 = oneCellXpix * verticalLineCount; //Начало координат
         int x = 0, old_x = 0;
         qint64 shift_ms = realTime.toMSecsSinceEpoch() - points.lastKey().toMSecsSinceEpoch();
-        int shift_pix = shift_ms/onePixelTime;
-
+        int shift_pix = shift_ms / onePixelTime;
         for (const auto &pixels : pointsPixelMap.keys()) {
             old_x = x;
             x = x0 - pixels;/*
 *Дописать: текущее время конца графика в сравнении с последней точкой из pixels, пересчитать в пиксели и тоже отнять
 *
 */
-            if (old_x>0 && ((x-old_x)*onePixelTime)<3000) { //Чтоб не было лишней линии к концу графика, и при паузе больше 3с линия не рисуется
-            paintcv.drawLine(old_x - shift_pix, //x1
-                             (((pointsPixelMap.value(prevPixels) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix) * -1, //y1
-                             x - shift_pix - oneStepXpix, //x2
-                             (((pointsPixelMap.value(pixels) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix) * -1); //y2
-
-            paintcv.drawEllipse(x - shift_pix - 2,
-                                (((pointsPixelMap.value(prevPixels) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix + 2) * -1,
-                                4, 4);
+            if (old_x > 0 && ((x - old_x) * onePixelTime) < 3000) { //Чтоб не было лишней линии к концу графика, и при паузе больше 3с линия не рисуется
+                paintcv.drawLine(old_x - shift_pix, //x1
+                                 (((pointsPixelMap.value(prevPixels) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix) * -1, //y1
+                                 x - shift_pix - oneStepXpix, //x2
+                                 (((pointsPixelMap.value(pixels) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix) * -1); //y2
+                paintcv.drawEllipse(x - shift_pix - 2,
+                                    (((pointsPixelMap.value(prevPixels) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix + 2) * -1,
+                                    4, 4);
             }
             prevPixels = pixels;
         }
@@ -319,7 +318,7 @@ void liveGraph::paintAnnotation()
         paintan.setPen(Qt::white);
         paintan.setBrush(QBrush(Qt::white));
         paintan.setOpacity(0.7);
-        paintan.drawRect(0, 0, rectXSizePix.at(0) +15, oneStringYpix * graphAnnotation.size() + 3);
+        paintan.drawRect(1, 1, rectXSizePix.at(0) +15, oneStringYpix * graphAnnotation.size() + 3);
         paintan.setOpacity(1.0);
         for (int i = 0, y = 4; i < graphAnnotation.size(); ++i, y += oneStringYpix) {
             paintColor.setNamedColor(annotationKeys.at(i));
@@ -362,9 +361,7 @@ QMap<QDateTime, double> liveGraph::pointsForTimeFrames(QMap<QDateTime, double>& 
     while (it_upper != points.end()) {
         it_upper++;
     }
-    --it_upper; //Видимо я что-то не понимаю в итераторах, поэтому тут костыль, чтоб итератор был на последнем элементе
-    qDebug() << it_lower.key();
-    qDebug() << it_upper.key();
+    --it_upper;
     for (auto it = it_lower; it != it_upper; ++it) {
         splittedPoints.insert(it.key(), it.value());
     }
