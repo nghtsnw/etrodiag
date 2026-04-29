@@ -181,15 +181,16 @@ void newconnect::readFromFile(QMap<QDateTime, QVector<uint8_t> > dataWithTime)
 
 void newconnect::readFromFilePortions()
 {
-/*
-* Функция использует массив ключей с метками времени и итератором на него
-* для вычисления дельты между текущей меткой и предыдущей, и соответственно
-* получением значения из основного массива по ключу и выдачу пары ключ-значение
-* на обработку значения в нужный момент времени по истечению таймера,
-* имитируя получение данных как при работе устройства
-*/
+    /*
+    * Функция использует массив ключей с метками времени и итератором на него
+    * для вычисления дельты между текущей меткой и предыдущей, и соответственно
+    * получением значения из основного массива по ключу и выдачу пары ключ-значение
+    * на обработку значения в нужный момент времени по истечению таймера,
+    * имитируя получение данных как при работе устройства
+    */
     if (p_timeKeysIterator->hasNext()) {
         //QDateTime time = timeKeysIterator.next();
+        readerBusy = true;
         qint64 currentTime = p_timeKeysIterator->next().toMSecsSinceEpoch();
         qint64 nextTime = p_timeKeysIterator->peekNext().toMSecsSinceEpoch();
         qint64 betweenTime = nextTime - currentTime;
@@ -202,6 +203,7 @@ void newconnect::readFromFilePortions()
         timer->start(betweenTime);
     }
     else {
+        readerBusy = false;
         timer->stop();
         showStatusMessage(tr("End of file"));
     }
@@ -306,9 +308,17 @@ void newconnect::on_connectButton_clicked()
         }
     }
     else {
-        showStatusMessage(tr("Read data log from file..."));
+        if (!readerBusy) {
+            showStatusMessage(tr("Read data log from file..."));
+            emit connected();
+            emit readFromFileSignal(p_local.readFromFileFlag);
+            ui->connectButton->setText(tr("Stop read log"));
+        }
+        else {
+            ui->connectButton->setText(tr("Read log"));
+            emit disconnected();
+        }
     }
-    emit readFromFileSignal(p_local.readFromFileFlag);
 }
 
 void newconnect::prepareToSaveProfile()

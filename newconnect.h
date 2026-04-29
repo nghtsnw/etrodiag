@@ -93,6 +93,7 @@ private:
     Ui::newconnect *ui;
     QString message;
     bool createNewFileNamePermission = true;
+    bool readerBusy = false;
     QString binFileName;
     s_Settings p_local;
     //QByteArray fsba;
