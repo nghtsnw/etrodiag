@@ -316,6 +316,8 @@ void newconnect::on_connectButton_clicked()
         }
         else {
             ui->connectButton->setText(tr("Read log"));
+            timer->stop();
+            showStatusMessage(tr("Connection closed"));
             emit disconnected();
         }
     }
