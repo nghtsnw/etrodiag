@@ -68,6 +68,7 @@ signals:
     void setTime(QDateTime);
     void pushByteToProfiler(uint8_t);
     void putIntDataToConsole(QVector<uint8_t>);
+    void logLoadProgress(int percent);
 
 public slots:
 
@@ -87,7 +88,6 @@ private slots:
     void on_connectButton_clicked();
     void on_settingsButton_clicked();
     void sendCommand();
-    void readFromFilePortions();
 
 private:
     Ui::newconnect *ui;
@@ -98,7 +98,6 @@ private:
     s_Settings p_local;
     //QByteArray fsba;
     QByteArray arr4byteStream;
-    QTimer *timer = new QTimer(this);
     QTimer *timerAboveTxCommand = new QTimer(this);
     /*QList<QByteArray> fileSplitted;
     const int bytesPerOneShot = 20;
@@ -109,8 +108,6 @@ private:
     quint8 calcCrc(const QVector<quint8> &arr);
     s_protocolDescription protocol;
 
-    QList<QDateTime> timeKeys;
-    QListIterator<QDateTime> *p_timeKeysIterator = nullptr;
     QMap<QDateTime, QVector<uint8_t> > p_dataWithTime;
 
 protected:

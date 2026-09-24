@@ -9,6 +9,7 @@
 #include <QDataStream>
 #include <QStandardPaths>
 #include <QApplication>
+#include <QEventLoop>
 
 Logger::Logger()
 {
@@ -76,9 +77,13 @@ void Logger::binReadFromCsv(bool r)
 {
     if (r) {
         emit showStatusMessage(tr("Bufferisation..."));
+        emit logLoadProgress(0); //показываем прогрессбар сразу при старте чтения
         rawDataWithTimeLog = new QMap<QDateTime, QVector<uint8_t >>;
         const auto readData = QtCSV::Reader::readToList(settings.pathToBinFile);
-        for (const auto &i : readData) { //Чтение всего csv в QMap
+        const int rowsCount = readData.size();
+        const int step = qMax(1, rowsCount / 100); //обновляем прогресс примерно 100 раз
+        for (int row = 0; row < rowsCount; ++row) { //Чтение всего csv в QMap
+            const auto &i = readData.at(row);
             if (i.at(0) != "time") { // Проверка что это не текст с первой строки файла
                 QStringList splittedText = i.at(1).split(':');
                 QVector<uint8_t> convertedDataFromText;
@@ -86,6 +91,10 @@ void Logger::binReadFromCsv(bool r)
                     convertedDataFromText.append(s.toInt(0, 16));
                 }
                 rawDataWithTimeLog->insert(QDateTime::fromString(i.at(0), timeFormat), convertedDataFromText);
+            }
+            if (row % step == 0) { //первая половина прогресса - чтение файла
+                emit logLoadProgress(rowsCount ? (50 * (row + 1)) / rowsCount : 50);
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
             }
         }
         emit readFromCsv(*rawDataWithTimeLog);

@@ -4,12 +4,24 @@
 #include <newgraph.h>
 #include <QDebug>
 #include <QMouseEvent>
+#include <QScrollBar>
+#include <QLabel>
 
 liveGraph::liveGraph(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::liveGraphWidget)
 {
     ui->setupUi(this);
+    timeNavigationScrollbarNewMaxLevel(10000); //диапазон навигации по логу 0..10000
+    ui->timeScrollBar->setSingleStep(10);
+    ui->timeScrollBar->setPageStep(1000); //ручка ~10% ширины, иначе её не ухватить
+    connect (ui->timeScrollBar, &QScrollBar::valueChanged, this, &liveGraph::timeNavigationScrollbarPositionChanged);
+    frameTimeLabel = new QLabel(this); //временная метка конца кадра над слайдером
+    frameTimeLabel->setStyleSheet("QLabel{background:#FFFFAA;border:1px solid #808080;padding:2px;color:#000000;}");
+    frameTimeLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
+    frameTimeLabel->hide();
+    connect (ui->timeScrollBar, &QScrollBar::sliderPressed, this, &liveGraph::showNavigationTimeLabel);
+    connect (ui->timeScrollBar, &QScrollBar::sliderReleased, this, &liveGraph::hideNavigationTimeLabel);
     connect (this, &liveGraph::readFromFileSignal, [ = ](bool r) {
         readFromFile = r;
         if (r) {
@@ -26,26 +38,15 @@ liveGraph::liveGraph(QWidget *parent) :
         timer->stop();
     });
     connect (timer, &QTimer::timeout, this, &liveGraph::shiftCells);
-    connect (timer, &QTimer::timeout, this, [ = ]() {
+    connect (timer, &QTimer::timeout, this, [this]() {
         if (!readFromFile) {
-            realTime = QDateTime::currentDateTime(); //При чтении в реальном времени
+            realTime = QDateTime::currentDateTime(); //живой режим от порта - реальное время
         }
-        else
-        {
-            /*qint64 bt = beginTime.toMSecsSinceEpoch();
-            qint64 st = startTime.toMSecsSinceEpoch();
-            qint64 ct = QDateTime::currentMSecsSinceEpoch();
-            qint64 lt = lastTime.toMSecsSinceEpoch();*/
-            realTime = lastTime;/*QDateTime::fromMSecsSinceEpoch(bt + (ct - st));*/
+        else {
+            realTime = lastTime; //чтение лога - время из лога (последняя принятая метка)
         }
+        //betweenTime - длительность данных от первой метки до конца графика
         betweenTime = beginTime.msecsTo(realTime);
-        /*
-         realTime - "реальное" время для текущего режима работы. Если читаем данные с порта, то подставляем системное время на момент чтения.
-            Если читаем из файла, то высчитываем "реальное" время, беря за ноль первую временную метку из файла, прибавляя к ней время от начала чтения.
-         startTime - системное время на начало чтения из файла.
-         betweenTime - время между начальной временной меткой и "реальным" временем
-        */
-        //В режиме чтения из лога отключить / переделать
     });
     waitFirstData = true;
 }
@@ -131,7 +132,6 @@ void liveGraph::incomingDataSlot(QDateTime currentTimeForData, s_parameterMask d
     {
         waitFirstData = false;
         beginTime = currentTimeForData;
-        startTime = QDateTime::currentDateTime();
         ui->leftTimeLabel->setText(beginTime.toString("hh:mm:ss"));
     }
     lastTime = currentTimeForData;
@@ -167,23 +167,13 @@ void liveGraph::incomingDataSlot(QDateTime currentTimeForData, s_parameterMask d
         newgraph *graph = new newgraph(this);
         connect (this, &liveGraph::repaintCurves, graph, &newgraph::repaintThis);
         connect (graph, &newgraph::graph2Painter, this, [ = ](QMap<QDateTime, double> points, QString color) {
-            calculatedEndTime = realTime;
-            /*
-             * TODO: Разобраться с рассинхроном конца реального времени графика и
-             * конца точек самих графиков при отрисовке.
-             * - realTime это первая точка времени пришедших данных, к которой прибавляется
-             * дельта времени между временем старта и текущим системным временем.
-             * - последнее прочитанное время уплывает постепенно влево от рассчётного конца графика
-             * из за того что дельта между временем старта и текущим системным временем,
-             * используемая для расчёта конца графика, становится больше чем дельта между первой временной меткой
-             * и последней принятой временной меткой из за накладных расходов программы.
-             * - calculatedEndTime при чтении лога должен рассчитываться не от системного времени, а от последнего принятого.
-             */
+            if (!navigationActive) { //при навигации по логу конец графика задаёт слайдер, а не реальное время
+                calculatedEndTime = realTime;
+            }
+            //calculatedEndTime - конец графика: либо последняя принятая метка данных,
+            //либо время по положению слайдера навигации. К нему привязывается выборка точек.
             paintCurve(points, calculatedEndTime, color);
-        }); //calculatedEndTime либо реальное время - и до него ищется ближайшая временная метка в графике
-        //либо вычисленное по положению слайдера, и так же ищется ближайшая метка в графике
-        //graph2Painter отдаёт указатель на весь массив графика, и цвет рисования
-        //на paintCurve нужно выдать уже время конца, к котрому привязывается график
+        }); //graph2Painter отдаёт весь массив точек графика и цвет рисования
         connect (this, &liveGraph::data2graph, graph, &newgraph::dataPool);
         graph->devNum = data.devNum;
         graph->byteNum = data.byteNum;
@@ -226,6 +216,9 @@ void liveGraph::paintCurve(QMap<QDateTime, double> allPoints, QDateTime endTime,
     if (paintcv.isActive())
     {
         QMap<QDateTime, double> points = pointsForTimeFrames(allPoints, endTime);
+        if (points.isEmpty()) { //в выбранном временном окне нет точек
+            return;
+        }
         /*-----------------------------------------------------------------------------------------*/
         QMap<qint64, double> pointsPixelMap; //Делаем карту позиций времени по шкале х кадра в пикселях
         for (const auto &i : points.keys())
@@ -247,27 +240,17 @@ void liveGraph::paintCurve(QMap<QDateTime, double> allPoints, QDateTime endTime,
         }
         double oneUnitPix = vZeroLevel / yScale; //цена одного деления в пикселях
         //рисуем линии с учётом всех смещений и поправок на масштабирование
-        /*
-         oneCellXPix - количество пикселей в одной ячейке по x
-        verticalLineCount - количество вертикальных линий
-        oneStepXPix - количество пикселей за один шаг отрисовки (тут вероятно надо переделать
-        на количество пикселей между временными отрезками)
-        добавить в уравнение текущее время, чтоб последняя имеющаяся точка уплывала от границы
-        */
-        /* pictWidth - ширина всего графика в пикселях
-         *
-         */
+        //oneCellXpix - количество пикселей в одной ячейке по x, verticalLineCount - количество вертикальных линий
+        //oneStepXpix - количество пикселей за один шаг отрисовки, pictWidth - ширина всего графика в пикселях
         qint64 prevPixels = 0;
         int x0 = oneCellXpix * verticalLineCount; //Начало координат
         int x = 0, old_x = 0;
-        qint64 shift_ms = realTime.toMSecsSinceEpoch() - points.lastKey().toMSecsSinceEpoch();
+        qint64 shift_ms = endTime.toMSecsSinceEpoch() - points.lastKey().toMSecsSinceEpoch();
         int shift_pix = shift_ms / onePixelTime;
         for (const auto &pixels : pointsPixelMap.keys()) {
             old_x = x;
-            x = x0 - pixels;/*
-*Дописать: текущее время конца графика в сравнении с последней точкой из pixels, пересчитать в пиксели и тоже отнять
-*
-*/
+            //x - позиция точки по времени, shift_pix сдвигает кривую так, чтобы её конец совпал с концом графика
+            x = x0 - pixels;
             if (old_x > 0 && ((x - old_x) * onePixelTime) < 3000) { //Чтоб не было лишней линии к концу графика, и при паузе больше 3с линия не рисуется
                 paintcv.drawLine(old_x - shift_pix, //x1
                                  (((pointsPixelMap.value(prevPixels) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix) * -1, //y1
@@ -290,11 +273,45 @@ void liveGraph::paintCurve(QMap<QDateTime, double> allPoints, QDateTime endTime,
 
 void liveGraph::timeNavigationScrollbarPositionChanged(int pos) // Пропорционально положению слайдера, нужно выбрать временные рамки для отрисовки
 {
-    double proportion_slider = (pos / 10000/*slider maximum*/);
+    if (!readFromFile) { //навигация имеет смысл только при чтении заранее считанного лога
+        return;
+    }
+    double proportion_slider = pos / 10000.0; //вещественное деление, иначе pos/10000 всегда 0
     qint64 proportion_time = betweenTime * proportion_slider;
-    QDateTime markerTimePosition = beginTime.addMSecs(proportion_time);
-    if (proportion_slider < 1.0) {
-        calculatedEndTime = markerTimePosition;
+    calculatedEndTime = beginTime.addMSecs(proportion_time);
+    navigationActive = true;
+    if (ui->timeScrollBar->isSliderDown()) { //при удержании слайдера показываем метку конца кадра
+        showNavigationTimeLabel();
+    }
+    this->update();
+}
+
+void liveGraph::showNavigationTimeLabel()
+{
+    if (!readFromFile || !frameTimeLabel) {
+        return;
+    }
+    const QDateTime frameEnd = calculatedEndTime.isValid() ? calculatedEndTime : lastTime;
+    frameTimeLabel->setText(frameEnd.toString("hh:mm:ss.zzz"));
+    frameTimeLabel->adjustSize();
+    const QRect groove = ui->timeScrollBar->geometry();
+    const double span = ui->timeScrollBar->maximum() - ui->timeScrollBar->minimum();
+    const double frac = span > 0 ? (ui->timeScrollBar->value() - ui->timeScrollBar->minimum()) / span : 0.0;
+    int x = groove.left() + int(frac * groove.width()) - frameTimeLabel->width() / 2;
+    x = qBound(0, x, this->width() - frameTimeLabel->width());
+    int y = groove.top() - frameTimeLabel->height() - 2;
+    if (y < 0) { //если сверху нет места - показываем снизу
+        y = groove.bottom() + 2;
+    }
+    frameTimeLabel->move(x, y);
+    frameTimeLabel->raise();
+    frameTimeLabel->show();
+}
+
+void liveGraph::hideNavigationTimeLabel()
+{
+    if (frameTimeLabel) {
+        frameTimeLabel->hide();
     }
 }
 
@@ -357,11 +374,7 @@ QMap<QDateTime, double> liveGraph::pointsForTimeFrames(QMap<QDateTime, double>& 
     //Теперь надо собрать массив точек для данного конкретного временного отрезка
     /*------------------------------------------------------*/
     QMap<QDateTime, double>::iterator it_lower = points.lowerBound(firstPointForDraw);
-    QMap<QDateTime, double>::iterator it_upper = it_lower;
-    while (it_upper != points.end()) {
-        it_upper++;
-    }
-    --it_upper;
+    QMap<QDateTime, double>::iterator it_upper = points.upperBound(timeMarker);
     for (auto it = it_lower; it != it_upper; ++it) {
         splittedPoints.insert(it.key(), it.value());
     }
@@ -452,4 +465,6 @@ void liveGraph::cleanGraph()
         graphListIt.next()->~newgraph();
     }
     waitFirstData = true;
+    ui->timeScrollBar->setValue(ui->timeScrollBar->maximum()); //возвращаемся к концу лога
+    navigationActive = false;
 }

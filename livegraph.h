@@ -5,6 +5,7 @@
 #include <QPainter>
 #include <QTimer>
 #include <QMap>
+#include <QLabel>
 #include "global.h"
 #include <QDateTime>
 
@@ -52,9 +53,15 @@ private:
     QVector<int> rectXSizePix;
     int curvesCount = 0;
     bool minMaxOnOff = true;
+    bool navigationActive = false; //true когда конец графика задан слайдером навигации по логу
 
+private slots:
     void timeNavigationScrollbarPositionChanged(int pos);
     void timeNavigationScrollbarNewMaxLevel(int max);
+    void showNavigationTimeLabel();
+    void hideNavigationTimeLabel();
+
+private:
 
     QMap<QDateTime, double> pointsForTimeFrames(QMap<QDateTime, double>& points, QDateTime timeMarker); //буфер для точек в отрезке времени размере кадра
     int timeFrames = 60; // ширина графика в секундах (менять для увеличения и уменьшения общего масштаба)
@@ -63,11 +70,11 @@ private:
     QDateTime beginTime; // начало отсчёта для нового соединения или начальная метка из файла
     QDateTime realTime;
     QDateTime lastTime; // последняя принятая временная метка
-    QDateTime startTime;
-    qint64 betweenTime; // разница между begin и real
+    qint64 betweenTime = 0; // разница между begin и real
 
     bool waitFirstData = false;
     bool readFromFile = false;
+    QLabel *frameTimeLabel = nullptr; //метка конца кадра, показывается над слайдером при перетаскивании
 
     const int oneStepTime = 100;//время для таймера сдвига на шаг и перерисовки (мсек)
     const int steps = 300; //ширина графика в шагах

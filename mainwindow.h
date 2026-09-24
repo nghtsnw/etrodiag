@@ -20,6 +20,7 @@
 QT_BEGIN_NAMESPACE
 
 class QLabel;
+class QProgressBar;
 //class QGestureEvent;
 //class QSwipeGesture;
 
@@ -45,6 +46,7 @@ public:
     QLabel *statuslbl = nullptr;
     QLabel *crcerrorlbl = nullptr;
     QPushButton *aboutButton = nullptr;
+    QProgressBar *loadProgress = nullptr;
     void openMaskSettingsDialog();
     void createDevice(int devNum);
     void loadProfile(s_parameterMask mask);
@@ -78,6 +80,7 @@ signals:
 public slots:
 
     void showStatusMessage(QString message);
+    void setLogLoadProgress(int percent);
     void addDeviceToList(QDateTime currentTime, QVector<int> ddata);
     void openDevSett(int devNum, QVector<int> data);
     void openByteSett(int devNum, int byteNum);

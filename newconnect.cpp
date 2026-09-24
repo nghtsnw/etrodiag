@@ -10,6 +10,8 @@
 #include "dataprofiler.h"
 #include "txtmaskobj.h"
 #include <QStandardPaths>
+#include <QCoreApplication>
+#include <QEventLoop>
 #include <global.h>
 
 newconnect::newconnect(QWidget *parent) :
@@ -56,6 +58,9 @@ newconnect::newconnect(QWidget *parent) :
     connect (this, &newconnect::loadProtocol, m_settings, &SettingsDialog::loadProtocol);
     connect (this, &newconnect::loadProtocol, this, &newconnect::setProtocol);
     connect (this, &newconnect::loadProtocol, datapool, &dataprofiler::setProtocol);
+    connect (this, &newconnect::loadProtocol, this, [this](s_protocolDescription p) {
+        emit setVisibleControlWindow(p.varControl); //видимость окна управления берём из профиля
+    });
     /*----------------------------------------------------------------------------------------------------------------------------*/
     /*----------------------------------------------------------------------------------------------------------------------------*/
     //По применению настроек в UI, они сразу применяются на датаразборке, копия в newconnect для сохранения профиля
@@ -63,6 +68,7 @@ newconnect::newconnect(QWidget *parent) :
     connect (m_settings, &SettingsDialog::setProtocol, this, &newconnect::setProtocol);
     connect (m_settings, &SettingsDialog::setProtocol, this, [this](s_protocolDescription p) {
         protocol = p;
+        emit setVisibleControlWindow(p.varControl); //окно управления переменными видно только при включённом контроле
         if (m_settings->settings().readFromFileFlag) {
             ui->connectButton->setText(tr("Read log"));
         }
@@ -75,7 +81,6 @@ newconnect::newconnect(QWidget *parent) :
     connect (this, &newconnect::s_sendSettings, datapool, &dataprofiler::setSettings);
     /*----------------------------------------------------------------------------------------------------------------------------*/
     connect (m_settings, &SettingsDialog::loadSelectedProfile, this, &newconnect::readProfile);
-    connect (timer, &QTimer::timeout, this, &newconnect::readFromFilePortions);//читаем из файла по таймеру
     connect (timerAboveTxCommand, &QTimer::timeout, this, &newconnect::sendCommand);//отправляем команду после задержки
     connect (this, &newconnect::sendRawData, gstream, &getStream::getRawData);
     connect (this, &newconnect::sendRawData, m_console, &Console::putData);
@@ -168,45 +173,31 @@ void newconnect::openSerialPort()
 
 void newconnect::readFromFile(QMap<QDateTime, QVector<uint8_t> > dataWithTime)
 /*
-* Функция принимает адрес на кэшированные временные метки с данными от логгера,
-* создаёт отдельный массив с временными метками для последующего поочерёдного
-* опроса основного массива по этим ключам.
+* Функция принимает весь лог с временными метками, держит его в памяти и разом
+* прогоняет через разбор, без порционной выдачи по времени.
+* Перед разбором каждого блока ему выставляется время из лога, поэтому метки кадров
+* и навигация по графику используют время лога, а не системные часы.
 */
-{ // Подготовка данных
-    p_dataWithTime = dataWithTime; //p_dataWithTime = &dataWithTime;
-    QList<QDateTime> timeKeys = p_dataWithTime.keys();
-    p_timeKeysIterator = new QListIterator<QDateTime>(timeKeys);
-    readFromFilePortions(); //Запуск процесса чтения из файла
-}
-
-void newconnect::readFromFilePortions()
-{
-    /*
-    * Функция использует массив ключей с метками времени и итератором на него
-    * для вычисления дельты между текущей меткой и предыдущей, и соответственно
-    * получением значения из основного массива по ключу и выдачу пары ключ-значение
-    * на обработку значения в нужный момент времени по истечению таймера,
-    * имитируя получение данных как при работе устройства
-    */
-    if (p_timeKeysIterator->hasNext()) {
-        //QDateTime time = timeKeysIterator.next();
-        readerBusy = true;
-        qint64 currentTime = p_timeKeysIterator->next().toMSecsSinceEpoch();
-        qint64 nextTime = p_timeKeysIterator->peekNext().toMSecsSinceEpoch();
-        qint64 betweenTime = nextTime - currentTime;
-        QVector<uint8_t> data = p_dataWithTime.value(QDateTime::fromMSecsSinceEpoch(currentTime));
-        emit setTime(QDateTime::fromMSecsSinceEpoch(currentTime));
+{ // Весь лог кладём в память
+    p_dataWithTime = dataWithTime;
+    const QList<QDateTime> logTimes = p_dataWithTime.keys();
+    const int blocksCount = logTimes.size();
+    const int step = qMax(1, blocksCount / 100); //обновляем прогресс примерно 100 раз
+    for (int block = 0; block < blocksCount; ++block) {
+        const QDateTime logTime = logTimes.at(block);
+        const QVector<uint8_t> data = p_dataWithTime.value(logTime);
+        emit setTime(logTime); //время из лога
         emit putIntDataToConsole(data);
         for (const uint8_t byte : data) {
             emit pushByteToProfiler(byte);
         }
-        timer->start(betweenTime);
+        if (block % step == 0) { //вторая половина прогресса - разбор лога
+            emit logLoadProgress(50 + (blocksCount ? (50 * (block + 1)) / blocksCount : 50));
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        }
     }
-    else {
-        readerBusy = false;
-        timer->stop();
-        showStatusMessage(tr("End of file"));
-    }
+    emit logLoadProgress(100);
+    showStatusMessage(tr("End of file"));
 }
 
 void newconnect::closeSerialPort()
@@ -310,14 +301,16 @@ void newconnect::on_connectButton_clicked()
     else {
         if (!readerBusy) {
             showStatusMessage(tr("Read data log from file..."));
+            readerBusy = true; //весь лог читается и разбирается разом внутри emit ниже
             emit connected();
             emit readFromFileSignal(p_local.readFromFileFlag);
             ui->connectButton->setText(tr("Stop read log"));
         }
         else {
+            readerBusy = false;
             ui->connectButton->setText(tr("Read log"));
-            timer->stop();
             showStatusMessage(tr("Connection closed"));
+            emit readFromFileSignal(false); //лог закрыт - график возвращается к реальному времени
             emit disconnected();
         }
     }

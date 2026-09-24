@@ -6,6 +6,7 @@
 #include <QtWidgets>
 #include <QDebug>
 #include <QPushButton>
+#include <QProgressBar>
 #include <QList>
 #include "device.h"
 #include "devsettingsform.h"
@@ -24,7 +25,16 @@ MainWindow::MainWindow(QWidget *parent) :
 // grabGesture(gesture);
 // Надеюсь, что когда в qt починят qswipegesture, я раскомментирую это и удалю тот ужас что сейчас заменяет свайп.
     m_ui->setupUi(this);
+    loadProgress = new QProgressBar;
+    loadProgress->setRange(0, 100);
+    loadProgress->setValue(0);
+    loadProgress->setFixedWidth(160);
+    loadProgress->setTextVisible(true);
+    loadProgress->setStyleSheet("QProgressBar{border:1px solid #808080;border-radius:2px;text-align:center;}"
+                                "QProgressBar::chunk{background-color:#00CC00;}");
+    loadProgress->hide();
     statusBar()->addWidget(statuslbl, 1);
+    statusBar()->addWidget(loadProgress);
     statusBar()->addWidget(crcerrorlbl);
     statusBar()->addWidget(aboutButton);
     crcerrorlbl->setText(tr("CRC Errors: ") + QString::number(CRCErrorCount));
@@ -36,6 +46,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect (this, &MainWindow::dvsfAfterCloseClear, &devSettForm, &devSettingsForm::afterCloseClearing);
     connect (m_ui->valueArea, &QTabWidget::currentChanged, this, &MainWindow::setCurrentOpenTab);
     connect (logger, &Logger::showStatusMessage, this, &MainWindow::showStatusMessage);
+    connect (logger, &Logger::logLoadProgress, this, &MainWindow::setLogLoadProgress);
     connect (logger, &Logger::toTextLog, this, [ = ](QString text, bool redflag) {
         textLogWindow(QDateTime::currentDateTime(), text, redflag);
     });
@@ -45,6 +56,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->logArea->viewport()->installEventFilter(this);
     graphiq.setParent(m_ui->graphLabel);
     m_ui->graphLayout->addWidget(&cBoard);
+    cBoard.setVisible(false); //окно управления переменными показывается только при включённом контроле переменных
     connect (&cBoard, &ControlBoard::controlCommand, this, &MainWindow::guiCommandHandler);
     connect (connection, &newconnect::setVisibleControlWindow, &cBoard, &ControlBoard::setVisible);
     connect (connection, &newconnect::s_sendSettings, logger, &Logger::setSettings);
@@ -85,6 +97,7 @@ void MainWindow::addConnection()
     connect (connection, &newconnect::disconnected, logger, &Logger::stopLog);
     connect (connection, &newconnect::profileName2log, logger, &Logger::setProfileName);
     connect (connection, &newconnect::badCRC, this, &MainWindow::badCRCEvent);
+    connect (connection, &newconnect::logLoadProgress, this, &MainWindow::setLogLoadProgress);
     //connect (connection, &newconnect::corruptedData, this, &MainWindow::corruptedDataEvent);
     connect(this, &MainWindow::emitCommand, connection, &newconnect::receiveCommandFromGui);
     connection->show();
@@ -94,6 +107,20 @@ void MainWindow::showStatusMessage(QString message)
 {
     statuslbl->setText(message);
     textLogWindow(QDateTime::currentDateTime(), message, true);
+}
+
+void MainWindow::setLogLoadProgress(int percent)
+{
+    if (percent >= 100) { //загрузка завершена - прячем прогрессбар
+        loadProgress->setValue(100);
+        loadProgress->hide();
+        return;
+    }
+    if (!loadProgress->isVisible()) {
+        loadProgress->show();
+    }
+    loadProgress->setValue(percent);
+    statuslbl->setText(tr("Reading log") + ": " + QString::number(percent) + "%");
 }
 
 void MainWindow::addDeviceToList(QDateTime currentTime, QVector<int> ddata)

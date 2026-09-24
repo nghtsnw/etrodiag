@@ -52,6 +52,7 @@ private:
 
 signals:
     void showStatusMessage(QString);
+    void logLoadProgress(int percent);
     void toTextLog(QString text, bool redFlag);
     void setSettings(s_Settings);
     void readFromCsv(QMap<QDateTime, QVector<uint8_t >> );
