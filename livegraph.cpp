@@ -278,9 +278,13 @@ void liveGraph::timeNavigationScrollbarPositionChanged(int pos) // Пропор�
     if (!readFromFile) { //навигация имеет смысл только при чтении заранее считанного лога
         return;
     }
-    double proportion_slider = pos / 10000.0; //вещественное деление, иначе pos/10000 всегда 0
-    qint64 proportion_time = betweenTime * proportion_slider;
-    calculatedEndTime = beginTime.addMSecs(proportion_time);
+    const double proportion_slider = pos / 10000.0; //вещественное деление, иначе pos/10000 всегда 0
+    const qint64 frameMs = qint64(timeFrames) * 1000; //ширина кадра в мс
+    //Левая граница навигации - конец первого кадра, а не начало координат: в самом левом
+    //положении показывается первый кадр [beginTime, beginTime + frameMs], поэтому метка
+    //конца кадра на минуту (frameMs) больше начала координат.
+    const qint64 navSpan = qMax(qint64(0), betweenTime - frameMs);
+    calculatedEndTime = beginTime.addMSecs(frameMs + qint64(navSpan * proportion_slider));
     navigationActive = true;
     if (ui->timeScrollBar->isSliderDown()) { //при удержании слайдера показываем метку конца кадра
         showNavigationTimeLabel();

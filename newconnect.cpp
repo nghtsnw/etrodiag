@@ -416,7 +416,7 @@ void newconnect::readProfile()
 {
     emit cleanDevListSig();
     const s_Settings p = m_settings->settings();
-    s_protocolDescription pt;
+    s_protocolDescription pt{}; //инициализируем нулями: у невалидного профиля поля останутся валидными, а не мусором
     QFile profile(p.profilePath);
     QFileInfo info(profile);
     currentProfileName = getProfileNameFromInfo(info);
@@ -428,6 +428,10 @@ void newconnect::readProfile()
     {
         QString str = txtStream.readLine();
         QStringList strLst = str.split('\t');
+        if (strLst.size() < 2) { //пустая или неполная строка профиля - пропускаем, чтобы не выйти за границы
+            strLst.clear();
+            continue;
+        }
         if (strLst.at(0) == "packetSize") {
             pt.packetSize = (strLst.at(1).toInt(0, 10));
         }
@@ -462,7 +466,7 @@ void newconnect::readProfile()
     for (QString m : maskList)
     {
         QStringList strLst = m.split('\t');
-        if (strLst.at(0) == "thisIsMask") {
+        if (strLst.at(0) == "thisIsMask" && strLst.size() >= 14) { //ожидаем все поля маски
             s_parameterMask mask;
             mask.id = strLst.at(1).toInt(0, 10);
             mask.devNum = strLst.at(2).toInt(0, 10);

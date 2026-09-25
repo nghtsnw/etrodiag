@@ -435,8 +435,12 @@ void MainWindow::loadProfile(s_parameterMask mask)
     else if (!thisDeviceHere)
     { //создаём устройство и инициализируем пустым пакетом в oneMsgLeight байт
         createDevice(mask.devNum);
-        QVector<int> devInitArray(protocol.packetSize, 0);
-        devInitArray.replace(protocol.blockIdentifycatorPosition, mask.devNum);
+        const int packetSize = (protocol.packetSize > 0) ? protocol.packetSize : 1; //защита от невалидного профиля
+        QVector<int> devInitArray(packetSize, 0);
+        const int idPosition = protocol.blockIdentifycatorPosition;
+        if (idPosition >= 0 && idPosition < devInitArray.size()) { //не даём выйти за границы массива
+            devInitArray.replace(idPosition, mask.devNum);
+        }
         emit devUpdate(QDateTime::currentDateTime(), mask.devNum, devInitArray);
         devSettForm.updByteButtons(mask.devNum, devInitArray);
         emit sendMaskData(mask);
