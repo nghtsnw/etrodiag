@@ -20,6 +20,8 @@ liveGraph::liveGraph(QWidget *parent) :
     frameTimeLabel->setStyleSheet("QLabel{background:#FFFFAA;border:1px solid #808080;padding:2px;color:#000000;}");
     frameTimeLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
     frameTimeLabel->hide();
+    ui->leftTimeLabel->setStyleSheet("QLabel{background:#FFFFAA;border:1px solid #808080;padding:2px;color:#000000;}");
+    ui->rightTimeLabel->setStyleSheet("QLabel{background:#FFFFAA;border:1px solid #808080;padding:2px;color:#000000;}");
     connect (ui->timeScrollBar, &QScrollBar::sliderPressed, this, &liveGraph::showNavigationTimeLabel);
     connect (ui->timeScrollBar, &QScrollBar::sliderReleased, this, &liveGraph::hideNavigationTimeLabel);
     connect (this, &liveGraph::readFromFileSignal, [ = ](bool r) {

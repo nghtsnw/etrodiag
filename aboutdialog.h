@@ -18,7 +18,6 @@ public:
 private:
     Ui::AboutDialog *ui;
     QPixmap *pixmap = new QPixmap(":/etrodiag.png");
-    QString BUILDV = tr("Build from ") + QStringLiteral(__DATE__ " " __TIME__);
 };
 
 #endif // ABOUTDIALOG_H

@@ -47,7 +47,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>left</string>
+        <string>-</string>
        </property>
       </widget>
      </item>
@@ -73,7 +73,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>right</string>
+        <string>-</string>
        </property>
       </widget>
      </item>
