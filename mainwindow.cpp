@@ -7,6 +7,11 @@
 #include <QDebug>
 #include <QPushButton>
 #include <QProgressBar>
+#include <QToolButton>
+#include <QMenu>
+#include <QAction>
+#include <QFileDialog>
+#include <QFileInfo>
 #include <QList>
 #include "device.h"
 #include "devsettingsform.h"
@@ -25,23 +30,12 @@ MainWindow::MainWindow(QWidget *parent) :
 // grabGesture(gesture);
 // Надеюсь, что когда в qt починят qswipegesture, я раскомментирую это и удалю тот ужас что сейчас заменяет свайп.
     m_ui->setupUi(this);
-    loadProgress = new QProgressBar;
-    loadProgress->setRange(0, 100);
-    loadProgress->setValue(0);
-    loadProgress->setFixedWidth(160);
-    loadProgress->setTextVisible(true);
-    loadProgress->setStyleSheet("QProgressBar{border:1px solid #808080;border-radius:2px;text-align:center;}"
-                                "QProgressBar::chunk{background-color:#00CC00;}");
-    loadProgress->hide();
-    statusBar()->addWidget(statuslbl, 1);
-    statusBar()->addWidget(loadProgress);
-    statusBar()->addWidget(crcerrorlbl);
-    statusBar()->addWidget(aboutButton);
     crcerrorlbl->setText(tr("CRC Errors: ") + QString::number(CRCErrorCount));
     statuslbl->setText(tr("Etrodiag"));
     aboutButton->setText(tr("About"));
     logger = new Logger;
     addConnection();
+    setupStatusBar();
     connect (&byteSettForm, &ByteSettingsForm::editMask, &maskSettForm, &maskSettingsDialog::requestDataOnId);
     connect (this, &MainWindow::dvsfAfterCloseClear, &devSettForm, &devSettingsForm::afterCloseClearing);
     connect (m_ui->valueArea, &QTabWidget::currentChanged, this, &MainWindow::setCurrentOpenTab);
@@ -103,6 +97,296 @@ void MainWindow::addConnection()
     connection->show();
 }
 
+void MainWindow::setupStatusBar()
+{ //Строка состояния управляет подключением, профилем, портом, параметрами связи и логами
+    profileButton = new QToolButton;
+    profileButton->setPopupMode(QToolButton::InstantPopup);
+    profileButton->setToolButtonStyle(Qt::ToolButtonTextOnly);
+    profileButton->setMenu(new QMenu(profileButton));
+    connect(profileButton->menu(), &QMenu::aboutToShow, this, &MainWindow::fillProfileMenu);
+
+    portButton = new QToolButton;
+    portButton->setPopupMode(QToolButton::InstantPopup);
+    portButton->setToolButtonStyle(Qt::ToolButtonTextOnly);
+    portButton->setMenu(new QMenu(portButton));
+    connect(portButton->menu(), &QMenu::aboutToShow, this, &MainWindow::fillPortMenu);
+
+    paramsButton = new QToolButton;
+    paramsButton->setPopupMode(QToolButton::InstantPopup);
+    paramsButton->setToolButtonStyle(Qt::ToolButtonTextOnly);
+    paramsButton->setMenu(new QMenu(paramsButton));
+    connect(paramsButton->menu(), &QMenu::aboutToShow, this, &MainWindow::fillParamsMenu);
+
+    logButton = new QToolButton;
+    logButton->setPopupMode(QToolButton::InstantPopup);
+    logButton->setToolButtonStyle(Qt::ToolButtonTextOnly);
+    QMenu *logMenu = new QMenu(logButton);
+    QAction *txtAction = logMenu->addAction(tr("Write text log"));
+    txtAction->setCheckable(true);
+    connect(txtAction, &QAction::toggled, this, [this](bool on) { connection->m_settings->setWriteTxt(on); });
+    QAction *binAction = logMenu->addAction(tr("Write binary data"));
+    binAction->setCheckable(true);
+    connect(binAction, &QAction::toggled, this, [this](bool on) { connection->m_settings->setWriteBin(on); });
+    QAction *jsonAction = logMenu->addAction(tr("Write json log"));
+    jsonAction->setCheckable(true);
+    connect(jsonAction, &QAction::toggled, this, [this](bool on) { connection->m_settings->setWriteJson(on); });
+    logButton->setMenu(logMenu);
+
+    connectButton = new QPushButton(tr("Connect"));
+
+    loadProgress = new QProgressBar;
+    loadProgress->setRange(0, 100);
+    loadProgress->setValue(0);
+    loadProgress->setFixedWidth(160);
+    loadProgress->setTextVisible(true);
+    loadProgress->setStyleSheet("QProgressBar{border:1px solid #808080;border-radius:2px;text-align:center;}"
+                                "QProgressBar::chunk{background-color:#00CC00;}");
+    loadProgress->hide();
+
+    statusBar()->addWidget(statuslbl, 1);
+    statusBar()->addWidget(profileButton);
+    statusBar()->addWidget(portButton);
+    statusBar()->addWidget(paramsButton);
+    statusBar()->addWidget(logButton);
+    statusBar()->addWidget(connectButton);
+    statusBar()->addWidget(loadProgress);
+    statusBar()->addWidget(crcerrorlbl);
+    statusBar()->addWidget(aboutButton);
+
+    connect(connectButton, &QPushButton::clicked, this, [this]() { connection->toggleConnection(); });
+    connect(connection, &newconnect::connectButtonTextChanged, connectButton, &QPushButton::setText);
+    connect(connection->m_settings, &SettingsDialog::settingsChanged, this, &MainWindow::refreshConnectionButtons);
+    connect(connection, &newconnect::connected, this, [this]() {
+        serialConnected = true;
+        refreshConnectionButtons();
+    });
+    connect(connection, &newconnect::disconnected, this, [this]() {
+        serialConnected = false;
+        refreshConnectionButtons();
+    });
+
+    connectButton->setText(tr("Connect"));
+    refreshConnectionButtons();
+
+    //Автоматическое обновление списка COM-портов (без перезапуска программы)
+    knownPortList = connection->m_settings->availablePortNames();
+    portPollTimer = new QTimer(this);
+    portPollTimer->setInterval(1000);
+    connect(portPollTimer, &QTimer::timeout, this, &MainWindow::pollPorts);
+    portPollTimer->start();
+}
+
+void MainWindow::refreshConnectionButtons()
+{
+    if (!connection || !connection->m_settings) {
+        return;
+    }
+    SettingsDialog *s = connection->m_settings;
+    const QString profileName = s->currentProfileName();
+    profileButton->setText(profileName.isEmpty() ? tr("Profile") : profileName);
+
+    if (s->isReadFromFile()) {
+        portButton->setText(QFileInfo(s->selectedPortName()).fileName());
+    }
+    else {
+        const QString port = s->selectedPortName();
+        portButton->setText(port.isEmpty() ? tr("Port") : port);
+    }
+
+    paramsButton->setText(s->connectionSummary());
+    paramsButton->setDisabled(serialConnected);
+    paramsButton->setVisible(!s->isReadFromFile());
+
+    QStringList activeLogs;
+    if (s->writeTxtEnabled()) {
+        activeLogs << QStringLiteral("txt");
+    }
+    if (s->writeBinEnabled()) {
+        activeLogs << QStringLiteral("bin");
+    }
+    if (s->writeJsonEnabled()) {
+        activeLogs << QStringLiteral("json");
+    }
+    logButton->setText(activeLogs.isEmpty() ? tr("Logs") : (tr("Logs") + ": " + activeLogs.join('+')));
+
+    if (connectButton && loadProgress && !loadProgress->isVisible()) {
+        if (s->isReadFromFile()) {
+            connectButton->setText(connection->isReaderBusy() ? tr("Stop read log") : tr("Read log"));
+        }
+        else {
+            connectButton->setText(serialConnected ? tr("Disconnect") : tr("Connect"));
+        }
+    }
+}
+
+void MainWindow::fillProfileMenu()
+{
+    QMenu *menu = profileButton->menu();
+    menu->clear();
+    SettingsDialog *s = connection->m_settings;
+    const QStringList profiles = s->profileNames();
+    for (const QString &name : profiles) {
+        QAction *a = menu->addAction(name);
+        a->setCheckable(true);
+        a->setChecked(name == s->currentProfileName());
+        connect(a, &QAction::triggered, this, [this, name]() {
+            connection->m_settings->selectProfile(name);
+            refreshConnectionButtons();
+        });
+    }
+    if (!profiles.isEmpty()) {
+        menu->addSeparator();
+    }
+    QAction *createAction = menu->addAction(tr("Create new profile"));
+    connect(createAction, &QAction::triggered, this, [this]() {
+        connection->m_settings->createNewProfile();
+        refreshConnectionButtons();
+    });
+    QAction *editAction = menu->addAction(tr("Edit profile"));
+    connect(editAction, &QAction::triggered, this, [this]() {
+        m_ui->tabWidget->setCurrentIndex(0);
+        connection->editProfile();
+    });
+}
+
+void MainWindow::fillPortMenu()
+{
+    QMenu *menu = portButton->menu();
+    menu->clear();
+    SettingsDialog *s = connection->m_settings;
+    const QStringList ports = s->availablePortNames();
+    for (const QString &name : ports) {
+        QAction *a = menu->addAction(name);
+        a->setCheckable(true);
+        a->setChecked(!s->isReadFromFile() && name == s->selectedPortName());
+        connect(a, &QAction::triggered, this, [this, name]() {
+            connection->m_settings->setPortName(name);
+            refreshConnectionButtons();
+        });
+    }
+    menu->addSeparator();
+    QAction *fileAction = menu->addAction(tr("Read from file"));
+    fileAction->setCheckable(true);
+    fileAction->setChecked(s->isReadFromFile());
+    connect(fileAction, &QAction::triggered, this, [this]() {
+        SettingsDialog *st = connection->m_settings;
+        const QString file = QFileDialog::getOpenFileName(this, tr("Open csv data file"),
+                                                          st->appHomeDir + "Logs", tr("csv data (*.csv)"));
+        if (!file.isEmpty()) {
+            st->setReadFromFile(file);
+            refreshConnectionButtons();
+        }
+    });
+}
+
+void MainWindow::pollPorts()
+{ //Периодически проверяем список портов: при изменении обновляем открытое меню
+    if (!connection || !connection->m_settings) {
+        return;
+    }
+    const QStringList ports = connection->m_settings->availablePortNames();
+    if (ports == knownPortList) {
+        return;
+    }
+    knownPortList = ports;
+    connection->m_settings->refreshPorts();
+    if (portButton && portButton->menu() && portButton->menu()->isVisible()) {
+        fillPortMenu();
+    }
+}
+
+void MainWindow::fillParamsMenu()
+{
+    QMenu *menu = paramsButton->menu();
+    menu->clear();
+    SettingsDialog *s = connection->m_settings;
+    const s_Settings cur = s->currentSettings();
+    const int curBaud = cur.baudRate;
+    const int curData = static_cast<int>(cur.dataBits);
+    const int curParity = static_cast<int>(cur.parity);
+    const int curStop = static_cast<int>(cur.stopBits);
+    const int curFlow = static_cast<int>(cur.flowControl);
+    auto apply = [this](int baud, int data, int parity, int stop, int flow) {
+        connection->m_settings->applyConnection(baud, data, parity, stop, flow);
+        refreshConnectionButtons();
+    };
+
+    QMenu *baudMenu = menu->addMenu(tr("Baud rate"));
+    const QVector<int> bauds = {9600, 19200, 38400, 115200};
+    for (int b : bauds) {
+        QAction *a = baudMenu->addAction(QString::number(b));
+        a->setCheckable(true);
+        a->setChecked(curBaud == b);
+        connect(a, &QAction::triggered, this, [apply, curBaud, curData, curParity, curStop, curFlow, b]() {
+            Q_UNUSED(curBaud)
+            apply(b, curData, curParity, curStop, curFlow);
+        });
+    }
+
+    QMenu *dataMenu = menu->addMenu(tr("Data bits"));
+    const QVector<int> dataBits = {5, 6, 7, 8};
+    for (int d : dataBits) {
+        QAction *a = dataMenu->addAction(QString::number(d));
+        a->setCheckable(true);
+        a->setChecked(curData == d);
+        connect(a, &QAction::triggered, this, [apply, curBaud, curParity, curStop, curFlow, d]() {
+            apply(curBaud, d, curParity, curStop, curFlow);
+        });
+    }
+
+    const QVector<QPair<QString, int>> parities = {
+        {tr("None"), static_cast<int>(QSerialPort::NoParity)},
+        {tr("Even"), static_cast<int>(QSerialPort::EvenParity)},
+        {tr("Odd"), static_cast<int>(QSerialPort::OddParity)},
+        {tr("Mark"), static_cast<int>(QSerialPort::MarkParity)},
+        {tr("Space"), static_cast<int>(QSerialPort::SpaceParity)}
+    };
+    QMenu *parityMenu = menu->addMenu(tr("Parity"));
+    for (const QPair<QString, int> &p : parities) {
+        QAction *a = parityMenu->addAction(p.first);
+        a->setCheckable(true);
+        a->setChecked(curParity == p.second);
+        const int value = p.second;
+        connect(a, &QAction::triggered, this, [apply, curBaud, curData, curStop, curFlow, value]() {
+            apply(curBaud, curData, value, curStop, curFlow);
+        });
+    }
+
+    const QVector<QPair<QString, int>> stopBits = {
+        {tr("1"), static_cast<int>(QSerialPort::OneStop)},
+#ifdef Q_OS_WIN
+        {tr("1.5"), static_cast<int>(QSerialPort::OneAndHalfStop)},
+#endif
+        {tr("2"), static_cast<int>(QSerialPort::TwoStop)}
+    };
+    QMenu *stopMenu = menu->addMenu(tr("Stop bits"));
+    for (const QPair<QString, int> &p : stopBits) {
+        QAction *a = stopMenu->addAction(p.first);
+        a->setCheckable(true);
+        a->setChecked(curStop == p.second);
+        const int value = p.second;
+        connect(a, &QAction::triggered, this, [apply, curBaud, curData, curParity, curFlow, value]() {
+            apply(curBaud, curData, curParity, value, curFlow);
+        });
+    }
+
+    const QVector<QPair<QString, int>> flowControls = {
+        {tr("None"), static_cast<int>(QSerialPort::NoFlowControl)},
+        {tr("RTS/CTS"), static_cast<int>(QSerialPort::HardwareControl)},
+        {tr("XON/XOFF"), static_cast<int>(QSerialPort::SoftwareControl)}
+    };
+    QMenu *flowMenu = menu->addMenu(tr("Flow control"));
+    for (const QPair<QString, int> &p : flowControls) {
+        QAction *a = flowMenu->addAction(p.first);
+        a->setCheckable(true);
+        a->setChecked(curFlow == p.second);
+        const int value = p.second;
+        connect(a, &QAction::triggered, this, [apply, curBaud, curData, curParity, curStop, value]() {
+            apply(curBaud, curData, curParity, curStop, value);
+        });
+    }
+}
+
 void MainWindow::showStatusMessage(QString message)
 {
     statuslbl->setText(message);
@@ -111,13 +395,19 @@ void MainWindow::showStatusMessage(QString message)
 
 void MainWindow::setLogLoadProgress(int percent)
 {
-    if (percent >= 100) { //загрузка завершена - прячем прогрессбар
+    if (percent >= 100) { //загрузка завершена - возвращаем кнопку подключения, прячем прогрессбар
         loadProgress->setValue(100);
         loadProgress->hide();
+        if (connectButton) {
+            connectButton->show();
+        }
         return;
     }
-    if (!loadProgress->isVisible()) {
+    if (!loadProgress->isVisible()) { //во время чтения лога кнопка подключения заменяется прогрессбаром
         loadProgress->show();
+        if (connectButton) {
+            connectButton->hide();
+        }
     }
     loadProgress->setValue(percent);
     statuslbl->setText(tr("Reading log") + ": " + QString::number(percent) + "%");

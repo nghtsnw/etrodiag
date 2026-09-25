@@ -21,6 +21,7 @@ QT_BEGIN_NAMESPACE
 
 class QLabel;
 class QProgressBar;
+class QToolButton;
 //class QGestureEvent;
 //class QSwipeGesture;
 
@@ -47,6 +48,12 @@ public:
     QLabel *crcerrorlbl = nullptr;
     QPushButton *aboutButton = nullptr;
     QProgressBar *loadProgress = nullptr;
+    QToolButton *profileButton = nullptr;
+    QToolButton *portButton = nullptr;
+    QToolButton *paramsButton = nullptr;
+    QToolButton *logButton = nullptr;
+    QPushButton *connectButton = nullptr;
+    bool serialConnected = false;
     void openMaskSettingsDialog();
     void createDevice(int devNum);
     void loadProfile(s_parameterMask mask);
@@ -81,6 +88,7 @@ public slots:
 
     void showStatusMessage(QString message);
     void setLogLoadProgress(int percent);
+    void refreshConnectionButtons();
     void addDeviceToList(QDateTime currentTime, QVector<int> ddata);
     void openDevSett(int devNum, QVector<int> data);
     void openByteSett(int devNum, int byteNum);
@@ -97,6 +105,13 @@ private slots:
 
 private:
     void initActionsConnections();
+    void setupStatusBar();
+    void fillProfileMenu();
+    void fillPortMenu();
+    void fillParamsMenu();
+    void pollPorts();
+    QTimer *portPollTimer = nullptr;
+    QStringList knownPortList;
     //QDateTime returnTimestamp();
     QTimer *timer = new QTimer(this);
     void swipeTriggered(QString);

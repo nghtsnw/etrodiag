@@ -8,6 +8,7 @@
 #include <QDebug>
 #include <QStandardPaths>
 #include <QInputDialog>
+#include <QFileInfo>
 #include "global.h"
 
 static const char blankString[] = QT_TRANSLATE_NOOP("SettingsDialog", "N/A");
@@ -67,6 +68,217 @@ SettingsDialog::~SettingsDialog()
 s_Settings SettingsDialog::settings() const
 {
     return m_currentSettings;
+}
+
+s_Settings SettingsDialog::currentSettings()
+{
+    updateSettings();
+    return m_currentSettings;
+}
+
+QString SettingsDialog::connectionSummary() const
+{
+    QString parityLetter = QStringLiteral("N");
+    const QString parityText = m_ui->parityBox->currentText();
+    if (parityText == tr("Even")) {
+        parityLetter = QStringLiteral("E");
+    }
+    else if (parityText == tr("Odd")) {
+        parityLetter = QStringLiteral("O");
+    }
+    else if (parityText == tr("Mark")) {
+        parityLetter = QStringLiteral("M");
+    }
+    else if (parityText == tr("Space")) {
+        parityLetter = QStringLiteral("S");
+    }
+    return m_ui->baudRateBox->currentText() + " " + m_ui->dataBitsBox->currentText()
+           + parityLetter + m_ui->stopBitsBox->currentText();
+}
+
+bool SettingsDialog::isReadFromFile() const
+{
+    return m_currentSettings.readFromFileFlag;
+}
+
+QString SettingsDialog::selectedPortName() const
+{
+    return m_ui->serialPortInfoListBox->currentText();
+}
+
+QStringList SettingsDialog::availablePortNames() const
+{
+    QStringList ports;
+    const auto infos = QSerialPortInfo::availablePorts();
+    for (const QSerialPortInfo &info : infos) {
+        ports << info.portName();
+    }
+    return ports;
+}
+
+void SettingsDialog::refreshPorts()
+{ //перечитываем список портов, сохраняя текущий выбор (в режиме файла список не трогаем)
+    if (m_currentSettings.readFromFileFlag) {
+        return;
+    }
+    const QString current = m_ui->serialPortInfoListBox->currentText();
+    fillPortsInfo();
+    const int idx = m_ui->serialPortInfoListBox->findText(current);
+    if (idx >= 0) {
+        m_ui->serialPortInfoListBox->blockSignals(true);
+        m_ui->serialPortInfoListBox->setCurrentIndex(idx);
+        m_ui->serialPortInfoListBox->blockSignals(false);
+    }
+}
+
+QStringList SettingsDialog::profileNames() const
+{
+    QStringList profileList;
+    QDir dir(appHomeDir + "Profiles");
+    if (!dir.exists()) {
+        return profileList;
+    }
+    dir.setFilter(QDir::Files | QDir::Hidden | QDir::NoSymLinks);
+    dir.setSorting(QDir::Name);
+    QStringList filters;
+    filters << "*.eag";
+    dir.setNameFilters(filters);
+    const QFileInfoList list = dir.entryInfoList();
+    for (const QFileInfo &fileInfo : list) {
+        profileList << fileInfo.fileName();
+    }
+    return profileList;
+}
+
+QString SettingsDialog::currentProfileName() const
+{
+    return m_ui->profileSelectBox->currentText();
+}
+
+void SettingsDialog::selectProfile(const QString &fileName)
+{
+    if (fileName.isEmpty()) {
+        return;
+    }
+    if (m_ui->profileSelectBox->findText(fileName) < 0) {
+        m_ui->profileSelectBox->addItem(fileName);
+    }
+    fillProfileList();
+    m_ui->profileSelectBox->setCurrentText(fileName); //вызовет загрузку выбранного профиля
+}
+
+void SettingsDialog::createNewProfile()
+{
+    on_newProfileButton_clicked();
+}
+
+bool SettingsDialog::readOnlyProfile() const
+{
+    return m_ui->readOnlyCheckBox->isChecked();
+}
+
+bool SettingsDialog::writeTxtEnabled() const
+{
+    return m_ui->writeTxtChkBox->isChecked();
+}
+
+bool SettingsDialog::writeBinEnabled() const
+{
+    return m_ui->writeBinChkBox->isChecked();
+}
+
+bool SettingsDialog::writeJsonEnabled() const
+{
+    return m_ui->writeJsonChkBox->isChecked();
+}
+
+void SettingsDialog::setWriteTxt(bool on)
+{
+    m_ui->writeTxtChkBox->setChecked(on);
+}
+
+void SettingsDialog::setWriteBin(bool on)
+{
+    m_ui->writeBinChkBox->setChecked(on);
+}
+
+void SettingsDialog::setWriteJson(bool on)
+{
+    m_ui->writeJsonChkBox->setChecked(on);
+}
+
+void SettingsDialog::setPortName(const QString &portName)
+{
+    m_ui->serialPortInfoListBox->blockSignals(true);
+    m_ui->serialPortInfoListBox->setEditable(false);
+    const int idx = m_ui->serialPortInfoListBox->findText(portName);
+    if (idx >= 0) {
+        m_ui->serialPortInfoListBox->setCurrentIndex(idx);
+    }
+    m_ui->serialPortInfoListBox->blockSignals(false);
+    m_currentSettings.readFromFileFlag = false;
+    m_currentSettings.pathToBinFile.clear();
+    m_ui->parametersBox->setDisabled(false);
+    updateSettings();
+    emit settingsChanged();
+}
+
+void SettingsDialog::setReadFromFile(const QString &filePath)
+{
+    m_ui->serialPortInfoListBox->blockSignals(true);
+    m_ui->serialPortInfoListBox->setEditable(true);
+    m_ui->serialPortInfoListBox->setCurrentText(filePath);
+    m_ui->serialPortInfoListBox->blockSignals(false);
+    m_currentSettings.readFromFileFlag = true;
+    m_currentSettings.pathToBinFile = filePath;
+    m_ui->parametersBox->setDisabled(true);
+    updateSettings();
+    emit settingsChanged();
+}
+
+void SettingsDialog::applyConnection(int baud, int dataBits, int parity, int stopBits, int flowControl)
+{
+    int idx = m_ui->baudRateBox->findData(baud);
+    if (idx >= 0) {
+        m_ui->baudRateBox->setCurrentIndex(idx);
+    }
+    else {
+        m_ui->baudRateBox->setCurrentIndex(m_ui->baudRateBox->count() - 1); //Custom
+        m_ui->baudRateBox->setCurrentText(QString::number(baud));
+    }
+    idx = m_ui->dataBitsBox->findData(dataBits);
+    if (idx >= 0) {
+        m_ui->dataBitsBox->setCurrentIndex(idx);
+    }
+    idx = m_ui->parityBox->findData(parity);
+    if (idx >= 0) {
+        m_ui->parityBox->setCurrentIndex(idx);
+    }
+    idx = m_ui->stopBitsBox->findData(stopBits);
+    if (idx >= 0) {
+        m_ui->stopBitsBox->setCurrentIndex(idx);
+    }
+    idx = m_ui->flowControlBox->findData(flowControl);
+    if (idx >= 0) {
+        m_ui->flowControlBox->setCurrentIndex(idx);
+    }
+    updateSettings();
+    emit settingsChanged();
+}
+
+void SettingsDialog::applyConnectionSettings(const s_Settings &s)
+{
+    if (s.readFromFileFlag) {
+        setReadFromFile(s.pathToBinFile);
+    }
+    else {
+        setPortName(s.name);
+    }
+    applyConnection(s.baudRate, static_cast<int>(s.dataBits), static_cast<int>(s.parity),
+                    static_cast<int>(s.stopBits), static_cast<int>(s.flowControl));
+    m_ui->readOnlyCheckBox->setChecked(s.readOnlyProfile);
+    updateSettings();
+    emit settingsChanged();
 }
 
 void SettingsDialog::showPortInfo(int idx)
@@ -297,6 +509,7 @@ void SettingsDialog::on_newProfileButton_clicked()
         file.open(QIODevice::WriteOnly);
         file.close();
         fillProfileList();
+        m_ui->profileSelectBox->setCurrentText(QFileInfo(fileName).fileName()); //сразу выбираем созданный профиль
     }
 }
 

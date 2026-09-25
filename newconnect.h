@@ -37,7 +37,7 @@ public:
     QDateTime returnTimestamp();
     bool permission2SaveMasks = false;
     QString currentProfileName;
-
+    bool isReaderBusy() const { return readerBusy; } //идёт чтение лога из файла
     ~newconnect();
 
 signals:
@@ -69,6 +69,8 @@ signals:
     void pushByteToProfiler(uint8_t);
     void putIntDataToConsole(QVector<uint8_t>);
     void logLoadProgress(int percent);
+    void connectButtonTextChanged(QString); //текст кнопки подключения в строке состояния
+    void loadSettings(s_Settings);          //настройки связи, считанные из профиля
 
 public slots:
 
@@ -78,6 +80,8 @@ public slots:
     void saveProfile();
     void receiveCommandFromGui(QVector<quint8> command, bool newcommandflag);
     void readFromFile(QMap<QDateTime, QVector<uint8_t >> );
+    void toggleConnection(); //подключиться/отключиться или прочитать лог
+    void editProfile();      //открыть окно редактирования профиля
 
 private slots:
     void openSerialPort();

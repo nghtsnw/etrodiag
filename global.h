@@ -6,30 +6,30 @@
 
 typedef struct s_protocolDescription
 {
-    int blockIdentifycatorPosition ;
-    int packetSize;
-    int calcCRCFromPosition;
-    int markerPacketBeginSize;
-    uint8_t markerPacketBeginByte1;
-    uint8_t markerPacketBeginByte2;
+    int blockIdentifycatorPosition = 38;
+    int packetSize = 40;
+    int calcCRCFromPosition = 0;
+    int markerPacketBeginSize = 1;
+    uint8_t markerPacketBeginByte1 = 0xFF;
+    uint8_t markerPacketBeginByte2 = 0x00;
     //int timeoutAfterLastByte;
     QString description;
-    bool varControl;
+    bool varControl = false;
 } s_protocolDescription;
 
 typedef struct s_Settings
 {
     QString name;
-    qint32 baudRate;
-    QString stringBaudRate;
-    QSerialPort::DataBits dataBits;
-    QString stringDataBits;
-    QSerialPort::Parity parity;
-    QString stringParity;
-    QSerialPort::StopBits stopBits;
-    QString stringStopBits;
-    QSerialPort::FlowControl flowControl;
-    QString stringFlowControl;
+    qint32 baudRate = QSerialPort::Baud115200;
+    QString stringBaudRate = QStringLiteral("115200");
+    QSerialPort::DataBits dataBits = QSerialPort::Data8;
+    QString stringDataBits = QStringLiteral("8");
+    QSerialPort::Parity parity = QSerialPort::NoParity;
+    QString stringParity = QStringLiteral("None");
+    QSerialPort::StopBits stopBits = QSerialPort::OneStop;
+    QString stringStopBits = QStringLiteral("1");
+    QSerialPort::FlowControl flowControl = QSerialPort::NoFlowControl;
+    QString stringFlowControl = QStringLiteral("None");
     QString profilePath;
     bool readOnlyProfile = true;
     bool readFromFileFlag = false;

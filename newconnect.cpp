@@ -25,6 +25,9 @@ newconnect::newconnect(QWidget *parent) :
     ui(new Ui::newconnect)
 {
     ui->setupUi(this);
+    //Кнопки подключения/настроек перенесены в строку состояния главного окна
+    ui->connectButton->hide();
+    ui->settingsButton->hide();
     m_console->setEnabled(false);
     m_console->setParent(ui->consoleFrame);
     m_console->show();
@@ -61,6 +64,7 @@ newconnect::newconnect(QWidget *parent) :
     connect (this, &newconnect::loadProtocol, this, [this](s_protocolDescription p) {
         emit setVisibleControlWindow(p.varControl); //видимость окна управления берём из профиля
     });
+    connect (this, &newconnect::loadSettings, m_settings, &SettingsDialog::applyConnectionSettings);
     /*----------------------------------------------------------------------------------------------------------------------------*/
     /*----------------------------------------------------------------------------------------------------------------------------*/
     //По применению настроек в UI, они сразу применяются на датаразборке, копия в newconnect для сохранения профиля
@@ -70,10 +74,10 @@ newconnect::newconnect(QWidget *parent) :
         protocol = p;
         emit setVisibleControlWindow(p.varControl); //окно управления переменными видно только при включённом контроле
         if (m_settings->settings().readFromFileFlag) {
-            ui->connectButton->setText(tr("Read log"));
+            emit connectButtonTextChanged(tr("Read log"));
         }
         else {
-            ui->connectButton->setText(tr("Connect"));
+            emit connectButtonTextChanged(tr("Connect"));
         }
         emit s_sendSettings(m_settings->settings());
     });
@@ -86,7 +90,6 @@ newconnect::newconnect(QWidget *parent) :
     connect (this, &newconnect::sendRawData, m_console, &Console::putData);
     connect (this, &newconnect::putIntDataToConsole, m_console, &Console::putIntData);
     connect (this, &newconnect::sendRawDataWithTime, this, &newconnect::readFromFile);
-    on_settingsButton_clicked();
 }
 
 newconnect::~newconnect()
@@ -97,12 +100,18 @@ newconnect::~newconnect()
 
 void newconnect::on_settingsButton_clicked()
 {
+    editProfile();
+}
+
+void newconnect::editProfile()
+{ //открываем окно редактирования текущего профиля
     m_settings->setParent(this);
     m_console->hide();
     ui->connectButton->hide();
     ui->settingsButton->hide();
     ui->consoleFrame->hide();
     readProfile();
+    m_settings->refreshPorts(); //показываем актуальный список портов
     m_settings->show();
 }
 
@@ -274,7 +283,12 @@ void newconnect::showStatusMessage(QString message)
 
 void newconnect::on_connectButton_clicked()
 {
-    p_local = m_settings->settings();
+    toggleConnection();
+}
+
+void newconnect::toggleConnection()
+{
+    p_local = m_settings->currentSettings();
     if (!p_local.readFromFileFlag)
     {
         if (m_serial->isOpen())
@@ -282,7 +296,7 @@ void newconnect::on_connectButton_clicked()
             this->closeSerialPort();
             if (!(m_serial->isOpen()))
             {
-                ui->connectButton->setText(tr("Connect"));
+                emit connectButtonTextChanged(tr("Connect"));
                 showStatusMessage(tr("Connection closed"));
                 emit disconnected();
             }
@@ -294,7 +308,7 @@ void newconnect::on_connectButton_clicked()
             {
                 emit connected();
                 createNewFileNamePermission = true;
-                ui->connectButton->setText(tr("Disconnect"));
+                emit connectButtonTextChanged(tr("Disconnect"));
             }
         }
     }
@@ -304,11 +318,11 @@ void newconnect::on_connectButton_clicked()
             readerBusy = true; //весь лог читается и разбирается разом внутри emit ниже
             emit connected();
             emit readFromFileSignal(p_local.readFromFileFlag);
-            ui->connectButton->setText(tr("Stop read log"));
+            emit connectButtonTextChanged(tr("Stop read log"));
         }
         else {
             readerBusy = false;
-            ui->connectButton->setText(tr("Read log"));
+            emit connectButtonTextChanged(tr("Read log"));
             showStatusMessage(tr("Connection closed"));
             emit readFromFileSignal(false); //лог закрыт - график возвращается к реальному времени
             emit disconnected();
@@ -398,6 +412,16 @@ void newconnect::saveProfile()
         txtStream << "markerPacketBeginTextB2" << "\t" << QString::number(protocol.markerPacketBeginByte2, 16) << "\n";
         txtStream << "description" << "\t" << protocol.description << "\n";
         txtStream << "varControl" << "\t" << (protocol.varControl ? "true" : "false") << "\n";
+        //Настройки связи с портом (сохраняются и загружаются вместе с профилем)
+        txtStream << "readFromFile" << "\t" << (p.readFromFileFlag ? "true" : "false") << "\n";
+        txtStream << "portName" << "\t" << (p.readFromFileFlag ? QString() : p.name) << "\n";
+        txtStream << "logFilePath" << "\t" << p.pathToBinFile << "\n";
+        txtStream << "baudRate" << "\t" << QString::number(p.baudRate, 10) << "\n";
+        txtStream << "dataBits" << "\t" << QString::number(static_cast<int>(p.dataBits), 10) << "\n";
+        txtStream << "parity" << "\t" << QString::number(static_cast<int>(p.parity), 10) << "\n";
+        txtStream << "stopBits" << "\t" << QString::number(static_cast<int>(p.stopBits), 10) << "\n";
+        txtStream << "flowControl" << "\t" << QString::number(static_cast<int>(p.flowControl), 10) << "\n";
+        txtStream << "readOnlyProfile" << "\t" << (p.readOnlyProfile ? "true" : "false") << "\n";
         while (maskVectorsListIt.hasNext())
         {
             QListIterator<QString> lstIt(maskVectorsListIt.peekNext()->lst);
@@ -417,6 +441,8 @@ void newconnect::readProfile()
     emit cleanDevListSig();
     const s_Settings p = m_settings->settings();
     s_protocolDescription pt{}; //инициализируем нулями: у невалидного профиля поля останутся валидными, а не мусором
+    s_Settings st; //настройки связи, сохранённые в профиле
+    bool hasSettings = false;
     QFile profile(p.profilePath);
     QFileInfo info(profile);
     currentProfileName = getProfileNameFromInfo(info);
@@ -456,10 +482,50 @@ void newconnect::readProfile()
         if (strLst.at(0) == "varControl") {
             pt.varControl = (strLst.at(1) == "true") ? true : false;
         }
+        //Настройки связи с портом (есть только в новых профилях)
+        if (strLst.at(0) == "readFromFile") {
+            st.readFromFileFlag = (strLst.at(1) == "true");
+            hasSettings = true;
+        }
+        if (strLst.at(0) == "portName") {
+            st.name = strLst.at(1);
+            hasSettings = true;
+        }
+        if (strLst.at(0) == "logFilePath") {
+            st.pathToBinFile = strLst.at(1);
+            hasSettings = true;
+        }
+        if (strLst.at(0) == "baudRate") {
+            st.baudRate = strLst.at(1).toInt(0, 10);
+            hasSettings = true;
+        }
+        if (strLst.at(0) == "dataBits") {
+            st.dataBits = static_cast<QSerialPort::DataBits>(strLst.at(1).toInt(0, 10));
+            hasSettings = true;
+        }
+        if (strLst.at(0) == "parity") {
+            st.parity = static_cast<QSerialPort::Parity>(strLst.at(1).toInt(0, 10));
+            hasSettings = true;
+        }
+        if (strLst.at(0) == "stopBits") {
+            st.stopBits = static_cast<QSerialPort::StopBits>(strLst.at(1).toInt(0, 10));
+            hasSettings = true;
+        }
+        if (strLst.at(0) == "flowControl") {
+            st.flowControl = static_cast<QSerialPort::FlowControl>(strLst.at(1).toInt(0, 10));
+            hasSettings = true;
+        }
+        if (strLst.at(0) == "readOnlyProfile") {
+            st.readOnlyProfile = (strLst.at(1) == "true");
+            hasSettings = true;
+        }
         if (strLst.at(0) == "thisIsMask") {
             maskList.append(str);
         }
         strLst.clear();
+    }
+    if (hasSettings) {
+        emit loadSettings(st); //применяем настройки связи из профиля
     }
     emit loadProtocol(pt);
     // Два раза читаю файл, потому что сначала нужно применить протокол, только потом читать маски
@@ -497,10 +563,8 @@ void newconnect::resizeEvent(QResizeEvent *event)
 }
 
 void newconnect::restoreWindowAfterApplySettings()
-{
+{ //кнопки подключения/настроек теперь живут в строке состояния, поэтому не показываем их здесь
     m_console->show();
-    ui->connectButton->show();
-    ui->settingsButton->show();
     ui->consoleFrame->show();
 }
 
