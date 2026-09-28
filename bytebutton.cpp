@@ -30,16 +30,22 @@ void byteButton::updateBtnData(int _devNum, QVector<int> fullData)
     {        
     if (wordType == 0)
     {
-        txttmp = (Int2Hex(fullData.at(byteNum)));
+        if (byteNum < fullData.size()) {
+            txttmp = (Int2Hex(fullData.at(byteNum)));
+        }
     }
     else if (wordType == 1)
     {
-        txttmp = ((Int2Hex(fullData.at(byteNum+1))+':'+(Int2Hex(fullData.at(byteNum)))));
+        if (byteNum + 1 < fullData.size()) { //проверка: после смены профиля пакет может быть короче
+            txttmp = ((Int2Hex(fullData.at(byteNum+1))+':'+(Int2Hex(fullData.at(byteNum)))));
+        }
     }
     else if (wordType == 2)
     {
-        txttmp = ((Int2Hex(fullData.at(byteNum+3))+':'+(Int2Hex(fullData.at(byteNum+2)))+':'
-                             +(Int2Hex(fullData.at(byteNum+1))+':'+(Int2Hex(fullData.at(byteNum))))));
+        if (byteNum + 3 < fullData.size()) { //проверка: после смены профиля пакет может быть короче
+            txttmp = ((Int2Hex(fullData.at(byteNum+3))+':'+(Int2Hex(fullData.at(byteNum+2)))+':'
+                                 +(Int2Hex(fullData.at(byteNum+1))+':'+(Int2Hex(fullData.at(byteNum))))));
+        }
     }
     if (txttmp != this->text())
     {

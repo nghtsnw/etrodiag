@@ -27,7 +27,7 @@ byteDefinition::~byteDefinition()
 
 void byteDefinition::updateSlot(int _devNum, QVector<int> _data)
 {
-    if (devNum == _devNum)
+    if (devNum == _devNum && th_byteNum >= 0 && th_byteNum < _data.size())
     {
         th_data = _data.at(th_byteNum);
         calcWordData(devNum, _data);
@@ -141,30 +141,36 @@ void byteDefinition::calcWordData(int _devNum, QVector<int> data)
     if (_devNum == devNum)
     {
         if (wordType == 0) {
-            wordData = (data.at(th_byteNum));
+            if (th_byteNum < data.size()) {
+                wordData = (data.at(th_byteNum));
+            }
         }
         else if (wordType == 1)
         {
-            for (int y = 0; y <= 1; y++)
-            {
-                bytex = (data.at(th_byteNum + y));
-                for (int i = 0, mask = 1; i <= 7; i++, step++, mask = mask << 1)
+            if (th_byteNum + 1 < data.size()) { //проверка: после смены профиля пакет может быть короче
+                for (int y = 0; y <= 1; y++)
                 {
-                    if (bytex & mask) {
-                        wordData += pow(2, step);
+                    bytex = (data.at(th_byteNum + y));
+                    for (int i = 0, mask = 1; i <= 7; i++, step++, mask = mask << 1)
+                    {
+                        if (bytex & mask) {
+                            wordData += pow(2, step);
+                        }
                     }
                 }
             }
         }
         else if (wordType == 2)
         {
-            for (int y = 0; y <= 3; y++)
-            {
-                bytex = (data.at(th_byteNum + y));
-                for (int i = 0, mask = 1; i <= 7; i++, step++, mask = mask << 1)
+            if (th_byteNum + 3 < data.size()) { //проверка: после смены профиля пакет может быть короче
+                for (int y = 0; y <= 3; y++)
                 {
-                    if (bytex & mask) {
-                        wordData += pow(2, step);
+                    bytex = (data.at(th_byteNum + y));
+                    for (int i = 0, mask = 1; i <= 7; i++, step++, mask = mask << 1)
+                    {
+                        if (bytex & mask) {
+                            wordData += pow(2, step);
+                        }
                     }
                 }
             }

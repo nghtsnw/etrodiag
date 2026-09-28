@@ -38,6 +38,7 @@ public:
     bool permission2SaveMasks = false;
     QString currentProfileName;
     bool isReaderBusy() const { return readerBusy; } //идёт чтение лога из файла
+    bool hasProfileChanges() const { return profileModified; } //есть несохранённые изменения профиля
     ~newconnect();
 
 signals:
@@ -82,6 +83,10 @@ public slots:
     void readFromFile(QMap<QDateTime, QVector<uint8_t >> );
     void toggleConnection(); //подключиться/отключиться или прочитать лог
     void editProfile();      //открыть окно редактирования профиля
+    void sendCurrentSettings(); //переслать текущие настройки связи в логгер и разбор
+    void commitProfileChanges();   //заменить профиль временным файлом (старый уйдёт в .bak)
+    void discardProfileChanges();  //отказаться от изменений профиля (удалить .tmp)
+    void offerToSaveProfile();     //предложить сохранить изменённый профиль
 
 private slots:
     void openSerialPort();
@@ -98,6 +103,7 @@ private:
     QString message;
     bool createNewFileNamePermission = true;
     bool readerBusy = false;
+    bool profileModified = false; //профиль изменён, изменения лежат в <профиль>.eag.tmp
     QString binFileName;
     s_Settings p_local;
     //QByteArray fsba;

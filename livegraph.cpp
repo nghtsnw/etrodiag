@@ -186,6 +186,9 @@ void liveGraph::incomingDataSlot(QDateTime currentTimeForData, s_parameterMask d
     }
     if (data.drawGraphFlag)
     {
+        if (!graphAnnotationMinMax.contains(data.parameterName)) { //нет записи (например после смены профиля) - создаём, иначе .at() выйдет за границы
+            graphAnnotationMinMax.insert(data.parameterName, {data.endValue, data.endValue});
+        }
         if (graphAnnotationMinMax.value(data.parameterName).at(0) > data.endValue) //Тут сыпется при попытке рисования
         {
             QVector<double> minMax = {data.endValue, graphAnnotationMinMax.value(data.parameterName).at(1)};

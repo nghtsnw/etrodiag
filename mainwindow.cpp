@@ -12,6 +12,7 @@
 #include <QAction>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QCloseEvent>
 #include <QList>
 #include "device.h"
 #include "devsettingsform.h"
@@ -36,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
     logger = new Logger;
     addConnection();
     setupStatusBar();
+    connection->readProfile(); //применяем профиль (протокол/настройки) при старте, как раньше открытие настроек
     connect (&byteSettForm, &ByteSettingsForm::editMask, &maskSettForm, &maskSettingsDialog::requestDataOnId);
     connect (this, &MainWindow::dvsfAfterCloseClear, &devSettForm, &devSettingsForm::afterCloseClearing);
     connect (m_ui->valueArea, &QTabWidget::currentChanged, this, &MainWindow::setCurrentOpenTab);
@@ -196,6 +198,8 @@ void MainWindow::refreshConnectionButtons()
     paramsButton->setText(s->connectionSummary());
     paramsButton->setDisabled(serialConnected);
     paramsButton->setVisible(!s->isReadFromFile());
+    profileButton->setDisabled(serialConnected); //при активном соединении профиль не переключаем
+    logButton->setVisible(!s->isReadFromFile()); //при чтении из файла настройка логов не нужна
 
     QStringList activeLogs;
     if (s->writeTxtEnabled()) {
@@ -247,6 +251,12 @@ void MainWindow::fillProfileMenu()
         m_ui->tabWidget->setCurrentIndex(0);
         connection->editProfile();
     });
+    QAction *deleteAction = menu->addAction(tr("Delete profile"));
+    deleteAction->setEnabled(!profiles.isEmpty());
+    connect(deleteAction, &QAction::triggered, this, [this]() {
+        connection->m_settings->deleteCurrentProfile();
+        refreshConnectionButtons();
+    });
 }
 
 void MainWindow::fillPortMenu()
@@ -289,7 +299,6 @@ void MainWindow::pollPorts()
         return;
     }
     knownPortList = ports;
-    connection->m_settings->refreshPorts();
     if (portButton && portButton->menu() && portButton->menu()->isVisible()) {
         fillPortMenu();
     }
@@ -415,6 +424,9 @@ void MainWindow::setLogLoadProgress(int percent)
 
 void MainWindow::addDeviceToList(QDateTime currentTime, QVector<int> ddata)
 {
+    if (protocol.blockIdentifycatorPosition < 0 || protocol.blockIdentifycatorPosition >= ddata.size()) {
+        return; //некорректный протокол/данные - не даём выйти за границы
+    }
     devNum = ddata.at(protocol.blockIdentifycatorPosition);//узнаём номер устройства в посылке
     thisDeviceHere = false; //обнуляем флаг
     vlayChildList = m_ui->devArea->findChildren<Device*>();
@@ -750,6 +762,14 @@ void MainWindow::resizeEvent(QResizeEvent*)
     graphiq.resize(m_ui->graphLabel->size());
 }
 
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    if (connection) {
+        connection->offerToSaveProfile(); //при закрытии программы предлагаем сохранить изменения профиля
+    }
+    event->accept();
+}
+
 void MainWindow::cleanDevList()
 {
     QList<Device*> vlayChildList = m_ui->devArea->findChildren<Device*>();
@@ -758,6 +778,7 @@ void MainWindow::cleanDevList()
         vlayChildListIt.next()->~Device();
     }
     CRCErrorCount = 0;
+    graphiq.cleanGraph(); //чистим графики, чтобы после смены профиля не оставались чужие кривые
 }
 
 void MainWindow::on_tabWidget_currentChanged(int)

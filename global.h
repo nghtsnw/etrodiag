@@ -31,7 +31,6 @@ typedef struct s_Settings
     QSerialPort::FlowControl flowControl = QSerialPort::NoFlowControl;
     QString stringFlowControl = QStringLiteral("None");
     QString profilePath;
-    bool readOnlyProfile = true;
     bool readFromFileFlag = false;
     QString pathToBinFile;
 } s_Settings;

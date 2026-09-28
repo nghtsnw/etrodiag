@@ -84,7 +84,7 @@ void Logger::binReadFromCsv(bool r)
         const int step = qMax(1, rowsCount / 100); //обновляем прогресс примерно 100 раз
         for (int row = 0; row < rowsCount; ++row) { //Чтение всего csv в QMap
             const auto &i = readData.at(row);
-            if (i.at(0) != "time") { // Проверка что это не текст с первой строки файла
+            if (i.size() >= 2 && i.at(0) != "time") { // Проверка что это не текст с первой строки файла
                 QStringList splittedText = i.at(1).split(':');
                 QVector<uint8_t> convertedDataFromText;
                 for (const QString &s : std::as_const(splittedText)) {

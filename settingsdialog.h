@@ -3,7 +3,6 @@
 
 #include <QWidget>
 #include <QSerialPort>
-#include <QLineEdit>
 #include "global.h"
 
 QT_BEGIN_NAMESPACE
@@ -11,8 +10,6 @@ QT_BEGIN_NAMESPACE
 namespace Ui {
     class SettingsDialog;
 }
-
-class QIntValidator;
 
 QT_END_NAMESPACE
 
@@ -28,17 +25,16 @@ public:
     s_Settings settings() const;
 
     // API для кнопок в строке состояния главного окна
-    s_Settings currentSettings();                 // синхронизирует модель с виджетами и возвращает её
+    s_Settings currentSettings();                 // синхронизирует модель с состоянием и возвращает её
     QString connectionSummary() const;            // краткая подпись текущих параметров связи
     bool isReadFromFile() const;                  // выбран режим чтения лога из файла
     QString selectedPortName() const;             // выбранный COM-порт или путь к логу
     QStringList availablePortNames() const;       // список доступных COM-портов
-    void refreshPorts();                          // перечитать список COM-портов
     QStringList profileNames() const;             // список профилей из каталога Profiles
     QString currentProfileName() const;
     void selectProfile(const QString &fileName);  // выбрать профиль (загрузит его)
     void createNewProfile();                      // диалог создания нового профиля
-    bool readOnlyProfile() const;
+    void deleteCurrentProfile();                  // удалить выбранный профиль (с подтверждением)
     bool writeTxtEnabled() const;
     bool writeBinEnabled() const;
     bool writeJsonEnabled() const;
@@ -64,9 +60,6 @@ signals:
 
 public slots:
     void apply(); //применение настроек: сохранение профиля и закрытие окна (кнопка "Применить")
-    void showPortInfo(int idx);
-    void checkCustomBaudRatePolicy(int idx);
-    void checkCustomDevicePathPolicy(int idx);
 
     void on_newProfileButton_clicked();
 
@@ -74,21 +67,9 @@ public slots:
 
     void on_deleteProfileButton_clicked();
 
-    void on_readOnlyCheckBox_stateChanged(int);
-
-    void on_writeBinChkBox_stateChanged(int);
-
-    void on_writeTxtChkBox_stateChanged(int);
-
-    void on_writeJsonChkBox_stateChanged(int);
-
-
 private:
-    void fillPortsParameters();
-    void fillPortsInfo();
     void updateSettings();
     void fillProfileList();
-    void portBoxEvent(int currentText);
     s_protocolDescription currentProtocol;
     void updateProtocol();
     void markerTextNormalisation(int numberByte, QString text);
@@ -96,7 +77,10 @@ private:
 private:
     Ui::SettingsDialog *m_ui = nullptr;
     s_Settings m_currentSettings;
-    QIntValidator *m_intValidator = nullptr;
+    bool m_readFromFileMode = false; //режим "чтение из файла" - меняется только явным выбором пользователя
+    bool m_writeTxt = false;
+    bool m_writeBin = false;
+    bool m_writeJson = false;
 };
 
 #endif // SETTINGSDIALOG_H

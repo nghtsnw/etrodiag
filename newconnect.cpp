@@ -65,6 +65,9 @@ newconnect::newconnect(QWidget *parent) :
         emit setVisibleControlWindow(p.varControl); //видимость окна управления берём из профиля
     });
     connect (this, &newconnect::loadSettings, m_settings, &SettingsDialog::applyConnectionSettings);
+    //Любое программное изменение настроек связи (порт, файл лога, параметры) сразу уходит
+    //в логгер и разбор, иначе путь к файлу лога не доходил до Logger и чтение падало.
+    connect (m_settings, &SettingsDialog::settingsChanged, this, &newconnect::sendCurrentSettings);
     /*----------------------------------------------------------------------------------------------------------------------------*/
     /*----------------------------------------------------------------------------------------------------------------------------*/
     //По применению настроек в UI, они сразу применяются на датаразборке, копия в newconnect для сохранения профиля
@@ -111,8 +114,12 @@ void newconnect::editProfile()
     ui->settingsButton->hide();
     ui->consoleFrame->hide();
     readProfile();
-    m_settings->refreshPorts(); //показываем актуальный список портов
     m_settings->show();
+}
+
+void newconnect::sendCurrentSettings()
+{ //пересылаем актуальные настройки связи в логгер и на разбор
+    emit s_sendSettings(m_settings->currentSettings());
 }
 
 void newconnect::openSerialPort()
@@ -296,6 +303,7 @@ void newconnect::toggleConnection()
             this->closeSerialPort();
             if (!(m_serial->isOpen()))
             {
+                offerToSaveProfile(); //по завершении соединения предлагаем сохранить изменения профиля
                 emit connectButtonTextChanged(tr("Connect"));
                 showStatusMessage(tr("Connection closed"));
                 emit disconnected();
@@ -306,6 +314,7 @@ void newconnect::toggleConnection()
             openSerialPort();
             if (m_serial->isOpen())
             {
+                emit readFromFileSignal(false); //живое соединение - график идёт по реальному времени
                 emit connected();
                 createNewFileNamePermission = true;
                 emit connectButtonTextChanged(tr("Disconnect"));
@@ -318,32 +327,25 @@ void newconnect::toggleConnection()
             readerBusy = true; //весь лог читается и разбирается разом внутри emit ниже
             emit connected();
             emit readFromFileSignal(p_local.readFromFileFlag);
-            emit connectButtonTextChanged(tr("Stop read log"));
-        }
-        else {
-            readerBusy = false;
+            readerBusy = false; //чтение синхронное - сразу завершаем сессию
             emit connectButtonTextChanged(tr("Read log"));
-            showStatusMessage(tr("Connection closed"));
-            emit readFromFileSignal(false); //лог закрыт - график возвращается к реальному времени
-            emit disconnected();
+            showStatusMessage(tr("End of file"));
+            emit disconnected(); //соединение закрывается автоматически после чтения лога
+            offerToSaveProfile(); //если профиль менялся - предложим сохранить
         }
     }
 }
 
 void newconnect::prepareToSaveProfile()
-{
-    const s_Settings p = m_settings->settings();
-    if (!p.readOnlyProfile)
-    { //очищаем список, выставляем разрешение для дальнейших операций по сохранению, даём сигнал на запрос всех масок
-        maskVectorsList = this->findChildren<txtmaskobj*>();
-        QListIterator<txtmaskobj*> maskVectorsListIt(maskVectorsList);
-        maskVectorsListIt.toFront();
-        while (maskVectorsListIt.hasNext()) {
-            maskVectorsListIt.next()->~txtmaskobj();
-        }
-        permission2SaveMasks = true;
-        emit saveAllMasks();
+{ //очищаем список масок, разрешаем сохранение и запрашиваем у устройств все маски
+    maskVectorsList = this->findChildren<txtmaskobj*>();
+    QListIterator<txtmaskobj*> maskVectorsListIt(maskVectorsList);
+    maskVectorsListIt.toFront();
+    while (maskVectorsListIt.hasNext()) {
+        maskVectorsListIt.next()->~txtmaskobj();
     }
+    permission2SaveMasks = true;
+    emit saveAllMasks();
 }
 
 void newconnect::saveProfileSlot4Masks(s_parameterMask mask)
@@ -392,47 +394,123 @@ void newconnect::saveProfileSlot4Masks(s_parameterMask mask)
 }
 
 void newconnect::saveProfile()
-{
-    if (permission2SaveMasks)
-    {
-        maskVectorsList = this->findChildren<txtmaskobj*>();
-        QListIterator<txtmaskobj*> maskVectorsListIt(maskVectorsList);
-        maskVectorsListIt.toFront();
-        const s_Settings p = m_settings->settings();
-        QFile profile(p.profilePath);
-        QFileInfo info(profile);
-        profile.open(QIODevice::WriteOnly | QIODevice::Text);
-        QTextStream txtStream(&profile);
-        txtStream << info.fileName() << "\n";
-        txtStream << "packetSize" << "\t" << QString::number(protocol.packetSize, 10) << "\n";
-        txtStream << "blockIdentifycatorPosition" << "\t" << QString::number(protocol.blockIdentifycatorPosition, 10) << "\n";
-        txtStream << "calcCRCFromPosition" << "\t" << QString::number(protocol.calcCRCFromPosition, 10) << "\n";
-        txtStream << "markerPacketBeginSize" << "\t" << QString::number(protocol.markerPacketBeginSize, 10) << "\n";
-        txtStream << "markerPacketBeginTextB1" << "\t" << QString::number(protocol.markerPacketBeginByte1, 16) << "\n";
-        txtStream << "markerPacketBeginTextB2" << "\t" << QString::number(protocol.markerPacketBeginByte2, 16) << "\n";
-        txtStream << "description" << "\t" << protocol.description << "\n";
-        txtStream << "varControl" << "\t" << (protocol.varControl ? "true" : "false") << "\n";
-        //Настройки связи с портом (сохраняются и загружаются вместе с профилем)
-        txtStream << "readFromFile" << "\t" << (p.readFromFileFlag ? "true" : "false") << "\n";
-        txtStream << "portName" << "\t" << (p.readFromFileFlag ? QString() : p.name) << "\n";
-        txtStream << "logFilePath" << "\t" << p.pathToBinFile << "\n";
-        txtStream << "baudRate" << "\t" << QString::number(p.baudRate, 10) << "\n";
-        txtStream << "dataBits" << "\t" << QString::number(static_cast<int>(p.dataBits), 10) << "\n";
-        txtStream << "parity" << "\t" << QString::number(static_cast<int>(p.parity), 10) << "\n";
-        txtStream << "stopBits" << "\t" << QString::number(static_cast<int>(p.stopBits), 10) << "\n";
-        txtStream << "flowControl" << "\t" << QString::number(static_cast<int>(p.flowControl), 10) << "\n";
-        txtStream << "readOnlyProfile" << "\t" << (p.readOnlyProfile ? "true" : "false") << "\n";
-        while (maskVectorsListIt.hasNext())
-        {
-            QListIterator<QString> lstIt(maskVectorsListIt.peekNext()->lst);
-            while (lstIt.hasNext()) {
-                txtStream << lstIt.next() << "\t";
-            }
-            txtStream << "\n";
-            maskVectorsListIt.next();
-        }
+{ //Изменения профиля пишем в файл <профиль>.eag.tmp; сам профиль заменяем только
+  //по подтверждению при завершении соединения или закрытии программы.
+    if (!permission2SaveMasks) {
+        return;
+    }
+    maskVectorsList = this->findChildren<txtmaskobj*>();
+    QListIterator<txtmaskobj*> maskVectorsListIt(maskVectorsList);
+    maskVectorsListIt.toFront();
+    const s_Settings p = m_settings->settings();
+    if (p.profilePath.isEmpty()) {
         permission2SaveMasks = false;
-        emit sendStatusStr("Profile " + info.fileName() + " saved");
+        return;
+    }
+    QString content;
+    QTextStream txtStream(&content);
+    txtStream << QFileInfo(p.profilePath).fileName() << "\n";
+    txtStream << "packetSize" << "\t" << QString::number(protocol.packetSize, 10) << "\n";
+    txtStream << "blockIdentifycatorPosition" << "\t" << QString::number(protocol.blockIdentifycatorPosition, 10) << "\n";
+    txtStream << "calcCRCFromPosition" << "\t" << QString::number(protocol.calcCRCFromPosition, 10) << "\n";
+    txtStream << "markerPacketBeginSize" << "\t" << QString::number(protocol.markerPacketBeginSize, 10) << "\n";
+    txtStream << "markerPacketBeginTextB1" << "\t" << QString::number(protocol.markerPacketBeginByte1, 16) << "\n";
+    txtStream << "markerPacketBeginTextB2" << "\t" << QString::number(protocol.markerPacketBeginByte2, 16) << "\n";
+    txtStream << "description" << "\t" << protocol.description << "\n";
+    txtStream << "varControl" << "\t" << (protocol.varControl ? "true" : "false") << "\n";
+    //Настройки связи с портом (сохраняются и загружаются вместе с профилем).
+    //COM-порт не сохраняем: он всегда выбирается вручную из найденных устройств.
+    txtStream << "readFromFile" << "\t" << (p.readFromFileFlag ? "true" : "false") << "\n";
+    txtStream << "logFilePath" << "\t" << p.pathToBinFile << "\n";
+    txtStream << "baudRate" << "\t" << QString::number(p.baudRate, 10) << "\n";
+    txtStream << "dataBits" << "\t" << QString::number(static_cast<int>(p.dataBits), 10) << "\n";
+    txtStream << "parity" << "\t" << QString::number(static_cast<int>(p.parity), 10) << "\n";
+    txtStream << "stopBits" << "\t" << QString::number(static_cast<int>(p.stopBits), 10) << "\n";
+    txtStream << "flowControl" << "\t" << QString::number(static_cast<int>(p.flowControl), 10) << "\n";
+    while (maskVectorsListIt.hasNext())
+    {
+        QListIterator<QString> lstIt(maskVectorsListIt.peekNext()->lst);
+        while (lstIt.hasNext()) {
+            txtStream << lstIt.next() << "\t";
+        }
+        txtStream << "\n";
+        maskVectorsListIt.next();
+    }
+    permission2SaveMasks = false;
+
+    //Сравниваем с уже сохранённым (tmp или самим профилем), чтобы не помечать профиль изменённым зря
+    const QString tmpPath = p.profilePath + ".tmp";
+    QString existing;
+    QFile existingFile(tmpPath);
+    if (!existingFile.exists()) {
+        existingFile.setFileName(p.profilePath);
+    }
+    if (existingFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        existing = QString::fromUtf8(existingFile.readAll());
+        existingFile.close();
+    }
+    if (existing == content) {
+        return; //никаких изменений
+    }
+    QFile out(tmpPath);
+    if (out.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+        out.write(content.toUtf8());
+        out.close();
+        profileModified = true;
+        emit sendStatusStr(tr("Profile changes saved to ") + QFileInfo(tmpPath).fileName());
+    }
+}
+
+void newconnect::commitProfileChanges()
+{ //подтверждено: старый профиль -> .bak, временный -> профиль
+    const QString path = m_settings->settings().profilePath;
+    if (path.isEmpty()) {
+        return;
+    }
+    const QString tmpPath = path + ".tmp";
+    if (!QFile::exists(tmpPath)) {
+        profileModified = false;
+        return;
+    }
+    const QString bakPath = path + ".bak";
+    if (QFile::exists(bakPath)) {
+        QFile::remove(bakPath);
+    }
+    if (QFile::exists(path)) {
+        QFile::rename(path, bakPath);
+    }
+    QFile::rename(tmpPath, path);
+    profileModified = false;
+    emit sendStatusStr(tr("Profile saved: ") + QFileInfo(path).fileName());
+}
+
+void newconnect::discardProfileChanges()
+{ //отказ от сохранения - удаляем временный файл
+    const QString path = m_settings->settings().profilePath;
+    if (!path.isEmpty()) {
+        QFile::remove(path + ".tmp");
+    }
+    profileModified = false;
+}
+
+void newconnect::offerToSaveProfile()
+{ //предлагаем сохранить изменённый профиль (при разрыве соединения или выходе)
+    if (!profileModified) {
+        return;
+    }
+    const QString name = QFileInfo(m_settings->settings().profilePath).fileName();
+    if (name.isEmpty()) {
+        profileModified = false;
+        return;
+    }
+    const QMessageBox::StandardButton answer = QMessageBox::question(this, tr("Profile changed"),
+            tr("Profile %1 has been changed.\nSave the changes?").arg(name),
+            QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+    if (answer == QMessageBox::Yes) {
+        commitProfileChanges();
+    }
+    else {
+        discardProfileChanges();
     }
 }
 
@@ -487,10 +565,7 @@ void newconnect::readProfile()
             st.readFromFileFlag = (strLst.at(1) == "true");
             hasSettings = true;
         }
-        if (strLst.at(0) == "portName") {
-            st.name = strLst.at(1);
-            hasSettings = true;
-        }
+        //portName в старых профилях может ещё встречаться, но не применяется - порт выбирается вручную
         if (strLst.at(0) == "logFilePath") {
             st.pathToBinFile = strLst.at(1);
             hasSettings = true;
@@ -513,10 +588,6 @@ void newconnect::readProfile()
         }
         if (strLst.at(0) == "flowControl") {
             st.flowControl = static_cast<QSerialPort::FlowControl>(strLst.at(1).toInt(0, 10));
-            hasSettings = true;
-        }
-        if (strLst.at(0) == "readOnlyProfile") {
-            st.readOnlyProfile = (strLst.at(1) == "true");
             hasSettings = true;
         }
         if (strLst.at(0) == "thisIsMask") {

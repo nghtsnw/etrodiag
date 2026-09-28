@@ -143,6 +143,7 @@ private:
 protected:
     Ui::MainWindow *m_ui = nullptr;
     virtual void resizeEvent(QResizeEvent *) override;
+    virtual void closeEvent(QCloseEvent *) override;
     bool event(QEvent *event) override;
     //bool eventFilter(QObject *obj, QEvent *ev) override;
 

@@ -35,7 +35,9 @@ void Device::updateData(QDateTime currTime, int id, QVector<int> devdata) //ес
         }
         if (devStatus == "init")
         {
-            setDeviceName(id, QString("%1").arg(devdata.at(protocol.blockIdentifycatorPosition), 0, 16).toUpper());
+            if (protocol.blockIdentifycatorPosition >= 0 && protocol.blockIdentifycatorPosition < devdata.size()) { //защита от неверного протокола
+                setDeviceName(id, QString("%1").arg(devdata.at(protocol.blockIdentifycatorPosition), 0, 16).toUpper());
+            }
             devStatus = tr("offline");
         }
         changeButtonColor(devStatus);
@@ -50,7 +52,7 @@ void Device::byteObjectsInit(QVector<int> &data) //инициализируем 
 {
     connect (timer, &QTimer::timeout, this, &Device::setOfflineStatus);
     int n = data.size() - 1;
-    while (n != 0)//набиваем массив ссылками на новые объекты байтов
+    while (n > 0)//набиваем массив ссылками на новые объекты байтов (без нулевого байта)
     {
         byteDefinition *bytedef = new byteDefinition(devNum, n, data.at(n));
         connect (this, &Device::setWordBitTX, bytedef, &byteDefinition::setWordBitRX);
