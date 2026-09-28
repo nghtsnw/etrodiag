@@ -20,10 +20,6 @@ public slots:
     void readPermission(bool p);
 
 private:
-    int n;
-    bool ok;
-    QByteArray toQue;
-    int intToQue = 0;
     QQueue<int> buffer;
     bool profilerReadyToReceive = true;
 };

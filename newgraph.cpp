@@ -18,7 +18,7 @@ void newgraph::dataPool(int _devNum, int _byteNum, int _id, double _endValue, in
         //bufferForMidValue.push_back(_endValue);
         pointsWithValues->insert(currentTime, _endValue);
         watchDogFlag = false;
-        watchDogTimer.start(3000);
+        watchDogTimer.start(kWatchdogMs);
         if (graphColor != _drawGraphColor) {
             graphColor = _drawGraphColor;
         }

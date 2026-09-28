@@ -4,6 +4,10 @@
 #include <QString>
 #include <QSerialPort>
 
+//Общие константы протокола/поведения
+constexpr int kAllMasksMaskId = 999;    //id запроса "все маски байта" (не реальный id маски)
+constexpr int kDeviceWatchdogMs = 5000; //таймаут потери связи с устройством, мс
+
 typedef struct s_protocolDescription
 {
     int blockIdentifycatorPosition = 38;
@@ -12,7 +16,6 @@ typedef struct s_protocolDescription
     int markerPacketBeginSize = 1;
     uint8_t markerPacketBeginByte1 = 0xFF;
     uint8_t markerPacketBeginByte2 = 0x00;
-    //int timeoutAfterLastByte;
     QString description;
     bool varControl = false;
 } s_protocolDescription;
@@ -47,10 +50,8 @@ typedef struct s_parameterMask
     QString parameterName;
     QString parameterMask;
     int parameterShift;
-    int parameterLeight;
     double valueShift;
     double valueKoef;
-    int binRawValue;
     double endValue;
     bool viewInLogFlag;
     bool isNewData;

@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QSerialPort>
 #include "global.h"
+#include "protocolsettings.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -20,10 +21,12 @@ class SettingsDialog : public QWidget
 public:
     explicit SettingsDialog(QWidget *parent = nullptr);
     ~SettingsDialog();
-    QString selectedProfile;
-    QString appHomeDir;
-    s_Settings settings() const;
 
+    //Единственный владелец протокола и настроек связи: все остальные модули
+    //читают их отсюда через model()
+    const ProtocolSettings &model() const { return m_model; }
+    QString selectedProfile;
+    s_Settings settings() const;
     // API для кнопок в строке состояния главного окна
     s_Settings currentSettings();                 // синхронизирует модель с состоянием и возвращает её
     QString connectionSummary() const;            // краткая подпись текущих параметров связи
@@ -61,22 +64,14 @@ signals:
 public slots:
     void apply(); //применение настроек: сохранение профиля и закрытие окна (кнопка "Применить")
 
-    void on_newProfileButton_clicked();
-
-    void on_profileSelectBox_currentTextChanged(const QString &arg1);
-
-    void on_deleteProfileButton_clicked();
-
 private:
-    void updateSettings();
-    void fillProfileList();
-    s_protocolDescription currentProtocol;
+    void selectFirstProfile(); //при старте подхватываем первый профиль из каталога
     void updateProtocol();
     void markerTextNormalisation(int numberByte, QString text);
 
 private:
     Ui::SettingsDialog *m_ui = nullptr;
-    s_Settings m_currentSettings;
+    ProtocolSettings m_model; //единственное хранилище протокола и настроек связи
     bool m_readFromFileMode = false; //режим "чтение из файла" - меняется только явным выбором пользователя
     bool m_writeTxt = false;
     bool m_writeBin = false;

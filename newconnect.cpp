@@ -9,7 +9,7 @@
 #include "getstream.h"
 #include "dataprofiler.h"
 #include "txtmaskobj.h"
-#include <QStandardPaths>
+#include "profiledata.h"
 #include <QCoreApplication>
 #include <QEventLoop>
 #include <global.h>
@@ -31,12 +31,14 @@ newconnect::newconnect(QWidget *parent) :
     m_console->setEnabled(false);
     m_console->setParent(ui->consoleFrame);
     m_console->show();
-#ifdef Q_OS_WIN32
-    appHomeDir = qApp->applicationDirPath() + QDir::separator();
-#endif
-#ifdef Q_OS_ANDROID
-    appHomeDir = QStandardPaths::standardLocations(QStandardPaths::DataLocation)[1] + QDir::separator();
-#endif
+    datapool->setModel(&m_settings->model()); //разбор читает протокол и настройки из модели профиля
+    wireConnection();
+    wireSettings();
+    wireProfile();
+}
+
+void newconnect::wireConnection()
+{ //порт, консоль, поток байт и разбор кадров
     connect(m_serial, &QSerialPort::errorOccurred, this, &newconnect::handleError);
     connect(m_serial, &QSerialPort::readyRead, this, &newconnect::readData);
     connect(m_console, &Console::getData, this, &newconnect::writeData);
@@ -48,51 +50,43 @@ newconnect::newconnect(QWidget *parent) :
         timerAboveTxCommand->start(1);
     });/*После успешного приёма задержка перед отправкой команды */
     connect(datapool, &dataprofiler::badCRC, this, &newconnect::badCRC);
-    //connect(datapool, &dataprofiler::corruptedData, this, &newconnect::corruptedData);
     connect(datapool, &dataprofiler::ready4read, gstream, &getStream::readPermission);
     connect(datapool, &dataprofiler::readNext, gstream, &getStream::readIntByte);
+    connect(this, &newconnect::sendRawData, gstream, &getStream::getRawData);
+    connect(this, &newconnect::sendRawData, m_console, &Console::putData);
+    connect(this, &newconnect::putIntDataToConsole, m_console, &Console::putIntData);
+}
+
+void newconnect::wireSettings()
+{ //обмен протоколом и настройками между редактором профиля, разбором и сохранением
     connect(m_settings, &SettingsDialog::restoreConsoleAndButtons, this, &newconnect::restoreWindowAfterApplySettings);
-    connect (m_settings, &SettingsDialog::prepareToSaveProfile, this, &newconnect::prepareToSaveProfile);
-    connect (m_settings, &SettingsDialog::saveProfile, this, &newconnect::saveProfile);
-    connect (m_settings, &SettingsDialog::writeBinLog, this, &newconnect::writeBinLog);
-    connect (m_settings, &SettingsDialog::writeJsonLog, this, &newconnect::writeJsonLog);
-    /*----------------------------------------------------------------------------------------------------------------------------*/
-    //При загрузке данных из профиля, они отправляются в окно настроек в UI
-    connect (this, &newconnect::loadProtocol, m_settings, &SettingsDialog::loadProtocol);
-    connect (this, &newconnect::loadProtocol, this, &newconnect::setProtocol);
-    connect (this, &newconnect::loadProtocol, datapool, &dataprofiler::setProtocol);
-    connect (this, &newconnect::loadProtocol, this, [this](s_protocolDescription p) {
+    connect(m_settings, &SettingsDialog::prepareToSaveProfile, this, &newconnect::prepareToSaveProfile);
+    connect(m_settings, &SettingsDialog::saveProfile, this, &newconnect::saveProfile);
+    connect(m_settings, &SettingsDialog::writeTextLog, this, &newconnect::writeTextLog);
+    connect(m_settings, &SettingsDialog::writeBinLog, this, &newconnect::writeBinLog);
+    connect(m_settings, &SettingsDialog::writeJsonLog, this, &newconnect::writeJsonLog);
+    //При загрузке данных из профиля они попадают в модель (SettingsDialog::loadProtocol),
+    //из которой протокол и настройки читают разбор, устройства и логгер
+    connect(this, &newconnect::loadProtocol, m_settings, &SettingsDialog::loadProtocol);
+    connect(this, &newconnect::loadProtocol, this, &newconnect::setProtocol);
+    connect(this, &newconnect::loadProtocol, this, [this](s_protocolDescription p) {
         emit setVisibleControlWindow(p.varControl); //видимость окна управления берём из профиля
     });
-    connect (this, &newconnect::loadSettings, m_settings, &SettingsDialog::applyConnectionSettings);
-    //Любое программное изменение настроек связи (порт, файл лога, параметры) сразу уходит
-    //в логгер и разбор, иначе путь к файлу лога не доходил до Logger и чтение падало.
-    connect (m_settings, &SettingsDialog::settingsChanged, this, &newconnect::sendCurrentSettings);
-    /*----------------------------------------------------------------------------------------------------------------------------*/
-    /*----------------------------------------------------------------------------------------------------------------------------*/
-    //По применению настроек в UI, они сразу применяются на датаразборке, копия в newconnect для сохранения профиля
-    connect (m_settings, &SettingsDialog::setProtocol, datapool, &dataprofiler::setProtocol);
-    connect (m_settings, &SettingsDialog::setProtocol, this, &newconnect::setProtocol);
-    connect (m_settings, &SettingsDialog::setProtocol, this, [this](s_protocolDescription p) {
-        protocol = p;
+    connect(this, &newconnect::loadSettings, m_settings, &SettingsDialog::applyConnectionSettings);
+    //По применению настроек в редакторе они оказываются в модели, поэтому разбору и
+    //логгеру пересылать ничего не нужно - они читают ту же модель
+    connect(m_settings, &SettingsDialog::setProtocol, this, &newconnect::setProtocol);
+    connect(m_settings, &SettingsDialog::setProtocol, this, [this](s_protocolDescription p) {
         emit setVisibleControlWindow(p.varControl); //окно управления переменными видно только при включённом контроле
-        if (m_settings->settings().readFromFileFlag) {
-            emit connectButtonTextChanged(tr("Read log"));
-        }
-        else {
-            emit connectButtonTextChanged(tr("Connect"));
-        }
-        emit s_sendSettings(m_settings->settings());
+        emit connectButtonTextChanged(m_settings->settings().readFromFileFlag ? tr("Read log") : tr("Connect"));
     });
-    //Вместе с отправкой протокола отправить на датаразбор настройки соединения
-    connect (this, &newconnect::s_sendSettings, datapool, &dataprofiler::setSettings);
-    /*----------------------------------------------------------------------------------------------------------------------------*/
-    connect (m_settings, &SettingsDialog::loadSelectedProfile, this, &newconnect::readProfile);
-    connect (timerAboveTxCommand, &QTimer::timeout, this, &newconnect::sendCommand);//отправляем команду после задержки
-    connect (this, &newconnect::sendRawData, gstream, &getStream::getRawData);
-    connect (this, &newconnect::sendRawData, m_console, &Console::putData);
-    connect (this, &newconnect::putIntDataToConsole, m_console, &Console::putIntData);
-    connect (this, &newconnect::sendRawDataWithTime, this, &newconnect::readFromFile);
+}
+
+void newconnect::wireProfile()
+{ //загрузка профиля и отправка команд устройству
+    connect(m_settings, &SettingsDialog::loadSelectedProfile, this, &newconnect::readProfile);
+    connect(timerAboveTxCommand, &QTimer::timeout, this, &newconnect::sendCommand);//отправляем команду после задержки
+    connect(this, &newconnect::sendRawDataWithTime, this, &newconnect::readFromFile);
 }
 
 newconnect::~newconnect()
@@ -107,50 +101,14 @@ void newconnect::on_settingsButton_clicked()
 }
 
 void newconnect::editProfile()
-{ //открываем окно редактирования текущего профиля
-    m_settings->setParent(this);
-    m_console->hide();
-    ui->connectButton->hide();
-    ui->settingsButton->hide();
-    ui->consoleFrame->hide();
+{ //заполняем редактор профиля данными текущего профиля; показом управляет главное окно
     readProfile();
-    m_settings->show();
-}
-
-void newconnect::sendCurrentSettings()
-{ //пересылаем актуальные настройки связи в логгер и на разбор
-    emit s_sendSettings(m_settings->currentSettings());
 }
 
 void newconnect::openSerialPort()
 {
-    /*if (p_local.readFromFileFlag)
-    {
-        readProfile();
-        pos = 0;//задаём позицию для чтения FileSplitted в readFromFile()
-        fileSplitted.clear();
-        int freq = 1000 / ((p_local.baudRate / 8) / bytesPerOneShot);
-        QFile file(p_local.pathToBinFile);
-        file.open(QIODevice::ReadOnly);
-        showStatusMessage(tr("Bufferisation..."));
-        QByteArray fileBuffer = file.readAll();//читаем весь файл в память
-        for (int i = 0; i < fileBuffer.size();)
-        {
-            static QByteArray ch;
-            while (ch.size() < bytesPerOneShot && i < fileBuffer.size())//создаём список FileSplitted с кусками файла fileBuffer равными bytesPerOneShot
-            {
-                ch.append(fileBuffer.at(i));
-                i++;
-            }
-            fileSplitted.push_back(ch);
-            ch.clear();
-        }
-        fileBuffer.clear();
-        showStatusMessage(tr("Read file %1").arg(p_local.pathToBinFile));
-        //timer->start(freq);//запускаем таймер, по нему читается по порядку FileSplitted функцией readFromFile()
-    }*/
+    const s_Settings p_local = m_settings->currentSettings(); //снимок настроек на момент открытия порта
     if (!p_local.readFromFileFlag)
-        //else
     {
         m_serial->setPortName(p_local.name);
         m_serial->setBaudRate(p_local.baudRate);
@@ -162,7 +120,8 @@ void newconnect::openSerialPort()
             m_console->setEnabled(true);
             showStatusMessage(tr("Connected to %1 : %2, %3, %4, %5, %6, %7")
                               .arg(p_local.name).arg(p_local.stringBaudRate).arg(p_local.stringDataBits)
-                              .arg(p_local.stringParity).arg(p_local.stringStopBits).arg(p_local.stringFlowControl).arg(p_local.profilePath));
+                              .arg(p_local.stringParity).arg(p_local.stringStopBits).arg(p_local.stringFlowControl)
+                              .arg(QFileInfo(p_local.profilePath).fileName())); //в статусе только имя профиля, без пути
         }
         else {
             QMessageBox::critical(this, tr("Error"), m_serial->errorString());
@@ -170,22 +129,6 @@ void newconnect::openSerialPort()
         }
     }
 }
-
-/*void newconnect::readFromFile()
-{
-    if (pos < fileSplitted.size())
-    { //если текущая позиция не в конце списка (костыль вместо итератора) то кусок по нужному номеру листа добавляем в fsba
-        fsba.append(fileSplitted.at(pos));//добавляем кусок по указателю
-        pos++;
-        readData();//вызываем читалку данных
-    }
-    else
-    {
-        showStatusMessage(tr("End of file"));
-        timer->stop();
-        on_connectButton_clicked();
-    }
-}*/
 
 void newconnect::readFromFile(QMap<QDateTime, QVector<uint8_t> > dataWithTime)
 /*
@@ -223,11 +166,6 @@ void newconnect::closeSerialPort()
         m_serial->close();
         showStatusMessage(tr("Disconnected"));
     }
-    /*if (p_local.readFromFileFlag)
-    {
-        p_local.readFromFileFlag = false;
-        //timer->stop();
-    }*/
 }
 
 void newconnect::writeData(const QByteArray &data)
@@ -238,15 +176,6 @@ void newconnect::writeData(const QByteArray &data)
 void newconnect::readData()
 {
     static QByteArray data;
-    /*if (p_local.readFromFileFlag)
-    {
-        data = fsba;//если есть флаг чтения из файла, то читаем из fsba
-        fsba.clear();
-    }
-    else
-    {
-        data = m_serial->readAll();//если нет то читаем всё что есть с порта
-    }*/
     data = m_serial->readAll();
     emit sendRawData(data);
     data.clear();
@@ -295,7 +224,7 @@ void newconnect::on_connectButton_clicked()
 
 void newconnect::toggleConnection()
 {
-    p_local = m_settings->currentSettings();
+    const s_Settings p_local = m_settings->currentSettings();
     if (!p_local.readFromFileFlag)
     {
         if (m_serial->isOpen())
@@ -316,7 +245,6 @@ void newconnect::toggleConnection()
             {
                 emit readFromFileSignal(false); //живое соединение - график идёт по реальному времени
                 emit connected();
-                createNewFileNamePermission = true;
                 emit connectButtonTextChanged(tr("Disconnect"));
             }
         }
@@ -342,7 +270,7 @@ void newconnect::prepareToSaveProfile()
     QListIterator<txtmaskobj*> maskVectorsListIt(maskVectorsList);
     maskVectorsListIt.toFront();
     while (maskVectorsListIt.hasNext()) {
-        maskVectorsListIt.next()->~txtmaskobj();
+        delete maskVectorsListIt.next();
     }
     permission2SaveMasks = true;
     emit saveAllMasks();
@@ -407,33 +335,10 @@ void newconnect::saveProfile()
         permission2SaveMasks = false;
         return;
     }
-    QString content;
-    QTextStream txtStream(&content);
-    txtStream << QFileInfo(p.profilePath).fileName() << "\n";
-    txtStream << "packetSize" << "\t" << QString::number(protocol.packetSize, 10) << "\n";
-    txtStream << "blockIdentifycatorPosition" << "\t" << QString::number(protocol.blockIdentifycatorPosition, 10) << "\n";
-    txtStream << "calcCRCFromPosition" << "\t" << QString::number(protocol.calcCRCFromPosition, 10) << "\n";
-    txtStream << "markerPacketBeginSize" << "\t" << QString::number(protocol.markerPacketBeginSize, 10) << "\n";
-    txtStream << "markerPacketBeginTextB1" << "\t" << QString::number(protocol.markerPacketBeginByte1, 16) << "\n";
-    txtStream << "markerPacketBeginTextB2" << "\t" << QString::number(protocol.markerPacketBeginByte2, 16) << "\n";
-    txtStream << "description" << "\t" << protocol.description << "\n";
-    txtStream << "varControl" << "\t" << (protocol.varControl ? "true" : "false") << "\n";
-    //Настройки связи с портом (сохраняются и загружаются вместе с профилем).
-    //COM-порт не сохраняем: он всегда выбирается вручную из найденных устройств.
-    txtStream << "readFromFile" << "\t" << (p.readFromFileFlag ? "true" : "false") << "\n";
-    txtStream << "logFilePath" << "\t" << p.pathToBinFile << "\n";
-    txtStream << "baudRate" << "\t" << QString::number(p.baudRate, 10) << "\n";
-    txtStream << "dataBits" << "\t" << QString::number(static_cast<int>(p.dataBits), 10) << "\n";
-    txtStream << "parity" << "\t" << QString::number(static_cast<int>(p.parity), 10) << "\n";
-    txtStream << "stopBits" << "\t" << QString::number(static_cast<int>(p.stopBits), 10) << "\n";
-    txtStream << "flowControl" << "\t" << QString::number(static_cast<int>(p.flowControl), 10) << "\n";
+    QString content = profiledata::serializeHeader(QFileInfo(p.profilePath).fileName(), m_settings->model().protocol(), p);
     while (maskVectorsListIt.hasNext())
     {
-        QListIterator<QString> lstIt(maskVectorsListIt.peekNext()->lst);
-        while (lstIt.hasNext()) {
-            txtStream << lstIt.next() << "\t";
-        }
-        txtStream << "\n";
+        content += profiledata::serializeMaskLine(maskVectorsListIt.peekNext()->lst);
         maskVectorsListIt.next();
     }
     permission2SaveMasks = false;
@@ -518,109 +423,25 @@ void newconnect::readProfile()
 {
     emit cleanDevListSig();
     const s_Settings p = m_settings->settings();
-    s_protocolDescription pt{}; //инициализируем нулями: у невалидного профиля поля останутся валидными, а не мусором
-    s_Settings st; //настройки связи, сохранённые в профиле
-    bool hasSettings = false;
     QFile profile(p.profilePath);
     QFileInfo info(profile);
     currentProfileName = getProfileNameFromInfo(info);
     emit profileName2log(currentProfileName);
-    profile.open(QIODevice::ReadOnly | QIODevice::Text);
-    QTextStream txtStream(&profile);
-    QStringList maskList;
-    while (!txtStream.atEnd())
-    {
-        QString str = txtStream.readLine();
-        QStringList strLst = str.split('\t');
-        if (strLst.size() < 2) { //пустая или неполная строка профиля - пропускаем, чтобы не выйти за границы
-            strLst.clear();
-            continue;
-        }
-        if (strLst.at(0) == "packetSize") {
-            pt.packetSize = (strLst.at(1).toInt(0, 10));
-        }
-        if (strLst.at(0) == "blockIdentifycatorPosition") {
-            pt.blockIdentifycatorPosition = (strLst.at(1).toInt(0, 10));
-        }
-        if (strLst.at(0) == "calcCRCFromPosition") {
-            pt.calcCRCFromPosition = (strLst.at(1).toInt(0, 10));
-        }
-        if (strLst.at(0) == "markerPacketBeginSize") {
-            pt.markerPacketBeginSize = (strLst.at(1).toInt(0, 10));
-        }
-        if (strLst.at(0) == "markerPacketBeginTextB1") {
-            pt.markerPacketBeginByte1 = (strLst.at(1).toInt(0, 16));
-        }
-        if (strLst.at(0) == "markerPacketBeginTextB2") {
-            pt.markerPacketBeginByte2 = (strLst.at(1).toInt(0, 16));
-        }
-        if (strLst.at(0) == "description") {
-            pt.description = strLst.at(1);
-        }
-        if (strLst.at(0) == "varControl") {
-            pt.varControl = (strLst.at(1) == "true") ? true : false;
-        }
-        //Настройки связи с портом (есть только в новых профилях)
-        if (strLst.at(0) == "readFromFile") {
-            st.readFromFileFlag = (strLst.at(1) == "true");
-            hasSettings = true;
-        }
-        //portName в старых профилях может ещё встречаться, но не применяется - порт выбирается вручную
-        if (strLst.at(0) == "logFilePath") {
-            st.pathToBinFile = strLst.at(1);
-            hasSettings = true;
-        }
-        if (strLst.at(0) == "baudRate") {
-            st.baudRate = strLst.at(1).toInt(0, 10);
-            hasSettings = true;
-        }
-        if (strLst.at(0) == "dataBits") {
-            st.dataBits = static_cast<QSerialPort::DataBits>(strLst.at(1).toInt(0, 10));
-            hasSettings = true;
-        }
-        if (strLst.at(0) == "parity") {
-            st.parity = static_cast<QSerialPort::Parity>(strLst.at(1).toInt(0, 10));
-            hasSettings = true;
-        }
-        if (strLst.at(0) == "stopBits") {
-            st.stopBits = static_cast<QSerialPort::StopBits>(strLst.at(1).toInt(0, 10));
-            hasSettings = true;
-        }
-        if (strLst.at(0) == "flowControl") {
-            st.flowControl = static_cast<QSerialPort::FlowControl>(strLst.at(1).toInt(0, 10));
-            hasSettings = true;
-        }
-        if (strLst.at(0) == "thisIsMask") {
-            maskList.append(str);
-        }
-        strLst.clear();
+    QString text;
+    if (profile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream txtStream(&profile);
+        text = txtStream.readAll();
+        profile.close();
     }
-    if (hasSettings) {
-        emit loadSettings(st); //применяем настройки связи из профиля
+    //Файл разбирается целиком: пустые, неполные и неизвестные строки пропускаются внутри parse
+    const profiledata::ProfileText parsed = profiledata::parse(text);
+    if (parsed.hasSettings) {
+        emit loadSettings(parsed.settings); //применяем настройки связи из профиля
     }
-    emit loadProtocol(pt);
-    // Два раза читаю файл, потому что сначала нужно применить протокол, только потом читать маски
-    for (QString m : maskList)
-    {
-        QStringList strLst = m.split('\t');
-        if (strLst.at(0) == "thisIsMask" && strLst.size() >= 14) { //ожидаем все поля маски
-            s_parameterMask mask;
-            mask.id = strLst.at(1).toInt(0, 10);
-            mask.devNum = strLst.at(2).toInt(0, 10);
-            mask.byteNum = strLst.at(3).toInt(0, 10);
-            mask.devName = strLst.at(4);
-            mask.byteName = strLst.at(5);
-            mask.parameterName = strLst.at(6);
-            mask.parameterMask = strLst.at(7);
-            mask.valueShift = strLst.at(8).toDouble();
-            mask.valueKoef = strLst.at(9).toDouble();
-            mask.viewInLogFlag = ((QString::compare(strLst.at(10), "true") == 0) ? true : false);
-            mask.wordType = strLst.at(11).toInt(0, 10);
-            mask.drawGraphFlag = ((QString::compare(strLst.at(12), "true") == 0) ? true : false);
-            mask.drawGraphColor = strLst.at(13);
-            emit loadMask(mask);
-        }
-        strLst.clear();
+    emit loadProtocol(parsed.protocol);
+    //Протокол применяется раньше масок, поэтому маски разбираем после его загрузки
+    for (const s_parameterMask &mask : std::as_const(parsed.masks)) {
+        emit loadMask(mask);
     }
 }
 
@@ -629,7 +450,6 @@ void newconnect::resizeEvent(QResizeEvent *event)
     if (event)
     {
         m_console->resize(event->size());
-        m_settings->resize(event->size());
     }
 }
 
@@ -637,13 +457,6 @@ void newconnect::restoreWindowAfterApplySettings()
 { //кнопки подключения/настроек теперь живут в строке состояния, поэтому не показываем их здесь
     m_console->show();
     ui->consoleFrame->show();
-}
-
-QDateTime newconnect::returnTimestamp()
-{
-    quint64 timestamp = QDateTime::currentMSecsSinceEpoch();
-    QDateTime dt3 = QDateTime::fromMSecsSinceEpoch(timestamp);
-    return dt3;
 }
 
 QString newconnect::getProfileNameFromInfo(QFileInfo& info)

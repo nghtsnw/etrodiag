@@ -13,6 +13,8 @@ namespace Ui {
     class liveGraphWidget;
 }
 
+class newgraph;
+
 class liveGraph : public QWidget
 {
     Q_OBJECT
@@ -33,6 +35,10 @@ private:
     int xShift = 0; //индекс сдвига ячеек разметки поля
     void shiftCells();
     void paintCurve(QMap<QDateTime, double> points, QDateTime endTime, QString color);
+    QMap<qint64, double> pointsToPixelMap(const QMap<QDateTime, double> &points) const;      //карта времени в пиксели кадра
+    double yPixel(double value, double oneUnitPix, double zeroShift) const;                  //координата Y значения
+    void drawCurve(QPainter &painter, const QMap<qint64, double> &pointsPixelMap,
+                   double oneUnitPix, double zeroShift, int shiftPix);                       //отрисовка кривой
     void paintAnnotation();
     QVector<int> maxStringSizePix(QFont font, QList<QString> str);
     double xShiftPix = 0;
@@ -48,7 +54,9 @@ private:
     double scaleErrorPix = 0.0;
     QVector<double> findDeltaValue(QMap<QDateTime, double> &points);
     double findYScale(const QVector<double> &values);
-    bool foundFlag = false;
+    newgraph *findCurve(const s_parameterMask &data);                       // график для этой маски
+    newgraph *createCurve(const s_parameterMask &data, const QDateTime &time);// создать/инициализировать график
+    void updateAnnotation(const s_parameterMask &data);                       // обновить Min/Max и подпись
     QList<QString> annotationKeys;
     QVector<int> rectXSizePix;
     int curvesCount = 0;
@@ -64,8 +72,9 @@ private slots:
 private:
 
     QMap<QDateTime, double> pointsForTimeFrames(QMap<QDateTime, double>& points, QDateTime timeMarker); //буфер для точек в отрезке времени размере кадра
+    static constexpr int kSliderMax = 10000; //диапазон слайдера навигации по логу
+    static constexpr int kMaxGapMs = 3000;   //разрыв линии графика при паузе данных, мс
     int timeFrames = 60; // ширина графика в секундах (менять для увеличения и уменьшения общего масштаба)
-    QDateTime frameFront; // передний край графика (либо сдвигается таймером по времени в live режиме, либо последняя запись из файла лога)
     QDateTime calculatedEndTime; // время конца нарисованного графика пропорционально положению слайдера навигации
     QDateTime beginTime; // начало отсчёта для нового соединения или начальная метка из файла
     QDateTime realTime;

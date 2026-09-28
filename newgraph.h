@@ -12,6 +12,7 @@ class newgraph : public QObject
 public:
     explicit newgraph(QObject *parent = nullptr);
     ~newgraph();
+    static constexpr int kWatchdogMs = 3000; //пауза без данных, после которой кривая помечается "мёртвой"
     int devNum;
     int byteNum;
     int id;

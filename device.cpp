@@ -1,4 +1,5 @@
 #include "device.h"
+#include "protocolsettings.h"
 #include <QDebug>
 #include "bytedefinition.h"
 #include <QBitArray>
@@ -8,12 +9,26 @@
 #include <QDateTime>
 #include "global.h"
 
+//Текстовое представление состояния устройства (только для сообщений интерфейса)
+static QString stateText(Device::State s)
+{
+    switch (s) {
+    case Device::State::Online:
+        return Device::tr("online");
+    case Device::State::Offline:
+        return Device::tr("offline");
+    case Device::State::Init:
+    default:
+        return Device::tr("init");
+    }
+}
 
 Device::Device(QWidget *parent) : QPushButton(parent)
 {
+    connect(timer, &QTimer::timeout, this, &Device::setOfflineStatus);
 }
 
-Device::Device(int id) //инициализация нового устройства
+Device::Device(int id) : Device(nullptr) //инициализация нового устройства
 {
     devNum = id;
 }
@@ -27,22 +42,24 @@ void Device::updateData(QDateTime currTime, int id, QVector<int> devdata) //ес
         if (!byteObjReady) {
             byteObjectsInit(currentState);
         }
+        countMasks(); //количество масок считаем раз на кадр, а не на каждую маску
         emit byteObjUpdSig(devNum, devdata);
-        if (devStatus == tr("offline"))
+        if (devStatus == State::Offline)
         {
-            devStatus = tr("online");
-            emit devStatusMessage(devName, devStatus);
+            devStatus = State::Online;
+            emit devStatusMessage(devName, stateText(devStatus));
         }
-        if (devStatus == "init")
+        if (devStatus == State::Init)
         {
-            if (protocol.blockIdentifycatorPosition >= 0 && protocol.blockIdentifycatorPosition < devdata.size()) { //защита от неверного протокола
-                setDeviceName(id, QString("%1").arg(devdata.at(protocol.blockIdentifycatorPosition), 0, 16).toUpper());
+            const int idPosition = m_model ? m_model->protocol().blockIdentifycatorPosition : -1;
+            if (idPosition >= 0 && idPosition < devdata.size()) { //защита от неверного протокола
+                setDeviceName(id, QString("%1").arg(devdata.at(idPosition), 0, 16).toUpper());
             }
-            devStatus = tr("offline");
+            devStatus = State::Offline;
         }
         changeButtonColor(devStatus);
-        if (devStatus == tr("online")) {
-            devOnlineWatchdog(5000);
+        if (devStatus == State::Online) {
+            devOnlineWatchdog(kDeviceWatchdogMs);
         }
     }
 }
@@ -50,11 +67,11 @@ void Device::updateData(QDateTime currTime, int id, QVector<int> devdata) //ес
 void Device::byteObjectsInit(QVector<int> &data) //инициализируем для каждого байта свой объект,
 //с параметрами конкретно этого байта и значениями каждого бита, и загоняем объекты в массив
 {
-    connect (timer, &QTimer::timeout, this, &Device::setOfflineStatus);
     int n = data.size() - 1;
     while (n > 0)//набиваем массив ссылками на новые объекты байтов (без нулевого байта)
     {
         byteDefinition *bytedef = new byteDefinition(devNum, n, data.at(n));
+        bytedef->setParent(this); //родитель нужен, чтобы объекты байтов удалялись вместе с устройством
         connect (this, &Device::setWordBitTX, bytedef, &byteDefinition::setWordBitRX);
         connect (this, &Device::getWordTypeTX, bytedef, &byteDefinition::getWordType);
         connect (bytedef, &byteDefinition::returnWordType, this, &Device::returnWordTypeTX);
@@ -65,7 +82,7 @@ void Device::byteObjectsInit(QVector<int> &data) //инициализируем 
         connect (bytedef, &byteDefinition::allMasksToListTX, this, &Device::allMasksToListTX);
         connect (this, &Device::sendDataToProfileTX, bytedef, &byteDefinition::sendDataToProfileRX);
         connect (this, &Device::deleteMaskObjTX, bytedef, &byteDefinition::deleteMaskObjTX);
-        connect (bytedef, &byteDefinition::param2FrontEndTX, this, [ = ](s_parameterMask mask) {
+        connect (bytedef, &byteDefinition::param2FrontEndTX, this, [this](s_parameterMask mask) {
             mask.devName = devName;
             emit param2FrontEndTX(currentTime, mask);
         });
@@ -90,9 +107,9 @@ void Device::getDeviceName(int id)
     }
 }
 
-void Device::setProtocol(s_protocolDescription p)
+void Device::setModel(const ProtocolSettings *model)
 {
-    protocol = p;
+    m_model = model;
 }
 
 void Device::setDeviceName(int id, QString name)
@@ -107,7 +124,7 @@ void Device::setDeviceName(int id, QString name)
 void Device::requestMasks4Saving()
 { //каждому байту устройства отправляем сигнал на выдачу всех масок
     for (int i = 0; i <= currentState.size(); i++) {
-        emit requestMaskDataTX(devNum, i, 999);
+        emit requestMaskDataTX(devNum, i, kAllMasksMaskId);
     }
 }
 
@@ -131,9 +148,11 @@ int Device::calcMasksInDev()
 }
 
 int Device::countMasks()
-{
+{ //запрашиваем количество масок у байтов и кэшируем сумму до следующего кадра
+    maskCountMap.clear(); //без очистки остаются устаревшие значения удалённых масок
     emit requestMaskCounting();
-    return calcMasksInDev();
+    maskCountCache = calcMasksInDev();
+    return maskCountCache;
 }
 
 void Device::loadMaskRX(s_parameterMask mask)
@@ -153,7 +172,7 @@ void Device::jsonMap(s_parameterMask mask)
         devParams->insert("NumberBlock", QString::number(mask.devNum));
         devParams->insert(mask.parameterName, QString::number(mask.endValue));
         devParamsCount++;
-        if (devParamsCount == countMasks())
+        if (devParamsCount == maskCountCache)
         {
             devParams->insert("DateTime", currentTime.toString("yy-MM-ddThh:mm:ss.zzz"));
             emit devParamsToJson(*devParams);
@@ -180,19 +199,19 @@ void Device::devOnlineWatchdog(int msec)
 
 void Device::setOfflineStatus()
 {
-    devStatus = tr("offline");
-    emit devStatusMessage(devName, devStatus);
+    devStatus = State::Offline;
+    emit devStatusMessage(devName, stateText(devStatus));
     timer->stop();
     changeButtonColor(devStatus);
 }
 
-void Device::changeButtonColor(QString _status)
+void Device::changeButtonColor(State _status)
 {
-    if (_status == tr("offline"))
+    if (_status == State::Offline)
     {
         this->setStyleSheet("QPushButton{background:#808080;}");
     }
-    if (_status == tr("online"))
+    else if (_status == State::Online)
     {
         this->setStyleSheet("QPushButton{background:#00FF00;}");
     }

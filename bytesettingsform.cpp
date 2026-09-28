@@ -150,7 +150,7 @@ void ByteSettingsForm::on_pushButton_clicked()
 
 void ByteSettingsForm::requestAllMasks()
 {
-    emit requestAllMaskToList(devNum, byteNum, 999);
+    emit requestAllMaskToList(devNum, byteNum, kAllMasksMaskId);
 }
 
 void ByteSettingsForm::updateMasksList(QDateTime, s_parameterMask mask)

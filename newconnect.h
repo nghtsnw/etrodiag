@@ -33,8 +33,6 @@ public:
     QList<txtmaskobj*> maskVectorsList;
     void readProfile();
 
-    QString appHomeDir;
-    QDateTime returnTimestamp();
     bool permission2SaveMasks = false;
     QString currentProfileName;
     bool isReaderBusy() const { return readerBusy; } //идёт чтение лога из файла
@@ -45,7 +43,6 @@ signals:
 
     void cleanDevListSig();
     void connected();
-    //void readFromFile();
     void readFromFileSignal(bool);
     void sendStatusStr(QString);
     void transmitData(QDateTime currentTime, QVector<int> snapshot);
@@ -65,7 +62,6 @@ signals:
     void disconnected();
     void profileName2log(QString);
     void setVisibleControlWindow(bool);
-    void s_sendSettings(s_Settings);
     void setTime(QDateTime);
     void pushByteToProfiler(uint8_t);
     void putIntDataToConsole(QVector<uint8_t>);
@@ -83,7 +79,6 @@ public slots:
     void readFromFile(QMap<QDateTime, QVector<uint8_t >> );
     void toggleConnection(); //подключиться/отключиться или прочитать лог
     void editProfile();      //открыть окно редактирования профиля
-    void sendCurrentSettings(); //переслать текущие настройки связи в логгер и разбор
     void commitProfileChanges();   //заменить профиль временным файлом (старый уйдёт в .bak)
     void discardProfileChanges();  //отказаться от изменений профиля (удалить .tmp)
     void offerToSaveProfile();     //предложить сохранить изменённый профиль
@@ -100,23 +95,16 @@ private slots:
 
 private:
     Ui::newconnect *ui;
-    QString message;
-    bool createNewFileNamePermission = true;
+    void wireConnection(); //связи порта, консоли и разбора кадров
+    void wireSettings();   //связи протокола и настроек
+    void wireProfile();    //связи профиля и отправки команд
     bool readerBusy = false;
     bool profileModified = false; //профиль изменён, изменения лежат в <профиль>.eag.tmp
-    QString binFileName;
-    s_Settings p_local;
-    //QByteArray fsba;
-    QByteArray arr4byteStream;
     QTimer *timerAboveTxCommand = new QTimer(this);
-    /*QList<QByteArray> fileSplitted;
-    const int bytesPerOneShot = 20;
-    int pos = 0;*/
     QString getProfileNameFromInfo(QFileInfo &info);
     bool newcommand = false;
     QVector<quint8> toTransmit;
     quint8 calcCrc(const QVector<quint8> &arr);
-    s_protocolDescription protocol;
 
     QMap<QDateTime, QVector<uint8_t> > p_dataWithTime;
 

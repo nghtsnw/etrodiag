@@ -43,6 +43,6 @@ target_wrapper.*
 # QtCreator CMake
 CMakeLists.txt.user*
 /build
+/tests/build
 AGENTS.md
-/.codegpaph
 /.codegraph

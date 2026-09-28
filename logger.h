@@ -9,6 +9,8 @@
 #include <QDateTime>
 #include "global.h"
 
+class ProtocolSettings;
+
 class Logger : public QObject
 {
     Q_OBJECT
@@ -26,6 +28,7 @@ public slots:
     void incomingTxtData(const QString string);
     void incomingJsonData(const QVariantMap jsonMap);
     void binReadFromCsv(bool r);
+    void setModel(const ProtocolSettings *model); //настройки (путь к логу) читаем из модели
 
 private:
     QFile newBinFile;
@@ -42,19 +45,17 @@ private:
     const QString timeFormat = "dd.MM.yyyy_HH:mm:ss.zzz";
     const QString timeFormatForFile = "dd.MM.yy_HH-mm-ss";
     QString sessionName;
-    QString appHomeDir;
     QDir dir;
     QString currentProfileName;
     bool writeLogsPermission = false;
     QQueue<QString> txtLogQueue;
-    s_Settings settings;
+    const ProtocolSettings *m_model = nullptr;
     QMap<QDateTime, QVector<uint8_t >> *rawDataWithTimeLog = nullptr;
 
 signals:
     void showStatusMessage(QString);
     void logLoadProgress(int percent);
     void toTextLog(QString text, bool redFlag);
-    void setSettings(s_Settings);
     void readFromCsv(QMap<QDateTime, QVector<uint8_t >> );
 
 };

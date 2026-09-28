@@ -11,22 +11,20 @@
 #include "global.h"
 #include "qdatetime.h"
 
+class ProtocolSettings;
+
 class Device : public QPushButton
 {
     Q_OBJECT
 
 public:
     explicit Device(QWidget *parent = nullptr);
+    enum class State { Init, Offline, Online }; //состояние устройства вместо сравнения переведённых строк
     int devNum;
     QString devName = "Device name";
     QVector<int> currentState;
-    int currStateInt = 0;
-    QVector<int> *oldState = new QVector<int>;
     Device(int id);
     void byteObjectsInit(QVector<int> &data);
-    QVector<byteDefinition*> *byteObjArr = new QVector<byteDefinition*>;
-    QVector<byteDefinition*> *byteObjArrOld = new QVector<byteDefinition*>;
-    byteDefinition zeroByteDef;
     void getDeviceName(int id);
     void clickedF();
     bool byteObjReady = false;
@@ -60,25 +58,24 @@ public slots:
     void requestMasks4Saving();
     void loadMaskRX(s_parameterMask mask);
     void hideDevButton(bool trueOrFalse, int _devNum);
-    void changeButtonColor(QString _status);
+    void changeButtonColor(State _status);
     void setOfflineStatus();
     void jsonMap(s_parameterMask mask);
     void returnMaskCounting(int devNum, int byteNum, int count);
-    void setProtocol(s_protocolDescription);
+    void setModel(const ProtocolSettings *model); //протокол читаем из модели профиля
 
 private:
-    QString devStatus = "init";
+    State devStatus = State::Init;
     Q_DISABLE_COPY(Device)
     QTimer *timer = new QTimer(this);
     QVariantMap *devParams = new QVariantMap;
-    //QDateTime returnTimestamp();
     QDateTime currentTime;
-    bool skippedFirstJsonSending = false;
     int devParamsCount = 0;
-    int countMasks();
+    int countMasks(); //пересчитывает кэш количества масок и возвращает его
+    int maskCountCache = 0;
     QMap<int, int> maskCountMap;
     int calcMasksInDev();
-    s_protocolDescription protocol;
+    const ProtocolSettings *m_model = nullptr;
 };
 
 #endif // DEVICE_H

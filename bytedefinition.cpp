@@ -1,9 +1,9 @@
 #include "bytedefinition.h"
+#include "wordvalue.h"
 #include <QDebug>
 #include "bitmaskobj.h"
 #include <QByteArray>
 #include <QDataStream>
-#include "cmath"
 //Создаётся для каждого байта при инициализации устройства.
 //Данные отсюда будут подтягиваться в гуй параметров байта, и сюда же сохраняться.
 //Вместе с параметрами устройства (dynamicbaseprofile) данные будут сохраняться в файл.
@@ -60,19 +60,18 @@ void byteDefinition::createNewMask(int _devNum, int _byteNum)
         mask->currentMask.byteNum = _byteNum;
         mask->currentMask.id = calcMaskID();
         mask->setParent(this);
-        //connect (mask, &bitMaskObj::mask2byteSettingsForm, this, &byteDefinition::mask2FormRX); //открытие формы
-        connect (this, &byteDefinition::requestMaskDataRX, this, [ = ](int r_devNum, int r_byteNum, int r_id) { //ответный сигнал от masksettingsdialog с запросом всех параметров маски bitmaskobject
+        connect (this, &byteDefinition::requestMaskDataRX, this, [this](int r_devNum, int r_byteNum, int r_id) { //ответный сигнал от masksettingsdialog с запросом всех параметров маски bitmaskobject
             if (devNum == r_devNum && th_byteNum == r_byteNum) {
                 emit requestMaskDataTX(r_devNum, r_byteNum, r_id);
             }
         });
         connect (this, &byteDefinition::requestMaskDataTX, mask, &bitMaskObj::maskToForm);//запрос от формы
-        connect (mask, &bitMaskObj::maskToFormSIG, this, [ = ](s_parameterMask answer) { //ответный сигнал со всеми данными маски bitmaskobj в masksettingsdialog
+        connect (mask, &bitMaskObj::maskToFormSIG, this, [this](s_parameterMask answer) { //ответный сигнал со всеми данными маски bitmaskobj в masksettingsdialog
             if (devNum == answer.devNum && th_byteNum == answer.byteNum) {
                 emit maskData2FormTX(answer);
             }
         });
-        connect (this, &byteDefinition::sendDataToProfileRX, this, [ = ](s_parameterMask mask) { //забор данных из формы masksettingsdialog и отправка в профиль bitmaskobj
+        connect (this, &byteDefinition::sendDataToProfileRX, this, [this](s_parameterMask mask) { //забор данных из формы masksettingsdialog и отправка в профиль bitmaskobj
             if (devNum == mask.devNum && th_byteNum == mask.byteNum) {
                 emit sendDataToProfileTX(mask);
             }
@@ -89,11 +88,9 @@ void byteDefinition::createNewMask(int _devNum, int _byteNum)
 }
 
 void byteDefinition::countMasks()
-{
-    QList<bitMaskObj*> bytedefChildList = this->findChildren<bitMaskObj*>();
-    if (!bytedefChildList.isEmpty()) {
-        emit returnMaskCountForThisByte(devNum, th_byteNum, bytedefChildList.count());
-    }
+{ //сообщаем количество масок байта, в том числе нулевое:
+  //устройство кэширует сумму, поэтому устаревшее значение исказит счёт
+    emit returnMaskCountForThisByte(devNum, th_byteNum, this->findChildren<bitMaskObj*>().count());
 }
 
 void byteDefinition::loadMaskRX(s_parameterMask mask)
@@ -135,46 +132,9 @@ int byteDefinition::calcMaskID()
 
 void byteDefinition::calcWordData(int _devNum, QVector<int> data)
 { //формируем слово из полных данных устройства и заданной длины, и рассылаем слово маскам
-    wordData = 0;
-    int bytex = 0;
-    int step = 0;
-    if (_devNum == devNum)
-    {
-        if (wordType == 0) {
-            if (th_byteNum < data.size()) {
-                wordData = (data.at(th_byteNum));
-            }
-        }
-        else if (wordType == 1)
-        {
-            if (th_byteNum + 1 < data.size()) { //проверка: после смены профиля пакет может быть короче
-                for (int y = 0; y <= 1; y++)
-                {
-                    bytex = (data.at(th_byteNum + y));
-                    for (int i = 0, mask = 1; i <= 7; i++, step++, mask = mask << 1)
-                    {
-                        if (bytex & mask) {
-                            wordData += pow(2, step);
-                        }
-                    }
-                }
-            }
-        }
-        else if (wordType == 2)
-        {
-            if (th_byteNum + 3 < data.size()) { //проверка: после смены профиля пакет может быть короче
-                for (int y = 0; y <= 3; y++)
-                {
-                    bytex = (data.at(th_byteNum + y));
-                    for (int i = 0, mask = 1; i <= 7; i++, step++, mask = mask << 1)
-                    {
-                        if (bytex & mask) {
-                            wordData += pow(2, step);
-                        }
-                    }
-                }
-            }
-        }
-        emit wordData2Mask(devNum, th_byteNum, wordData);
+    if (_devNum != devNum) {
+        return;
     }
+    wordData = wordvalue::assemble(data, th_byteNum, wordType);
+    emit wordData2Mask(devNum, th_byteNum, wordData);
 }

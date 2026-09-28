@@ -12,7 +12,7 @@ liveGraph::liveGraph(QWidget *parent) :
     ui(new Ui::liveGraphWidget)
 {
     ui->setupUi(this);
-    timeNavigationScrollbarNewMaxLevel(10000); //диапазон навигации по логу 0..10000
+    timeNavigationScrollbarNewMaxLevel(kSliderMax); //диапазон навигации по логу
     ui->timeScrollBar->setSingleStep(10);
     ui->timeScrollBar->setPageStep(1000); //ручка ~10% ширины, иначе её не ухватить
     connect (ui->timeScrollBar, &QScrollBar::valueChanged, this, &liveGraph::timeNavigationScrollbarPositionChanged);
@@ -24,7 +24,7 @@ liveGraph::liveGraph(QWidget *parent) :
     ui->rightTimeLabel->setStyleSheet("QLabel{background:#FFFFAA;border:1px solid #808080;padding:2px;color:#000000;}");
     connect (ui->timeScrollBar, &QScrollBar::sliderPressed, this, &liveGraph::showNavigationTimeLabel);
     connect (ui->timeScrollBar, &QScrollBar::sliderReleased, this, &liveGraph::hideNavigationTimeLabel);
-    connect (this, &liveGraph::readFromFileSignal, [ = ](bool r) {
+    connect (this, &liveGraph::readFromFileSignal, [this](bool r) {
         readFromFile = r;
         if (r) {
             emit startOscillator();
@@ -138,141 +138,147 @@ void liveGraph::incomingDataSlot(QDateTime currentTimeForData, s_parameterMask d
     }
     lastTime = currentTimeForData;
     ui->rightTimeLabel->setText(lastTime.toString("hh:mm:ss"));
-    QList<newgraph*> graphList = this->findChildren<newgraph*>();
-    QListIterator<newgraph*> graphListIt(graphList);
-    foundFlag = false;
-    if (!graphList.empty())
+
+    newgraph *curve = findCurve(data);
+    if (curve)
     {
-        for (int i = 0; i < graphList.size(); ++i)
-        {
-            if (graphListIt.peekNext()->devNum == data.devNum && graphListIt.peekNext()->byteNum == data.byteNum && graphListIt.peekNext()->id == data.id)
-            { //если нашёлся график
-                if (data.drawGraphFlag)
-                { //и в новых данных флаг на разрешение рисования, то обновляем график
-                    foundFlag = true;
-                    emit data2graph(data.devNum, data.byteNum, data.id, data.endValue, steps, data.drawGraphColor, currentTimeForData);
-                    break;
-                }
-                else
-                {
-                    graphAnnotation.remove(data.drawGraphColor);
-                    graphAnnotationMinMax.remove(data.parameterName);
-                    graphListIt.next()->~newgraph(); //если флаг снят - удаляем объект графика
-                    break;
-                }
-            }
-            graphListIt.next();
-        }
-    }
-    if (!foundFlag && data.drawGraphFlag)
-    { //если график не найден то создаём, инициализируем и сразу отправляем данные
-        newgraph *graph = new newgraph(this);
-        connect (this, &liveGraph::repaintCurves, graph, &newgraph::repaintThis);
-        connect (graph, &newgraph::graph2Painter, this, [ = ](QMap<QDateTime, double> points, QString color) {
-            if (!navigationActive) { //при навигации по логу конец графика задаёт слайдер, а не реальное время
-                calculatedEndTime = realTime;
-            }
-            //calculatedEndTime - конец графика: либо последняя принятая метка данных,
-            //либо время по положению слайдера навигации. К нему привязывается выборка точек.
-            paintCurve(points, calculatedEndTime, color);
-        }); //graph2Painter отдаёт весь массив точек графика и цвет рисования
-        connect (this, &liveGraph::data2graph, graph, &newgraph::dataPool);
-        graph->devNum = data.devNum;
-        graph->byteNum = data.byteNum;
-        graph->id = data.id;
-        emit data2graph(data.devNum, data.byteNum, data.id, data.endValue, steps, data.drawGraphColor, currentTimeForData);
-        //connect (timer, &QTimer::timeout, graph, &newgraph::oscillatorInput);
-        graphAnnotationMinMax.insert(data.parameterName, {data.endValue, data.endValue});
-    }
-    if (data.drawGraphFlag)
-    {
-        if (!graphAnnotationMinMax.contains(data.parameterName)) { //нет записи (например после смены профиля) - создаём, иначе .at() выйдет за границы
-            graphAnnotationMinMax.insert(data.parameterName, {data.endValue, data.endValue});
-        }
-        if (graphAnnotationMinMax.value(data.parameterName).at(0) > data.endValue) //Тут сыпется при попытке рисования
-        {
-            QVector<double> minMax = {data.endValue, graphAnnotationMinMax.value(data.parameterName).at(1)};
-            graphAnnotationMinMax.insert(data.parameterName, minMax);
-        }
-        if (graphAnnotationMinMax.value(data.parameterName).at(1) < data.endValue)
-        {
-            QVector<double> minMax = {graphAnnotationMinMax.value(data.parameterName).at(0), data.endValue};
-            graphAnnotationMinMax.insert(data.parameterName, minMax);
-        }
-        if (minMaxOnOff)
-        {
-            QString annotationString = data.parameterName + '@' + data.devName + " - " + QString::number(data.endValue)
-                                       + "| Min - " + QString::number(graphAnnotationMinMax.value(data.parameterName).at(0)) + "| Max - " +
-                                       QString::number(graphAnnotationMinMax.value(data.parameterName).at(1));
-            graphAnnotation.insert(data.drawGraphColor, annotationString);
+        if (data.drawGraphFlag)
+        { //в новых данных разрешено рисование - обновляем график
+            emit data2graph(data.devNum, data.byteNum, data.id, data.endValue, steps, data.drawGraphColor, currentTimeForData);
         }
         else
-        {
-            graphAnnotationMinMax.insert(data.parameterName, {data.endValue, data.endValue});
-            QString annotationString = data.parameterName + '@' + data.devName + " - " + QString::number(data.endValue);
-            graphAnnotation.insert(data.drawGraphColor, annotationString);
+        { //флаг снят - удаляем график вместе с подписью
+            graphAnnotation.remove(data.drawGraphColor);
+            graphAnnotationMinMax.remove(data.parameterName);
+            delete curve;
         }
+    }
+    else if (data.drawGraphFlag)
+    { //график не найден - создаём, инициализируем и сразу отправляем данные
+        createCurve(data, currentTimeForData);
+    }
+
+    if (data.drawGraphFlag) {
+        updateAnnotation(data);
+    }
+}
+
+newgraph *liveGraph::findCurve(const s_parameterMask &data)
+{
+    const QList<newgraph*> graphList = this->findChildren<newgraph*>();
+    for (newgraph *graph : graphList) {
+        if (graph->devNum == data.devNum && graph->byteNum == data.byteNum && graph->id == data.id) {
+            return graph;
+        }
+    }
+    return nullptr;
+}
+
+newgraph *liveGraph::createCurve(const s_parameterMask &data, const QDateTime &time)
+{
+    newgraph *graph = new newgraph(this);
+    connect (this, &liveGraph::repaintCurves, graph, &newgraph::repaintThis);
+    connect (graph, &newgraph::graph2Painter, this, [this](QMap<QDateTime, double> points, QString color) {
+        if (!navigationActive) { //при навигации по логу конец графика задаёт слайдер, а не реальное время
+            calculatedEndTime = realTime;
+        }
+        //calculatedEndTime - конец графика: либо последняя принятая метка данных,
+        //либо время по положению слайдера навигации. К нему привязывается выборка точек.
+        paintCurve(points, calculatedEndTime, color);
+    }); //graph2Painter отдаёт весь массив точек графика и цвет рисования
+    connect (this, &liveGraph::data2graph, graph, &newgraph::dataPool);
+    graph->devNum = data.devNum;
+    graph->byteNum = data.byteNum;
+    graph->id = data.id;
+    graphAnnotationMinMax.insert(data.parameterName, {data.endValue, data.endValue});
+    emit data2graph(data.devNum, data.byteNum, data.id, data.endValue, steps, data.drawGraphColor, time);
+    return graph;
+}
+
+void liveGraph::updateAnnotation(const s_parameterMask &data)
+{
+    if (!graphAnnotationMinMax.contains(data.parameterName)) { //нет записи (например после смены профиля) - создаём, иначе .at() выйдет за границы
+        graphAnnotationMinMax.insert(data.parameterName, {data.endValue, data.endValue});
+    }
+    if (minMaxOnOff)
+    {
+        QVector<double> minMax = graphAnnotationMinMax.value(data.parameterName);
+        if (minMax.at(0) > data.endValue) {
+            minMax[0] = data.endValue;
+        }
+        if (minMax.at(1) < data.endValue) {
+            minMax[1] = data.endValue;
+        }
+        graphAnnotationMinMax.insert(data.parameterName, minMax);
+        const QString annotationString = data.parameterName + '@' + data.devName + " - " + QString::number(data.endValue)
+                                         + "| Min - " + QString::number(minMax.at(0)) + "| Max - " + QString::number(minMax.at(1));
+        graphAnnotation.insert(data.drawGraphColor, annotationString);
+    }
+    else
+    {
+        graphAnnotationMinMax.insert(data.parameterName, {data.endValue, data.endValue});
+        const QString annotationString = data.parameterName + '@' + data.devName + " - " + QString::number(data.endValue);
+        graphAnnotation.insert(data.drawGraphColor, annotationString);
     }
 }
 
 void liveGraph::paintCurve(QMap<QDateTime, double> allPoints, QDateTime endTime, QString color) //приходит кривой endTime
 { //сюда каждый объект графика отдаёт массив данных и цвет на рисование
     QPainter paintcv(this);
-    if (paintcv.isActive())
-    {
-        QMap<QDateTime, double> points = pointsForTimeFrames(allPoints, endTime);
-        if (points.isEmpty()) { //в выбранном временном окне нет точек
-            return;
+    if (!paintcv.isActive()) {
+        return;
+    }
+    QMap<QDateTime, double> points = pointsForTimeFrames(allPoints, endTime);
+    if (points.isEmpty()) { //в выбранном временном окне нет точек
+        return;
+    }
+    const QMap<qint64, double> pointsPixelMap = pointsToPixelMap(points);
+
+    QColor paintColor;
+    paintColor.setNamedColor(color);
+    paintcv.setBrush(QBrush(paintColor));
+    paintcv.setPen(QPen(paintColor, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+
+    const QVector<double> minMaxDeltaValue = findDeltaValue(points); //минимальное, максимальное и дельта между ними
+    const double yScale = findYScale(minMaxDeltaValue); //высота шкалы Y, кратная 10
+    const double zeroShift = (minMaxDeltaValue.at(0) < 0) ? minMaxDeltaValue.at(0) * -1 : 0.0; //смещение нуля при отрицательных значениях
+    const double oneUnitPix = vZeroLevel / yScale; //цена одного деления в пикселях
+    const qint64 shiftMs = endTime.toMSecsSinceEpoch() - points.lastKey().toMSecsSinceEpoch();
+    const int shiftPix = shiftMs / onePixelTime; //сдвиг так, чтобы конец кривой совпал с концом графика
+
+    drawCurve(paintcv, pointsPixelMap, oneUnitPix, zeroShift, shiftPix);
+    curvesCount++;
+}
+
+QMap<qint64, double> liveGraph::pointsToPixelMap(const QMap<QDateTime, double> &points) const
+{ //карта позиций времени по шкале x кадра в пикселях
+    QMap<qint64, double> pointsPixelMap;
+    const qint64 base = points.firstKey().toMSecsSinceEpoch();
+    for (const QDateTime &t : points.keys()) {
+        pointsPixelMap.insert((t.toMSecsSinceEpoch() - base) / onePixelTime, points.value(t));
+    }
+    return pointsPixelMap;
+}
+
+double liveGraph::yPixel(double value, double oneUnitPix, double zeroShift) const
+{ //вертикальная координата значения с учётом смещений и поправки масштаба
+    return (((value + zeroShift) * oneUnitPix) - vZeroLevel - scaleErrorPix) * -1;
+}
+
+void liveGraph::drawCurve(QPainter &painter, const QMap<qint64, double> &pointsPixelMap, double oneUnitPix, double zeroShift, int shiftPix)
+{ //отрезки кривой и точки по карте пикселей
+    const int x0 = oneCellXpix * verticalLineCount; //начало координат
+    qint64 prevPixels = 0;
+    int x = 0, oldX = 0;
+    for (const qint64 &pixels : pointsPixelMap.keys()) {
+        oldX = x;
+        x = x0 - pixels; //x - позиция точки по времени
+        if (oldX > 0 && ((x - oldX) * onePixelTime) < kMaxGapMs) { //при паузе больше 3с линию не рисуем
+            painter.drawLine(oldX - shiftPix, yPixel(pointsPixelMap.value(prevPixels), oneUnitPix, zeroShift),
+                             x - shiftPix - oneStepXpix, yPixel(pointsPixelMap.value(pixels), oneUnitPix, zeroShift));
+            painter.drawEllipse(x - shiftPix - 2, yPixel(pointsPixelMap.value(prevPixels), oneUnitPix, zeroShift) - 2, 4, 4);
         }
-        /*-----------------------------------------------------------------------------------------*/
-        QMap<qint64, double> pointsPixelMap; //Делаем карту позиций времени по шкале х кадра в пикселях
-        for (const auto &i : points.keys())
-        {
-            qint64 ms = i.toMSecsSinceEpoch() - points.firstKey().toMSecsSinceEpoch();
-            pointsPixelMap.insert(ms / onePixelTime, points.value(i));
-        }
-        /*-----------------------------------------------------------------------------------------*/
-        QColor paintColor;
-        paintColor.setNamedColor(color);
-        QPen pen(paintColor, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
-        paintcv.setBrush(QBrush(paintColor));
-        paintcv.setPen(pen);
-        QVector<double> minMaxDeltaValue = findDeltaValue(points); //мнимальное, максимальное и дельта между ними
-        double yScale = findYScale(minMaxDeltaValue); //вычисляем по дельте высоту шкалы Y, кратную 10
-        double zeroShift = 0;
-        if (minMaxDeltaValue.at(0) < 0) {
-            zeroShift = minMaxDeltaValue.at(0) * -1; //смещение нуля если минимальное значение меньше нуля
-        }
-        double oneUnitPix = vZeroLevel / yScale; //цена одного деления в пикселях
-        //рисуем линии с учётом всех смещений и поправок на масштабирование
-        //oneCellXpix - количество пикселей в одной ячейке по x, verticalLineCount - количество вертикальных линий
-        //oneStepXpix - количество пикселей за один шаг отрисовки, pictWidth - ширина всего графика в пикселях
-        qint64 prevPixels = 0;
-        int x0 = oneCellXpix * verticalLineCount; //Начало координат
-        int x = 0, old_x = 0;
-        qint64 shift_ms = endTime.toMSecsSinceEpoch() - points.lastKey().toMSecsSinceEpoch();
-        int shift_pix = shift_ms / onePixelTime;
-        for (const auto &pixels : pointsPixelMap.keys()) {
-            old_x = x;
-            //x - позиция точки по времени, shift_pix сдвигает кривую так, чтобы её конец совпал с концом графика
-            x = x0 - pixels;
-            if (old_x > 0 && ((x - old_x) * onePixelTime) < 3000) { //Чтоб не было лишней линии к концу графика, и при паузе больше 3с линия не рисуется
-                paintcv.drawLine(old_x - shift_pix, //x1
-                                 (((pointsPixelMap.value(prevPixels) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix) * -1, //y1
-                                 x - shift_pix - oneStepXpix, //x2
-                                 (((pointsPixelMap.value(pixels) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix) * -1); //y2
-                paintcv.drawEllipse(x - shift_pix - 2,
-                                    (((pointsPixelMap.value(prevPixels) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix + 2) * -1,
-                                    4, 4);
-            }
-            prevPixels = pixels;
-        }
-        /*    for (int i = 0, x = oneCellXpix * verticalLineCount; i < points.size() - 1; ++i, x = x - oneStepXpix) {
-                paintcv.drawLine(x, (((points.values().at(i) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix) * -1,
-                                 x - oneStepXpix, (((points.values().at(i + 1) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix) * -1);
-                paintcv.drawEllipse(x - 2, (((points.values().at(i) + zeroShift)*oneUnitPix) - vZeroLevel - scaleErrorPix + 2) * -1, 4, 4);
-            }*/
-        curvesCount++;
+        prevPixels = pixels;
     }
 }
 
@@ -281,7 +287,7 @@ void liveGraph::timeNavigationScrollbarPositionChanged(int pos) // Пропор�
     if (!readFromFile) { //навигация имеет смысл только при чтении заранее считанного лога
         return;
     }
-    const double proportion_slider = pos / 10000.0; //вещественное деление, иначе pos/10000 всегда 0
+    const double proportion_slider = pos / double(kSliderMax); //вещественное деление, иначе pos/10000 всегда 0
     const qint64 frameMs = qint64(timeFrames) * 1000; //ширина кадра в мс
     //Левая граница навигации - конец первого кадра, а не начало координат: в самом левом
     //положении показывается первый кадр [beginTime, beginTime + frameMs], поэтому метка
@@ -471,7 +477,7 @@ void liveGraph::cleanGraph()
     graphAnnotationMinMax.clear();
     while (graphListIt.hasNext())
     {
-        graphListIt.next()->~newgraph();
+        delete graphListIt.next();
     }
     waitFirstData = true;
     ui->timeScrollBar->setValue(ui->timeScrollBar->maximum()); //возвращаемся к концу лога

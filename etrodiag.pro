@@ -11,6 +11,7 @@ include(qtcsv/qtcsv.pri)
 TRANSLATIONS = etrodiag_ru.ts
 SOURCES += \
     aboutdialog.cpp \
+    apppaths.cpp \
     bitmaskobj.cpp \
     bitsetform.cpp \
     bytebutton.cpp \
@@ -20,20 +21,26 @@ SOURCES += \
     dataprofiler.cpp \
     device.cpp \
     devsettingsform.cpp \
+    framecheck.cpp \
     getstream.cpp \
     livegraph.cpp \
     logger.cpp \
     main.cpp \
     mainwindow.cpp \
+    maskmath.cpp \
     masksettingsdialog.cpp \
     newconnect.cpp \
     newgraph.cpp \
+    profiledata.cpp \
+    protocolsettings.cpp \
     settingsdialog.cpp \
     console.cpp \
-    txtmaskobj.cpp
+    txtmaskobj.cpp \
+    wordvalue.cpp
 
 HEADERS += \
     aboutdialog.h \
+    apppaths.h \
     bitmaskobj.h \
     bitsetform.h \
     bytebutton.h \
@@ -43,17 +50,22 @@ HEADERS += \
     dataprofiler.h \
     device.h \
     devsettingsform.h \
+    framecheck.h \
     getstream.h \
     global.h \
     livegraph.h \
     logger.h \
     mainwindow.h \
+    maskmath.h \
     masksettingsdialog.h \
     newconnect.h \
     newgraph.h \
+    profiledata.h \
+    protocolsettings.h \
     settingsdialog.h \
     console.h \
-    txtmaskobj.h
+    txtmaskobj.h \
+    wordvalue.h
 
 FORMS += \
     aboutdialog.ui \

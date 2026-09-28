@@ -13,15 +13,11 @@ public:
     s_parameterMask currentMask;
     s_parameterMask oldMask;
     void newMaskObj(s_parameterMask mask);
-    QString paramMaskNew;
-    int paramMask4calcShift = 0;
     void calculateParamShift();
-// void calculateParamLeight();
     void calculateValue(int _devNum, int _byteNum, uint32_t wordData);
 
 signals:
     void maskToFormSIG(s_parameterMask mask);
-// void mask2byteSettingsForm(s_parameterMask mask);
     void maskToListSIG(s_parameterMask mask);
     void param2FrontEnd(s_parameterMask mask);
 public slots:

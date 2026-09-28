@@ -12,19 +12,15 @@ getStream::getStream(QWidget *parent) : QObject(parent)
 
 void getStream::getRawData(QByteArray r_data) //побайтово читаем из буфера, конвертируем в int и отсылаем на обработку
 {
-    n = 0;
-    while (n < (r_data.size()))
+    for (int i = 0; i < r_data.size(); ++i)
     {
-        toQue.insert(0, r_data.at(n));
-        intToQue = toQue.toHex().toInt(&ok, 16);
+        const int byteValue = static_cast<unsigned char>(r_data.at(i));
         if (profilerReadyToReceive && buffer.isEmpty()) {
-            emit giveMyByte(intToQue);
+            emit giveMyByte(byteValue);
         }
         else {
-            buffer.enqueue(intToQue);
+            buffer.enqueue(byteValue);
         }
-        toQue.clear();
-        n++;
     }
 }
 void getStream::readPermission(bool p)

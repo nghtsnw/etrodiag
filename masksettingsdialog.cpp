@@ -184,7 +184,7 @@ void maskSettingsDialog::killChildren() //очистка формы от объ�
     QList<bitSetForm*> devChildList = this->findChildren<bitSetForm*>();
     QListIterator<bitSetForm*> devChildListIt(devChildList);
     while (devChildListIt.hasNext()) {
-        devChildListIt.next()->~bitSetForm();
+        delete devChildListIt.next();
     }
     devChildList = this->findChildren<bitSetForm*>();
     bitSetList.clear();

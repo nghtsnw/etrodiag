@@ -13,7 +13,6 @@
 #include "masksettingsdialog.h"
 #include <livegraph.h>
 #include <QTableWidget>
-//#include <QGestureEvent>
 #include "logger.h"
 #include "global.h"
 
@@ -22,8 +21,7 @@ QT_BEGIN_NAMESPACE
 class QLabel;
 class QProgressBar;
 class QToolButton;
-//class QGestureEvent;
-//class QSwipeGesture;
+class QStackedWidget;
 
 namespace Ui {
     class MainWindow;
@@ -53,16 +51,19 @@ public:
     QToolButton *paramsButton = nullptr;
     QToolButton *logButton = nullptr;
     QPushButton *connectButton = nullptr;
+    QStackedWidget *profileArea = nullptr;
+    QLabel *profileInfoLabel = nullptr;
     bool serialConnected = false;
+    void setupProfileArea();   // делит вкладку соединения, справа - информация профиля/редактор
+    void updateProfileInfo();  // показывает данные выбранного профиля
+    void onEditProfile();      // открывает в правой половине редактор профиля
     void openMaskSettingsDialog();
     void createDevice(int devNum);
     void loadProfile(s_parameterMask mask);
     void textLogWindow(QDateTime currentTime, QString string, bool redFlag);
     void cleanDevList();
     void updValueArea(s_parameterMask mask);
-// void grabGestures(const QVector<Qt::GestureType> &gestures);
     void ValueArea_CellClicked(int row, int);
-    QString appHomeDir;
     ~MainWindow();
 
 
@@ -95,7 +96,6 @@ public slots:
     void frontendDataSort(QDateTime currentTime, s_parameterMask mask);
     void devStatusMsg(QString _devName, QString status);
     void badCRCEvent(uint8_t calculatedCRC, QVector<int> dataFrame);
-    //void corruptedDataEvent(QVector<int> data);
 
 private slots:
 
@@ -112,29 +112,20 @@ private:
     void pollPorts();
     QTimer *portPollTimer = nullptr;
     QStringList knownPortList;
-    //QDateTime returnTimestamp();
     QTimer *timer = new QTimer(this);
-    void swipeTriggered(QString);
     int currentOpenTab = 0;
     void setCurrentOpenTab(int index);
     QList<Device*> vlayChildList;
     int devNum;
     bool thisDeviceHere = false;
-    bool findRow;
-    QString value2str;
-    QString namesUnited;
-    QTableWidget *valueTable = nullptr;
-    QString tmp;
-    s_protocolDescription protocol;
+    QTableWidget *valueTableForDevice(const QString &devName); //таблица значений устройства или nullptr
+    QTableWidget *createValueTable(const QString &devName);    //создать таблицу и вкладку устройства
+    void updateValueTableRow(QTableWidget *table, const s_parameterMask &mask); //обновить/добавить строку
+    void closeMaskSettings(int devNum);                        //закрыть настройки маски
+    void closeByteSettings();                                  //закрыть настройки байта
+    void toggleDeviceSettings(int devNum, QVector<int> data);  //открыть/закрыть форму устройства
 private:
     AboutDialog aboutDialog;
-    QLabel *m_status = nullptr;
-    bool touchTrigger = false;
-    int mouseStartX;
-    int mouseStartY;
-    int mouseStopX;
-    int mouseStopY;
-    void swipeCalc(QMouseEvent mouseev);
     int grabDevNum = 0;
     int grabByteNum = 0;
     int grabMaskId = 0;
@@ -145,7 +136,6 @@ protected:
     virtual void resizeEvent(QResizeEvent *) override;
     virtual void closeEvent(QCloseEvent *) override;
     bool event(QEvent *event) override;
-    //bool eventFilter(QObject *obj, QEvent *ev) override;
 
 public:
     devSettingsForm devSettForm;

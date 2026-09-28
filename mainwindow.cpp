@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 #include "aboutdialog.h"
+#include "apppaths.h"
+#include "protocolsettings.h"
 #include "controlboard.h"
 #include "ui_mainwindow.h"
 #include "newconnect.h"
@@ -17,25 +19,18 @@
 #include "device.h"
 #include "devsettingsform.h"
 #include "bytesettingsform.h"
-#include <QGestureEvent>
-#include <QSwipeGesture>
 #include <QMap>
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), statuslbl (new QLabel), crcerrorlbl (new QLabel), aboutButton (new QPushButton), m_ui (new Ui::MainWindow)
 
 {
-// QVector<Qt::GestureType> gestures;
-// gestures << Qt::SwipeGesture << Qt::TapGesture;
-// for (Qt::GestureType gesture : gestures)
-// grabGesture(gesture);
-// Надеюсь, что когда в qt починят qswipegesture, я раскомментирую это и удалю тот ужас что сейчас заменяет свайп.
     m_ui->setupUi(this);
     crcerrorlbl->setText(tr("CRC Errors: ") + QString::number(CRCErrorCount));
     statuslbl->setText(tr("Etrodiag"));
     aboutButton->setText(tr("About"));
     logger = new Logger;
     addConnection();
+    setupProfileArea();
     setupStatusBar();
     connection->readProfile(); //применяем профиль (протокол/настройки) при старте, как раньше открытие настроек
     connect (&byteSettForm, &ByteSettingsForm::editMask, &maskSettForm, &maskSettingsDialog::requestDataOnId);
@@ -43,7 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect (m_ui->valueArea, &QTabWidget::currentChanged, this, &MainWindow::setCurrentOpenTab);
     connect (logger, &Logger::showStatusMessage, this, &MainWindow::showStatusMessage);
     connect (logger, &Logger::logLoadProgress, this, &MainWindow::setLogLoadProgress);
-    connect (logger, &Logger::toTextLog, this, [ = ](QString text, bool redflag) {
+    connect (logger, &Logger::toTextLog, this, [this](QString text, bool redflag) {
         textLogWindow(QDateTime::currentDateTime(), text, redflag);
     });
     connect (logger, &Logger::readFromCsv, connection, &newconnect::sendRawDataWithTime);
@@ -55,10 +50,8 @@ MainWindow::MainWindow(QWidget *parent) :
     cBoard.setVisible(false); //окно управления переменными показывается только при включённом контроле переменных
     connect (&cBoard, &ControlBoard::controlCommand, this, &MainWindow::guiCommandHandler);
     connect (connection, &newconnect::setVisibleControlWindow, &cBoard, &ControlBoard::setVisible);
-    connect (connection, &newconnect::s_sendSettings, logger, &Logger::setSettings);
-    connect (connection, &newconnect::setProtocol, this, [ = ](s_protocolDescription p) {
-        protocol = p;
-    });
+    logger->setModel(&connection->m_settings->model()); //логгер читает настройки (путь к логу) из модели
+    connect (connection, &newconnect::setProtocol, this, &MainWindow::updateProfileInfo);
     connect (this, &MainWindow::emitCommand, connection, &newconnect::receiveCommandFromGui);
     m_ui->tabWidget->setCurrentIndex(0);
     m_ui->tab_connections->show();
@@ -72,7 +65,7 @@ MainWindow::~MainWindow()
 void MainWindow::addConnection()
 {
     connection = new newconnect;
-    m_ui->horizontalLayout_3->addWidget(connection);
+    m_ui->horizontalLayout_3->addWidget(connection, 1);
     connect (connection, &newconnect::loadMask, this, &MainWindow::loadProfile);
     connect (connection, &newconnect::sendStatusStr, this, &MainWindow::showStatusMessage);
     connect (connection, &newconnect::transmitData, this, &MainWindow::addDeviceToList);
@@ -94,7 +87,6 @@ void MainWindow::addConnection()
     connect (connection, &newconnect::profileName2log, logger, &Logger::setProfileName);
     connect (connection, &newconnect::badCRC, this, &MainWindow::badCRCEvent);
     connect (connection, &newconnect::logLoadProgress, this, &MainWindow::setLogLoadProgress);
-    //connect (connection, &newconnect::corruptedData, this, &MainWindow::corruptedDataEvent);
     connect(this, &MainWindow::emitCommand, connection, &newconnect::receiveCommandFromGui);
     connection->show();
 }
@@ -221,6 +213,77 @@ void MainWindow::refreshConnectionButtons()
             connectButton->setText(serialConnected ? tr("Disconnect") : tr("Connect"));
         }
     }
+    updateProfileInfo();
+}
+
+void MainWindow::setupProfileArea()
+{ //Делим вкладку соединения: слева консоль, справа информация о профиле / редактор профиля
+    profileInfoLabel = new QLabel;
+    profileInfoLabel->setTextFormat(Qt::RichText);
+    profileInfoLabel->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+    profileInfoLabel->setWordWrap(true);
+    profileInfoLabel->setMargin(8);
+    profileInfoLabel->setMinimumWidth(0);
+    profileInfoLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+
+    QWidget *infoPage = new QWidget;
+    QVBoxLayout *infoLayout = new QVBoxLayout(infoPage);
+    infoLayout->setContentsMargins(0, 0, 0, 0);
+    infoLayout->addWidget(profileInfoLabel, 1);
+
+    //Редактор профиля кладём в область прокрутки: так страница может быть уже своего
+    //естественного минимума, и при маленьком окне ничего не наезжает на консоль слева.
+    QScrollArea *editorScroll = new QScrollArea;
+    editorScroll->setWidgetResizable(true);
+    editorScroll->setFrameShape(QFrame::NoFrame);
+    editorScroll->setWidget(connection->m_settings);
+
+    profileArea = new QStackedWidget;
+    profileArea->addWidget(infoPage);                       // 0 - информация о профиле
+    profileArea->addWidget(editorScroll);                   // 1 - редактор профиля
+    profileArea->setCurrentIndex(0);
+
+    connect(connection->m_settings, &SettingsDialog::restoreConsoleAndButtons, this, [this]() {
+        if (profileArea) { //после "Применить" возвращаемся к информации о профиле
+            profileArea->setCurrentIndex(0);
+            updateProfileInfo();
+        }
+    });
+
+    m_ui->horizontalLayout_3->addWidget(profileArea, 1);
+    updateProfileInfo();
+}
+
+void MainWindow::updateProfileInfo()
+{
+    if (!connection || !connection->m_settings || !profileInfoLabel) {
+        return;
+    }
+    SettingsDialog *s = connection->m_settings;
+    const QString profileName = s->currentProfileName();
+    const s_protocolDescription &protocol = connection->m_settings->model().protocol(); //протокол берём из модели профиля
+
+    QString text;
+    text += "<b>" + tr("Profile: ") + (profileName.isEmpty() ? tr("not selected") : profileName) + "</b><br><br>";
+    text += tr("Packet size") + ": " + QString::number(protocol.packetSize) + "<br>";
+    text += tr("Block identifycator position") + ": " + QString::number(protocol.blockIdentifycatorPosition) + "<br>";
+    text += tr("Calc CRC from position") + ": " + QString::number(protocol.calcCRCFromPosition) + "<br>";
+    text += tr("Marker of begin - size") + ": " + QString::number(protocol.markerPacketBeginSize) + "<br>";
+    text += tr("Marker b1/b2") + ": " + QString::number(protocol.markerPacketBeginByte1, 16).toUpper()
+            + " / " + QString::number(protocol.markerPacketBeginByte2, 16).toUpper() + "<br>";
+    text += tr("Variables control") + ": " + (protocol.varControl ? tr("yes") : tr("no")) + "<br>";
+    text += tr("Description") + ": " + protocol.description + "<br><br>";
+    text += tr("Connection") + ": " + s->connectionSummary();
+    profileInfoLabel->setText(text);
+}
+
+void MainWindow::onEditProfile()
+{ //в правой половине вкладки соединения показываем редактор профиля
+    if (!connection || !connection->m_settings || !profileArea) {
+        return;
+    }
+    connection->editProfile(); //заполняем поля редактора текущим профилем
+    profileArea->setCurrentIndex(1);
 }
 
 void MainWindow::fillProfileMenu()
@@ -249,7 +312,7 @@ void MainWindow::fillProfileMenu()
     QAction *editAction = menu->addAction(tr("Edit profile"));
     connect(editAction, &QAction::triggered, this, [this]() {
         m_ui->tabWidget->setCurrentIndex(0);
-        connection->editProfile();
+        onEditProfile();
     });
     QAction *deleteAction = menu->addAction(tr("Delete profile"));
     deleteAction->setEnabled(!profiles.isEmpty());
@@ -281,7 +344,7 @@ void MainWindow::fillPortMenu()
     connect(fileAction, &QAction::triggered, this, [this]() {
         SettingsDialog *st = connection->m_settings;
         const QString file = QFileDialog::getOpenFileName(this, tr("Open csv data file"),
-                                                          st->appHomeDir + "Logs", tr("csv data (*.csv)"));
+                                                          apppaths::logsDir(), tr("csv data (*.csv)"));
         if (!file.isEmpty()) {
             st->setReadFromFile(file);
             refreshConnectionButtons();
@@ -424,6 +487,7 @@ void MainWindow::setLogLoadProgress(int percent)
 
 void MainWindow::addDeviceToList(QDateTime currentTime, QVector<int> ddata)
 {
+    const s_protocolDescription &protocol = connection->m_settings->model().protocol(); //протокол берём из модели профиля
     if (protocol.blockIdentifycatorPosition < 0 || protocol.blockIdentifycatorPosition >= ddata.size()) {
         return; //некорректный протокол/данные - не даём выйти за границы
     }
@@ -455,7 +519,7 @@ void MainWindow::createDevice(int devNum)
     Device *dev = new Device(devNum);
     dev->setParent(m_ui->devArea);
     m_ui->devAreaLay->addWidget(dev);
-    dev->setProtocol(protocol);
+    dev->setModel(&connection->m_settings->model()); //устройство читает протокол из модели профиля
     dev->setText(QString::number(devNum, 16));
     connect (this, &MainWindow::devUpdate, dev, &Device::updateData);
     connect (dev, &Device::openDevSettSig, this, &MainWindow::openDevSett);
@@ -496,60 +560,70 @@ void MainWindow::createDevice(int devNum)
     dev->show();
 }
 
-void MainWindow::openDevSett(int devNum, QVector<int> data)
-{ //все реакции на нажатие кнопки устройства в зависимости от состояния окна
-    if (maskSettForm.isVisible())
+void MainWindow::closeMaskSettings(int devNum)
+{ //закрываем настройки маски: возвращаемся либо к списку значений, либо к настройкам байта
+    maskSettForm.sendMask2Profile();
+    maskSettForm.hide();
+    maskSettForm.killChildren();
+    if (maskSettForm.openDirectly)
     {
-        maskSettForm.sendMask2Profile();
-        maskSettForm.hide();
-        maskSettForm.killChildren();
-        if (maskSettForm.openDirectly)
-        {
-            emit hideOtherDevButtons(false, devNum);
-            emit prepareToSaveProfile();
-            emit saveProfile();
-            maskSettForm.openDirectly = false;
-            m_ui->valueArea->clear();
-            graphiq.graphAnnotation.clear();
-            m_ui->valueArea->show();
-        }
-        else {
-            byteSettForm.show();
-            byteSettForm.resize(m_ui->rightFrame->size());
-        }
+        emit hideOtherDevButtons(false, devNum);
+        emit prepareToSaveProfile();
+        emit saveProfile();
+        maskSettForm.openDirectly = false;
+        m_ui->valueArea->clear();
+        graphiq.graphAnnotation.clear();
+        m_ui->valueArea->show();
     }
     else {
-        if (byteSettForm.isVisible())
-        {
-            byteSettForm.hide();
-            byteSettForm.cleanForm();
-            devSettForm.show();
-            devSettForm.resize(m_ui->rightFrame->size());
-        }
-        else
-        {
-            devSettForm.setParent(m_ui->rightFrame);
-            if (m_ui->valueArea->isHidden())
-            {
-                devSettForm.hide();
-                emit dvsfAfterCloseClear();
-                m_ui->valueArea->clear();
-                graphiq.graphAnnotation.clear();
-                m_ui->valueArea->show();
-                emit hideOtherDevButtons(false, devNum);
-                emit prepareToSaveProfile();
-                emit saveProfile();
-            }
-            else
-            {
-                m_ui->valueArea->hide();
-                emit hideOtherDevButtons(true, devNum);
-                devSettForm.initByteButtons(devNum, data);
-                emit getDevName(devNum);
-                devSettForm.show();
-                devSettForm.resize(m_ui->rightFrame->size());
-            }
-        }
+        byteSettForm.show();
+        byteSettForm.resize(m_ui->rightFrame->size());
+    }
+}
+
+void MainWindow::closeByteSettings()
+{ //из настроек байта возвращаемся к списку устройств
+    byteSettForm.hide();
+    byteSettForm.cleanForm();
+    devSettForm.show();
+    devSettForm.resize(m_ui->rightFrame->size());
+}
+
+void MainWindow::toggleDeviceSettings(int devNum, QVector<int> data)
+{ //открываем форму устройства или возвращаемся к списку значений
+    devSettForm.setParent(m_ui->rightFrame);
+    if (m_ui->valueArea->isHidden())
+    {
+        devSettForm.hide();
+        emit dvsfAfterCloseClear();
+        m_ui->valueArea->clear();
+        graphiq.graphAnnotation.clear();
+        m_ui->valueArea->show();
+        emit hideOtherDevButtons(false, devNum);
+        emit prepareToSaveProfile();
+        emit saveProfile();
+    }
+    else
+    {
+        m_ui->valueArea->hide();
+        emit hideOtherDevButtons(true, devNum);
+        devSettForm.initByteButtons(devNum, data);
+        emit getDevName(devNum);
+        devSettForm.show();
+        devSettForm.resize(m_ui->rightFrame->size());
+    }
+}
+
+void MainWindow::openDevSett(int devNum, QVector<int> data)
+{ //все реакции на нажатие кнопки устройства в зависимости от состояния окна
+    if (maskSettForm.isVisible()) {
+        closeMaskSettings(devNum);
+    }
+    else if (byteSettForm.isVisible()) {
+        closeByteSettings();
+    }
+    else {
+        toggleDeviceSettings(devNum, data);
     }
 }
 
@@ -578,101 +652,70 @@ void MainWindow::openMaskSettingsDialog()
     }
 }
 
-/*QDateTime MainWindow::returnTimestamp()
-{
-    quint64 timestamp = QDateTime::currentMSecsSinceEpoch();
-    QDateTime dt3 = QDateTime::fromMSecsSinceEpoch(timestamp);
-    return dt3;
-}*/
-
-void MainWindow::updValueArea(s_parameterMask mask)
-{ //сначала проверяем есть ли уже вкладка с этим устройством по имени
-    static int thisDeviceIndex = -1;
-    for (int var = m_ui->valueArea->count(); var >= 0; --var) {
-        if (m_ui->valueArea->tabText(var) == mask.devName)
-        { //если есть то сохраняем индекс вкладки и покидаем цикл
-            thisDeviceIndex = var;
-            break;
+QTableWidget *MainWindow::valueTableForDevice(const QString &devName)
+{ //вкладка устройства (по имени) и её таблица, либо nullptr
+    for (int i = 0; i < m_ui->valueArea->count(); ++i) {
+        if (m_ui->valueArea->tabText(i) == devName) {
+            return qobject_cast<QTableWidget*>(m_ui->valueArea->widget(i));
         }
-        else {
-            thisDeviceIndex = -1;
-        }
-        //если нет то ставим индекс -1 чтоб триггернуться для последующей обработки
     }
-    if (thisDeviceIndex == -1)
-    { //создаём и инициализируем таблицу, добавляем виджет таблицы в новую вкладку имени девайса пришедшего в этой посылке
-        QTableWidget *valueTableNew = new QTableWidget(m_ui->valueArea);
-        connect(valueTableNew, &QTableWidget::cellClicked, this, &MainWindow::ValueArea_CellClicked);
-        valueTableNew->insertColumn(0);//name
-        valueTableNew->insertColumn(1);//value
-        valueTableNew->insertColumn(2);//devnum
-        valueTableNew->insertColumn(3);//bytenum
-        valueTableNew->insertColumn(4);//maskid
-        valueTableNew->hideColumn(2);//скрываем колонки с виду, данные в них нужны только для открытия настроек нужной маски
-        valueTableNew->hideColumn(3);
-        valueTableNew->hideColumn(4);
-        valueTableNew->horizontalHeader()->hide();
-        m_ui->valueArea->addTab(valueTableNew, mask.devName);
-        //узнаём индекс только что созданной вкладки. Может быть стоит выделить это в отдельную функцию, но пока и так сойдёт
-        for (int var = m_ui->valueArea->count(); var >= 0; --var) {
-            if (m_ui->valueArea->tabText(var) == mask.devName) {
-                thisDeviceIndex = var;
-                break;
+    return nullptr;
+}
+
+QTableWidget *MainWindow::createValueTable(const QString &devName)
+{ //создаём таблицу значений и вкладку с именем устройства
+    QTableWidget *table = new QTableWidget(m_ui->valueArea);
+    connect(table, &QTableWidget::cellClicked, this, &MainWindow::ValueArea_CellClicked);
+    table->insertColumn(0);//name
+    table->insertColumn(1);//value
+    table->insertColumn(2);//devnum
+    table->insertColumn(3);//bytenum
+    table->insertColumn(4);//maskid
+    table->hideColumn(2);//скрываем колонки: данные нужны только для открытия настроек нужной маски
+    table->hideColumn(3);
+    table->hideColumn(4);
+    table->horizontalHeader()->hide();
+    m_ui->valueArea->addTab(table, devName);
+    return table;
+}
+
+void MainWindow::updateValueTableRow(QTableWidget *table, const s_parameterMask &mask)
+{ //обновляем строку параметра или создаём её
+    const QString updatedName = mask.parameterName + '@' + mask.devName;
+    const QString valueText = QString::number(mask.endValue, 'g', 6);
+    for (int i = 0; i < table->rowCount(); ++i) {
+        if (updatedName == table->item(i, 0)->text()) { //строка найдена
+            if (valueText != table->item(i, 1)->text()) { //значение изменилось - подсвечиваем
+                table->item(i, 1)->setText(valueText);
+                table->item(i, 1)->setBackground(Qt::green);
             }
             else {
-                thisDeviceIndex = -1;
+                table->item(i, 1)->setBackground(Qt::white);
             }
+            return;
         }
     }
-    tmp = (m_ui->valueArea->widget(thisDeviceIndex)->metaObject()->className());
-    //ищем виджет таблицы на вкладке и ссылаем на него статичный указатель
-    if (tmp == "QTableWidget") {
-        valueTable = (QTableWidget*)m_ui->valueArea->widget(thisDeviceIndex);
+    const int row = table->rowCount(); //строка не найдена - создаём
+    table->setRowCount(row + 1);
+    table->setItem(row, 0, new QTableWidgetItem(mask.parameterName + '@' + mask.devName));
+    table->setItem(row, 1, new QTableWidgetItem(valueText));
+    table->setItem(row, 2, new QTableWidgetItem(QString::number(mask.devNum)));
+    table->setItem(row, 3, new QTableWidgetItem(QString::number(mask.byteNum)));
+    table->setItem(row, 4, new QTableWidgetItem(QString::number(mask.id)));
+    table->resizeColumnsToContents();
+    table->resizeRowsToContents();
+}
+
+void MainWindow::updValueArea(s_parameterMask mask)
+{
+    QTableWidget *table = valueTableForDevice(mask.devName);
+    if (!table) {
+        table = createValueTable(mask.devName);
     }
-    //далее работаем со строками таблицы по указателю
-    findRow = false;
-    namesUnited = (mask.parameterName + '@' + mask.devName);
-    value2str.setNum(mask.endValue, 'g', 6);
-    if (valueTable->rowCount() > 0)
-    { //если строки есть то ищем нужную
-        for (int i = 0; i < valueTable->rowCount(); i++)
-        {
-            if ((namesUnited) == valueTable->item(i, 0)->text())
-            { //если найдена строка с именем и значение обновилось, подсвечиваем
-                findRow = true;
-                if (value2str != valueTable->item(i, 1)->text())
-                {
-                    valueTable->item(i, 1)->setText(value2str);
-                    valueTable->item(i, 1)->setBackground(Qt::green);
-                }
-                else if (value2str == valueTable->item(i, 1)->text()) {
-                    valueTable->item(i, 1)->setBackground(Qt::white);
-                }
-            }
-        }
+    if (!table) {
+        return;
     }
-    if (!findRow)
-    { //если строка не найдена - создаём
-        valueTable->setRowCount(valueTable->rowCount() + 1); //добавляем новую строку
-        int row = valueTable->rowCount() - 1; //определяем индекс строки
-        QTableWidgetItem *nameItem = new QTableWidgetItem;
-        nameItem->setText(mask.parameterName + '@' + mask.devName);
-        valueTable->setItem(row, 0, nameItem);
-        QTableWidgetItem *valueItem = new QTableWidgetItem;
-        valueItem->setText(value2str);
-        valueTable->setItem(row, 1, valueItem);
-        QTableWidgetItem *devNumItem = new QTableWidgetItem;
-        devNumItem->setText(QString::number(mask.devNum));
-        valueTable->setItem(row, 2, devNumItem);
-        QTableWidgetItem *byteNumItem = new QTableWidgetItem;
-        byteNumItem->setText(QString::number(mask.byteNum));
-        valueTable->setItem(row, 3, byteNumItem);
-        QTableWidgetItem *maskIdItem = new QTableWidgetItem;
-        maskIdItem->setText(QString::number(mask.id));
-        valueTable->setItem(row, 4, maskIdItem);
-        valueTable->resizeColumnsToContents();
-        valueTable->resizeRowsToContents();
-    }
+    updateValueTableRow(table, mask);
 }
 
 void MainWindow::setCurrentOpenTab(int index)
@@ -737,6 +780,7 @@ void MainWindow::loadProfile(s_parameterMask mask)
     else if (!thisDeviceHere)
     { //создаём устройство и инициализируем пустым пакетом в oneMsgLeight байт
         createDevice(mask.devNum);
+        const s_protocolDescription &protocol = connection->m_settings->model().protocol();
         const int packetSize = (protocol.packetSize > 0) ? protocol.packetSize : 1; //защита от невалидного профиля
         QVector<int> devInitArray(packetSize, 0);
         const int idPosition = protocol.blockIdentifycatorPosition;
@@ -775,7 +819,7 @@ void MainWindow::cleanDevList()
     QList<Device*> vlayChildList = m_ui->devArea->findChildren<Device*>();
     QListIterator<Device*> vlayChildListIt(vlayChildList);
     while(vlayChildListIt.hasNext()) {
-        vlayChildListIt.next()->~Device();
+        delete vlayChildListIt.next();
     }
     CRCErrorCount = 0;
     graphiq.cleanGraph(); //чистим графики, чтобы после смены профиля не оставались чужие кривые
@@ -814,23 +858,6 @@ void MainWindow::badCRCEvent(uint8_t calculatedCRC, QVector<int> dataFrame)
     crcerrorlbl->setText(tr("CRC Errors: ") + QString::number(CRCErrorCount));
 }
 
-// void MainWindow::corruptedDataEvent(QVector<int> data)
-// {
-// QString str, chr;
-// for (int i = 0; i < data.size(); ++i)
-// {
-// if (i > 0) {
-// str += ":";
-// }
-// chr = QString::number(data[i], 16).toUpper();
-// if (chr.size() == 1) {
-// chr = '0' + chr;
-// }
-// str += chr;
-// }
-// textLogWindow(QDateTime::currentDateTime(), tr("Corrupted data: ") + str, true);
-// }
-
 void MainWindow::guiCommandHandler(int varNumber, bool action)
 {
     uint8_t actionChr = action ? 1 : 0;
@@ -845,92 +872,11 @@ void MainWindow::guiCommandHandler(int varNumber, bool action)
     */
     emit emitCommand(command, true);
 }
-//так как не получилось заставить работать SwipeGesture, я напишу свой свайп. Для пролистывания табов его хватит.
-/*bool MainWindow::eventFilter(QObject *obj, QEvent *event)//взято из документации к QObject::eventFilter
-{//ещё немножко костылей ради того что-бы свайп работал
-
-    if (obj == m_ui->logArea || m_ui->valueArea || m_ui->aboutText)
-    {
-        if ((event->type() == QEvent::MouseButtonPress) || (event->type() == QEvent::MouseButtonRelease))
-        {
-            QMouseEvent mouseev(*static_cast<QMouseEvent*>(event));
-            swipeCalc(mouseev);
-            return true;
-        }
-    else return false;
-    }
-    else return QMainWindow::eventFilter(obj, event);
-}
-*/
 bool MainWindow::event(QEvent *event)
 {
-    /*if ((event->type() == QEvent::MouseButtonPress) || (event->type() == QEvent::MouseButtonRelease))
-    {
-          QMouseEvent mouseEvent = *static_cast<QMouseEvent*>(event);
-          #ifdef Q_OS_ANDROID
-          swipeCalc(mouseEvent);
-          #endif
-    }*/
     if ((event->type() == QEvent::MouseButtonDblClick) && graphiq.isVisible())
     {
         graphiq.chngMinMaxVisible();
     }
     return QMainWindow::event(event);
 }
-/*
-void MainWindow::swipeCalc(QMouseEvent mouseev)
-{
-    if (mouseev.type() == QMouseEvent::MouseButtonPress)
-        {
-            mouseStartX = mouseev.x();
-            mouseStartY = mouseev.y();
-        }
-    if (mouseev.type() == QMouseEvent::MouseButtonRelease)
-        {
-            touchTrigger = false;
-            mouseStopX = mouseev.x();
-            mouseStopY = mouseev.y();
-            int calcx = mouseStartX - mouseStopX;
-            int calcy = mouseStartY - mouseStopY;
-            bool xpositive;
-            bool ypositive;
-            static QString direction;
-            int pixelsToSwipe = 200; //граница после которой действие будет однозначно восприниматься как свайп, в пикселях
-            if (calcx > pixelsToSwipe) xpositive = true;
-            else if (calcx < 0)
-            {
-                calcx = calcx * -1;
-                if (calcx > pixelsToSwipe) xpositive = false;
-            }
-            if (calcy > pixelsToSwipe) ypositive = true;
-            else if (calcy < 0)
-            {
-                calcy = calcy * -1;
-                if (calcy > pixelsToSwipe) ypositive = false;
-            }
-            if ((calcx > calcy) && (calcx > pixelsToSwipe))
-            {
-                if (xpositive) direction = "Right";
-                else if (!xpositive) direction = "Left";
-            }
-            else if ((calcx < calcy) && (calcy > pixelsToSwipe))
-            {
-                if (ypositive) direction = "Up";
-                else if (!ypositive) direction = "Down";
-            }
-            if (!direction.isEmpty())
-            swipeTriggered(direction);
-        }
-}
-
-void MainWindow::swipeTriggered(QString gesture)
-{
-    if (gesture == "Left")
-        {
-            m_ui->tabWidget->setCurrentIndex(m_ui->tabWidget->currentIndex()-1);
-        } else if (gesture == "Right")
-        {
-            m_ui->tabWidget->setCurrentIndex(m_ui->tabWidget->currentIndex()+1);
-        }
-        update();
-}*/

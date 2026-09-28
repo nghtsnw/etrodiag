@@ -1,4 +1,6 @@
 #include "logger.h"
+#include "apppaths.h"
+#include "protocolsettings.h"
 #include "qtcsv/variantdata.h"
 #include "qtcsv/writer.h"
 #include "qtcsv/reader.h"
@@ -7,25 +9,20 @@
 #include <QFile>
 #include <QDir>
 #include <QDataStream>
-#include <QStandardPaths>
-#include <QApplication>
+#include <QCoreApplication>
 #include <QEventLoop>
 
 Logger::Logger()
 {
-#ifdef Q_OS_WIN32
-    appHomeDir = qApp->applicationDirPath() + QDir::separator();
-#endif
-#ifdef Q_OS_ANDROID
-    appHomeDir = QStandardPaths::standardLocations(QStandardPaths::DataLocation)[1] + QDir::separator();
-#endif
-    dir.setPath(appHomeDir + "Logs");
+    dir.setPath(apppaths::logsDir());
     if (!dir.exists()) {
-        QDir().mkdir(appHomeDir + "Logs");
+        QDir().mkpath(apppaths::logsDir());
     }
-    connect (this, &Logger::setSettings, [ = ](s_Settings s) {
-        settings = s;
-    });
+}
+
+void Logger::setModel(const ProtocolSettings *model)
+{
+    m_model = model;
 }
 
 void Logger::startLog()
@@ -48,7 +45,7 @@ void Logger::incomingBinData(const QByteArray data)
         QtCSV::VariantData varData;
         if (createNewBinFileNamePermission)
         {
-            binFileName = (dir.path() + "\\" + currentProfileName + '_' + returnTimestamp().toString(timeFormatForFile) + ".csv");
+            binFileName = dir.filePath(currentProfileName + '_' + returnTimestamp().toString(timeFormatForFile) + ".csv");
             createNewBinFileNamePermission = false;
             QStringList csvHead;
             csvHead << "time" << "data";
@@ -79,7 +76,8 @@ void Logger::binReadFromCsv(bool r)
         emit showStatusMessage(tr("Bufferisation..."));
         emit logLoadProgress(0); //показываем прогрессбар сразу при старте чтения
         rawDataWithTimeLog = new QMap<QDateTime, QVector<uint8_t >>;
-        const auto readData = QtCSV::Reader::readToList(settings.pathToBinFile);
+        const QString logPath = m_model ? m_model->settings().pathToBinFile : QString();
+        const auto readData = QtCSV::Reader::readToList(logPath);
         const int rowsCount = readData.size();
         const int step = qMax(1, rowsCount / 100); //обновляем прогресс примерно 100 раз
         for (int row = 0; row < rowsCount; ++row) { //Чтение всего csv в QMap
@@ -109,7 +107,7 @@ void Logger::incomingTxtData(const QString string)
         {
             if (createNewTxtFileNamePermission)//обновляем имя файла, если стоит флаг
             {
-                logFileName = (dir.path() + "\\" + currentProfileName + '_' + returnTimestamp().toString(timeFormatForFile) + ".log");
+                logFileName = dir.filePath(currentProfileName + '_' + returnTimestamp().toString(timeFormatForFile) + ".log");
                 newLogFile.setFileName(logFileName);
                 createNewTxtFileNamePermission = false;
             }
@@ -160,7 +158,7 @@ void Logger::incomingJsonData(const QVariantMap jsonMap)
         {
             if (createNewJsonFileNamePermission)
             {
-                jsonFileName = (dir.path() + "\\" + currentProfileName + '_' + returnTimestamp().toString(timeFormatForFile) + ".json");
+                jsonFileName = dir.filePath(currentProfileName + '_' + returnTimestamp().toString(timeFormatForFile) + ".json");
                 createNewJsonFileNamePermission = false;
             }
             newJsonFile.setFileName(jsonFileName);
