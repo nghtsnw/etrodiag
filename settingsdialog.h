@@ -68,6 +68,7 @@ private:
     void selectFirstProfile(); //при старте подхватываем первый профиль из каталога
     void updateProtocol();
     void markerTextNormalisation(int numberByte, QString text);
+    void updateMarkerFieldsEnabled(); //гасит окна ввода маркера, которых нет при текущем размере
 
 private:
     Ui::SettingsDialog *m_ui = nullptr;

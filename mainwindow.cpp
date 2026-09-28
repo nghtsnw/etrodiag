@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "aboutdialog.h"
 #include "apppaths.h"
+#include "packetdiagram.h"
 #include "protocolsettings.h"
 #include "controlboard.h"
 #include "ui_mainwindow.h"
@@ -28,6 +29,10 @@ MainWindow::MainWindow(QWidget *parent) :
     crcerrorlbl->setText(tr("CRC Errors: ") + QString::number(CRCErrorCount));
     statuslbl->setText(tr("Etrodiag"));
     aboutButton->setText(tr("About"));
+    //Схема формата пакета пересобирается по изменениям профиля (одна пересборка на пачку изменений)
+    diagramRefreshTimer = new QTimer(this);
+    diagramRefreshTimer->setSingleShot(true);
+    connect(diagramRefreshTimer, &QTimer::timeout, this, &MainWindow::updatePacketDiagram);
     logger = new Logger;
     addConnection();
     setupProfileArea();
@@ -35,6 +40,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connection->readProfile(); //применяем профиль (протокол/настройки) при старте, как раньше открытие настроек
     connect (&byteSettForm, &ByteSettingsForm::editMask, &maskSettForm, &maskSettingsDialog::requestDataOnId);
     connect (this, &MainWindow::dvsfAfterCloseClear, &devSettForm, &devSettingsForm::afterCloseClearing);
+    //Изменения масок в формах тоже отражаются на схеме формата пакета
+    connect (&maskSettForm, &maskSettingsDialog::sendMaskData, this, &MainWindow::schedulePacketDiagramUpdate);
+    connect (&byteSettForm, &ByteSettingsForm::createMask, this, &MainWindow::schedulePacketDiagramUpdate);
+    connect (&byteSettForm, &ByteSettingsForm::deleteMaskObj, this, &MainWindow::schedulePacketDiagramUpdate);
+    connect (&byteSettForm, &ByteSettingsForm::setWordBit, this, &MainWindow::schedulePacketDiagramUpdate);
     connect (m_ui->valueArea, &QTabWidget::currentChanged, this, &MainWindow::setCurrentOpenTab);
     connect (logger, &Logger::showStatusMessage, this, &MainWindow::showStatusMessage);
     connect (logger, &Logger::logLoadProgress, this, &MainWindow::setLogLoadProgress);
@@ -47,9 +57,8 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->logArea->viewport()->installEventFilter(this);
     graphiq.setParent(m_ui->graphLabel);
     m_ui->graphLayout->addWidget(&cBoard);
-    cBoard.setVisible(false); //окно управления переменными показывается только при включённом контроле переменных
+    cBoard.setVisible(false); //управление переменными - тестовая функция, в интерфейсе она скрыта
     connect (&cBoard, &ControlBoard::controlCommand, this, &MainWindow::guiCommandHandler);
-    connect (connection, &newconnect::setVisibleControlWindow, &cBoard, &ControlBoard::setVisible);
     logger->setModel(&connection->m_settings->model()); //логгер читает настройки (путь к логу) из модели
     connect (connection, &newconnect::setProtocol, this, &MainWindow::updateProfileInfo);
     connect (this, &MainWindow::emitCommand, connection, &newconnect::receiveCommandFromGui);
@@ -85,6 +94,7 @@ void MainWindow::addConnection()
     connect (connection, &newconnect::connected, logger, &Logger::startLog);
     connect (connection, &newconnect::disconnected, logger, &Logger::stopLog);
     connect (connection, &newconnect::profileName2log, logger, &Logger::setProfileName);
+    connect (connection, &newconnect::profileLoaded, this, &MainWindow::schedulePacketDiagramUpdate); //маски профиля разосланы - обновляем схему
     connect (connection, &newconnect::badCRC, this, &MainWindow::badCRCEvent);
     connect (connection, &newconnect::logLoadProgress, this, &MainWindow::setLogLoadProgress);
     connect(this, &MainWindow::emitCommand, connection, &newconnect::receiveCommandFromGui);
@@ -190,6 +200,7 @@ void MainWindow::refreshConnectionButtons()
     paramsButton->setText(s->connectionSummary());
     paramsButton->setDisabled(serialConnected);
     paramsButton->setVisible(!s->isReadFromFile());
+    portButton->setDisabled(serialConnected); //при активном соединении порт не меняем
     profileButton->setDisabled(serialConnected); //при активном соединении профиль не переключаем
     logButton->setVisible(!s->isReadFromFile()); //при чтении из файла настройка логов не нужна
 
@@ -226,10 +237,18 @@ void MainWindow::setupProfileArea()
     profileInfoLabel->setMinimumWidth(0);
     profileInfoLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
+    //Схема формата пакета: моноширинный шрифт без переноса, иначе столбцы разъедутся
+    packetDiagramView = new QPlainTextEdit;
+    packetDiagramView->setReadOnly(true);
+    packetDiagramView->setLineWrapMode(QPlainTextEdit::NoWrap);
+    packetDiagramView->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+    packetDiagramView->setFrameShape(QFrame::StyledPanel);
+
     QWidget *infoPage = new QWidget;
     QVBoxLayout *infoLayout = new QVBoxLayout(infoPage);
     infoLayout->setContentsMargins(0, 0, 0, 0);
-    infoLayout->addWidget(profileInfoLabel, 1);
+    infoLayout->addWidget(profileInfoLabel, 0);
+    infoLayout->addWidget(packetDiagramView, 1);
 
     //Редактор профиля кладём в область прокрутки: так страница может быть уже своего
     //естественного минимума, и при маленьком окне ничего не наезжает на консоль слева.
@@ -250,7 +269,8 @@ void MainWindow::setupProfileArea()
         }
     });
 
-    m_ui->horizontalLayout_3->addWidget(profileArea, 1);
+    //Консоль занимает треть ширины вкладки, информация о профиле - две трети
+    m_ui->horizontalLayout_3->addWidget(profileArea, 2);
     updateProfileInfo();
 }
 
@@ -275,6 +295,38 @@ void MainWindow::updateProfileInfo()
     text += tr("Description") + ": " + protocol.description + "<br><br>";
     text += tr("Connection") + ": " + s->connectionSummary();
     profileInfoLabel->setText(text);
+    schedulePacketDiagramUpdate(); //протокол мог измениться - схему пересобираем
+}
+
+void MainWindow::schedulePacketDiagramUpdate()
+{ //одна пересборка на пачку изменений: загрузка профиля рассылает маски по одной
+    if (diagramRefreshTimer) {
+        diagramRefreshTimer->start(0);
+    }
+}
+
+void MainWindow::updatePacketDiagram()
+{ //схема строится из текущего протокола и живых масок устройств
+    if (!packetDiagramView || !connection || !connection->m_settings) {
+        return;
+    }
+    QVector<s_parameterMask> masks;
+    const QList<Device*> devices = m_ui->devArea->findChildren<Device*>();
+    for (const Device *device : devices) {
+        masks += device->currentMasks();
+    }
+    packetDiagramView->setPlainText(packetdiagram::picture(connection->m_settings->model().protocol(), masks));
+
+    //Минимальная ширина панели - по самой длинной строке схемы: так схема видна целиком,
+    //без горизонтальной прокрутки, и вместе с ней растёт минимальная ширина окна
+    const QFontMetricsF metrics(packetDiagramView->font());
+    qreal widestLine = 0;
+    for (const QString &line : packetDiagramView->toPlainText().split('\n')) {
+        widestLine = qMax(widestLine, metrics.horizontalAdvance(line));
+    }
+    const int chrome = packetDiagramView->frameWidth() * 2 + 8
+                       + packetDiagramView->verticalScrollBar()->sizeHint().width();
+    packetDiagramView->setMinimumWidth(static_cast<int>(widestLine) + chrome);
 }
 
 void MainWindow::onEditProfile()

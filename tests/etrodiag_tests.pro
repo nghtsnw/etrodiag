@@ -15,6 +15,7 @@ SOURCES += \
     testdataprofiler.cpp \
     testframecheck.cpp \
     testmaskmath.cpp \
+    testpacketdiagram.cpp \
     testwordvalue.cpp \
     testprofiledata.cpp \
     testprotocolsettings.cpp \
@@ -22,6 +23,7 @@ SOURCES += \
     $$PWD/../dataprofiler.cpp \
     $$PWD/../framecheck.cpp \
     $$PWD/../maskmath.cpp \
+    $$PWD/../packetdiagram.cpp \
     $$PWD/../wordvalue.cpp \
     $$PWD/../profiledata.cpp \
     $$PWD/../protocolsettings.cpp
@@ -31,6 +33,7 @@ HEADERS += \
     testdataprofiler.h \
     testframecheck.h \
     testmaskmath.h \
+    testpacketdiagram.h \
     testwordvalue.h \
     testprofiledata.h \
     testprotocolsettings.h \
@@ -38,6 +41,7 @@ HEADERS += \
     $$PWD/../dataprofiler.h \
     $$PWD/../framecheck.h \
     $$PWD/../maskmath.h \
+    $$PWD/../packetdiagram.h \
     $$PWD/../wordvalue.h \
     $$PWD/../profiledata.h \
     $$PWD/../protocolsettings.h \

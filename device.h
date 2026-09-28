@@ -29,6 +29,7 @@ public:
     void clickedF();
     bool byteObjReady = false;
     void devOnlineWatchdog(int msec);
+    QVector<s_parameterMask> currentMasks() const; //текущие маски всех байтов - для схемы формата пакета
 
 signals:
     void txtToGui(QString);

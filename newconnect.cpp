@@ -30,6 +30,7 @@ newconnect::newconnect(QWidget *parent) :
     ui->settingsButton->hide();
     m_console->setEnabled(false);
     m_console->setParent(ui->consoleFrame);
+    m_console->setPlainText(tr("Waiting for connection")); //надпись в терминале до прихода первых данных
     m_console->show();
     datapool->setModel(&m_settings->model()); //разбор читает протокол и настройки из модели профиля
     wireConnection();
@@ -257,7 +258,6 @@ void newconnect::toggleConnection()
             emit readFromFileSignal(p_local.readFromFileFlag);
             readerBusy = false; //чтение синхронное - сразу завершаем сессию
             emit connectButtonTextChanged(tr("Read log"));
-            showStatusMessage(tr("End of file"));
             emit disconnected(); //соединение закрывается автоматически после чтения лога
             offerToSaveProfile(); //если профиль менялся - предложим сохранить
         }
@@ -443,6 +443,7 @@ void newconnect::readProfile()
     for (const s_parameterMask &mask : std::as_const(parsed.masks)) {
         emit loadMask(mask);
     }
+    emit profileLoaded();
 }
 
 void newconnect::resizeEvent(QResizeEvent *event)

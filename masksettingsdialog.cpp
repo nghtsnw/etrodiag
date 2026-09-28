@@ -37,19 +37,19 @@ void maskSettingsDialog::getDataOnId(s_parameterMask mask)
         wordType = mask.wordType;
         QString wordInfoString;
         if (wordType == 0) {
-            wordInfoString = "Byte num: " + QString::number(byteNum);
+            wordInfoString = tr("Byte num: %1").arg(byteNum);
         }
         else if (wordType == 1)
         {
-            wordInfoString = "Word bytes: [%1, %2]";
+            wordInfoString = tr("Word bytes: [%1, %2]");
             wordInfoString = wordInfoString.arg(QString::number(byteNum + 1)).arg(QString::number(byteNum));
         }
         else if (wordType == 2)
         {
-            wordInfoString = "Word bytes: [%1, %2, %3, %4]";
+            wordInfoString = tr("Word bytes: [%1, %2, %3, %4]");
             wordInfoString = wordInfoString.arg(QString::number(byteNum + 3)).arg(QString::number(byteNum + 2)).arg(QString::number(byteNum + 1)).arg(QString::number(byteNum));
         }
-        ui->wordInfo->setText("Dev num: " + QString::number(devNum) + ", " + wordInfoString);
+        ui->wordInfo->setText(tr("Dev num: %1, %2").arg(QString::number(devNum)).arg(wordInfoString));
         ui->maskName->setText(mask.parameterName);
         binMaskInTxt = mask.parameterMask;
         ui->shiftTxt->setText(QString::number(mask.valueShift));

@@ -61,6 +61,7 @@ signals:
     void startLog();
     void disconnected();
     void profileName2log(QString);
+    void profileLoaded(); //профиль прочитан целиком (протокол, настройки и все маски разосланы)
     void setVisibleControlWindow(bool);
     void setTime(QDateTime);
     void pushByteToProfiler(uint8_t);

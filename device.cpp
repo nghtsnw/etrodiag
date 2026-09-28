@@ -1,4 +1,5 @@
 #include "device.h"
+#include "bitmaskobj.h"
 #include "protocolsettings.h"
 #include <QDebug>
 #include "bytedefinition.h"
@@ -195,6 +196,19 @@ void Device::hideDevButton(bool trueOrFalse, int _devNum)
 void Device::devOnlineWatchdog(int msec)
 {
     timer->start(msec);
+}
+
+QVector<s_parameterMask> Device::currentMasks() const
+{ //обходим объекты байтов и собираем маски - из них строится схема формата пакета
+    QVector<s_parameterMask> masks;
+    const QList<byteDefinition*> bytes = findChildren<byteDefinition*>();
+    for (const byteDefinition *byte : bytes) {
+        const QList<bitMaskObj*> byteMasks = byte->findChildren<bitMaskObj*>();
+        for (const bitMaskObj *mask : byteMasks) {
+            masks.append(mask->currentMask);
+        }
+    }
+    return masks;
 }
 
 void Device::setOfflineStatus()

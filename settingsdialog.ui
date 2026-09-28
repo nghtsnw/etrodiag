@@ -75,7 +75,7 @@
         </property>
         <layout class="QGridLayout" name="gridLayout_6">
          <item row="4" column="1">
-          <widget class="QLineEdit" name="b1MarkerLineEdit">
+          <widget class="QLineEdit" name="b0MarkerLineEdit">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -93,7 +93,7 @@
          <item row="4" column="0">
           <widget class="QLabel" name="markerBeginLabel">
            <property name="text">
-            <string>Marker of begin - b1, b2:</string>
+            <string>Marker of begin - b0, b1:</string>
            </property>
           </widget>
          </item>
@@ -149,7 +149,7 @@
           </widget>
          </item>
          <item row="4" column="2">
-          <widget class="QLineEdit" name="b2MarkerLineEdit">
+          <widget class="QLineEdit" name="b1MarkerLineEdit">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>

@@ -23,10 +23,10 @@ static bool parseProtocolLine(const QStringList &strLst, s_protocolDescription &
     else if (key == "markerPacketBeginSize") {
         pt.markerPacketBeginSize = val.toInt(0, 10);
     }
-    else if (key == "markerPacketBeginTextB1") {
+    else if (key == "markerPacketBeginTextB0") {
         pt.markerPacketBeginByte1 = val.toInt(0, 16);
     }
-    else if (key == "markerPacketBeginTextB2") {
+    else if (key == "markerPacketBeginTextB1") {
         pt.markerPacketBeginByte2 = val.toInt(0, 16);
     }
     else if (key == "description") {
@@ -135,8 +135,8 @@ QString serializeHeader(const QString &profileFileName, const s_protocolDescript
     txtStream << "blockIdentifycatorPosition" << "\t" << QString::number(protocol.blockIdentifycatorPosition, 10) << "\n";
     txtStream << "calcCRCFromPosition" << "\t" << QString::number(protocol.calcCRCFromPosition, 10) << "\n";
     txtStream << "markerPacketBeginSize" << "\t" << QString::number(protocol.markerPacketBeginSize, 10) << "\n";
-    txtStream << "markerPacketBeginTextB1" << "\t" << QString::number(protocol.markerPacketBeginByte1, 16) << "\n";
-    txtStream << "markerPacketBeginTextB2" << "\t" << QString::number(protocol.markerPacketBeginByte2, 16) << "\n";
+    txtStream << "markerPacketBeginTextB0" << "\t" << QString::number(protocol.markerPacketBeginByte1, 16) << "\n";
+    txtStream << "markerPacketBeginTextB1" << "\t" << QString::number(protocol.markerPacketBeginByte2, 16) << "\n";
     txtStream << "description" << "\t" << protocol.description << "\n";
     txtStream << "varControl" << "\t" << (protocol.varControl ? "true" : "false") << "\n";
     txtStream << "readFromFile" << "\t" << (settings.readFromFileFlag ? "true" : "false") << "\n";

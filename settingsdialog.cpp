@@ -24,20 +24,26 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
         m_ui->BlockIdentifycatorPositionSpinBox->setValue(p.blockIdentifycatorPosition);
         m_ui->calcCRCFromSpinBox->setValue(p.calcCRCFromPosition);
         m_ui->markerSizeSpinBox->setValue(p.markerPacketBeginSize);
-        m_ui->b1MarkerLineEdit->setText(QString::number(p.markerPacketBeginByte1, 16).toUpper());
-        m_ui->b2MarkerLineEdit->setText(QString::number(p.markerPacketBeginByte2, 16).toUpper());
+        m_ui->b0MarkerLineEdit->setText(QString::number(p.markerPacketBeginByte1, 16).toUpper());
+        m_ui->b1MarkerLineEdit->setText(QString::number(p.markerPacketBeginByte2, 16).toUpper());
         m_ui->descriptionTextEdit->setText(p.description);
         m_ui->varConrolCheckBox->setChecked(p.varControl);
         //В модель кладём именно протокол из профиля, а не значения из полей:
         //спинбоксы ограничивают диапазоны и могли бы испортить загруженное значение
         m_model.setProtocol(p);
     } );
+    connect(m_ui->b0MarkerLineEdit, &QLineEdit::textEdited, this, [this](QString text) {
+        markerTextNormalisation(0, text);
+    } );
     connect(m_ui->b1MarkerLineEdit, &QLineEdit::textEdited, this, [this](QString text) {
         markerTextNormalisation(1, text);
-    } );
-    connect(m_ui->b2MarkerLineEdit, &QLineEdit::textEdited, this, [this](QString text) {
-        markerTextNormalisation(2, text);
     });
+    //Окна ввода маркера доступны только для тех байтов, которые есть в пакете
+    connect(m_ui->markerSizeSpinBox, &QSpinBox::valueChanged, this, &SettingsDialog::updateMarkerFieldsEnabled);
+    updateMarkerFieldsEnabled();
+    //Управление переменными - тестовая функция, в редакторе профиля она скрыта
+    m_ui->varConrolCheckBox->hide();
+    m_ui->varControlLabel->hide();
     selectFirstProfile();
 }
 
@@ -305,6 +311,13 @@ void SettingsDialog::apply()
     emit restoreConsoleAndButtons();
 }
 
+void SettingsDialog::updateMarkerFieldsEnabled()
+{ //маркер может состоять из 0, 1 или 2 байтов - лишние окна ввода гасим
+    const int size = m_ui->markerSizeSpinBox->value();
+    m_ui->b0MarkerLineEdit->setEnabled(size >= 1);
+    m_ui->b1MarkerLineEdit->setEnabled(size >= 2);
+}
+
 void SettingsDialog::markerTextNormalisation(int numberByte, QString text)
 {
     bool ok;
@@ -315,11 +328,11 @@ void SettingsDialog::markerTextNormalisation(int numberByte, QString text)
     else if (val > 0xFF) {
         val = 0xFF;
     }
-    if (numberByte == 1) {
-        m_ui->b1MarkerLineEdit->setText(QString::number(val, 16).toUpper());
+    if (numberByte == 0) {
+        m_ui->b0MarkerLineEdit->setText(QString::number(val, 16).toUpper());
     }
-    else if (numberByte == 2) {
-        m_ui->b2MarkerLineEdit->setText(QString::number(val, 16).toUpper());
+    else if (numberByte == 1) {
+        m_ui->b1MarkerLineEdit->setText(QString::number(val, 16).toUpper());
     }
 }
 
@@ -330,8 +343,8 @@ void SettingsDialog::updateProtocol()
     p.blockIdentifycatorPosition = m_ui->BlockIdentifycatorPositionSpinBox->value();
     p.calcCRCFromPosition = m_ui->calcCRCFromSpinBox->value();
     p.markerPacketBeginSize = m_ui->markerSizeSpinBox->value();
-    p.markerPacketBeginByte1 = QString(m_ui->b1MarkerLineEdit->text()).toInt(0, 16);
-    p.markerPacketBeginByte2 = QString(m_ui->b2MarkerLineEdit->text()).toInt(0, 16);
+    p.markerPacketBeginByte1 = QString(m_ui->b0MarkerLineEdit->text()).toInt(0, 16);
+    p.markerPacketBeginByte2 = QString(m_ui->b1MarkerLineEdit->text()).toInt(0, 16);
     p.description = m_ui->descriptionTextEdit->toPlainText();
     p.varControl = m_ui->varConrolCheckBox->checkState() ? true : false;
     m_model.setProtocol(p);

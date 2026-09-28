@@ -64,13 +64,13 @@ void ByteSettingsForm::addMaskItem(s_parameterMask mask)
             nameItem->setText(mask.parameterName);
             ui->masksWidget->setItem(row, 0, nameItem);
             QTableWidgetItem *valueItem = new QTableWidgetItem;
-            valueItem->setText("waiting new data...");
+            valueItem->setText(tr("waiting new data..."));
             ui->masksWidget->setItem(row, 1, valueItem);
             QTableWidgetItem *idItem = new QTableWidgetItem;
             idItem->setText(QString::number(mask.id, 10));
             ui->masksWidget->setItem(row, 2, idItem);
             QTableWidgetItem *deleteItem = new QTableWidgetItem;
-            deleteItem->setText("Delete");
+            deleteItem->setText(tr("Delete"));
             ui->masksWidget->setItem(row, 3, deleteItem);
         }
         if (ui->masksWidget->rowCount() > 0) {
@@ -175,19 +175,22 @@ void ByteSettingsForm::updateHexWordData(int _devNum, int _byteNum, QString _txt
     {
         QString wordInfoString;
         if (ui->bitBox->value() == 8) {
-            wordInfoString = "Byte num: " + QString::number(byteNum);
+            wordInfoString = tr("Byte num: %1").arg(byteNum);
         }
         else if (ui->bitBox->value() == 16)
         {
-            wordInfoString = "Word bytes: [%1, %2]";
+            wordInfoString = tr("Word bytes: [%1, %2]");
             wordInfoString = wordInfoString.arg(QString::number(byteNum + 1)).arg(QString::number(byteNum));
         }
         else if (ui->bitBox->value() == 32)
         {
-            wordInfoString = "Word bytes: [%1, %2, %3, %4]";
+            wordInfoString = tr("Word bytes: [%1, %2, %3, %4]");
             wordInfoString = wordInfoString.arg(QString::number(byteNum + 3)).arg(QString::number(byteNum + 2)).arg(QString::number(byteNum + 1)).arg(QString::number(byteNum));
         }
-        ui->hexNumber->setText("Dev num: " + QString("%1").arg(devNum, 0, 16).toUpper() + ", " + wordInfoString + ", Word data: " + _txt);
+        ui->hexNumber->setText(tr("Dev num: %1, %2, Word data: %3")
+                               .arg(QString("%1").arg(devNum, 0, 16).toUpper())
+                               .arg(wordInfoString)
+                               .arg(_txt));
     }
 }
 

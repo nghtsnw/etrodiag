@@ -4,6 +4,7 @@
 #include "testdataprofiler.h"
 #include "testframecheck.h"
 #include "testmaskmath.h"
+#include "testpacketdiagram.h"
 #include "testprofiledata.h"
 #include "testprotocolsettings.h"
 #include "testwordvalue.h"
@@ -25,6 +26,7 @@ int main(int argc, char *argv[])
     status |= runTest(new TestFrameCheck(), argc, argv);
     status |= runTest(new TestWordValue(), argc, argv);
     status |= runTest(new TestMaskMath(), argc, argv);
+    status |= runTest(new TestPacketDiagram(), argc, argv);
     status |= runTest(new TestProfileData(), argc, argv);
     status |= runTest(new TestProtocolSettings(), argc, argv);
     return status;

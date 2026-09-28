@@ -31,6 +31,7 @@ SOURCES += \
     masksettingsdialog.cpp \
     newconnect.cpp \
     newgraph.cpp \
+    packetdiagram.cpp \
     profiledata.cpp \
     protocolsettings.cpp \
     settingsdialog.cpp \
@@ -60,6 +61,7 @@ HEADERS += \
     masksettingsdialog.h \
     newconnect.h \
     newgraph.h \
+    packetdiagram.h \
     profiledata.h \
     protocolsettings.h \
     settingsdialog.h \

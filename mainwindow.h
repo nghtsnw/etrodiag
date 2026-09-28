@@ -19,6 +19,7 @@
 QT_BEGIN_NAMESPACE
 
 class QLabel;
+class QPlainTextEdit;
 class QProgressBar;
 class QToolButton;
 class QStackedWidget;
@@ -53,9 +54,12 @@ public:
     QPushButton *connectButton = nullptr;
     QStackedWidget *profileArea = nullptr;
     QLabel *profileInfoLabel = nullptr;
+    QPlainTextEdit *packetDiagramView = nullptr; //схема формата пакета (обновляется автоматически)
     bool serialConnected = false;
     void setupProfileArea();   // делит вкладку соединения, справа - информация профиля/редактор
     void updateProfileInfo();  // показывает данные выбранного профиля
+    void updatePacketDiagram();        // пересобирает схему формата пакета
+    void schedulePacketDiagramUpdate(); // откладывает пересборку, чтобы пачка изменений дала одну схему
     void onEditProfile();      // открывает в правой половине редактор профиля
     void openMaskSettingsDialog();
     void createDevice(int devNum);
@@ -111,6 +115,7 @@ private:
     void fillParamsMenu();
     void pollPorts();
     QTimer *portPollTimer = nullptr;
+    QTimer *diagramRefreshTimer = nullptr; //собирает изменения профиля в одно обновление схемы
     QStringList knownPortList;
     QTimer *timer = new QTimer(this);
     int currentOpenTab = 0;
