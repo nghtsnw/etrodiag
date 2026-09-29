@@ -60,7 +60,6 @@ MainWindow::MainWindow(QWidget *parent) :
     cBoard.setVisible(false); //управление переменными - тестовая функция, в интерфейсе она скрыта
     connect (&cBoard, &ControlBoard::controlCommand, this, &MainWindow::guiCommandHandler);
     logger->setModel(&connection->m_settings->model()); //логгер читает настройки (путь к логу) из модели
-    connect (connection, &newconnect::setProtocol, this, &MainWindow::updateProfileInfo);
     connect (this, &MainWindow::emitCommand, connection, &newconnect::receiveCommandFromGui);
     m_ui->tabWidget->setCurrentIndex(0);
     m_ui->tab_connections->show();
@@ -95,6 +94,12 @@ void MainWindow::addConnection()
     connect (connection, &newconnect::disconnected, logger, &Logger::stopLog);
     connect (connection, &newconnect::profileName2log, logger, &Logger::setProfileName);
     connect (connection, &newconnect::profileLoaded, this, &MainWindow::schedulePacketDiagramUpdate); //маски профиля разосланы - обновляем схему
+    //панель информации о профиле обновляем сразу по загрузке профиля, иначе при старте
+    //в ней остаются значения по умолчанию, а имя профиля уже подставлено
+    connect (connection, &newconnect::profileLoaded, this, &MainWindow::updateProfileInfo);
+    //таблицы параметров наполняем сразу по профилю, данные потом только обновляют значения
+    connect (connection, &newconnect::profileLoaded, this, &MainWindow::fillValueAreaFromProfile);
+    connect (connection, &newconnect::setProtocol, this, &MainWindow::updateProfileInfo); //протокол изменён в редакторе профиля
     connect (connection, &newconnect::badCRC, this, &MainWindow::badCRCEvent);
     connect (connection, &newconnect::logLoadProgress, this, &MainWindow::setLogLoadProgress);
     connect(this, &MainWindow::emitCommand, connection, &newconnect::receiveCommandFromGui);
@@ -289,7 +294,7 @@ void MainWindow::updateProfileInfo()
     text += tr("Block identifycator position") + ": " + QString::number(protocol.blockIdentifycatorPosition) + "<br>";
     text += tr("Calc CRC from position") + ": " + QString::number(protocol.calcCRCFromPosition) + "<br>";
     text += tr("Marker of begin - size") + ": " + QString::number(protocol.markerPacketBeginSize) + "<br>";
-    text += tr("Marker b1/b2") + ": " + QString::number(protocol.markerPacketBeginByte1, 16).toUpper()
+    text += tr("Marker b0/b1") + ": " + QString::number(protocol.markerPacketBeginByte1, 16).toUpper()
             + " / " + QString::number(protocol.markerPacketBeginByte2, 16).toUpper() + "<br>";
     text += tr("Variables control") + ": " + (protocol.varControl ? tr("yes") : tr("no")) + "<br>";
     text += tr("Description") + ": " + protocol.description + "<br><br>";
@@ -315,7 +320,10 @@ void MainWindow::updatePacketDiagram()
     for (const Device *device : devices) {
         masks += device->currentMasks();
     }
-    packetDiagramView->setPlainText(packetdiagram::picture(connection->m_settings->model().protocol(), masks));
+    const s_protocolDescription &protocol = connection->m_settings->model().protocol();
+    const packetdiagram::DiagramPicture diagram = packetdiagram::pictureDevices(protocol, masks);
+    packetDiagramView->setPlainText(diagram.text);
+    applyParamColors(diagram.colors);
 
     //Минимальная ширина панели - по самой длинной строке схемы: так схема видна целиком,
     //без горизонтальной прокрутки, и вместе с ней растёт минимальная ширина окна
@@ -327,6 +335,30 @@ void MainWindow::updatePacketDiagram()
     const int chrome = packetDiagramView->frameWidth() * 2 + 8
                        + packetDiagramView->verticalScrollBar()->sizeHint().width();
     packetDiagramView->setMinimumWidth(static_cast<int>(widestLine) + chrome);
+}
+
+void MainWindow::applyParamColors(const QVector<packetdiagram::ParamColor> &colors)
+{ //обозначения параметров с включённым графиком выделяем цветом из настроек маски
+    QList<QTextEdit::ExtraSelection> selections;
+    for (const packetdiagram::ParamColor &color : colors) {
+        //Схема собрана заранее, поэтому место обозначения известно точно - ищем его по позиции
+        QTextCursor range(packetDiagramView->document());
+        range.setPosition(color.position);
+        range.setPosition(color.position + color.length, QTextCursor::KeepAnchor);
+        QTextEdit::ExtraSelection selection;
+        selection.cursor = range;
+        selection.format.setBackground(QColor(color.background));
+        selection.format.setForeground(QColor(color.foreground));
+        selections.append(selection);
+    }
+    packetDiagramView->setExtraSelections(selections);
+}
+
+void MainWindow::saveProfileChanges()
+{ //изменения профиля (маски, параметры связи) собираем и пишем в <профиль>.eag.tmp;
+  //сам профиль заменяется по подтверждению при разрыве соединения или закрытии программы
+    emit prepareToSaveProfile();
+    emit saveProfile();
 }
 
 void MainWindow::onEditProfile()
@@ -433,6 +465,7 @@ void MainWindow::fillParamsMenu()
     auto apply = [this](int baud, int data, int parity, int stop, int flow) {
         connection->m_settings->applyConnection(baud, data, parity, stop, flow);
         refreshConnectionButtons();
+        saveProfileChanges(); //изменённые параметры связи сразу уходят на сохранение в профиль
     };
 
     QMenu *baudMenu = menu->addMenu(tr("Baud rate"));
@@ -572,7 +605,8 @@ void MainWindow::createDevice(int devNum)
     dev->setParent(m_ui->devArea);
     m_ui->devAreaLay->addWidget(dev);
     dev->setModel(&connection->m_settings->model()); //устройство читает протокол из модели профиля
-    dev->setText(QString::number(devNum, 16));
+    //имя по умолчанию - id узла из пакета (в hex); имя из профиля подставится при загрузке масок
+    dev->setDeviceName(devNum, QString("%1").arg(devNum, 0, 16).toUpper());
     connect (this, &MainWindow::devUpdate, dev, &Device::updateData);
     connect (dev, &Device::openDevSettSig, this, &MainWindow::openDevSett);
     connect (dev, &Device::clicked, dev, &Device::clickedF);
@@ -620,10 +654,9 @@ void MainWindow::closeMaskSettings(int devNum)
     if (maskSettForm.openDirectly)
     {
         emit hideOtherDevButtons(false, devNum);
-        emit prepareToSaveProfile();
-        emit saveProfile();
+        saveProfileChanges();
         maskSettForm.openDirectly = false;
-        m_ui->valueArea->clear();
+        fillValueAreaFromProfile(); //возвращаемся к таблицам параметров - наполняем их по профилю
         graphiq.graphAnnotation.clear();
         m_ui->valueArea->show();
     }
@@ -648,12 +681,11 @@ void MainWindow::toggleDeviceSettings(int devNum, QVector<int> data)
     {
         devSettForm.hide();
         emit dvsfAfterCloseClear();
-        m_ui->valueArea->clear();
+        fillValueAreaFromProfile(); //возвращаемся к таблицам параметров - наполняем их по профилю
         graphiq.graphAnnotation.clear();
         m_ui->valueArea->show();
         emit hideOtherDevButtons(false, devNum);
-        emit prepareToSaveProfile();
-        emit saveProfile();
+        saveProfileChanges();
     }
     else
     {
@@ -731,23 +763,25 @@ QTableWidget *MainWindow::createValueTable(const QString &devName)
     return table;
 }
 
-void MainWindow::updateValueTableRow(QTableWidget *table, const s_parameterMask &mask)
-{ //обновляем строку параметра или создаём её
-    const QString updatedName = mask.parameterName + '@' + mask.devName;
-    const QString valueText = QString::number(mask.endValue, 'g', 6);
+int MainWindow::valueTableRowFor(QTableWidget *table, const s_parameterMask &mask) const
+{ //строку параметра ищем по номеру устройства, байту и id маски: имена параметров могут совпадать
     for (int i = 0; i < table->rowCount(); ++i) {
-        if (updatedName == table->item(i, 0)->text()) { //строка найдена
-            if (valueText != table->item(i, 1)->text()) { //значение изменилось - подсвечиваем
-                table->item(i, 1)->setText(valueText);
-                table->item(i, 1)->setBackground(Qt::green);
-            }
-            else {
-                table->item(i, 1)->setBackground(Qt::white);
-            }
-            return;
+        const QTableWidgetItem *devItem = table->item(i, 2);
+        const QTableWidgetItem *byteItem = table->item(i, 3);
+        const QTableWidgetItem *idItem = table->item(i, 4);
+        if (devItem && byteItem && idItem
+                && devItem->text().toInt() == mask.devNum
+                && byteItem->text().toInt() == mask.byteNum
+                && idItem->text().toInt() == mask.id) {
+            return i;
         }
     }
-    const int row = table->rowCount(); //строка не найдена - создаём
+    return -1;
+}
+
+void MainWindow::addValueTableRow(QTableWidget *table, const s_parameterMask &mask, const QString &valueText)
+{ //новая строка параметра: подпись, значение и скрытые номера для открытия настроек маски
+    const int row = table->rowCount();
     table->setRowCount(row + 1);
     table->setItem(row, 0, new QTableWidgetItem(mask.parameterName + '@' + mask.devName));
     table->setItem(row, 1, new QTableWidgetItem(valueText));
@@ -756,6 +790,50 @@ void MainWindow::updateValueTableRow(QTableWidget *table, const s_parameterMask 
     table->setItem(row, 4, new QTableWidgetItem(QString::number(mask.id)));
     table->resizeColumnsToContents();
     table->resizeRowsToContents();
+}
+
+void MainWindow::updateValueTableRow(QTableWidget *table, const s_parameterMask &mask)
+{ //обновляем значение параметра или создаём строку, если её ещё нет
+    const QString valueText = QString::number(mask.endValue, 'g', 6);
+    const int row = valueTableRowFor(table, mask);
+    if (row < 0) {
+        addValueTableRow(table, mask, valueText);
+        return;
+    }
+    table->item(row, 0)->setText(mask.parameterName + '@' + mask.devName); //имя могло измениться в настройках маски
+    if (valueText != table->item(row, 1)->text()) { //значение изменилось - подсвечиваем
+        table->item(row, 1)->setText(valueText);
+        table->item(row, 1)->setBackground(Qt::green);
+    }
+    else {
+        table->item(row, 1)->setBackground(Qt::white);
+    }
+}
+
+void MainWindow::fillValueAreaFromProfile()
+{ //таблицы параметров заполняем сразу по профилю (устройство - вкладка, параметр - строка),
+  //а приход данных будет только обновлять значения: до первого кадра в значении прочерк
+    const QString openedTab = m_ui->valueArea->tabText(m_ui->valueArea->currentIndex());
+    m_ui->valueArea->clear(); //вкладки прежнего профиля больше не нужны
+    const QList<Device*> devices = m_ui->devArea->findChildren<Device*>();
+    for (const Device *device : devices) {
+        const QVector<s_parameterMask> masks = device->currentMasks();
+        for (const s_parameterMask &mask : masks) {
+            QTableWidget *table = valueTableForDevice(mask.devName);
+            if (!table) {
+                table = createValueTable(mask.devName);
+            }
+            if (table) {
+                addValueTableRow(table, mask, QStringLiteral("-"));
+            }
+        }
+    }
+    for (int i = 0; i < m_ui->valueArea->count(); ++i) {
+        if (m_ui->valueArea->tabText(i) == openedTab) {
+            m_ui->valueArea->setCurrentIndex(i); //возвращаемся на ту вкладку устройства, где были
+            break;
+        }
+    }
 }
 
 void MainWindow::updValueArea(s_parameterMask mask)

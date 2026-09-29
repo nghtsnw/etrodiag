@@ -18,6 +18,7 @@ private slots:
     void parsesMaskLineWithoutTrailingTab();
     void skipsIncompleteMaskLine();
     void handlesCrlfLineEndings();
+    void legacyReadFromFileKeysAreIgnored();
     void serializedHeaderParsesBack();
     void serializedMaskLineRoundTrip();
 };

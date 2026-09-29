@@ -29,7 +29,8 @@ struct ProfileText
 ProfileText parse(const QString &text);
 
 //Собирает шапку профиля: имя файла, протокол и настройки связи.
-//COM-порт не сохраняется: он всегда выбирается вручную из найденных устройств
+//COM-порт не сохраняется: он всегда выбирается вручную из найденных устройств.
+//Режим "чтение из файла" и путь к логу тоже не сохраняются - это состояние окна
 QString serializeHeader(const QString &profileFileName, const s_protocolDescription &protocol,
                         const s_Settings &settings);
 

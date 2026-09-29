@@ -16,8 +16,6 @@ static QString sampleProfileText()
         "markerPacketBeginTextB1\t0\n"
         "description\tTest profile\n"
         "varControl\ttrue\n"
-        "readFromFile\tfalse\n"
-        "logFilePath\tC:/Logs/test.csv\n"
         "baudRate\t115200\n"
         "dataBits\t8\n"
         "parity\t0\n"
@@ -52,8 +50,6 @@ void TestProfileData::parsesConnectionSettings()
     const profiledata::ProfileText parsed = profiledata::parse(sampleProfileText());
 
     QVERIFY(parsed.hasSettings);
-    QCOMPARE(parsed.settings.readFromFileFlag, false);
-    QCOMPARE(parsed.settings.pathToBinFile, QStringLiteral("C:/Logs/test.csv"));
     QCOMPARE(parsed.settings.baudRate, 115200);
     QCOMPARE(static_cast<int>(parsed.settings.dataBits), static_cast<int>(QSerialPort::Data8));
     QCOMPARE(static_cast<int>(parsed.settings.parity), static_cast<int>(QSerialPort::NoParity));
@@ -160,6 +156,23 @@ void TestProfileData::handlesCrlfLineEndings()
     QVERIFY(parsed.hasSettings);
 }
 
+void TestProfileData::legacyReadFromFileKeysAreIgnored()
+{
+    //В старых профилях режим чтения из файла и путь к логу писались в файл профиля:
+    //теперь эти ключи не читаются и не влияют на настройки
+    const QString text = QStringLiteral("test.eag\n"
+                                        "packetSize\t40\n"
+                                        "readFromFile\ttrue\n"
+                                        "logFilePath\tC:/Logs/old.csv\n"
+                                        "baudRate\t57600\n");
+    const profiledata::ProfileText parsed = profiledata::parse(text);
+
+    QVERIFY(parsed.hasSettings); //baudRate из той же строки настроек применяется
+    QCOMPARE(parsed.settings.baudRate, 57600);
+    QVERIFY(!parsed.settings.readFromFileFlag);
+    QVERIFY(parsed.settings.pathToBinFile.isEmpty());
+}
+
 void TestProfileData::serializedHeaderParsesBack()
 {
     s_protocolDescription protocol;
@@ -173,7 +186,7 @@ void TestProfileData::serializedHeaderParsesBack()
     protocol.varControl = true;
 
     s_Settings settings;
-    settings.readFromFileFlag = true;
+    settings.readFromFileFlag = true; //состояние окна: в профиль не пишется
     settings.pathToBinFile = QStringLiteral("C:/Logs/read.csv");
     settings.baudRate = 9600;
     settings.dataBits = QSerialPort::Data7;
@@ -183,6 +196,9 @@ void TestProfileData::serializedHeaderParsesBack()
 
     const QString text = profiledata::serializeHeader(QStringLiteral("my.eag"), protocol, settings);
     QCOMPARE(text.split('\n').first(), QStringLiteral("my.eag"));
+    //Режим чтения из файла и путь к логу в профиль не попадают
+    QVERIFY(!text.contains(QStringLiteral("readFromFile")));
+    QVERIFY(!text.contains(QStringLiteral("logFilePath")));
 
     const profiledata::ProfileText parsed = profiledata::parse(text);
     QCOMPARE(parsed.protocol.packetSize, 64);
@@ -195,8 +211,6 @@ void TestProfileData::serializedHeaderParsesBack()
     QVERIFY(parsed.protocol.varControl);
 
     QVERIFY(parsed.hasSettings);
-    QCOMPARE(parsed.settings.readFromFileFlag, true);
-    QCOMPARE(parsed.settings.pathToBinFile, QStringLiteral("C:/Logs/read.csv"));
     QCOMPARE(parsed.settings.baudRate, 9600);
     QCOMPARE(static_cast<int>(parsed.settings.dataBits), static_cast<int>(QSerialPort::Data7));
     QCOMPARE(static_cast<int>(parsed.settings.parity), static_cast<int>(QSerialPort::EvenParity));

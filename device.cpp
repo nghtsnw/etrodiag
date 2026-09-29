@@ -52,9 +52,11 @@ void Device::updateData(QDateTime currTime, int id, QVector<int> devdata) //ес
         }
         if (devStatus == State::Init)
         {
-            const int idPosition = m_model ? m_model->protocol().blockIdentifycatorPosition : -1;
-            if (idPosition >= 0 && idPosition < devdata.size()) { //защита от неверного протокола
-                setDeviceName(id, QString("%1").arg(devdata.at(idPosition), 0, 16).toUpper());
+            if (devName.isEmpty()) { //имя из профиля (или правку пользователя) не перетираем
+                const int idPosition = m_model ? m_model->protocol().blockIdentifycatorPosition : -1;
+                if (idPosition >= 0 && idPosition < devdata.size()) { //защита от неверного протокола
+                    setDeviceName(id, QString("%1").arg(devdata.at(idPosition), 0, 16).toUpper());
+                }
             }
             devStatus = State::Offline;
         }
@@ -157,10 +159,15 @@ int Device::countMasks()
 }
 
 void Device::loadMaskRX(s_parameterMask mask)
-{
-    setDeviceName(devNum, devName);
+{ //сигнал о загрузке маски из профиля приходит всем устройствам, поэтому берём только своё
+  //(иначе каждое устройство получало бы параметры всех устройств) и имя берём из профиля
+    if (mask.devNum != devNum) {
+        return;
+    }
+    if (!mask.devName.isEmpty()) {
+        setDeviceName(devNum, mask.devName);
+    }
     s_parameterMask _mask = mask;
-    _mask.devNum = devNum;
     _mask.devName = devName;
     emit loadMaskTX(_mask);
 }
@@ -205,7 +212,12 @@ QVector<s_parameterMask> Device::currentMasks() const
     for (const byteDefinition *byte : bytes) {
         const QList<bitMaskObj*> byteMasks = byte->findChildren<bitMaskObj*>();
         for (const bitMaskObj *mask : byteMasks) {
-            masks.append(mask->currentMask);
+            s_parameterMask current = mask->currentMask;
+            current.devNum = devNum;
+            if (!devName.isEmpty()) {
+                current.devName = devName; //имя устройства нужно схеме формата пакета
+            }
+            masks.append(current);
         }
     }
     return masks;

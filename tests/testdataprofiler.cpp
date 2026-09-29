@@ -114,3 +114,40 @@ void TestDataProfiler::doesNothingWithoutModel()
 
     QCOMPARE(spy.count(), 0);
 }
+
+void TestDataProfiler::acceptsMarkerlessNineByteFrame()
+{
+    //Протокол 2470 (профиль 2470.eag): кадр 9 байт без маркера - адрес устройства в байте 0,
+    //байты данных 1..7, контрольная сумма в байте 8 как сумма байтов 0..7 (в прошивках
+    //адрес плюс семь байт данных)
+    ProtocolSettings model;
+    s_protocolDescription protocol;
+    protocol.packetSize = 9;
+    protocol.blockIdentifycatorPosition = 0;
+    protocol.calcCRCFromPosition = 0;
+    protocol.markerPacketBeginSize = 0;
+    model.setProtocol(protocol);
+
+    dataprofiler profiler;
+    profiler.setModel(&model);
+    QSignalSpy spy(&profiler, &dataprofiler::deviceData);
+
+    QVector<int> frame(9, 0);
+    frame[0] = 2;    //адрес БУД2
+    frame[2] = 0x80; //температура ОГ
+    frame[5] = 0x05; //обороты, старший байт
+    frame[6] = 0x3C; //обороты, младший байт
+    frame.last() = framecheck::checksum(frame, protocol.calcCRCFromPosition);
+    feed(profiler, frame);
+
+    QCOMPARE(spy.count(), 1);
+    QCOMPARE(spy.at(0).at(1).value<QVector<int>>(), frame);
+
+    //тот же кадр с испорченной суммой не принимается, а разбор сдвигается на байт
+    QVector<int> broken = frame;
+    broken[3] = 0x77;
+    QSignalSpy bad(&profiler, &dataprofiler::badCRC);
+    feed(profiler, broken);
+    QCOMPARE(bad.count() > 0, true);
+    QCOMPARE(spy.count(), 1); //нового кадра нет
+}

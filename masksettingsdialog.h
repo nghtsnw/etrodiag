@@ -25,6 +25,7 @@ public:
     QList<bitSetForm*> bitSetList;
     //QListIterator<bitSetForm*> bitSetListIt;
     void initBitButtonsAndCheckBoxes(int _wordType);
+    void updateDrawGraphColorStyle(); //фон чекбокса графика: цвет выбран или как у родителя
     void killChildren();
     void scanCheckboxesToMask();
     bool openDirectly = false;
@@ -63,6 +64,7 @@ private:
     QColor drawColor;
     bool chkBoxStopSignal;
     QString binMaskInTxt;
+    s_parameterMask maskToEdit{}; //загруженная маска: форму меняет только те поля, которые показывает
 };
 
 #endif // MASKSETTINGSDIALOG_H

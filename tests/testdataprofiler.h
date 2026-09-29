@@ -15,6 +15,7 @@ private slots:
     void resyncsAfterGarbageByte();
     void keepsLogTimestampWhenReadingFromFile();
     void doesNothingWithoutModel();
+    void acceptsMarkerlessNineByteFrame();
 };
 
 #endif // TESTDATAPROFILER_H

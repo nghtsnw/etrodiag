@@ -34,6 +34,7 @@ void maskSettingsDialog::getDataOnId(s_parameterMask mask)
 { //ответный сигнал со всеми данными маски bitmaskobj в masksettingsdialog
     if (devNum == mask.devNum && byteNum == mask.byteNum && id == mask.id)
     {
+        maskToEdit = mask; //длину слова, имена и значение форма не показывает - храним маску целиком
         wordType = mask.wordType;
         QString wordInfoString;
         if (wordType == 0) {
@@ -58,12 +59,19 @@ void maskSettingsDialog::getDataOnId(s_parameterMask mask)
         ui->logCheckBox->setChecked(mask.viewInLogFlag);
         ui->drawGraphCheckBox->setChecked(mask.drawGraphFlag);
         chkBoxStopSignal = false;
-        QString style = "background: %1;";
-        style = style.arg(mask.drawGraphColor);
-        ui->drawGraphCheckBox->setStyleSheet(style);
-        drawColor.fromString(mask.drawGraphColor);
+        drawColor = QColor::fromString(mask.drawGraphColor);
+        updateDrawGraphColorStyle();
         initBitButtonsAndCheckBoxes(wordType);
     }
+}
+
+void maskSettingsDialog::updateDrawGraphColorStyle()
+{ //цвет показываем только у включённого чекбокса: без выбранного цвета фон берём у родителя
+    if (!ui->drawGraphCheckBox->isChecked() || !drawColor.isValid()) {
+        ui->drawGraphCheckBox->setStyleSheet(QString());
+        return;
+    }
+    ui->drawGraphCheckBox->setStyleSheet(QStringLiteral("background: %1;").arg(drawColor.name()));
 }
 
 void maskSettingsDialog::initBitButtonsAndCheckBoxes(int _wordType)
@@ -155,26 +163,26 @@ void maskSettingsDialog::liveDataSlot(QDateTime, s_parameterMask mask)
         }
         endValueToString.setNum(mask.endValue);
         ui->decimalInt->setText(endValueToString);
+        maskToEdit.endValue = mask.endValue; //держим последнее значение: его же отдадим при сохранении
     }
 }
 
 void maskSettingsDialog::sendMask2Profile()
-{ //забор данных из формы masksettingsdialog и отправка в профиль bitmaskobj
+{ //отправляем в профиль маску с изменёнными в форме полями: длину слова, имена устройства/байта
+  //и значение форма не показывает, поэтому берём их из загруженной маски
     {
-        s_parameterMask mask;
+        s_parameterMask mask = maskToEdit;
         mask.id = id;
         mask.devNum = devNum;
         mask.byteNum = byteNum;
-        mask.devName = "";
-        mask.byteName = "";
         mask.parameterName = this->ui->maskName->text();
         mask.parameterMask = binMaskInTxt;
         mask.valueShift = ui->shiftTxt->text().toInt(nullptr, 10);
         mask.valueKoef = ui->koeffTxt->text().toFloat(nullptr);
         mask.viewInLogFlag = ui->logCheckBox->isChecked();
-        mask.wordType = 0;
         mask.drawGraphFlag = ui->drawGraphCheckBox->isChecked();
-        mask.drawGraphColor = drawColor.name();
+        //цвет графика сохраняем только выбранный: у чекбокса без цвета его нет
+        mask.drawGraphColor = drawColor.isValid() ? drawColor.name() : QString();
         emit sendMaskData(mask);
     }
 }
@@ -216,21 +224,20 @@ void maskSettingsDialog::on_drawGraphCheckBox_stateChanged(int)
 {
     if (!chkBoxStopSignal)
     {
-        QString style = "background: %1;";
         if (ui->drawGraphCheckBox->isChecked())
         {
             drawColor = QColorDialog::getColor(Qt::white, this, "Choose color");
             if (!drawColor.isValid())
-            {
+            { //цвет не выбран - снимаем галочку, но фон чекбокса остаётся как у родителя
+                chkBoxStopSignal = true;
                 ui->drawGraphCheckBox->setChecked(false);
-                drawColor.setNamedColor("#ffffff");
+                chkBoxStopSignal = false;
             }
         }
         else {
             drawColor.setNamedColor("#ffffff");
         }
-        style = style.arg(drawColor.name());
-        ui->drawGraphCheckBox->setStyleSheet(style);
+        updateDrawGraphColorStyle();
         sendMask2Profile();
     }
 }

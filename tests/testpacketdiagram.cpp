@@ -164,6 +164,7 @@ void TestPacketDiagram::overlappingMasksAreReportedAndMarked()
     QCOMPARE(row.mid(1 + 5 * 5, 2), QStringLiteral("P1"));
     QCOMPARE(row.mid(1 + 5 * 5 + 2, 1), QStringLiteral("*"));
     QVERIFY(text.contains(QStringLiteral("byte 5: P2 (Second) overlaps with P1")));
+    QVERIFY(text.contains(QStringLiteral("Pn*  parameters claim the same bits of the byte")));
 }
 
 void TestPacketDiagram::wordSizeMismatchIsReported()
@@ -210,4 +211,199 @@ void TestPacketDiagram::legendShowsMaskBits()
     QVERIFY(text.contains(QStringLiteral("(bits 0-3)")));
     QVERIFY(!text.contains(QStringLiteral("graph")));
     QVERIFY(!text.contains(QStringLiteral("#ff0000")));
+}
+
+void TestPacketDiagram::maskWithoutBitsIsShown()
+{
+    //Пустая маска, реально записанная в профиль, - это параметр профиля: показываем её как есть
+    s_protocolDescription protocol;
+    s_parameterMask withoutBits = makeMask(3, 1, QStringLiteral("00000000"), QStringLiteral("Пустая"));
+    withoutBits.devNum = 1;
+    s_parameterMask real = makeMask(5, 0, QStringLiteral("11111111"), QStringLiteral("Первая"));
+    real.devNum = 1;
+
+    QVector<s_parameterMask> masks;
+    masks.append(withoutBits);
+    masks.append(real);
+
+    const QString text = packetdiagram::picture(protocol, masks);
+    const QString row = dataRow(text, 0);
+
+    QVERIFY(text.contains(QStringLiteral("Пустая")));
+    QVERIFY(text.contains(QStringLiteral("(no bits)")));
+    QVERIFY(text.contains(QStringLiteral("the mask has 8 characters")));
+    QCOMPARE(row.mid(1 + 3 * 5, 2), QStringLiteral("P1")); //пустая маска занимает своё слово
+    QCOMPARE(row.mid(1 + 4 * 5, 2), QStringLiteral("P1"));
+    QCOMPARE(row.mid(1 + 5 * 5, 2), QStringLiteral("P2")); //нумерация по порядку байтов
+}
+
+void TestPacketDiagram::deviceWithEmptyMasksGetsItsSection()
+{
+    s_protocolDescription protocol;
+    s_parameterMask emptyDev = makeMask(3, 0, QStringLiteral("00000000"), QStringLiteral("Пустая"));
+    emptyDev.devNum = 1;
+    emptyDev.devName = QStringLiteral("БЗА");
+    s_parameterMask realDev = makeMask(3, 0, QStringLiteral("11111111"), QStringLiteral("A"));
+    realDev.devNum = 2;
+    realDev.devName = QStringLiteral("КДГ");
+
+    QVector<s_parameterMask> masks;
+    masks.append(emptyDev);
+    masks.append(realDev);
+
+    const QString text = packetdiagram::pictureDevices(protocol, masks).text;
+
+    QVERIFY(text.contains(QStringLiteral("Device 1 (БЗА)")));
+    QVERIFY(text.contains(QStringLiteral("Device 2 (КДГ)")));
+    QVERIFY(!text.contains(QStringLiteral("overlaps"))); //маски разных устройств не смешиваются
+}
+
+void TestPacketDiagram::graphedParamGetsGraphColor()
+{
+    s_protocolDescription protocol;
+    s_parameterMask mask = makeMask(3, 0, QStringLiteral("00001111"), QStringLiteral("Режим"));
+    mask.drawGraphFlag = true;
+    mask.drawGraphColor = QStringLiteral("#000080"); //тёмно-синий цвет графика из настроек маски
+
+    QVector<s_parameterMask> masks;
+    masks.append(mask);
+
+    const packetdiagram::DiagramPicture picture = packetdiagram::pictureDevices(protocol, masks);
+
+    // Обозначение выделяется и в схеме, и в легенде
+    QCOMPARE(picture.colors.size(), 2);
+    const packetdiagram::ParamColor color = picture.colors.first();
+    //Выделяется только обозначение параметра, а не весь байт
+    QCOMPARE(picture.text.mid(color.position, color.length), QStringLiteral("P1"));
+    QCOMPARE(picture.colors.at(1).length, color.length);
+    QCOMPARE(picture.text.mid(picture.colors.at(1).position, picture.colors.at(1).length), QStringLiteral("P1"));
+    QCOMPARE(color.background, QStringLiteral("#000080"));
+    QCOMPARE(color.foreground, QStringLiteral("#FFFFFF")); //тёмный фон - шрифт светлый
+}
+
+void TestPacketDiagram::ungraphedParamHasNoColor()
+{
+    s_protocolDescription protocol;
+    s_parameterMask withoutGraph = makeMask(3, 0, QStringLiteral("11111111"), QStringLiteral("A"));
+    withoutGraph.drawGraphFlag = false;
+    withoutGraph.drawGraphColor = QStringLiteral("#ff0000");
+    s_parameterMask withoutColor = makeMask(4, 0, QStringLiteral("11111111"), QStringLiteral("B"));
+    withoutColor.drawGraphFlag = true;
+    withoutColor.drawGraphColor = QString();
+
+    QVector<s_parameterMask> masks;
+    masks.append(withoutGraph);
+    masks.append(withoutColor);
+
+    QVERIFY(packetdiagram::pictureDevices(protocol, masks).colors.isEmpty());
+}
+
+void TestPacketDiagram::devicesGetTheirOwnSection()
+{
+    //Профиль 2543.eag: у каждого устройства свой состав параметров на тех же байтах,
+    //и параметры разных устройств не должны считаться пересекающимися
+    s_protocolDescription protocol;
+    protocol.packetSize = 8;
+    protocol.markerPacketBeginSize = 0;
+    protocol.blockIdentifycatorPosition = 0;
+
+    s_parameterMask firstDev = makeMask(3, 1, QStringLiteral("1111111111111111"), QStringLiteral("A"));
+    firstDev.devNum = 1;
+    firstDev.devName = QStringLiteral("КДГ");
+    s_parameterMask secondDev = makeMask(3, 0, QStringLiteral("10101010"), QStringLiteral("B"));
+    secondDev.devNum = 2;
+    secondDev.devName = QStringLiteral("ПДУ");
+    s_parameterMask lateDev = makeMask(3, 0, QStringLiteral("10101010"), QStringLiteral("C"));
+    lateDev.devNum = 5; //устройство без имени
+    lateDev.devName.clear();
+
+    QVector<s_parameterMask> masks;
+    masks.append(secondDev);
+    masks.append(lateDev); //порядок масок в списке не задаёт порядок разделов
+    masks.append(firstDev);
+
+    const QString text = packetdiagram::pictureDevices(protocol, masks).text;
+
+    QVERIFY(text.contains(QStringLiteral("Device 1 (КДГ)")));
+    QVERIFY(text.contains(QStringLiteral("Device 2 (ПДУ)")));
+    QVERIFY(text.contains(QStringLiteral("Device 5\n"))); //имени нет - только номер
+    QVERIFY(text.indexOf(QStringLiteral("Device 1")) < text.indexOf(QStringLiteral("Device 2")));
+    QVERIFY(text.indexOf(QStringLiteral("Device 2")) < text.indexOf(QStringLiteral("Device 5")));
+    //Нумерация параметров идёт внутри устройства: в каждом разделе есть свой P1
+    QCOMPARE(text.count(QStringLiteral("mask 10101010")), 2);
+    QVERIFY(!text.contains(QStringLiteral("overlaps"))); //пересечений между устройствами нет
+}
+
+void TestPacketDiagram::bitFlagsOnOneByteAreNotOverlaps()
+{
+    //Параметры-флаги на одном байте делят его, но их биты разные - это не пересечение
+    s_protocolDescription protocol;
+    protocol.packetSize = 8;
+    protocol.markerPacketBeginSize = 0;
+    protocol.blockIdentifycatorPosition = 0;
+
+    s_parameterMask low = makeMask(3, 1, QStringLiteral("0000000000000001"), QStringLiteral("Low"));
+    low.devNum = 1;
+    s_parameterMask high = makeMask(3, 1, QStringLiteral("0000000000010000"), QStringLiteral("High"));
+    high.devNum = 1;
+
+    QVector<s_parameterMask> masks;
+    masks.append(low);
+    masks.append(high);
+
+    const QString text = packetdiagram::picture(protocol, masks);
+    const QString row = dataRow(text, 0);
+
+    QCOMPARE(row.mid(1 + 3 * 5, 2), QStringLiteral("P1"));
+    QCOMPARE(row.mid(1 + 3 * 5 + 2, 1), QStringLiteral("+")); //в байте есть и другие параметры
+    QVERIFY(!text.contains(QStringLiteral("overlaps")));
+    QVERIFY(text.contains(QStringLiteral("Pn+  the byte is shared with other parameters of the device")));
+    //Первый байт слова у второго параметра пустой: его бит лежит во втором байте
+    QCOMPARE(row.mid(1 + 4 * 5, 2), QStringLiteral("P1"));
+    QCOMPARE(row.mid(1 + 4 * 5 + 2, 1), QStringLiteral("+"));
+
+    //А совпадающие биты - настоящее пересечение
+    masks[1] = makeMask(3, 1, QStringLiteral("0000000000000001"), QStringLiteral("Same"));
+    masks[1].devNum = 1;
+    const QString conflict = packetdiagram::picture(protocol, masks);
+    QVERIFY(conflict.contains(QStringLiteral("byte 3: P2 (Same) overlaps with P1")));
+    QCOMPARE(dataRow(conflict, 0).mid(1 + 3 * 5 + 2, 1), QStringLiteral("*"));
+}
+
+void TestPacketDiagram::paramColorsFollowPacketOrder()
+{
+    s_protocolDescription protocol;
+    s_parameterMask late = makeMask(9, 0, QStringLiteral("11111111"), QStringLiteral("Late"));
+    late.drawGraphFlag = true;
+    late.drawGraphColor = QStringLiteral("#00ff00");
+    s_parameterMask early = makeMask(2, 0, QStringLiteral("11111111"), QStringLiteral("Early"));
+    early.drawGraphFlag = true;
+    early.drawGraphColor = QStringLiteral("#000080");
+
+    QVector<s_parameterMask> masks;
+    masks.append(late);
+    masks.append(early); //маски приходят в произвольном порядке - нумерация идёт по байтам пакета
+
+    const packetdiagram::DiagramPicture picture = packetdiagram::pictureDevices(protocol, masks);
+
+    //По два выделения на параметр: в схеме и в легенде
+    QCOMPARE(picture.colors.size(), 4);
+    //Первое по порядку выделение - обозначение параметра на байте 2 (P1), затем на байте 9 (P2)
+    QCOMPARE(picture.text.mid(picture.colors.at(0).position, picture.colors.at(0).length), QStringLiteral("P1"));
+    QCOMPARE(picture.colors.at(0).background, QStringLiteral("#000080"));
+    QCOMPARE(picture.text.mid(picture.colors.at(1).position, picture.colors.at(1).length), QStringLiteral("P2"));
+    QCOMPARE(picture.colors.at(1).background, QStringLiteral("#00ff00"));
+    QCOMPARE(picture.text.mid(picture.colors.at(2).position, picture.colors.at(2).length), QStringLiteral("P1"));
+    QCOMPARE(picture.text.mid(picture.colors.at(3).position, picture.colors.at(3).length), QStringLiteral("P2"));
+}
+
+void TestPacketDiagram::textColorContrastsWithBackground()
+{
+    //Из двух вариантов (чёрный/белый) берётся тот, у которого контраст с фоном выше
+    QCOMPARE(packetdiagram::contrastTextColor(QStringLiteral("#FFFFFF")), QStringLiteral("#000000")); //светлый фон
+    QCOMPARE(packetdiagram::contrastTextColor(QStringLiteral("#00FF00")), QStringLiteral("#000000"));
+    QCOMPARE(packetdiagram::contrastTextColor(QStringLiteral("#FF0000")), QStringLiteral("#000000"));
+    QCOMPARE(packetdiagram::contrastTextColor(QStringLiteral("#000000")), QStringLiteral("#FFFFFF")); //тёмный фон
+    QCOMPARE(packetdiagram::contrastTextColor(QStringLiteral("#000080")), QStringLiteral("#FFFFFF"));
+    QCOMPARE(packetdiagram::contrastTextColor(QString()), QString()); //нераспознанный цвет - выделять нечем
 }

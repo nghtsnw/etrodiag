@@ -15,6 +15,7 @@
 #include <QTableWidget>
 #include "logger.h"
 #include "global.h"
+#include "packetdiagram.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -59,6 +60,8 @@ public:
     void setupProfileArea();   // делит вкладку соединения, справа - информация профиля/редактор
     void updateProfileInfo();  // показывает данные выбранного профиля
     void updatePacketDiagram();        // пересобирает схему формата пакета
+    void applyParamColors(const QVector<packetdiagram::ParamColor> &colors); // красит обозначения параметров цветом графика
+    void saveProfileChanges(); // отправляет изменения (маски, параметры связи) на сохранение в профиль
     void schedulePacketDiagramUpdate(); // откладывает пересборку, чтобы пачка изменений дала одну схему
     void onEditProfile();      // открывает в правой половине редактор профиля
     void openMaskSettingsDialog();
@@ -67,6 +70,7 @@ public:
     void textLogWindow(QDateTime currentTime, QString string, bool redFlag);
     void cleanDevList();
     void updValueArea(s_parameterMask mask);
+    void fillValueAreaFromProfile(); // заполняет таблицы параметров по устройствам загруженного профиля
     void ValueArea_CellClicked(int row, int);
     ~MainWindow();
 
@@ -125,6 +129,8 @@ private:
     bool thisDeviceHere = false;
     QTableWidget *valueTableForDevice(const QString &devName); //таблица значений устройства или nullptr
     QTableWidget *createValueTable(const QString &devName);    //создать таблицу и вкладку устройства
+    int valueTableRowFor(QTableWidget *table, const s_parameterMask &mask) const; //строка параметра или -1
+    void addValueTableRow(QTableWidget *table, const s_parameterMask &mask, const QString &valueText); //новая строка параметра
     void updateValueTableRow(QTableWidget *table, const s_parameterMask &mask); //обновить/добавить строку
     void closeMaskSettings(int devNum);                        //закрыть настройки маски
     void closeByteSettings();                                  //закрыть настройки байта

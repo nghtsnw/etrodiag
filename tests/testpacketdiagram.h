@@ -21,6 +21,14 @@ private slots:
     void wordSizeMismatchIsReported();
     void byteZeroMaskIsReported();
     void legendShowsMaskBits();
+    void graphedParamGetsGraphColor();
+    void ungraphedParamHasNoColor();
+    void maskWithoutBitsIsShown();
+    void deviceWithEmptyMasksGetsItsSection();
+    void devicesGetTheirOwnSection();
+    void bitFlagsOnOneByteAreNotOverlaps();
+    void paramColorsFollowPacketOrder();
+    void textColorContrastsWithBackground();
 };
 
 #endif // TESTPACKETDIAGRAM_H

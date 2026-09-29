@@ -5,7 +5,6 @@
 #include <QObject>
 #include <QWidget>
 #include <QPushButton>
-#include "bytedefinition.h"
 #include <QTimer>
 #include <QVariantMap>
 #include "global.h"
@@ -21,7 +20,7 @@ public:
     explicit Device(QWidget *parent = nullptr);
     enum class State { Init, Offline, Online }; //состояние устройства вместо сравнения переведённых строк
     int devNum;
-    QString devName = "Device name";
+    QString devName; //имя устройства: из профиля, из формы настроек или id узла
     QVector<int> currentState;
     Device(int id);
     void byteObjectsInit(QVector<int> &data);

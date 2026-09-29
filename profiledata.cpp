@@ -41,18 +41,13 @@ static bool parseProtocolLine(const QStringList &strLst, s_protocolDescription &
     return true;
 }
 
-//Разбор строки настроек связи из профиля (portName старых профилей игнорируется - порт выбирается вручную)
+//Разбор строки настроек связи из профиля (portName старых профилей игнорируется - порт выбирается вручную;
+//ключи readFromFile и logFilePath из старых профилей тоже игнорируются - это состояние окна, а не профиля)
 static bool parseSettingsLine(const QStringList &strLst, s_Settings &st)
 {
     const QString &key = strLst.at(0);
     const QString &val = strLst.at(1);
-    if (key == "readFromFile") {
-        st.readFromFileFlag = (val == "true");
-    }
-    else if (key == "logFilePath") {
-        st.pathToBinFile = val;
-    }
-    else if (key == "baudRate") {
+    if (key == "baudRate") {
         st.baudRate = val.toInt(0, 10);
     }
     else if (key == "dataBits") {
@@ -127,7 +122,7 @@ ProfileText parse(const QString &text)
 
 QString serializeHeader(const QString &profileFileName, const s_protocolDescription &protocol,
                         const s_Settings &settings)
-{
+{ //Режим "чтение из файла" и путь к логу в профиль не пишем: это состояние окна, а не профиля
     QString content;
     QTextStream txtStream(&content);
     txtStream << profileFileName << "\n";
@@ -139,8 +134,6 @@ QString serializeHeader(const QString &profileFileName, const s_protocolDescript
     txtStream << "markerPacketBeginTextB1" << "\t" << QString::number(protocol.markerPacketBeginByte2, 16) << "\n";
     txtStream << "description" << "\t" << protocol.description << "\n";
     txtStream << "varControl" << "\t" << (protocol.varControl ? "true" : "false") << "\n";
-    txtStream << "readFromFile" << "\t" << (settings.readFromFileFlag ? "true" : "false") << "\n";
-    txtStream << "logFilePath" << "\t" << settings.pathToBinFile << "\n";
     txtStream << "baudRate" << "\t" << QString::number(settings.baudRate, 10) << "\n";
     txtStream << "dataBits" << "\t" << QString::number(static_cast<int>(settings.dataBits), 10) << "\n";
     txtStream << "parity" << "\t" << QString::number(static_cast<int>(settings.parity), 10) << "\n";

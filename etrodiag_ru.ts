@@ -287,7 +287,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="mainwindow.cpp" line="29"/>
-        <location filename="mainwindow.cpp" line="910"/>
+        <location filename="mainwindow.cpp" line="930"/>
         <source>CRC Errors: </source>
         <translation>Ошибки CRC: </translation>
     </message>
@@ -385,8 +385,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="mainwindow.cpp" line="292"/>
-        <source>Marker b1/b2</source>
-        <translation>Маркер b1/b2</translation>
+        <source>Marker b0/b1</source>
+        <translation>Маркер b0/b1</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="294"/>
@@ -409,123 +409,123 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>Описание</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="359"/>
+        <location filename="mainwindow.cpp" line="379"/>
         <source>Create new profile</source>
         <translation>Создать новый профиль</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="364"/>
+        <location filename="mainwindow.cpp" line="384"/>
         <source>Edit profile</source>
         <translation>Редактировать профиль</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="369"/>
+        <location filename="mainwindow.cpp" line="389"/>
         <source>Delete profile</source>
         <translation>Удалить профиль</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="393"/>
+        <location filename="mainwindow.cpp" line="413"/>
         <source>Read from file</source>
         <translation>Читать из файла</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="398"/>
+        <location filename="mainwindow.cpp" line="418"/>
         <source>Open csv data file</source>
         <translation>Открыть файл данных csv</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="399"/>
+        <location filename="mainwindow.cpp" line="419"/>
         <source>csv data (*.csv)</source>
         <translation>данные csv (*.csv)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="438"/>
+        <location filename="mainwindow.cpp" line="458"/>
         <source>Baud rate</source>
         <translation>Битрейт</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="450"/>
+        <location filename="mainwindow.cpp" line="470"/>
         <source>Data bits</source>
         <translation>Биты данных</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="462"/>
-        <location filename="mainwindow.cpp" line="498"/>
+        <location filename="mainwindow.cpp" line="482"/>
+        <location filename="mainwindow.cpp" line="518"/>
         <source>None</source>
         <translation>Нет</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="463"/>
+        <location filename="mainwindow.cpp" line="483"/>
         <source>Even</source>
         <translation>Чётный</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="464"/>
+        <location filename="mainwindow.cpp" line="484"/>
         <source>Odd</source>
         <translation>Нечётный</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="465"/>
+        <location filename="mainwindow.cpp" line="485"/>
         <source>Mark</source>
         <translation>Маркер</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="466"/>
+        <location filename="mainwindow.cpp" line="486"/>
         <source>Space</source>
         <translation>Пробел</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="468"/>
+        <location filename="mainwindow.cpp" line="488"/>
         <source>Parity</source>
         <translation>Чётность</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="480"/>
+        <location filename="mainwindow.cpp" line="500"/>
         <source>1</source>
         <translation>1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="482"/>
+        <location filename="mainwindow.cpp" line="502"/>
         <source>1.5</source>
         <translation>1.5</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="484"/>
+        <location filename="mainwindow.cpp" line="504"/>
         <source>2</source>
         <translation>2</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="486"/>
+        <location filename="mainwindow.cpp" line="506"/>
         <source>Stop bits</source>
         <translation>Стоп бит</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="499"/>
+        <location filename="mainwindow.cpp" line="519"/>
         <source>RTS/CTS</source>
         <translation>RTS/CTS</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="500"/>
+        <location filename="mainwindow.cpp" line="520"/>
         <source>XON/XOFF</source>
         <translation>XON/XOFF</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="502"/>
+        <location filename="mainwindow.cpp" line="522"/>
         <source>Flow control</source>
         <translation>Контроль потока</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="537"/>
+        <location filename="mainwindow.cpp" line="557"/>
         <source>Reading log</source>
         <translation>Чтение лога</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="908"/>
+        <location filename="mainwindow.cpp" line="928"/>
         <source>CRC Calc: </source>
         <translation>Битый пакет! Вычисленная CRC: </translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="908"/>
+        <location filename="mainwindow.cpp" line="928"/>
         <source>Frame: </source>
         <translation>Для пакета: </translation>
     </message>
@@ -655,7 +655,7 @@ p, li { white-space: pre-wrap; }
         <translation type="vanished">Стоп записи JSON файла</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="850"/>
+        <location filename="mainwindow.cpp" line="870"/>
         <source>Device %1 is %2</source>
         <translation>Устройство %1 %2</translation>
     </message>
@@ -1129,161 +1129,177 @@ Save the changes?</source>
 <context>
     <name>packetdiagram</name>
     <message>
-        <location filename="packetdiagram.cpp" line="70"/>
+        <location filename="packetdiagram.cpp" line="78"/>
         <source>%1 bit</source>
         <translation>%1 бит</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="76"/>
+        <location filename="packetdiagram.cpp" line="84"/>
         <source>no bits</source>
         <translation>нет битов</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="79"/>
+        <location filename="packetdiagram.cpp" line="87"/>
         <source>all bits</source>
         <translation>все биты</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="82"/>
+        <location filename="packetdiagram.cpp" line="90"/>
         <source>bit %1</source>
         <translation>бит %1</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="84"/>
+        <location filename="packetdiagram.cpp" line="92"/>
         <source>bits %1-%2</source>
         <translation>биты %1-%2</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="90"/>
+        <location filename="packetdiagram.cpp" line="98"/>
         <source>byte %1</source>
         <translation>байт %1</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="91"/>
+        <location filename="packetdiagram.cpp" line="99"/>
         <source>bytes %1-%2</source>
         <translation>байты %1-%2</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="136"/>
+        <location filename="packetdiagram.cpp" line="146"/>
         <source>P%1 (%2): the mask has %3 characters while the word is %4 - check the word size</source>
         <translation>P%1 (%2): маска %3 символов, а слово %4 - проверьте длину слова</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="141"/>
+        <location filename="packetdiagram.cpp" line="151"/>
         <source>P%1 (%2) is on byte 0, which the app does not process</source>
         <translation>P%1 (%2) на байте 0 - приложение этот байт не обрабатывает</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="153"/>
+        <location filename="packetdiagram.cpp" line="163"/>
         <source>packet size is not set in the profile (0): the diagram bounds come from masks and marker/id positions</source>
         <translation>размер пакета в профиле не задан (0): границы схемы взяты по маскам и позициям маркера/id</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="171"/>
+        <location filename="packetdiagram.cpp" line="186"/>
         <source>P%1 (%2) is outside the diagram</source>
         <translation>P%1 (%2) вне схемы</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="175"/>
+        <location filename="packetdiagram.cpp" line="190"/>
         <source>P%1 (%2) occupies %3 while the packet is %4 bytes - part of the word is outside the packet</source>
         <translation>P%1 (%2) занимает %3, а пакет %4 байт - часть слова вне пакета</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="184"/>
+        <location filename="packetdiagram.cpp" line="204"/>
+        <location filename="packetdiagram.cpp" line="220"/>
         <source>byte %1: P%2 (%3) overlaps with %4</source>
         <translation>байт %1: P%2 (%3) перекрывается с %4</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="195"/>
+        <location filename="packetdiagram.cpp" line="237"/>
         <source>Packet format</source>
         <translation>Формат пакета</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="197"/>
+        <location filename="packetdiagram.cpp" line="239"/>
         <source>Packet %1 bytes</source>
         <translation>Пакет %1 байт</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="200"/>
+        <location filename="packetdiagram.cpp" line="242"/>
         <source>Packet: size is not set, %1 bytes shown</source>
         <translation>Пакет: размер не задан, показаны %1 байт</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="203"/>
+        <location filename="packetdiagram.cpp" line="245"/>
         <source>byte 0</source>
         <translation>байт 0</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="204"/>
+        <location filename="packetdiagram.cpp" line="246"/>
         <source>bytes 0-%1</source>
         <translation>байты 0-%1</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="205"/>
+        <location filename="packetdiagram.cpp" line="247"/>
         <source>marker %1 (%2)</source>
         <translation>маркер %1 (%2)</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="208"/>
+        <location filename="packetdiagram.cpp" line="250"/>
         <source>no marker (checksum only)</source>
         <translation>маркера нет (только контрольная сумма)</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="211"/>
+        <location filename="packetdiagram.cpp" line="253"/>
         <source>device id: byte %1</source>
         <translation>id устройства: байт %1</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="214"/>
+        <location filename="packetdiagram.cpp" line="256"/>
         <source>checksum: byte %1 (sum of bytes %2..%3)</source>
         <translation>контрольная сумма: байт %1 (сумма байтов %2..%3)</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="217"/>
+        <location filename="packetdiagram.cpp" line="259"/>
         <source>Words are little-endian: the first byte of a word is the least significant</source>
         <translation>Слова little-endian: первый байт слова - младший</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="223"/>
+        <location filename="packetdiagram.cpp" line="374"/>
         <source>Legend:</source>
         <translation>Обозначения:</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="227"/>
+        <location filename="packetdiagram.cpp" line="378"/>
         <source>M1 is the first byte, M2 is the second</source>
         <translation>M1 - первый байт, M2 - второй</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="229"/>
+        <location filename="packetdiagram.cpp" line="380"/>
         <source>Mk/M1,M2</source>
         <translation>Mk/M1,M2</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="230"/>
+        <location filename="packetdiagram.cpp" line="381"/>
         <source>start-of-frame marker (%1)%2</source>
         <translation>маркер начала кадра (%1)%2</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="233"/>
+        <location filename="packetdiagram.cpp" line="384"/>
         <source>device id</source>
         <translation>номер устройства</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="236"/>
+        <location filename="packetdiagram.cpp" line="387"/>
         <source>checksum (last byte, sum of bytes %1..%2)</source>
         <translation>контрольная сумма (последний байт, сумма байтов %1..%2)</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="244"/>
+        <location filename="packetdiagram.cpp" line="391"/>
+        <source>the byte is shared with other parameters of the device</source>
+        <translation>байт делят и другие параметры устройства</translation>
+    </message>
+    <message>
+        <location filename="packetdiagram.cpp" line="394"/>
+        <source>parameters claim the same bits of the byte</source>
+        <translation>параметры используют одни и те же биты байта</translation>
+    </message>
+    <message>
+        <location filename="packetdiagram.cpp" line="403"/>
         <source>mask %1</source>
         <translation>маска %1</translation>
+    </message>
+    <message>
+        <location filename="packetdiagram.cpp" line="459"/>
+        <source>Device %1</source>
+        <translation>Устройство %1</translation>
     </message>
     <message>
         <source>graph %1</source>
         <translation type="vanished">график %1</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="249"/>
+        <location filename="packetdiagram.cpp" line="407"/>
         <source>Notes:</source>
         <translation>Примечания:</translation>
     </message>
