@@ -1,0 +1,126 @@
+demo.eag
+packetSize	24
+blockIdentifycatorPosition	2
+calcCRCFromPosition	3
+markerPacketBeginSize	2
+markerPacketBeginTextB0	aa
+markerPacketBeginTextB1	55
+description	Demo: motor controllers MTR1..MTR3 and cabinet (24-byte frame, marker AA 55, id at byte 2, checksum of bytes 3..22 at byte 23)
+varControl	false
+baudRate	115200
+dataBits	8
+parity	0
+stopBits	1
+flowControl	0
+thisIsMask	0	1	3	MTR1	<empty>	Run	00000001	0	1	true	0	false	#000000	
+thisIsMask	1	1	3	MTR1	<empty>	Ready	00000010	0	1	true	0	false	#000000	
+thisIsMask	2	1	3	MTR1	<empty>	Fault	00000100	0	1	true	0	false	#000000	
+thisIsMask	3	1	3	MTR1	<empty>	DirCW	00001000	0	1	true	0	false	#000000	
+thisIsMask	4	1	3	MTR1	<empty>	DirCCW	00010000	0	1	true	0	false	#000000	
+thisIsMask	5	1	3	MTR1	<empty>	BrakeOpen	00100000	0	1	true	0	false	#000000	
+thisIsMask	6	1	3	MTR1	<empty>	OverloadWarn	01000000	0	1	true	0	false	#000000	
+thisIsMask	7	1	3	MTR1	<empty>	RemoteOn	10000000	0	1	true	0	false	#000000	
+thisIsMask	0	1	4	MTR1	<empty>	CmdStart	00000001	0	1	true	0	false	#000000	
+thisIsMask	1	1	4	MTR1	<empty>	CmdStop	00000010	0	1	true	0	false	#000000	
+thisIsMask	2	1	4	MTR1	<empty>	CmdReset	00000100	0	1	true	0	false	#000000	
+thisIsMask	3	1	4	MTR1	<empty>	CmdSetpointOn	00001000	0	1	true	0	false	#000000	
+thisIsMask	4	1	4	MTR1	<empty>	CmdJog	00010000	0	1	true	0	false	#000000	
+thisIsMask	5	1	4	MTR1	<empty>	CmdLocal	00100000	0	1	true	0	false	#000000	
+thisIsMask	6	1	4	MTR1	<empty>	CmdInterlock	01000000	0	1	true	0	false	#000000	
+thisIsMask	7	1	4	MTR1	<empty>	CmdEmergency	10000000	0	1	true	0	false	#000000	
+thisIsMask	0	1	5	MTR1	<empty>	SpeedRpm	1111111111111111	0	1	false	1	true	#ff0000	
+thisIsMask	0	1	7	MTR1	<empty>	CurrentA	1111111111111111	0	0.1	false	1	true	#00a000	
+thisIsMask	0	1	9	MTR1	<empty>	VoltageV	1111111111111111	0	0.1	false	1	false	#0000ff	
+thisIsMask	0	1	11	MTR1	<empty>	WindingTempC	11111111	0	1	false	0	true	#ff8000	
+thisIsMask	0	1	12	MTR1	<empty>	BearingTempC	11111111	0	1	false	0	false	#ff00ff	
+thisIsMask	0	1	13	MTR1	<empty>	VibrationMmS	11111111	0	0.1	false	0	false	#00ffff	
+thisIsMask	0	1	14	MTR1	<empty>	TorquePct	1111111111111111	0	0.1	false	1	false	#8000ff	
+thisIsMask	0	1	16	MTR1	<empty>	PowerKW	1111111111111111	0	0.01	false	1	false	#808000	
+thisIsMask	0	1	18	MTR1	<empty>	RunHours	1111111111111111	0	0.1	false	1	false	#000000	
+thisIsMask	0	1	20	MTR1	<empty>	StartCount	11111111	0	1	false	0	false	#000000	
+thisIsMask	0	1	21	MTR1	<empty>	FaultCode	11111111	0	1	false	0	false	#000000	
+thisIsMask	0	1	22	MTR1	<empty>	AmbientTempC	11111111	0	1	false	0	false	#000000	
+thisIsMask	0	2	3	MTR2	<empty>	Run	00000001	0	1	true	0	false	#000000	
+thisIsMask	1	2	3	MTR2	<empty>	Ready	00000010	0	1	true	0	false	#000000	
+thisIsMask	2	2	3	MTR2	<empty>	Fault	00000100	0	1	true	0	false	#000000	
+thisIsMask	3	2	3	MTR2	<empty>	DirCW	00001000	0	1	true	0	false	#000000	
+thisIsMask	4	2	3	MTR2	<empty>	DirCCW	00010000	0	1	true	0	false	#000000	
+thisIsMask	5	2	3	MTR2	<empty>	BrakeOpen	00100000	0	1	true	0	false	#000000	
+thisIsMask	6	2	3	MTR2	<empty>	OverloadWarn	01000000	0	1	true	0	false	#000000	
+thisIsMask	7	2	3	MTR2	<empty>	RemoteOn	10000000	0	1	true	0	false	#000000	
+thisIsMask	0	2	4	MTR2	<empty>	CmdStart	00000001	0	1	true	0	false	#000000	
+thisIsMask	1	2	4	MTR2	<empty>	CmdStop	00000010	0	1	true	0	false	#000000	
+thisIsMask	2	2	4	MTR2	<empty>	CmdReset	00000100	0	1	true	0	false	#000000	
+thisIsMask	3	2	4	MTR2	<empty>	CmdSetpointOn	00001000	0	1	true	0	false	#000000	
+thisIsMask	4	2	4	MTR2	<empty>	CmdJog	00010000	0	1	true	0	false	#000000	
+thisIsMask	5	2	4	MTR2	<empty>	CmdLocal	00100000	0	1	true	0	false	#000000	
+thisIsMask	6	2	4	MTR2	<empty>	CmdInterlock	01000000	0	1	true	0	false	#000000	
+thisIsMask	7	2	4	MTR2	<empty>	CmdEmergency	10000000	0	1	true	0	false	#000000	
+thisIsMask	0	2	5	MTR2	<empty>	SpeedRpm	1111111111111111	0	1	false	1	true	#ff0000	
+thisIsMask	0	2	7	MTR2	<empty>	CurrentA	1111111111111111	0	0.1	false	1	true	#00a000	
+thisIsMask	0	2	9	MTR2	<empty>	VoltageV	1111111111111111	0	0.1	false	1	false	#0000ff	
+thisIsMask	0	2	11	MTR2	<empty>	WindingTempC	11111111	0	1	false	0	true	#ff8000	
+thisIsMask	0	2	12	MTR2	<empty>	BearingTempC	11111111	0	1	false	0	false	#ff00ff	
+thisIsMask	0	2	13	MTR2	<empty>	VibrationMmS	11111111	0	0.1	false	0	false	#00ffff	
+thisIsMask	0	2	14	MTR2	<empty>	TorquePct	1111111111111111	0	0.1	false	1	false	#8000ff	
+thisIsMask	0	2	16	MTR2	<empty>	PowerKW	1111111111111111	0	0.01	false	1	false	#808000	
+thisIsMask	0	2	18	MTR2	<empty>	RunHours	1111111111111111	0	0.1	false	1	false	#000000	
+thisIsMask	0	2	20	MTR2	<empty>	StartCount	11111111	0	1	false	0	false	#000000	
+thisIsMask	0	2	21	MTR2	<empty>	FaultCode	11111111	0	1	false	0	false	#000000	
+thisIsMask	0	2	22	MTR2	<empty>	AmbientTempC	11111111	0	1	false	0	false	#000000	
+thisIsMask	0	3	3	MTR3	<empty>	Run	00000001	0	1	true	0	false	#000000	
+thisIsMask	1	3	3	MTR3	<empty>	Ready	00000010	0	1	true	0	false	#000000	
+thisIsMask	2	3	3	MTR3	<empty>	Fault	00000100	0	1	true	0	false	#000000	
+thisIsMask	3	3	3	MTR3	<empty>	DirCW	00001000	0	1	true	0	false	#000000	
+thisIsMask	4	3	3	MTR3	<empty>	DirCCW	00010000	0	1	true	0	false	#000000	
+thisIsMask	5	3	3	MTR3	<empty>	BrakeOpen	00100000	0	1	true	0	false	#000000	
+thisIsMask	6	3	3	MTR3	<empty>	OverloadWarn	01000000	0	1	true	0	false	#000000	
+thisIsMask	7	3	3	MTR3	<empty>	RemoteOn	10000000	0	1	true	0	false	#000000	
+thisIsMask	0	3	4	MTR3	<empty>	CmdStart	00000001	0	1	true	0	false	#000000	
+thisIsMask	1	3	4	MTR3	<empty>	CmdStop	00000010	0	1	true	0	false	#000000	
+thisIsMask	2	3	4	MTR3	<empty>	CmdReset	00000100	0	1	true	0	false	#000000	
+thisIsMask	3	3	4	MTR3	<empty>	CmdSetpointOn	00001000	0	1	true	0	false	#000000	
+thisIsMask	4	3	4	MTR3	<empty>	CmdJog	00010000	0	1	true	0	false	#000000	
+thisIsMask	5	3	4	MTR3	<empty>	CmdLocal	00100000	0	1	true	0	false	#000000	
+thisIsMask	6	3	4	MTR3	<empty>	CmdInterlock	01000000	0	1	true	0	false	#000000	
+thisIsMask	7	3	4	MTR3	<empty>	CmdEmergency	10000000	0	1	true	0	false	#000000	
+thisIsMask	0	3	5	MTR3	<empty>	SpeedRpm	1111111111111111	0	1	false	1	true	#ff0000	
+thisIsMask	0	3	7	MTR3	<empty>	CurrentA	1111111111111111	0	0.1	false	1	true	#00a000	
+thisIsMask	0	3	9	MTR3	<empty>	VoltageV	1111111111111111	0	0.1	false	1	false	#0000ff	
+thisIsMask	0	3	11	MTR3	<empty>	WindingTempC	11111111	0	1	false	0	true	#ff8000	
+thisIsMask	0	3	12	MTR3	<empty>	BearingTempC	11111111	0	1	false	0	false	#ff00ff	
+thisIsMask	0	3	13	MTR3	<empty>	VibrationMmS	11111111	0	0.1	false	0	false	#00ffff	
+thisIsMask	0	3	14	MTR3	<empty>	TorquePct	1111111111111111	0	0.1	false	1	false	#8000ff	
+thisIsMask	0	3	16	MTR3	<empty>	PowerKW	1111111111111111	0	0.01	false	1	false	#808000	
+thisIsMask	0	3	18	MTR3	<empty>	RunHours	1111111111111111	0	0.1	false	1	false	#000000	
+thisIsMask	0	3	20	MTR3	<empty>	StartCount	11111111	0	1	false	0	false	#000000	
+thisIsMask	0	3	21	MTR3	<empty>	FaultCode	11111111	0	1	false	0	false	#000000	
+thisIsMask	0	3	22	MTR3	<empty>	AmbientTempC	11111111	0	1	false	0	false	#000000	
+thisIsMask	0	16	3	CABINET	<empty>	MainsOK	00000001	0	1	true	0	false	#000000	
+thisIsMask	1	16	3	CABINET	<empty>	BreakerOn	00000010	0	1	true	0	false	#000000	
+thisIsMask	2	16	3	CABINET	<empty>	FanOn	00000100	0	1	true	0	false	#000000	
+thisIsMask	3	16	3	CABINET	<empty>	DoorClosed	00001000	0	1	true	0	false	#000000	
+thisIsMask	4	16	3	CABINET	<empty>	HeaterOn	00010000	0	1	true	0	false	#000000	
+thisIsMask	5	16	3	CABINET	<empty>	CoolingOn	00100000	0	1	true	0	false	#000000	
+thisIsMask	6	16	3	CABINET	<empty>	Alarm	01000000	0	1	true	0	false	#000000	
+thisIsMask	7	16	3	CABINET	<empty>	AutoMode	10000000	0	1	true	0	false	#000000	
+thisIsMask	0	16	4	CABINET	<empty>	RemoteEnable	00000001	0	1	true	0	false	#000000	
+thisIsMask	1	16	4	CABINET	<empty>	SeqStart	00000010	0	1	true	0	false	#000000	
+thisIsMask	2	16	4	CABINET	<empty>	SeqStop	00000100	0	1	true	0	false	#000000	
+thisIsMask	3	16	4	CABINET	<empty>	Interlock	00001000	0	1	true	0	false	#000000	
+thisIsMask	4	16	4	CABINET	<empty>	TestMode	00010000	0	1	true	0	false	#000000	
+thisIsMask	5	16	4	CABINET	<empty>	Spare1	00100000	0	1	true	0	false	#000000	
+thisIsMask	6	16	4	CABINET	<empty>	Spare2	01000000	0	1	true	0	false	#000000	
+thisIsMask	7	16	4	CABINET	<empty>	Spare3	10000000	0	1	true	0	false	#000000	
+thisIsMask	0	16	5	CABINET	<empty>	MainsL1V	1111111111111111	0	0.1	false	1	true	#ff0000	
+thisIsMask	0	16	7	CABINET	<empty>	MainsL2V	1111111111111111	0	0.1	false	1	false	#00a000	
+thisIsMask	0	16	9	CABINET	<empty>	MainsL3V	1111111111111111	0	0.1	false	1	false	#0000ff	
+thisIsMask	0	16	11	CABINET	<empty>	TotalCurrentA	1111111111111111	0	0.1	false	1	true	#804000	
+thisIsMask	0	16	13	CABINET	<empty>	CabinetTempC	1111111111111111	0	0.1	false	1	true	#ff8000	
+thisIsMask	0	16	15	CABINET	<empty>	HumidityPct	11111111	0	1	false	0	false	#00a0a0	
+thisIsMask	0	16	16	CABINET	<empty>	Fan1Speed	11111111	0	100	false	0	false	#00ffff	
+thisIsMask	0	16	17	CABINET	<empty>	Fan2Speed	11111111	0	100	false	0	false	#55aaff	
+thisIsMask	0	16	18	CABINET	<empty>	CabinetVibration	11111111	0	0.1	false	0	false	#000000	
+thisIsMask	0	16	19	CABINET	<empty>	ActivePowerKW	1111111111111111	0	0.01	false	1	true	#808000	
+thisIsMask	0	16	21	CABINET	<empty>	AlarmCode	11111111	0	1	false	0	false	#000000	
+thisIsMask	0	16	22	CABINET	<empty>	UptimeMin	11111111	0	1	false	0	false	#000000	
