@@ -16,6 +16,10 @@ public:
     int devNum;
     int byteNum;
     int id;
+    QString parameterName; //имя параметра и устройства - для подсказки при наведении
+    QString devName;
+    bool curveVisible = true; //кривую можно скрыть кликом по её строке в подписи графика
+    const QMap<QDateTime, double> &points() const { return *pointsWithValues; } //все точки кривой (время -> значение)
 
 public slots:
     void dataPool(int _devNum, int _byteNum, int _id, double _endValue, int pointsOnGraph, QString _drawGraphColor, QDateTime currentTime);//приём живых данных

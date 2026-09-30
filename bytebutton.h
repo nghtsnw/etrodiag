@@ -16,6 +16,7 @@ public:
     int wordType = 0;
     bool maskInside = false;
     void setByteNum(int _devNum, int _byteNum);
+    void setValueText(const QString &newValue); //значение в тексте кнопки; номер байта - метка в углу
     void onByteButtonClicked();
     void transformToWord(int wordType);
     QString Int2Hex(int num);
@@ -34,9 +35,14 @@ public slots:
     void defaultButtonColor();
     void setMaskInThisWord(int _devNum, int _byteNum);
 
+protected:
+    void resizeEvent(QResizeEvent *event) override; //номер байта держим в углу при любом размере
+
 private:
     QTimer *timer = new QTimer;
-    QLabel *numLabel = new QLabel;
+    QLabel *numLabel = nullptr; //номер байта в углу кнопки
+    QString valueText; //последнее показанное значение (hex), без номера байта
+    void placeNumLabel();
 };
 
 #endif // BYTEBUTTON_H

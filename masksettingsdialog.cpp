@@ -93,7 +93,7 @@ void maskSettingsDialog::initBitButtonsAndCheckBoxes(int _wordType)
     int x = 0, y = 0;
     for (int var = wordBit; var > 0; --var, ++y)
     {
-        if (y > 7) //по 8 бит в одной строке
+        if (y > 7) //по 8 бит в одной строке (ячейки бит узкие, поэтому строка помещается в колонку)
         {
             y = 0;
             x++;

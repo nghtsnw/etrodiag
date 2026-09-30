@@ -83,10 +83,10 @@ void bitMaskObj::calculateValue(int _devNum, int _byteNum, uint32_t wordData)
         value = value >> currentMask.parameterShift; //сдвигаем нужные нам биты к началу
         double endValue = (value + currentMask.valueShift) * currentMask.valueKoef;
         if (endValue == oldEndValue) {
-            isNewData = false;
+            currentMask.isNewData = false; //флаг нужен наружу (в текстовый лог), поэтому пишем в саму маску
         }
         else {
-            isNewData = true;
+            currentMask.isNewData = true;
         }
         //if (endValue != oldEndValue || oldEndValue == 1234.56)
         oldEndValue = endValue;

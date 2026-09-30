@@ -3,6 +3,7 @@
 #include "ui_bytesettingsform.h"
 #include <QDebug>
 #include <QTableWidgetItem>
+#include <QHeaderView>
 
 ByteSettingsForm::ByteSettingsForm(QWidget *parent) :
     QWidget(parent),
@@ -11,6 +12,13 @@ ByteSettingsForm::ByteSettingsForm(QWidget *parent) :
     ui->setupUi(this);
     ui->masksWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->masksWidget->setHorizontalHeaderLabels(lst);
+    //Столбцы по содержимому, а "Parameter" растягивается: узкий ID и никакой горизонтальной прокрутки.
+    QHeaderView *maskHeader = ui->masksWidget->horizontalHeader();
+    maskHeader->setSectionResizeMode(0, QHeaderView::Stretch);
+    maskHeader->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+    maskHeader->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+    maskHeader->setSectionResizeMode(3, QHeaderView::ResizeToContents);
+    maskHeader->setStretchLastSection(false);
 }
 
 

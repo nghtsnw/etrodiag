@@ -61,6 +61,13 @@ MainWindow::MainWindow(QWidget *parent) :
     connect (&cBoard, &ControlBoard::controlCommand, this, &MainWindow::guiCommandHandler);
     logger->setModel(&connection->m_settings->model()); //логгер читает настройки (путь к логу) из модели
     connect (this, &MainWindow::emitCommand, connection, &newconnect::receiveCommandFromGui);
+    //Пропорции панели мониторинга: график сверху, под ним ряд "устройства | параметры | лог".
+    //Ряду отдаём 3/5 высоты, чтобы форма настроек маски (до 16 бит) помещалась при минимуме окна.
+    m_ui->verticalLayout_3->setStretch(0, 2);
+    m_ui->verticalLayout_3->setStretch(1, 3);
+    m_ui->monitorRow->setStretch(0, 0); //кнопки устройств фиксированной ширины
+    m_ui->monitorRow->setStretch(1, 1); //таблица параметров
+    m_ui->monitorRow->setStretch(2, 1); //текстовый лог
     m_ui->tabWidget->setCurrentIndex(0);
     m_ui->tab_connections->show();
 }
@@ -657,7 +664,7 @@ void MainWindow::closeMaskSettings(int devNum)
         saveProfileChanges();
         maskSettForm.openDirectly = false;
         fillValueAreaFromProfile(); //возвращаемся к таблицам параметров - наполняем их по профилю
-        graphiq.graphAnnotation.clear();
+        graphiq.clearAnnotations();
         m_ui->valueArea->show();
     }
     else {
@@ -682,7 +689,7 @@ void MainWindow::toggleDeviceSettings(int devNum, QVector<int> data)
         devSettForm.hide();
         emit dvsfAfterCloseClear();
         fillValueAreaFromProfile(); //возвращаемся к таблицам параметров - наполняем их по профилю
-        graphiq.graphAnnotation.clear();
+        graphiq.clearAnnotations();
         m_ui->valueArea->show();
         emit hideOtherDevButtons(false, devNum);
         saveProfileChanges();
@@ -758,7 +765,12 @@ QTableWidget *MainWindow::createValueTable(const QString &devName)
     table->hideColumn(2);//скрываем колонки: данные нужны только для открытия настроек нужной маски
     table->hideColumn(3);
     table->hideColumn(4);
+    //Заголовок скрыт, но режимы секций нужны: имя - по содержимому, значение растягивается на остаток
+    //ширины, поэтому длинное значение больше не обрезается и нет горизонтальной прокрутки.
     table->horizontalHeader()->hide();
+    table->horizontalHeader()->setStretchLastSection(false);
+    table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+    table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
     m_ui->valueArea->addTab(table, devName);
     return table;
 }
@@ -788,7 +800,6 @@ void MainWindow::addValueTableRow(QTableWidget *table, const s_parameterMask &ma
     table->setItem(row, 2, new QTableWidgetItem(QString::number(mask.devNum)));
     table->setItem(row, 3, new QTableWidgetItem(QString::number(mask.byteNum)));
     table->setItem(row, 4, new QTableWidgetItem(QString::number(mask.id)));
-    table->resizeColumnsToContents();
     table->resizeRowsToContents();
 }
 

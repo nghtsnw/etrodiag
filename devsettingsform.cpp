@@ -47,7 +47,7 @@ void devSettingsForm::initByteButtons(int id, QVector<int> data)
         connect (byteBtn, &byteButton::wordDataFullHex, this, &devSettingsForm::wordDataFullHex);
         connect (this, &devSettingsForm::inThisWordLivingMask, byteBtn, &byteButton::setMaskInThisWord);
         QString hexBtnTxt = QString("%1").arg(data.at(count), 0, 16).toUpper();
-        byteBtn->setText(hexBtnTxt);
+        byteBtn->setValueText(hexBtnTxt);
         byteBtn->setByteNum(id, count);
         m_ui->gridLayoutButtonBox->addWidget(byteBtn, x, y);
     }

@@ -120,7 +120,9 @@ void Device::setDeviceName(int id, QString name)
     if (id == devNum)
     {
         devName = name;
-        this->setText(devName);
+        if (!backMode) { //в режиме возврата текст кнопки не перетираем именем
+            this->setText(devName);
+        }
     }
 }
 
@@ -191,13 +193,15 @@ void Device::jsonMap(s_parameterMask mask)
 }
 
 void Device::hideDevButton(bool trueOrFalse, int _devNum)
-{
+{ //при открытых настройках кнопка выбранного устройства остаётся одна и работает как "назад"
+    backMode = trueOrFalse && devNum == _devNum;
     if (devNum != _devNum && trueOrFalse) {
         this->hide();
     }
     else {
         this->show();
     }
+    this->setText(backMode ? QStringLiteral("<---") : devName);
 }
 
 void Device::devOnlineWatchdog(int msec)

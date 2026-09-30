@@ -1,21 +1,51 @@
 #include "bytebutton.h"
 #include "QDebug"
 #include <QTimer>
+#include <QResizeEvent>
 
 byteButton::byteButton()
 {
     connect(this, &byteButton::clicked, this, &byteButton::onByteButtonClicked);
     connect (timer, &QTimer::timeout, this, &byteButton::defaultButtonColor);
+    //Номер байта - маленькая метка в углу кнопки, чтобы не занимать строку текста
+    numLabel = new QLabel(this);
+    QFont numLabelFont = font();
+    numLabelFont.setPointSize(qMax(5, numLabelFont.pointSize() - 2)); //мельче основного: номер байта не спорит со значением
+    numLabel->setFont(numLabelFont);
+    numLabel->setStyleSheet(QStringLiteral("background:transparent;")); //фон - как у кнопки-родителя
+    numLabel->setAttribute(Qt::WA_TransparentForMouseEvents); //клик по метке проходит на кнопку
 }
 
 void byteButton::setByteNum(int _devNum, int _byteNum)
 {
     devNum = _devNum;
     byteNum = _byteNum;
-    QFont numLabelFont("Arial", 5);
-    numLabel->setParent(this);
-    numLabel->setFont(numLabelFont);
-    numLabel->setText(' ' + QString::number(byteNum));
+    setToolTip(tr("Byte %1").arg(byteNum));
+    numLabel->setText(QString::number(byteNum));
+    placeNumLabel();
+    numLabel->show();
+}
+
+void byteButton::setValueText(const QString &newValue)
+{ //в тексте кнопки только значение: номер байта показывает метка в углу
+    valueText = newValue;
+    QPushButton::setText(valueText);
+}
+
+void byteButton::placeNumLabel()
+{
+    if (!numLabel) {
+        return;
+    }
+    numLabel->adjustSize();
+    numLabel->move(2, 2); //верхний левый угол кнопки
+    numLabel->raise();
+}
+
+void byteButton::resizeEvent(QResizeEvent *event)
+{ //при изменении размера метку держим в углу
+    QPushButton::resizeEvent(event);
+    placeNumLabel();
 }
 
 byteButton::~byteButton()
@@ -47,14 +77,16 @@ void byteButton::updateBtnData(int _devNum, QVector<int> fullData)
                                  +(Int2Hex(fullData.at(byteNum+1))+':'+(Int2Hex(fullData.at(byteNum))))));
         }
     }
-    if (txttmp != this->text())
+    if (txttmp != valueText)
     {
-        byteButton::setText(txttmp);
+        setValueText(txttmp);
         changeButtonColor();
     }
     }
-    if (!this->isEnabled()) this->setText("--->");
-    emit wordDataFullHex(devNum, byteNum, this->text());
+    if (!this->isEnabled()) {
+        setValueText(QStringLiteral("--->"));
+    }
+    emit wordDataFullHex(devNum, byteNum, valueText);
 }
 
 void byteButton::onByteButtonClicked()

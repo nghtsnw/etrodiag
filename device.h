@@ -66,6 +66,7 @@ public slots:
 
 private:
     State devStatus = State::Init;
+    bool backMode = false; //кнопка выбранного устройства показывает "<---" (возврат из настроек)
     Q_DISABLE_COPY(Device)
     QTimer *timer = new QTimer(this);
     QVariantMap *devParams = new QVariantMap;

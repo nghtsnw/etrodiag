@@ -108,32 +108,32 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>Добавить маску</translation>
     </message>
     <message>
-        <location filename="bytesettingsform.cpp" line="67"/>
+        <location filename="bytesettingsform.cpp" line="75"/>
         <source>waiting new data...</source>
         <translation>ожидание новых данных...</translation>
     </message>
     <message>
-        <location filename="bytesettingsform.cpp" line="73"/>
+        <location filename="bytesettingsform.cpp" line="81"/>
         <source>Delete</source>
         <translation>Удалить</translation>
     </message>
     <message>
-        <location filename="bytesettingsform.cpp" line="178"/>
+        <location filename="bytesettingsform.cpp" line="186"/>
         <source>Byte num: %1</source>
         <translation>Номер байта: %1</translation>
     </message>
     <message>
-        <location filename="bytesettingsform.cpp" line="182"/>
+        <location filename="bytesettingsform.cpp" line="190"/>
         <source>Word bytes: [%1, %2]</source>
         <translation>Байты слова: [%1, %2]</translation>
     </message>
     <message>
-        <location filename="bytesettingsform.cpp" line="187"/>
+        <location filename="bytesettingsform.cpp" line="195"/>
         <source>Word bytes: [%1, %2, %3, %4]</source>
         <translation>Байты слова: [%1, %2, %3, %4]</translation>
     </message>
     <message>
-        <location filename="bytesettingsform.cpp" line="190"/>
+        <location filename="bytesettingsform.cpp" line="198"/>
         <source>Dev num: %1, %2, Word data: %3</source>
         <translation>Номер устройства: %1, %2, данные слова: %3</translation>
     </message>
@@ -266,28 +266,27 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="mainwindow.ui" line="61"/>
-        <location filename="mainwindow.cpp" line="296"/>
+        <location filename="mainwindow.cpp" line="308"/>
         <source>Connection</source>
         <translation>Соединение</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="67"/>
         <source>Profile setting</source>
-        <translation>Настройка профиля</translation>
+        <translation type="vanished">Настройка профиля</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="123"/>
+        <location filename="mainwindow.ui" line="67"/>
         <source>Log</source>
         <translation>Мониторинг</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="143"/>
+        <location filename="mainwindow.ui" line="87"/>
         <source>Graph here</source>
         <translation>Здесь будет график</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="29"/>
-        <location filename="mainwindow.cpp" line="930"/>
+        <location filename="mainwindow.cpp" line="999"/>
         <source>CRC Errors: </source>
         <translation>Ошибки CRC: </translation>
     </message>
@@ -302,230 +301,230 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>О программе</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="128"/>
+        <location filename="mainwindow.cpp" line="140"/>
         <source>Write text log</source>
         <translation>Текст</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="131"/>
+        <location filename="mainwindow.cpp" line="143"/>
         <source>Write binary data</source>
         <translation>Сырые данные</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="134"/>
+        <location filename="mainwindow.cpp" line="146"/>
         <source>Write json log</source>
         <translation>JSON</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="139"/>
-        <location filename="mainwindow.cpp" line="172"/>
-        <location filename="mainwindow.cpp" line="224"/>
+        <location filename="mainwindow.cpp" line="151"/>
+        <location filename="mainwindow.cpp" line="184"/>
+        <location filename="mainwindow.cpp" line="236"/>
         <source>Connect</source>
         <translation>Соединить</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="190"/>
+        <location filename="mainwindow.cpp" line="202"/>
         <source>Profile</source>
         <translation>Профиль</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="197"/>
+        <location filename="mainwindow.cpp" line="209"/>
         <source>Port</source>
         <translation>Порт</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="217"/>
+        <location filename="mainwindow.cpp" line="229"/>
         <source>Logs</source>
         <translation>Логи</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="221"/>
+        <location filename="mainwindow.cpp" line="233"/>
         <source>Stop read log</source>
         <translation>Остановить чтение лога</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="221"/>
+        <location filename="mainwindow.cpp" line="233"/>
         <source>Read log</source>
         <translation>Читать лог</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="224"/>
+        <location filename="mainwindow.cpp" line="236"/>
         <source>Disconnect</source>
         <translation>Разъединить</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="287"/>
+        <location filename="mainwindow.cpp" line="299"/>
         <source>Profile: </source>
         <translation>Профиль: </translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="287"/>
+        <location filename="mainwindow.cpp" line="299"/>
         <source>not selected</source>
         <translation>не выбран</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="288"/>
+        <location filename="mainwindow.cpp" line="300"/>
         <source>Packet size</source>
         <translation>Размер пакета</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="289"/>
+        <location filename="mainwindow.cpp" line="301"/>
         <source>Block identifycator position</source>
         <translation>Позиция идентификатора блока</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="290"/>
+        <location filename="mainwindow.cpp" line="302"/>
         <source>Calc CRC from position</source>
         <translation>Считать CRC с позиции</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="291"/>
+        <location filename="mainwindow.cpp" line="303"/>
         <source>Marker of begin - size</source>
         <translation>Маркер начала - размер</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="292"/>
+        <location filename="mainwindow.cpp" line="304"/>
         <source>Marker b0/b1</source>
         <translation>Маркер b0/b1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="294"/>
+        <location filename="mainwindow.cpp" line="306"/>
         <source>Variables control</source>
         <translation>Управление переменными</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="294"/>
+        <location filename="mainwindow.cpp" line="306"/>
         <source>yes</source>
         <translation>да</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="294"/>
+        <location filename="mainwindow.cpp" line="306"/>
         <source>no</source>
         <translation>нет</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="295"/>
+        <location filename="mainwindow.cpp" line="307"/>
         <source>Description</source>
         <translation>Описание</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="379"/>
+        <location filename="mainwindow.cpp" line="398"/>
         <source>Create new profile</source>
         <translation>Создать новый профиль</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="384"/>
+        <location filename="mainwindow.cpp" line="403"/>
         <source>Edit profile</source>
         <translation>Редактировать профиль</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="389"/>
+        <location filename="mainwindow.cpp" line="408"/>
         <source>Delete profile</source>
         <translation>Удалить профиль</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="413"/>
+        <location filename="mainwindow.cpp" line="432"/>
         <source>Read from file</source>
         <translation>Читать из файла</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="418"/>
+        <location filename="mainwindow.cpp" line="437"/>
         <source>Open csv data file</source>
         <translation>Открыть файл данных csv</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="419"/>
+        <location filename="mainwindow.cpp" line="438"/>
         <source>csv data (*.csv)</source>
         <translation>данные csv (*.csv)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="458"/>
+        <location filename="mainwindow.cpp" line="478"/>
         <source>Baud rate</source>
         <translation>Битрейт</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="470"/>
+        <location filename="mainwindow.cpp" line="490"/>
         <source>Data bits</source>
         <translation>Биты данных</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="482"/>
-        <location filename="mainwindow.cpp" line="518"/>
+        <location filename="mainwindow.cpp" line="502"/>
+        <location filename="mainwindow.cpp" line="538"/>
         <source>None</source>
         <translation>Нет</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="483"/>
+        <location filename="mainwindow.cpp" line="503"/>
         <source>Even</source>
         <translation>Чётный</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="484"/>
+        <location filename="mainwindow.cpp" line="504"/>
         <source>Odd</source>
         <translation>Нечётный</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="485"/>
+        <location filename="mainwindow.cpp" line="505"/>
         <source>Mark</source>
         <translation>Маркер</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="486"/>
+        <location filename="mainwindow.cpp" line="506"/>
         <source>Space</source>
         <translation>Пробел</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="488"/>
+        <location filename="mainwindow.cpp" line="508"/>
         <source>Parity</source>
         <translation>Чётность</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="500"/>
+        <location filename="mainwindow.cpp" line="520"/>
         <source>1</source>
         <translation>1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="502"/>
+        <location filename="mainwindow.cpp" line="522"/>
         <source>1.5</source>
         <translation>1.5</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="504"/>
+        <location filename="mainwindow.cpp" line="524"/>
         <source>2</source>
         <translation>2</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="506"/>
+        <location filename="mainwindow.cpp" line="526"/>
         <source>Stop bits</source>
         <translation>Стоп бит</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="519"/>
+        <location filename="mainwindow.cpp" line="539"/>
         <source>RTS/CTS</source>
         <translation>RTS/CTS</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="520"/>
+        <location filename="mainwindow.cpp" line="540"/>
         <source>XON/XOFF</source>
         <translation>XON/XOFF</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="522"/>
+        <location filename="mainwindow.cpp" line="542"/>
         <source>Flow control</source>
         <translation>Контроль потока</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="557"/>
+        <location filename="mainwindow.cpp" line="577"/>
         <source>Reading log</source>
         <translation>Чтение лога</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="928"/>
+        <location filename="mainwindow.cpp" line="997"/>
         <source>CRC Calc: </source>
         <translation>Битый пакет! Вычисленная CRC: </translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="928"/>
+        <location filename="mainwindow.cpp" line="997"/>
         <source>Frame: </source>
         <translation>Для пакета: </translation>
     </message>
@@ -655,7 +654,7 @@ p, li { white-space: pre-wrap; }
         <translation type="vanished">Стоп записи JSON файла</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="870"/>
+        <location filename="mainwindow.cpp" line="939"/>
         <source>Device %1 is %2</source>
         <translation>Устройство %1 %2</translation>
     </message>
@@ -887,6 +886,14 @@ p, li { white-space: pre-wrap; }
     </message>
 </context>
 <context>
+    <name>byteButton</name>
+    <message>
+        <location filename="bytebutton.cpp" line="15"/>
+        <source>Byte %1</source>
+        <translation>Байт %1</translation>
+    </message>
+</context>
+<context>
     <name>devSettingsForm</name>
     <message>
         <location filename="devsettingsform.ui" line="14"/>
@@ -895,8 +902,18 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="devsettingsform.ui" line="29"/>
+        <source>Device name</source>
+        <translation>Имя устройства</translation>
+    </message>
+    <message>
+        <location filename="devsettingsform.ui" line="42"/>
         <source>Input device name here</source>
         <translation>Введите имя устройства</translation>
+    </message>
+    <message>
+        <location filename="devsettingsform.ui" line="55"/>
+        <source>Data sorting into parameter masks</source>
+        <translation>Сортировка данных на маски параметров</translation>
     </message>
 </context>
 <context>
@@ -919,6 +936,11 @@ p, li { white-space: pre-wrap; }
         <source>-</source>
         <translation>-</translation>
     </message>
+    <message>
+        <location filename="livegraph.ui" line="83"/>
+        <source>Smoothing</source>
+        <translation>Сглаживание</translation>
+    </message>
 </context>
 <context>
     <name>maskSettingsDialog</name>
@@ -928,77 +950,77 @@ p, li { white-space: pre-wrap; }
         <translation>Диалог</translation>
     </message>
     <message>
-        <location filename="masksettingsdialog.ui" line="34"/>
+        <location filename="masksettingsdialog.ui" line="65"/>
         <source>View change to main log</source>
         <translation>Показывать изменения в лог</translation>
     </message>
     <message>
-        <location filename="masksettingsdialog.ui" line="41"/>
+        <location filename="masksettingsdialog.ui" line="72"/>
         <source>Draw a graph</source>
         <translation>Рисовать на графике</translation>
     </message>
     <message>
-        <location filename="masksettingsdialog.ui" line="56"/>
+        <location filename="masksettingsdialog.ui" line="87"/>
         <source>NumBox</source>
         <translation>Обработка значения</translation>
     </message>
     <message>
-        <location filename="masksettingsdialog.ui" line="62"/>
+        <location filename="masksettingsdialog.ui" line="114"/>
         <source>Decimal integer</source>
         <translation>Десятичное значение</translation>
     </message>
     <message>
-        <location filename="masksettingsdialog.ui" line="69"/>
+        <location filename="masksettingsdialog.ui" line="121"/>
         <source>Shift</source>
         <translation>Сдвиг</translation>
     </message>
     <message>
-        <location filename="masksettingsdialog.ui" line="79"/>
+        <location filename="masksettingsdialog.ui" line="131"/>
         <source>*K</source>
         <translation>Множитель</translation>
     </message>
     <message>
-        <location filename="masksettingsdialog.ui" line="89"/>
+        <location filename="masksettingsdialog.ui" line="141"/>
         <source>&lt;waiting new data...&gt;</source>
         <translation>&lt;ожидание новых данных...&gt;</translation>
     </message>
     <message>
-        <location filename="masksettingsdialog.ui" line="99"/>
+        <location filename="masksettingsdialog.ui" line="151"/>
         <source>Uncheck all</source>
         <translation>Снять всё</translation>
     </message>
     <message>
-        <location filename="masksettingsdialog.ui" line="106"/>
+        <location filename="masksettingsdialog.ui" line="158"/>
         <source>Check all</source>
         <translation>Выбрать всё</translation>
     </message>
     <message>
-        <location filename="masksettingsdialog.ui" line="119"/>
+        <location filename="masksettingsdialog.ui" line="171"/>
         <source>BitBox</source>
         <translation>Выбор бит</translation>
     </message>
     <message>
-        <location filename="masksettingsdialog.ui" line="137"/>
+        <location filename="masksettingsdialog.ui" line="204"/>
         <source>wordInfoLabel</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="masksettingsdialog.cpp" line="40"/>
+        <location filename="masksettingsdialog.cpp" line="41"/>
         <source>Byte num: %1</source>
         <translation>Номер байта: %1</translation>
     </message>
     <message>
-        <location filename="masksettingsdialog.cpp" line="44"/>
+        <location filename="masksettingsdialog.cpp" line="45"/>
         <source>Word bytes: [%1, %2]</source>
         <translation>Байты слова: [%1, %2]</translation>
     </message>
     <message>
-        <location filename="masksettingsdialog.cpp" line="49"/>
+        <location filename="masksettingsdialog.cpp" line="50"/>
         <source>Word bytes: [%1, %2, %3, %4]</source>
         <translation>Байты слова: [%1, %2, %3, %4]</translation>
     </message>
     <message>
-        <location filename="masksettingsdialog.cpp" line="52"/>
+        <location filename="masksettingsdialog.cpp" line="53"/>
         <source>Dev num: %1, %2</source>
         <translation>Номер устройства: %1, %2</translation>
     </message>
@@ -1129,37 +1151,37 @@ Save the changes?</source>
 <context>
     <name>packetdiagram</name>
     <message>
-        <location filename="packetdiagram.cpp" line="78"/>
+        <location filename="packetdiagram.cpp" line="79"/>
         <source>%1 bit</source>
         <translation>%1 бит</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="84"/>
+        <location filename="packetdiagram.cpp" line="85"/>
         <source>no bits</source>
         <translation>нет битов</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="87"/>
+        <location filename="packetdiagram.cpp" line="88"/>
         <source>all bits</source>
         <translation>все биты</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="90"/>
+        <location filename="packetdiagram.cpp" line="91"/>
         <source>bit %1</source>
         <translation>бит %1</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="92"/>
+        <location filename="packetdiagram.cpp" line="93"/>
         <source>bits %1-%2</source>
         <translation>биты %1-%2</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="98"/>
+        <location filename="packetdiagram.cpp" line="99"/>
         <source>byte %1</source>
         <translation>байт %1</translation>
     </message>
     <message>
-        <location filename="packetdiagram.cpp" line="99"/>
+        <location filename="packetdiagram.cpp" line="100"/>
         <source>bytes %1-%2</source>
         <translation>байты %1-%2</translation>
     </message>

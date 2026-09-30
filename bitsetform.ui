@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>49</width>
-    <height>58</height>
+    <width>34</width>
+    <height>38</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -30,16 +30,16 @@
     <number>0</number>
    </property>
    <property name="leftMargin">
-    <number>9</number>
+    <number>2</number>
    </property>
    <property name="topMargin">
-    <number>9</number>
+    <number>2</number>
    </property>
    <property name="rightMargin">
-    <number>9</number>
+    <number>2</number>
    </property>
    <property name="bottomMargin">
-    <number>9</number>
+    <number>2</number>
    </property>
    <item>
     <widget class="QCheckBox" name="bitCheckBox">
@@ -52,7 +52,7 @@
      <property name="minimumSize">
       <size>
        <width>0</width>
-       <height>20</height>
+       <height>14</height>
       </size>
      </property>
      <property name="accessibleName">
@@ -80,7 +80,7 @@
      <property name="minimumSize">
       <size>
        <width>0</width>
-       <height>20</height>
+       <height>10</height>
       </size>
      </property>
      <property name="font">

@@ -30,7 +30,6 @@ public slots:
 private:
     double oldEndValue = 1234.56;
     int wordDataSize = 0;
-    bool isNewData = true;
     uint32_t paramMaskInt;
     void recalcMask();
 };
