@@ -888,7 +888,7 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>byteButton</name>
     <message>
-        <location filename="bytebutton.cpp" line="15"/>
+        <location filename="bytebutton.cpp" line="23"/>
         <source>Byte %1</source>
         <translation>Байт %1</translation>
     </message>
@@ -961,7 +961,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="masksettingsdialog.ui" line="87"/>
-        <source>NumBox</source>
+        <source>Value processing</source>
         <translation>Обработка значения</translation>
     </message>
     <message>
@@ -996,7 +996,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="masksettingsdialog.ui" line="171"/>
-        <source>BitBox</source>
+        <source>Bit selection</source>
         <translation>Выбор бит</translation>
     </message>
     <message>
