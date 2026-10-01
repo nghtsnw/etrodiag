@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>etrodiag.png</file>
+        <file>etrodiag_icon.png</file>
         <file>etrodiag_ru.qm</file>
     </qresource>
 </RCC>

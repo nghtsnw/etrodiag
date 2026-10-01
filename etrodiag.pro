@@ -4,6 +4,9 @@ requires(qtConfig(combobox))
 TARGET = etrodiag
 TEMPLATE = app
 
+# Иконка исполняемого файла Windows (используется только на Windows)
+RC_ICONS = etrodiag.ico
+
 INCLUDEPATH += ../qtcsv
 DEPENDPATH += ../qtcsv
 include(qtcsv/qtcsv.pri)
